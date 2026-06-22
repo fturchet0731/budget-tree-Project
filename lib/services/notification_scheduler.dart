@@ -1,0 +1,114 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/budget_model.dart';
+import 'app_settings.dart';
+import 'goal_repository.dart';
+import 'notification_content.dart';
+import 'notification_service.dart';
+import 'streak_service.dart';
+
+/// Decides *what* notifications exist and keeps them in sync with the user's
+/// preferences and data. The recurring reminders (streak, weekly summary) are
+/// (re)scheduled here; budget warnings are event-driven via [checkBudget].
+///
+/// Launch set is intentionally just three types to avoid notification
+/// overload, with the daily streak nudge consolidating what would otherwise
+/// be constant pings, and the weekly summary replacing seven daily recaps.
+class NotificationScheduler {
+  NotificationScheduler._();
+
+  static const _kBudgetLevels = 'notif_budget_levels_v1';
+
+  /// Cancel and rebuild the recurring reminders from current prefs + data.
+  /// Call on startup, after preference changes, and after deposits so the
+  /// streak/summary copy stays current. Safe to call often.
+  static Future<void> rescheduleAll() async {
+    final settings = AppSettings.instance;
+    if (settings.anyNotificationsEnabled) {
+      await NotificationService.requestPermissions();
+    }
+
+    final goals = await GoalRepository.loadAll();
+
+    // ── Daily streak reminder ──
+    if (settings.notifStreakReminders) {
+      final streak = StreakService.weeklyStreak(goals);
+      await NotificationService.scheduleDaily(
+        id: NotificationService.idStreak,
+        hour: settings.streakHour,
+        minute: settings.streakMinute,
+        title: NotificationContent.streakTitle(streak),
+        body: NotificationContent.streakReminder(streak),
+      );
+    } else {
+      await NotificationService.cancel(NotificationService.idStreak);
+    }
+
+    // ── Weekly summary ──
+    if (settings.notifWeeklySummary) {
+      await NotificationService.scheduleWeekly(
+        id: NotificationService.idWeekly,
+        weekday: settings.weeklyWeekday,
+        hour: settings.weeklyHour,
+        title: NotificationContent.weeklySummaryTitle,
+        body: NotificationContent.weeklySummary(goals),
+      );
+    } else {
+      await NotificationService.cancel(NotificationService.idWeekly);
+    }
+  }
+
+  /// Event-driven budget warning. Fires only when a budget *crosses up* into a
+  /// higher warning level (healthy → near-limit → over-budget), so the user
+  /// gets each alert once rather than on every save.
+  static Future<void> checkBudget(BudgetModel budget) async {
+    if (!AppSettings.instance.notifBudgetWarnings) return;
+    final warning = NotificationContent.budgetWarning(budget);
+
+    final prefs = await SharedPreferences.getInstance();
+    final levels = _readLevels(prefs);
+    final previous = levels[budget.id] ?? 0;
+
+    if (warning.level > previous) {
+      await NotificationService.showNow(
+        id: NotificationService.budgetIdBase + (budget.id.hashCode & 0xfff),
+        title: warning.title,
+        body: warning.message,
+      );
+    }
+
+    // Persist the new level (including drops, so re-crossing notifies again).
+    if (warning.level != previous) {
+      levels[budget.id] = warning.level;
+      await _writeLevels(prefs, levels);
+    }
+  }
+
+  static Map<String, int> _readLevels(SharedPreferences prefs) {
+    final raw = prefs.getStringList(_kBudgetLevels) ?? const [];
+    final out = <String, int>{};
+    for (final e in raw) {
+      final i = e.lastIndexOf(':');
+      if (i <= 0) continue;
+      final id = e.substring(0, i);
+      final lvl = int.tryParse(e.substring(i + 1));
+      if (lvl != null) out[id] = lvl;
+    }
+    return out;
+  }
+
+  static Future<void> _writeLevels(
+      SharedPreferences prefs, Map<String, int> levels) async {
+    final raw = levels.entries.map((e) => '${e.key}:${e.value}').toList();
+    await prefs.setStringList(_kBudgetLevels, raw);
+  }
+
+  /// Forget a deleted budget's warning state so a future budget reusing the id
+  /// starts fresh. Best-effort.
+  static Future<void> forgetBudget(String budgetId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final levels = _readLevels(prefs);
+    if (levels.remove(budgetId) != null) {
+      await _writeLevels(prefs, levels);
+    }
+  }
+}

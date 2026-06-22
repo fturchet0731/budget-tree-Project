@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(chmod +x ~/.claude/statusline.sh ~/.claude/statusline.py)",
+      "Read(//Users/fabianturchetti/.claude/**)",
+      "Bash(/usr/bin/python3 ~/.claude/statusline.py)",
+      "Bash(python3 -c \"import time;print\\(int\\(time.time\\(\\)\\)+8040\\)\")",
+      "Bash(flutter --version)",
+      "Bash(timeout 60 flutter pub add flutter_local_notifications timezone)",
+      "Bash(flutter pub *)",
+      "Bash(flutter test *)",
+      "Bash([ -f \"$MEM\" ])",
+      "Bash(xargs -I {} basename {})"
+    ]
+  }
+}
