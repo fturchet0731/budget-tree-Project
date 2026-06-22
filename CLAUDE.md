@@ -21,19 +21,33 @@ flutter build apk|ios|web|macos               # release builds
 
 Requires Flutter 3.44+ / Dart SDK ^3.11.5.
 
+Run against Supabase with credentials from a gitignored `env.json`:
+
+```bash
+flutter run --dart-define-from-file=env.json   # injects SUPABASE_URL + SUPABASE_ANON_KEY
+```
+
+Database schema is managed with the Supabase CLI (migrations in `supabase/migrations/`, project linked to ref `uxfmisgzrprdzagfhcke`):
+
+```bash
+supabase migration new <name>   # scaffold a migration, then write SQL into it
+supabase db push                # apply pending migrations to the linked remote DB
+supabase migration list         # compare local vs remote
+```
+
 ## Architecture
 
-All real source lives under [lib/](lib/). (The top-level `services/` and `widgets/` directories are stray leftovers — `services/auth_service.dart` is empty — ignore them; do not add code there.)
+All real source lives under [lib/](lib/). (The top-level `services/` and `widgets/` directories are stray leftovers — the empty top-level `services/auth_service.dart` is **not** the real one, which is `lib/services/auth_service.dart` — ignore the top-level dirs; do not add code there.)
 
-**Entry & navigation.** [lib/main.dart](lib/main.dart) loads `AppSettings` before `runApp`, then wraps `MaterialApp` in an `AnimatedBuilder` on `AppSettings.instance` so theme/text-scale changes rebuild the whole app. Flow: [HomeScreen](lib/screens/home_screen.dart) (animated launch screen) → first launch plays the [GuidedTour](lib/tutorial/tutorial_tour.dart) → [DashboardScreen](lib/screens/dashboard_screen.dart) (the "four-leaf menu") which routes to the four pillars: Create Budget, Forest (view budgets), Goals, Settings. Navigation is plain imperative `Navigator.push` with `MaterialPageRoute`; there is no router package and no DI/state-management package. `main.dart` also calls `NotificationService.init()` before `runApp` and fires `NotificationScheduler.rescheduleAll()` unawaited on boot so first paint isn't blocked.
+**Entry & navigation.** [lib/main.dart](lib/main.dart) loads `AppSettings` before `runApp`, then wraps `MaterialApp` in an `AnimatedBuilder` on `AppSettings.instance` so theme/text-scale changes rebuild the whole app. Flow: [HomeScreen](lib/screens/home_screen.dart) (animated launch screen) → first launch plays the [GuidedTour](lib/tutorial/tutorial_tour.dart) → [DashboardScreen](lib/screens/dashboard_screen.dart) (the "four-leaf menu") which routes to the four pillars: Create Budget, Forest (view budgets), Goals, Settings. Navigation is plain imperative `Navigator.push` with `MaterialPageRoute`; there is no router package and no DI/state-management package. `main.dart` also calls `NotificationService.init()` before `runApp` and fires `NotificationScheduler.rescheduleAll()` unawaited on boot so first paint isn't blocked. It also calls `SupabaseConfig.init()`, `AuthService.instance.start()`, and `SyncEngine.init()` before `runApp`, and the app's `home` is an [AuthGate](lib/widgets/auth_gate.dart) that shows the email/password [LoginScreen](lib/screens/auth/login_screen.dart) until signed in, then enters the HomeScreen flow above.
 
-**Persistence — repositories over `shared_preferences`.** There is no database or backend. Each model is serialized to JSON and stored as a `List<String>` under a single versioned key:
-- [BudgetRepository](lib/services/budget_repository.dart) — key `budget_tree_v1`
-- [GoalRepository](lib/services/goal_repository.dart) — key `goals_v1`
-- [CategoryRepository](lib/services/category_repository.dart) — key `tree_categories_v1`
-- [AchievementService](lib/services/achievement_service.dart) — unlocked badges + timestamps, key `achievements_v1`
+**Persistence — offline-first cache synced to Supabase.** Source of truth is **Supabase** (Postgres + email/password auth); `shared_preferences` is a local **write-through cache** so reads stay instant. The seam is [SyncedStore<T>](lib/services/synced_store.dart): reads return cache immediately then refresh in the background; writes hit cache first, then upsert/delete to Supabase (queued in a per-collection pending list when offline). The four stores keep their original static API (`loadAll`/`saveNew`/`update`/`delete`) and local cache keys, each delegating to a `SyncedStore`:
+- [BudgetRepository](lib/services/budget_repository.dart) — cache `budget_tree_v1`, table `budgets`
+- [GoalRepository](lib/services/goal_repository.dart) — cache `goals_v1`, table `goals`
+- [CategoryRepository](lib/services/category_repository.dart) — cache `tree_categories_v1`, table `categories`
+- [AchievementService](lib/services/achievement_service.dart) — cache `ach_unlocks_v1`, table `achievements`
 
-Repositories are static-method utilities (`loadAll`, `saveNew`, `update`, `delete`); `update`/`delete` re-read, mutate, and re-write the whole list. Every model has matching `toJson`/`fromJson` with defensive defaults for missing fields — **when you add a field to a model, update both `toJson` and `fromJson` and keep the fallback so old stored records still parse.** If you change a record's shape incompatibly, bump the storage key version.
+Each Supabase table is keyed `(user_id, id)` with the whole model in a `data jsonb` column under per-user RLS, so **the toJson/fromJson rule still governs: when you add a model field, update both and keep the fallback** — it maps straight into `data`, no schema change needed. [AuthService](lib/services/auth_service.dart) (`AuthService.instance`, mirrors AppSettings) wraps Supabase auth; [SyncEngine](lib/services/sync_engine.dart) handles first-login migration (push local rows up, then pull), flush-on-resume/reconnect, and clear-caches-on-signout. No dart-defines → everything degrades to local-only mode. Schema lives in [supabase/migrations/](supabase/migrations/).
 
 **App-wide settings.** [AppSettings](lib/services/app_settings.dart) is a `ChangeNotifier` singleton (`AppSettings.instance`) persisting palette, text scale, reduced-motion, the tutorial-seen flag, a `soundEnabled` toggle, and notification preferences (per-type toggles for budget warnings / streak reminders / weekly summary, plus the scheduled hour/minute/weekday for each). Each setting has its own `settings_*_v1` key. UI reads `palette`/`textScaleFactor`/`motionMultiplier` from it; the whole app is theme-reactive through the listener in `main.dart`. Changing a notification setting should re-run `NotificationScheduler.rescheduleAll()`.
 

@@ -1,3 +1,9 @@
+# Supabase — local secrets & CLI state (never commit)
+env.json
+/supabase/.branches
+/supabase/.temp
+/supabase/.env
+
 # Miscellaneous
 *.class
 *.log

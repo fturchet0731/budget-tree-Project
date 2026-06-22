@@ -1,13 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
 import 'services/app_settings.dart';
+import 'services/auth_service.dart';
 import 'services/notification_scheduler.dart';
 import 'services/notification_service.dart';
+import 'services/supabase_config.dart';
+import 'services/sync_engine.dart';
 import 'theme/app_theme.dart';
+import 'widgets/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseConfig.init();
+  AuthService.instance.start();
+  SyncEngine.init();
   await AppSettings.instance.load();
   await NotificationService.init();
   // Refresh the recurring reminders in the background so they reflect the
@@ -38,7 +44,7 @@ class BudgetTreeApp extends StatelessWidget {
               child: child!,
             );
           },
-          home: const HomeScreen(),
+          home: const AuthGate(),
         );
       },
     );

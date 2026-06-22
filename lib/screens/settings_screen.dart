@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../services/app_settings.dart';
-import '../services/goal_repository.dart';
+import '../services/auth_service.dart';
 import '../services/notification_scheduler.dart';
+import '../services/sync_engine.dart';
 import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/info_button.dart';
@@ -33,6 +33,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _onChange() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _signOut() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF14210C),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Sign out?',
+          style: GoogleFonts.fredoka(
+              fontWeight: FontWeight.w600,
+              color: AppColors.stoneBeigeColor,
+              fontSize: 20),
+        ),
+        content: Text(
+          'Your forest is saved in the cloud — sign back in any time to bring it back.',
+          style: GoogleFonts.nunito(
+              color: AppColors.mossGreen, fontSize: 14, height: 1.55),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel',
+                style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Sign out',
+                style: GoogleFonts.nunito(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await AuthService.instance.signOut();
+    // AuthGate listens to AuthService and will swap back to the login screen.
   }
 
   Future<void> _confirmEraseAllData() async {
@@ -123,9 +161,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (reallyOk != true) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('budget_tree_v1');
-    await GoalRepository.clear();
+    // Wipe the signed-in user's rows remotely, then drop every local data
+    // cache (budgets, goals, categories, achievements). App preferences are
+    // intentionally left intact.
+    await SyncEngine.deleteAllRemote();
+    await SyncEngine.clearLocalCaches();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -276,6 +316,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
+                    if (AuthService.instance.isSignedIn) ...[
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                          icon: Icons.person_outline, label: 'ACCOUNT'),
+                      _SettingsCard(
+                        children: [
+                          _InfoRow(
+                            label: 'Signed in as',
+                            value: AuthService.instance.currentUser?.email ??
+                                'Unknown',
+                          ),
+                          const SizedBox(height: 6),
+                          _ActionTile(
+                            icon: Icons.logout,
+                            iconColor: AppColors.warningAmber,
+                            title: 'Sign out',
+                            subtitle:
+                                'Your data stays safe in the cloud.',
+                            onTap: _signOut,
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 22),
                     _SectionHeader(
                         icon: Icons.storage_outlined, label: 'DATA'),

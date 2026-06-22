@@ -1,47 +1,23 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/budget_model.dart';
+import 'synced_store.dart';
 
+/// Budget trees. Public API is unchanged from the original
+/// `shared_preferences`-only version — all logic now lives in [SyncedStore],
+/// which keeps a local cache (key `budget_tree_v1`) and syncs to the Supabase
+/// `budgets` table in the background.
 class BudgetRepository {
-  static const String _key = 'budget_tree_v1';
+  BudgetRepository._();
 
-  static Future<List<BudgetModel>> loadAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    return raw
-        .map((s) => BudgetModel.fromJson(jsonDecode(s) as Map<String, dynamic>))
-        .toList();
-  }
+  static final SyncedStore<BudgetModel> store = SyncedStore<BudgetModel>(
+    prefsKey: 'budget_tree_v1',
+    table: 'budgets',
+    toJson: (b) => b.toJson(),
+    fromJson: BudgetModel.fromJson,
+    idOf: (b) => b.id,
+  );
 
-  static Future<void> saveNew(BudgetModel budget) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    raw.add(jsonEncode(budget.toJson()));
-    await prefs.setStringList(_key, raw);
-  }
-
-  static Future<void> delete(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    raw.removeWhere((s) {
-      final m = BudgetModel.fromJson(jsonDecode(s) as Map<String, dynamic>);
-      return m.id == id;
-    });
-    await prefs.setStringList(_key, raw);
-  }
-
-  static Future<void> update(BudgetModel budget) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    final idx = raw.indexWhere((s) {
-      final m = BudgetModel.fromJson(jsonDecode(s) as Map<String, dynamic>);
-      return m.id == budget.id;
-    });
-    if (idx >= 0) {
-      raw[idx] = jsonEncode(budget.toJson());
-    } else {
-      raw.add(jsonEncode(budget.toJson()));
-    }
-    await prefs.setStringList(_key, raw);
-  }
+  static Future<List<BudgetModel>> loadAll() => store.loadAll();
+  static Future<void> saveNew(BudgetModel budget) => store.saveNew(budget);
+  static Future<void> update(BudgetModel budget) => store.update(budget);
+  static Future<void> delete(String id) => store.delete(id);
 }

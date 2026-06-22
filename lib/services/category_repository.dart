@@ -1,55 +1,22 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/category_model.dart';
+import 'synced_store.dart';
 
+/// Shared budget/goal categories. Local cache key `tree_categories_v1`, synced
+/// to the Supabase `categories` table. Public API unchanged.
 class CategoryRepository {
-  static const String _key = 'tree_categories_v1';
+  CategoryRepository._();
 
-  static Future<List<TreeCategory>> loadAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    return raw
-        .map((s) =>
-            TreeCategory.fromJson(jsonDecode(s) as Map<String, dynamic>))
-        .toList();
-  }
+  static final SyncedStore<TreeCategory> store = SyncedStore<TreeCategory>(
+    prefsKey: 'tree_categories_v1',
+    table: 'categories',
+    toJson: (c) => c.toJson(),
+    fromJson: TreeCategory.fromJson,
+    idOf: (c) => c.id,
+  );
 
-  static Future<void> saveNew(TreeCategory cat) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    raw.add(jsonEncode(cat.toJson()));
-    await prefs.setStringList(_key, raw);
-  }
-
-  static Future<void> update(TreeCategory cat) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    final idx = raw.indexWhere((s) {
-      final c =
-          TreeCategory.fromJson(jsonDecode(s) as Map<String, dynamic>);
-      return c.id == cat.id;
-    });
-    if (idx >= 0) {
-      raw[idx] = jsonEncode(cat.toJson());
-    } else {
-      raw.add(jsonEncode(cat.toJson()));
-    }
-    await prefs.setStringList(_key, raw);
-  }
-
-  static Future<void> delete(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    raw.removeWhere((s) {
-      final c =
-          TreeCategory.fromJson(jsonDecode(s) as Map<String, dynamic>);
-      return c.id == id;
-    });
-    await prefs.setStringList(_key, raw);
-  }
-
-  static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
-  }
+  static Future<List<TreeCategory>> loadAll() => store.loadAll();
+  static Future<void> saveNew(TreeCategory cat) => store.saveNew(cat);
+  static Future<void> update(TreeCategory cat) => store.update(cat);
+  static Future<void> delete(String id) => store.delete(id);
+  static Future<void> clear() => store.clearCache();
 }
