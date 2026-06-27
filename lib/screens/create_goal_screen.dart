@@ -130,10 +130,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     final hasName = _nameCtrl.text.trim().isNotEmpty;
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF050B05),
       body: Stack(
         children: [
-          // ── Sky → meadow background scene ───────
+          // ── Palette-driven background scene ───────
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
+            ),
+          ),
           Positioned.fill(
             child: CustomPaint(painter: _GoalSkyPainter()),
           ),
@@ -781,30 +785,16 @@ class _GoalSkyPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Vertical gradient
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, w, h),
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0A1F1A),
-            Color(0xFF0E2818),
-            Color(0xFF112B14),
-            Color(0xFF09140A),
-          ],
-          stops: [0.0, 0.35, 0.7, 1.0],
-        ).createShader(Rect.fromLTWH(0, 0, w, h)),
-    );
+    // The base gradient is painted behind us from AppPalettes.deepForest();
+    // here we only add the glow + silhouettes so the scene follows the palette.
 
-    // Soft warm glow upper right
+    // Soft glow upper right, tinted to the active palette.
     canvas.drawCircle(
       Offset(w * 0.86, h * 0.06),
       130,
       Paint()
         ..shader = RadialGradient(colors: [
-          const Color(0xFFFFE0B2).withValues(alpha: 0.18),
+          AppPalettes.celestialGlow().withValues(alpha: 0.18),
           Colors.transparent,
         ]).createShader(
             Rect.fromCircle(center: Offset(w * 0.86, h * 0.06), radius: 130)),
