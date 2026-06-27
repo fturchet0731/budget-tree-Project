@@ -132,10 +132,15 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF050B05),
       body: Stack(
         children: [
-          // ── Atmospheric background ───────────────
+          // ── Atmospheric background — palette-driven so the Settings theme
+          //    changes this screen's mood like every other surface ──
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
+            ),
+          ),
           Positioned.fill(
             child: CustomPaint(painter: _NatureBgPainter()),
           ),
@@ -262,30 +267,17 @@ class _NatureBgPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Vertical gradient: night sky → deep forest → soil
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, w, h),
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0A1F1A),
-            Color(0xFF0E2818),
-            Color(0xFF112B14),
-            Color(0xFF09140A),
-          ],
-          stops: [0.0, 0.35, 0.7, 1.0],
-        ).createShader(Rect.fromLTWH(0, 0, w, h)),
-    );
+    // The base gradient is painted behind us from AppPalettes.deepForest();
+    // here we only add the celestial glow + silhouettes so the whole scene
+    // follows the active palette.
 
-    // Soft moon-like glow upper right
+    // Soft celestial glow upper right, tinted to the active palette.
     canvas.drawCircle(
       Offset(w * 0.85, h * 0.08),
       120,
       Paint()
         ..shader = RadialGradient(colors: [
-          const Color(0xFFFFE0B2).withValues(alpha: 0.18),
+          AppPalettes.celestialGlow().withValues(alpha: 0.18),
           Colors.transparent,
         ]).createShader(
             Rect.fromCircle(center: Offset(w * 0.85, h * 0.08), radius: 120)),
@@ -491,19 +483,19 @@ class _IncomeStep extends StatelessWidget {
                       onTap: () => nameCtrl.text = s,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 7),
+                            horizontal: 13, vertical: 8),
                         decoration: BoxDecoration(
-                          color: AppColors.soilMid,
+                          color: AppColors.riverBlue.withValues(alpha: 0.20),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                               color: AppColors.riverBlue
-                                  .withValues(alpha: 0.45)),
+                                  .withValues(alpha: 0.65)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(Icons.water_drop_outlined,
-                                size: 12, color: AppColors.riverBlue),
+                                size: 12, color: AppColors.skyBlue),
                             const SizedBox(width: 5),
                             Text(s,
                                 style: GoogleFonts.nunito(
@@ -552,14 +544,7 @@ class _IncomeStep extends StatelessWidget {
               const SizedBox(width: 10),
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: ElevatedButton(
-                  onPressed: onAdd,
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(15),
-                      backgroundColor: AppColors.forestGreen,
-                      shape: const CircleBorder()),
-                  child: const Icon(Icons.add, color: Colors.white),
-                ),
+                child: _AddButton(onTap: onAdd),
               ),
             ],
           ),
@@ -815,14 +800,7 @@ class _ExpenseStep extends StatelessWidget {
               const SizedBox(width: 10),
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: ElevatedButton(
-                  onPressed: onAdd,
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(15),
-                      backgroundColor: AppColors.forestGreen,
-                      shape: const CircleBorder()),
-                  child: const Icon(Icons.add, color: Colors.white),
-                ),
+                child: _AddButton(onTap: onAdd),
               ),
             ],
           ),
@@ -1086,6 +1064,46 @@ class _PersonalStep extends StatelessWidget {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${m[d.month - 1]} ${d.day}, ${d.year}';
+  }
+}
+
+// ──────────────────────────────────────────────
+// Vibrant circular "add" button
+// ──────────────────────────────────────────────
+
+class _AddButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AddButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF8BE65C), Color(0xFF43A047)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.lightLeaf.withValues(alpha: 0.55),
+                blurRadius: 12,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: const Icon(Icons.add, color: Colors.white, size: 22),
+        ),
+      ),
+    );
   }
 }
 
