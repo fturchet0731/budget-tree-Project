@@ -68,7 +68,7 @@ Each Supabase table is keyed `(user_id, id)` with the whole model in a `data jso
 
 ### Pay-cycle engine
 
-[PayScheduler](lib/services/pay_scheduler.dart) is the core financial logic. `runUpdate(budget)` figures out how many whole pay periods elapsed since `budget.lastProcessedAt` (using `payFrequency` from [pay_frequency.dart](lib/data/pay_frequency.dart)) and credits each branch's allocation share to its linked goals, respecting target caps, then advances `lastProcessedAt` by exactly the processed periods (not to "now") and persists touched goals/budget. [TaxCalculator](lib/services/tax_calculator.dart) does bracket-based net-income estimation from [tax_data.dart](lib/data/tax_data.dart) jurisdictions. These are pure-ish static utilities — keep new financial math here, not in widgets.
+[PayScheduler](lib/services/pay_scheduler.dart) is the core financial logic. `runUpdate(budget)` figures out how many whole pay periods elapsed since `budget.lastProcessedAt` (using `payFrequency` from [pay_frequency.dart](lib/data/pay_frequency.dart)) and credits each branch's allocation share to its linked goals, respecting target caps, then advances `lastProcessedAt` by exactly the processed periods (not to "now") and persists touched goals/budget. It's a pure-ish static utility — keep new financial math here, not in widgets. (There is **no tax feature** — tax estimation was removed; `BudgetModel.age`/`location` linger only for back-compat and are no longer collected.)
 
 ### Retention & engagement
 

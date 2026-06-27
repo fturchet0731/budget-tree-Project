@@ -56,7 +56,7 @@ const Map<TutorialSection, List<TutorialStep>> _sectionLines = {
     TutorialStep(
         "You'll add what you earn, then where it goes, and a few personal details — the steps run along the vine up top."),
     TutorialStep(
-        "I'll even work out your taxes and pay schedule, then watch your budget sprout into a tree!",
+        "Set your pay schedule and watch your budget sprout into a tree!",
         expression: AcornExpression.happy),
   ],
   TutorialSection.forest: [
@@ -265,7 +265,7 @@ List<TutorialStep> createStepSteps(int step) {
       return const [
         TutorialStep("🪵 The Roots — the details that ground your tree."),
         TutorialStep(
-            "Name your budget, add your age, and choose your region and pay schedule. I use these to work out your taxes!"),
+            "Name your budget and choose your pay schedule — that's how often money flows into your goals."),
         TutorialStep(
             "All filled in? Tap “Plant My Budget Tree” below to grow it!",
             expression: AcornExpression.happy),

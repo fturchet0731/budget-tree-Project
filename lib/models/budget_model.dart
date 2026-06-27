@@ -60,8 +60,8 @@ class BudgetModel {
     required this.budgetName,
     required this.incomeSources,
     required this.expenses,
-    required this.age,
-    required this.location,
+    this.age = 0,
+    this.location = '',
     String? id,
     this.savedAt,
     this.categoryId,
@@ -101,8 +101,8 @@ class BudgetModel {
         expenses: (json['expenses'] as List)
             .map((e) => ExpenseCategory.fromJson(e as Map<String, dynamic>))
             .toList(),
-        age: json['age'] as int,
-        location: json['location'] as String,
+        age: (json['age'] as int?) ?? 0,
+        location: (json['location'] as String?) ?? '',
         id: json['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
         savedAt: json['savedAt'] != null
             ? DateTime.fromMillisecondsSinceEpoch(json['savedAt'] as int)

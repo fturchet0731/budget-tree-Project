@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/pay_frequency.dart';
-import '../data/tax_data.dart';
 import '../models/budget_model.dart';
-import '../services/tax_calculator.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
 import '../widgets/acorn_coach.dart';
@@ -37,10 +35,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final _expAmountCtrl = TextEditingController();
   String _selectedIconKey = 'other';
 
-  // Step 3 – Personal info
+  // Step 3 – Budget name + pay schedule
   final _budgetNameCtrl = TextEditingController(text: 'My Budget');
-  final _ageCtrl = TextEditingController();
-  String? _jurisdictionCode;
   PayFrequency? _payFrequency;
   DateTime? _firstPayDate;
 
@@ -70,7 +66,6 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     _expNameCtrl.dispose();
     _expAmountCtrl.dispose();
     _budgetNameCtrl.dispose();
-    _ageCtrl.dispose();
     super.dispose();
   }
 
@@ -101,16 +96,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   }
 
   void _plantTree() {
-    final age = int.tryParse(_ageCtrl.text) ?? 0;
-    final j = _jurisdictionCode != null ? findJurisdiction(_jurisdictionCode) : null;
     final model = BudgetModel(
       budgetName: _budgetNameCtrl.text.trim().isEmpty
           ? 'My Budget'
           : _budgetNameCtrl.text.trim(),
       incomeSources: _incomeSources,
       expenses: _expenses,
-      age: age,
-      location: j?.name ?? '',
       payFrequency: _payFrequency,
       firstPayDate: _firstPayDate,
     );
@@ -132,12 +123,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
         ? 'Income Sources'
         : _step == 1
             ? 'Expense Branches'
-            : 'About Your Roots';
+            : 'Name & Pay Schedule';
     final stepSubtitle = _step == 0
         ? 'What flows into your tree?'
         : _step == 1
             ? 'Where do the branches reach?'
-            : 'A few details to personalise your forest';
+            : 'Name your tree and set how often you\'re paid';
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -217,13 +208,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             : _PersonalStep(
                                 key: const ValueKey(2),
                                 nameCtrl: _budgetNameCtrl,
-                                ageCtrl: _ageCtrl,
-                                jurisdictionCode: _jurisdictionCode,
                                 payFrequency: _payFrequency,
                                 firstPayDate: _firstPayDate,
-                                monthlyGross: _totalIncome,
-                                onJurisdictionChanged: (code) =>
-                                    setState(() => _jurisdictionCode = code),
                                 onFrequencyChanged: (f) =>
                                     setState(() => _payFrequency = f),
                                 onFirstPayDateChanged: (d) =>
@@ -934,102 +920,41 @@ class _BudgetBar extends StatelessWidget {
 
 class _PersonalStep extends StatelessWidget {
   final TextEditingController nameCtrl;
-  final TextEditingController ageCtrl;
-  final String? jurisdictionCode;
   final PayFrequency? payFrequency;
   final DateTime? firstPayDate;
-  final double monthlyGross;
-  final ValueChanged<String?> onJurisdictionChanged;
   final ValueChanged<PayFrequency?> onFrequencyChanged;
   final ValueChanged<DateTime?> onFirstPayDateChanged;
 
   const _PersonalStep({
     super.key,
     required this.nameCtrl,
-    required this.ageCtrl,
-    required this.jurisdictionCode,
     required this.payFrequency,
     required this.firstPayDate,
-    required this.monthlyGross,
-    required this.onJurisdictionChanged,
     required this.onFrequencyChanged,
     required this.onFirstPayDateChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final jur = jurisdictionCode != null ? findJurisdiction(jurisdictionCode) : null;
-    final taxEstimate = TaxCalculator.estimate(
-      monthlyGross: monthlyGross,
-      location: jur?.code,
-    );
-
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       children: [
-        // Identity card
+        // Name card
         BarkCard(
-          label: 'Identity',
-          icon: Icons.fingerprint,
-          child: Column(
-            children: [
-              TextField(
-                controller: nameCtrl,
-                style: const TextStyle(color: AppColors.stoneBeigeColor),
-                decoration: const InputDecoration(
-                  labelText: 'Budget name',
-                  hintText: 'e.g. January Budget',
-                  prefixIcon: Icon(Icons.park, color: AppColors.mossGreen),
-                ),
-                textCapitalization: TextCapitalization.words,
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: ageCtrl,
-                style: const TextStyle(color: AppColors.stoneBeigeColor),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  labelText: 'Age',
-                  hintText: 'e.g. 25',
-                  prefixIcon: Icon(Icons.person_outline,
-                      color: AppColors.mossGreen),
-                ),
-              ),
-              const SizedBox(height: 14),
-              DropdownButtonFormField<String>(
-                initialValue: jurisdictionCode,
-                isExpanded: true,
-                dropdownColor: AppColors.darkBark,
-                style: const TextStyle(color: AppColors.stoneBeigeColor),
-                decoration: const InputDecoration(
-                  labelText: 'Province / State',
-                  prefixIcon: Icon(Icons.location_on_outlined,
-                      color: AppColors.mossGreen),
-                ),
-                items: jurisdictions.map((j) {
-                  final flag = j.country == 'CA' ? 'CA' : 'US';
-                  return DropdownMenuItem(
-                    value: j.code,
-                    child: Text('$flag · ${j.name}',
-                        style: const TextStyle(
-                            color: AppColors.stoneBeigeColor, fontSize: 13)),
-                  );
-                }).toList(),
-                onChanged: onJurisdictionChanged,
-              ),
-            ],
+          label: 'Name your tree',
+          icon: Icons.park,
+          child: TextField(
+            controller: nameCtrl,
+            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            decoration: const InputDecoration(
+              labelText: 'Budget name',
+              hintText: 'e.g. January Budget',
+              prefixIcon: Icon(Icons.park, color: AppColors.mossGreen),
+            ),
+            textCapitalization: TextCapitalization.words,
           ),
         ),
         const SizedBox(height: 14),
-        if (taxEstimate.hasData)
-          BarkCard(
-            label: 'Tax estimate',
-            icon: Icons.calculate_outlined,
-            accent: AppColors.warningAmber,
-            child: _TaxEstimateCard(estimate: taxEstimate),
-          ),
-        if (taxEstimate.hasData) const SizedBox(height: 14),
         // Pay schedule card
         BarkCard(
           label: 'Pay schedule',
@@ -1141,7 +1066,7 @@ class _PersonalStep extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Tax brackets are bundled into the app (2024 data) so they work offline. After saving, the budget tree lets you process pay cycles to feed linked goals.',
+                  'Your pay schedule lets the budget tree process pay cycles and feed money into your linked goals automatically.',
                   style: GoogleFonts.nunito(
                       color: AppColors.stoneBeigeColor,
                       fontSize: 12,
@@ -1161,58 +1086,6 @@ class _PersonalStep extends StatelessWidget {
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${m[d.month - 1]} ${d.day}, ${d.year}';
-  }
-}
-
-class _TaxEstimateCard extends StatelessWidget {
-  final TaxEstimate estimate;
-  const _TaxEstimateCard({required this.estimate});
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = (estimate.effectiveRate * 100).toStringAsFixed(1);
-    final marg = (estimate.marginalRate * 100).toStringAsFixed(1);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _row('Annual gross', '\$${estimate.annualGross.toStringAsFixed(0)}'),
-        _row('Annual tax', '\$${estimate.annualTax.toStringAsFixed(0)}'),
-        _row('Annual net', '\$${estimate.annualNet.toStringAsFixed(0)}',
-            accent: true),
-        Divider(
-            color: AppColors.mossGreen.withValues(alpha: 0.30), height: 18),
-        _row('Monthly net', '\$${estimate.monthlyNet.toStringAsFixed(2)}',
-            accent: true),
-        const SizedBox(height: 8),
-        Text(
-          'Effective $pct%  ·  Marginal $marg%',
-          style: GoogleFonts.nunito(
-              color: AppColors.mossGreen, fontSize: 11),
-        ),
-      ],
-    );
-  }
-
-  Widget _row(String label, String value, {bool accent = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: AppColors.mossGreen, fontSize: 12.5)),
-          Text(value,
-              style: GoogleFonts.nunito(
-                  color: accent
-                      ? AppColors.lightLeaf
-                      : AppColors.stoneBeigeColor,
-                  fontSize: 13.5,
-                  fontWeight:
-                      accent ? FontWeight.bold : FontWeight.normal)),
-        ],
-      ),
-    );
   }
 }
 
