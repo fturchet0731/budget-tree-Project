@@ -3,9 +3,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/app_settings.dart';
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/acorn_mascot.dart';
+import 'auth/login_screen.dart';
 import 'dashboard_screen.dart';
 
 /// Worm's-eye launch screen. You open at the base of a giant tree looking
@@ -170,15 +172,64 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  void _comingSoon(String what) {
+  void _openLogin({bool signUp = false}) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(startInSignUp: signUp),
+      ),
+    );
+  }
+
+  Future<void> _signOut() async {
+    await AuthService.instance.signOut();
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.darkBark,
-        content: Text('$what coming soon 🌱',
+        content: Text('Signed out 🌱',
             style: GoogleFonts.nunito(color: Colors.white)),
         duration: const Duration(seconds: 2),
       ),
+    );
+  }
+
+  /// The launch-screen account controls, reactive to [AuthService]. In
+  /// local-only mode (no backend configured) accounts don't exist, so we hide
+  /// them entirely; otherwise we show Sign In / Register when signed out and a
+  /// Sign Out button when signed in.
+  Widget _accountControls() {
+    final auth = AuthService.instance;
+    if (!auth.isConfigured) return const SizedBox.shrink();
+    return AnimatedBuilder(
+      animation: auth,
+      builder: (context, _) {
+        if (auth.isSignedIn) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                auth.currentUser?.email ?? 'Signed in',
+                style: GoogleFonts.nunito(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _ghostButton('Sign Out', onTap: _signOut),
+            ],
+          );
+        }
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _ghostButton('Sign In', onTap: () => _openLogin()),
+            const SizedBox(width: 12),
+            _solidButton('Register', onTap: () => _openLogin(signUp: true)),
+          ],
+        );
+      },
     );
   }
 
@@ -488,16 +539,7 @@ class _HomeScreenState extends State<HomeScreen>
                           child: _startButton(theme),
                         ),
                         const SizedBox(height: 14),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _ghostButton('Sign In',
-                                onTap: () => _comingSoon('Accounts')),
-                            const SizedBox(width: 12),
-                            _solidButton('Register',
-                                onTap: () => _comingSoon('Accounts')),
-                          ],
-                        ),
+                        _accountControls(),
                       ],
                     ),
                   ),

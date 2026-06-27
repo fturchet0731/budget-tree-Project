@@ -50,10 +50,13 @@ class AuthService extends ChangeNotifier {
 
   /// Create a new account. Throws [AuthException] on failure (caller surfaces
   /// the message). With "Confirm email" disabled in the dashboard, this also
-  /// signs the user in immediately.
-  Future<void> signUp(String email, String password) async {
-    await SupabaseConfig.client.auth
+  /// signs the user in immediately and returns true. If email confirmation is
+  /// enabled, no session is created (returns false) and the caller should tell
+  /// the user to check their inbox rather than silently doing nothing.
+  Future<bool> signUp(String email, String password) async {
+    final res = await SupabaseConfig.client.auth
         .signUp(email: email.trim(), password: password);
+    return res.session != null;
   }
 
   /// Sign in with email + password. Throws [AuthException] on bad credentials.
