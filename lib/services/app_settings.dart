@@ -1,3 +1,4 @@
+import 'dart:ui' show Locale;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,9 +18,14 @@ class AppSettings extends ChangeNotifier {
   static const _kNotifWeekly = 'settings_notif_weekly_v1';
   static const _kWeeklyWeekday = 'settings_weekly_weekday_v1';
   static const _kWeeklyHour = 'settings_weekly_hour_v1';
+  static const _kLocale = 'settings_locale_v1';
+
+  /// Languages the app ships translations for. `null` locale = follow device.
+  static const supportedLanguageCodes = ['en', 'fr', 'es'];
 
   AppPalette _palette = AppPalette.forestDark;
   AppTextScale _scale = AppTextScale.normal;
+  Locale? _locale; // null = follow the device language
   bool _motionFull = true;
   bool _soundEnabled = true;
   bool _tutorialSeen = false;
@@ -38,6 +44,13 @@ class AppSettings extends ChangeNotifier {
   AppPalette get palette => _palette;
   AppTextScale get textScale => _scale;
   bool get motionFull => _motionFull;
+
+  /// The user's chosen app language, or null to follow the device setting.
+  Locale? get locale => _locale;
+
+  /// The two-letter code of the active choice, or 'system' when following the
+  /// device. Used by the Settings language picker.
+  String get languageSelection => _locale?.languageCode ?? 'system';
 
   /// Whether tactile/audible feedback (taps, chimes) plays on actions.
   bool get soundEnabled => _soundEnabled;
@@ -93,6 +106,24 @@ class AppSettings extends ChangeNotifier {
     _notifWeeklySummary = prefs.getBool(_kNotifWeekly) ?? true;
     _weeklyWeekday = prefs.getInt(_kWeeklyWeekday) ?? DateTime.sunday;
     _weeklyHour = prefs.getInt(_kWeeklyHour) ?? 18;
+    final lc = prefs.getString(_kLocale);
+    _locale = (lc != null && supportedLanguageCodes.contains(lc))
+        ? Locale(lc)
+        : null;
+  }
+
+  /// Set the app language. Pass null to follow the device language. Persists
+  /// as the language code (or clears the key for "system").
+  Future<void> setLocale(Locale? locale) async {
+    if (_locale?.languageCode == locale?.languageCode) return;
+    _locale = locale;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    if (locale == null) {
+      await prefs.remove(_kLocale);
+    } else {
+      await prefs.setString(_kLocale, locale.languageCode);
+    }
   }
 
   Future<void> setNotifBudgetWarnings(bool v) async {

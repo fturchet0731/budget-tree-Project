@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import 'createbudget_screen.dart';
@@ -85,7 +86,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Choose a branch',
+                  AppLocalizations.of(context).dashboardChooseBranch,
                   style: TextStyle(
                     color: AppColors.mossGreen.withValues(alpha: 0.8),
                     fontSize: 13,
@@ -117,9 +118,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.arrow_downward,
                         color: AppColors.mossGreen, size: 16),
-                    label: const Text(
-                      'Back to ground',
-                      style: TextStyle(
+                    label: Text(
+                      AppLocalizations.of(context).dashboardBackToGround,
+                      style: const TextStyle(
                           color: AppColors.mossGreen, letterSpacing: 1),
                     ),
                   ),
@@ -208,7 +209,7 @@ class _FriendsHandleState extends State<_FriendsHandle>
               RotatedBox(
                 quarterTurns: 1,
                 child: Text(
-                  'FRIENDS',
+                  AppLocalizations.of(context).friends.toUpperCase(),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.95),
                     fontSize: 9,
@@ -244,6 +245,7 @@ class _LeafGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Center(
@@ -271,8 +273,8 @@ class _LeafGrid extends StatelessWidget {
                       width: w * leafW,
                       height: h * leafH,
                       child: _LeafButton(
-                        label: 'Create',
-                        sublabel: 'New budget',
+                        label: l.dashboardCreate,
+                        sublabel: l.dashboardCreateSub,
                         icon: Icons.park,
                         color: AppColors.forestGreen,
                         rotation: -0.18,
@@ -285,8 +287,8 @@ class _LeafGrid extends StatelessWidget {
                       width: w * leafW,
                       height: h * leafH,
                       child: _LeafButton(
-                        label: 'Modify',
-                        sublabel: 'Your forest',
+                        label: l.dashboardModify,
+                        sublabel: l.dashboardModifySub,
                         icon: Icons.forest,
                         color: AppColors.mossGreen,
                         rotation: 0.18,
@@ -299,8 +301,8 @@ class _LeafGrid extends StatelessWidget {
                       width: w * leafW,
                       height: h * leafH,
                       child: _LeafButton(
-                        label: 'Goals',
-                        sublabel: 'Savings targets',
+                        label: l.dashboardGoals,
+                        sublabel: l.dashboardGoalsSub,
                         icon: Icons.flag_outlined,
                         color: AppColors.riverBlue,
                         rotation: -0.18,
@@ -313,8 +315,8 @@ class _LeafGrid extends StatelessWidget {
                       width: w * leafW,
                       height: h * leafH,
                       child: _LeafButton(
-                        label: 'Settings',
-                        sublabel: 'Preferences',
+                        label: l.dashboardSettings,
+                        sublabel: l.dashboardSettingsSub,
                         icon: Icons.tune,
                         color: AppColors.barkBrown,
                         rotation: 0.18,

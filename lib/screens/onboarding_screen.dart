@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/profile_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/acorn_mascot.dart';
@@ -46,7 +47,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final username = _username.text.trim();
       final display = _displayName.text.trim();
       if (!await ProfileService.instance.isUsernameAvailable(username)) {
-        if (mounted) setState(() => _error = 'That username is taken. Try another.');
+        if (mounted) {
+          setState(() => _error = AppLocalizations.of(context).usernameTaken);
+        }
         return;
       }
       await ProfileService.instance.claimUsername(
@@ -55,11 +58,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
       await widget.onComplete();
     } on UsernameTakenException {
-      if (mounted) setState(() => _error = 'That username is taken. Try another.');
+      if (mounted) {
+        setState(() => _error = AppLocalizations.of(context).usernameTaken);
+      }
     } catch (_) {
       if (mounted) {
-        setState(() => _error =
-            'Couldn\'t save your profile. Check your connection and try again.');
+        setState(
+            () => _error = AppLocalizations.of(context).onboardingSaveError);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -67,14 +72,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   /// What Acorn says, reacting to the form state.
-  String get _acornLine {
-    if (_busy) return 'Planting your account… one sec! 🌱';
-    if (_error != null) {
-      return 'Hmm, that didn\'t take — let\'s try a different name!';
-    }
-    return "Hi, I'm Acorn! 🌰 Welcome to Budget Tree. Pick a username to "
-        'finish setting up — it\'s how friends find you, but you can grow '
-        'your forest with or without them.';
+  String _acornLine(AppLocalizations l) {
+    if (_busy) return l.onboardingAcornBusy;
+    if (_error != null) return l.onboardingAcornError;
+    return l.onboardingAcornWelcome;
   }
 
   AcornExpression get _acornFace =>
@@ -82,6 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
@@ -103,7 +105,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         expression: _acornFace,
                       ),
                       const SizedBox(height: 12),
-                      _AcornBubble(text: _acornLine),
+                      _AcornBubble(text: _acornLine(l)),
                       const SizedBox(height: 28),
                       TextFormField(
                         controller: _username,
@@ -113,18 +115,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         textInputAction: TextInputAction.next,
                         style:
                             const TextStyle(color: AppColors.stoneBeigeColor),
-                        decoration: const InputDecoration(
-                          labelText: 'Username',
-                          helperText: '3-20 letters, numbers or _',
-                          helperStyle: TextStyle(color: AppColors.mossGreen),
-                          prefixIcon: Icon(Icons.alternate_email,
+                        decoration: InputDecoration(
+                          labelText: l.username,
+                          helperText: l.onboardingUsernameHelper,
+                          helperStyle:
+                              const TextStyle(color: AppColors.mossGreen),
+                          prefixIcon: const Icon(Icons.alternate_email,
                               color: AppColors.mossGreen),
                         ),
                         validator: (v) {
                           final s = v?.trim() ?? '';
-                          if (s.isEmpty) return 'Choose a username';
+                          if (s.isEmpty) return l.chooseUsername;
                           if (!ProfileService.usernamePattern.hasMatch(s)) {
-                            return '3-20 letters, numbers or underscore';
+                            return l.usernameRule;
                           }
                           return null;
                         },
@@ -136,11 +139,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         textInputAction: TextInputAction.done,
                         style:
                             const TextStyle(color: AppColors.stoneBeigeColor),
-                        decoration: const InputDecoration(
-                          labelText: 'Display name (optional)',
-                          helperText: 'Shown to friends instead of @username',
-                          helperStyle: TextStyle(color: AppColors.mossGreen),
-                          prefixIcon: Icon(Icons.badge_outlined,
+                        decoration: InputDecoration(
+                          labelText: l.onboardingDisplayNameLabel,
+                          helperText: l.onboardingDisplayNameHelper,
+                          helperStyle:
+                              const TextStyle(color: AppColors.mossGreen),
+                          prefixIcon: const Icon(Icons.badge_outlined,
                               color: AppColors.mossGreen),
                         ),
                         onFieldSubmitted: (_) => _claim(),
@@ -184,7 +188,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     strokeWidth: 2, color: Colors.white),
                               )
                             : Text(
-                                'Enter the forest',
+                                l.onboardingEnterForest,
                                 style: GoogleFonts.nunito(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),

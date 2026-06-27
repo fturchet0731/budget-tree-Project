@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 
@@ -55,8 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (!hasSession && mounted) {
           setState(() {
             _isSignUp = false;
-            _notice = 'Account created. Check your email to confirm, '
-                'then sign in.';
+            _notice = AppLocalizations.of(context).accountCreatedConfirm;
           });
         }
       } else {
@@ -72,7 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _error = e.message);
     } catch (e) {
       if (mounted) {
-        setState(() => _error = 'Something went wrong. Please try again.');
+        setState(() =>
+            _error = AppLocalizations.of(context).somethingWentWrong);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -81,6 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
@@ -111,9 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        _isSignUp
-                            ? 'Plant your forest in the cloud'
-                            : 'Welcome back to your grove',
+                        _isSignUp ? l.loginPlantForest : l.loginWelcomeBack,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.nunito(
                           color: AppColors.mossGreen,
@@ -128,16 +128,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         enabled: !_busy,
                         style: const TextStyle(
                             color: AppColors.stoneBeigeColor),
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_outlined,
+                        decoration: InputDecoration(
+                          labelText: l.email,
+                          prefixIcon: const Icon(Icons.email_outlined,
                               color: AppColors.mossGreen),
                         ),
                         validator: (v) {
                           final s = v?.trim() ?? '';
-                          if (s.isEmpty) return 'Enter your email';
+                          if (s.isEmpty) return l.enterEmail;
                           if (!s.contains('@') || !s.contains('.')) {
-                            return 'Enter a valid email';
+                            return l.enterValidEmail;
                           }
                           return null;
                         },
@@ -149,14 +149,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         enabled: !_busy,
                         style: const TextStyle(
                             color: AppColors.stoneBeigeColor),
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock_outline,
+                        decoration: InputDecoration(
+                          labelText: l.password,
+                          prefixIcon: const Icon(Icons.lock_outline,
                               color: AppColors.mossGreen),
                         ),
                         validator: (v) {
                           if ((v ?? '').length < 6) {
-                            return 'At least 6 characters';
+                            return l.passwordTooShort;
                           }
                           return null;
                         },
@@ -229,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     strokeWidth: 2, color: Colors.white),
                               )
                             : Text(
-                                _isSignUp ? 'Create account' : 'Sign in',
+                                _isSignUp ? l.createAccount : l.signIn,
                                 style: GoogleFonts.nunito(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),
@@ -244,9 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _notice = null;
                                 }),
                         child: Text(
-                          _isSignUp
-                              ? 'Already have an account? Sign in'
-                              : "New here? Create an account",
+                          _isSignUp ? l.haveAccountSignIn : l.newHereCreate,
                           style: GoogleFonts.nunito(
                               color: AppColors.lightLeaf, fontSize: 14),
                         ),

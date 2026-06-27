@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'l10n/app_localizations.dart';
 import 'services/app_settings.dart';
 import 'services/auth_service.dart';
 import 'services/notification_scheduler.dart';
@@ -35,6 +36,11 @@ class BudgetTreeApp extends StatelessWidget {
           title: 'Budget Tree',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.theme,
+          // Language: follow the user's choice from Settings, or the device
+          // language when they haven't picked one (locale == null).
+          locale: settings.locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           builder: (context, child) {
             final media = MediaQuery.of(context);
             return MediaQuery(

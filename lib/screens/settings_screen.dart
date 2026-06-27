@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
@@ -190,6 +191,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
@@ -293,6 +295,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           value: settings.soundEnabled,
                           activeThumbColor: AppColors.lightLeaf,
                           onChanged: settings.setSoundEnabled,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    _SectionHeader(
+                        icon: Icons.language,
+                        label: l.settingsLanguageTitle.toUpperCase()),
+                    _SettingsCard(
+                      children: [
+                        _TileLabel(text: l.settingsLanguageSubtitle),
+                        const SizedBox(height: 8),
+                        _LanguagePicker(
+                          current: settings.languageSelection,
+                          systemLabel: l.systemDefault,
+                          onChanged: settings.setLocale,
                         ),
                       ],
                     ),
@@ -458,6 +475,78 @@ class _TileLabel extends StatelessWidget {
           color: AppColors.stoneBeigeColor,
           fontWeight: FontWeight.bold,
           fontSize: 13.5),
+    );
+  }
+}
+
+/// Vertical language selector: System default + each shipped language shown in
+/// its own native name. Tapping a row calls [onChanged] (null = follow device).
+class _LanguagePicker extends StatelessWidget {
+  final String current; // 'system' | 'en' | 'fr' | 'es'
+  final String systemLabel;
+  final void Function(Locale?) onChanged;
+  const _LanguagePicker({
+    required this.current,
+    required this.systemLabel,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final options = <(String, String, Locale?)>[
+      ('system', systemLabel, null),
+      ('en', 'English', const Locale('en')),
+      ('fr', 'Français', const Locale('fr')),
+      ('es', 'Español', const Locale('es')),
+    ];
+    return Column(
+      children: options.map((opt) {
+        final (code, label, locale) = opt;
+        final selected = code == current;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: GestureDetector(
+            onTap: () => onChanged(locale),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              decoration: BoxDecoration(
+                color: selected
+                    ? AppColors.forestGreen.withValues(alpha: 0.45)
+                    : AppColors.soilMid,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: selected
+                      ? AppColors.lightLeaf.withValues(alpha: 0.75)
+                      : AppColors.mossGreen.withValues(alpha: 0.25),
+                  width: selected ? 1.5 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: GoogleFonts.nunito(
+                        color: selected
+                            ? AppColors.lightLeaf
+                            : AppColors.stoneBeigeColor,
+                        fontSize: 14,
+                        fontWeight:
+                            selected ? FontWeight.bold : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (selected)
+                    const Icon(Icons.check_circle,
+                        color: AppColors.lightLeaf, size: 18),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
