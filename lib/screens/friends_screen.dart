@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/friendship_model.dart';
 import '../models/profile_model.dart';
 import '../services/friends_service.dart';
@@ -94,11 +95,25 @@ class _FriendsScreenState extends State<FriendsScreen> {
   /// (undefined_table) means the social migration hasn't been applied yet —
   /// worth calling out explicitly since this is a dev build.
   String _messageFor(Object e) {
+    final l = AppLocalizations.of(context);
     if (e is PostgrestException && e.code == '42P01') {
-      return 'The friends tables aren\'t set up yet. Apply the database '
-          'migration with `supabase db push`, then retry.';
+      return l.friendsTablesMissing;
     }
-    return 'Couldn\'t reach friends. Check your connection and try again.';
+    return l.couldntReachFriends;
+  }
+
+  /// Localized label for a friend-status mode (the model's own label is English).
+  String _statusModeLabel(AppLocalizations l, FriendStatusMode m) {
+    switch (m) {
+      case FriendStatusMode.best:
+        return l.statusModeBest;
+      case FriendStatusMode.average:
+        return l.statusModeAverage;
+      case FriendStatusMode.worst:
+        return l.statusModeWorst;
+      case FriendStatusMode.goal:
+        return l.statusModeGoal;
+    }
   }
 
   /// Run a mutating action, surfacing failures as a snackbar instead of an
@@ -142,7 +157,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
     setState(() => _results = const []);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Request sent to @${p.username}')),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context).requestSentTo(p.username))),
       );
     }
     await _load();
@@ -193,9 +210,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
     if (!mounted) return null;
     if (goals.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Share a goal with friends first to pin it as your '
-              'status.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).shareGoalFirstToPin),
         ),
       );
       return null;
@@ -203,7 +219,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('Pin which goal?'),
+        title: Text(AppLocalizations.of(context).pinWhichGoal),
         children: [
           for (final g in goals)
             SimpleDialogOption(
@@ -229,7 +245,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 icon: const Icon(Icons.close),
                 onPressed: widget.onClose,
               ),
-        title: const Text('Friends'),
+        title: Text(AppLocalizations.of(context).friends),
         foregroundColor: AppColors.stoneBeigeColor,
       ),
       extendBodyBehindAppBar: true,
@@ -241,6 +257,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   Widget _body() {
+    final l = AppLocalizations.of(context);
     if (_loading) {
       return const Center(
           child: CircularProgressIndicator(color: AppColors.lightLeaf));
@@ -248,14 +265,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
     if (!ProfileService.instance.isAvailable) {
       return _notice(
         Icons.cloud_off,
-        'Friends need an account',
-        'Sign in with an internet connection to add friends and share goals.',
+        l.friendsNeedAccountTitle,
+        l.friendsNeedAccountBody,
       );
     }
     if (_errorMsg != null) {
       return _notice(
         Icons.wifi_off,
-        'Couldn\'t load friends',
+        l.couldntLoadFriends,
         _errorMsg!,
         onRetry: _load,
       );
@@ -273,16 +290,16 @@ class _FriendsScreenState extends State<FriendsScreen> {
           _addCard(),
           if (_incoming.isNotEmpty) ...[
             const SizedBox(height: 20),
-            _sectionTitle('Requests'),
+            _sectionTitle(l.requests),
             for (final p in _incoming) _requestTile(p),
           ],
           const SizedBox(height: 20),
-          _sectionTitle('Friends'),
+          _sectionTitle(l.friends),
           if (_friends.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('No friends yet — add someone by their username.',
-                  style: TextStyle(color: AppColors.mossGreen)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(l.noFriendsYet,
+                  style: const TextStyle(color: AppColors.mossGreen)),
             ),
           for (final f in _friends) _friendTile(f),
         ],
@@ -291,6 +308,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   Widget _statusCard() {
+    final l = AppLocalizations.of(context);
     return _card(
       child: Row(
         children: [
@@ -298,14 +316,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('You are @${_me!.username}',
+                Text(l.youAreUsername(_me!.username),
                     style: const TextStyle(
                         color: AppColors.stoneBeigeColor,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 2),
-                const Text('How friends see your status:',
-                    style:
-                        TextStyle(color: AppColors.mossGreen, fontSize: 12)),
+                Text(l.howFriendsSeeStatus,
+                    style: const TextStyle(
+                        color: AppColors.mossGreen, fontSize: 12)),
               ],
             ),
           ),
@@ -317,7 +335,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
             style: const TextStyle(color: AppColors.stoneBeigeColor),
             items: [
               for (final m in FriendStatusMode.values)
-                DropdownMenuItem(value: m, child: Text(m.label)),
+                DropdownMenuItem(
+                    value: m, child: Text(_statusModeLabel(l, m))),
             ],
             onChanged: (m) {
               if (m != null) _changeStatusMode(m);
@@ -329,21 +348,22 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   Widget _addCard() {
+    final l = AppLocalizations.of(context);
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('Add a friend'),
+          _sectionTitle(l.addAFriend),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _search,
                   style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  decoration: const InputDecoration(
-                    hintText: 'Search by username',
-                    hintStyle: TextStyle(color: AppColors.mossGreen),
-                    prefixIcon: Icon(Icons.alternate_email,
+                  decoration: InputDecoration(
+                    hintText: l.searchByUsername,
+                    hintStyle: const TextStyle(color: AppColors.mossGreen),
+                    prefixIcon: const Icon(Icons.alternate_email,
                         color: AppColors.mossGreen),
                   ),
                   textInputAction: TextInputAction.search,
@@ -372,8 +392,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   style: const TextStyle(color: AppColors.mossGreen)),
               trailing: TextButton(
                 onPressed: () => _add(p),
-                child: const Text('Add',
-                    style: TextStyle(color: AppColors.lightLeaf)),
+                child: Text(l.add,
+                    style: const TextStyle(color: AppColors.lightLeaf)),
               ),
             ),
         ],
@@ -382,6 +402,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   Widget _requestTile(Profile p) {
+    final l = AppLocalizations.of(context);
     return _card(
       child: Row(
         children: [
@@ -393,13 +414,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
           ),
           TextButton(
             onPressed: () => _accept(p),
-            child: const Text('Accept',
-                style: TextStyle(color: AppColors.lightLeaf)),
+            child: Text(l.accept,
+                style: const TextStyle(color: AppColors.lightLeaf)),
           ),
           TextButton(
             onPressed: () => _decline(p),
-            child: const Text('Decline',
-                style: TextStyle(color: AppColors.dangerRed)),
+            child: Text(l.decline,
+                style: const TextStyle(color: AppColors.dangerRed)),
           ),
         ],
       ),
@@ -416,10 +437,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 color: AppColors.stoneBeigeColor,
                 fontWeight: FontWeight.bold)),
         subtitle: Text(
-          f.sharedGoals.isEmpty
-              ? '@${f.profile.username} · no shared goals'
-              : '@${f.profile.username} · ${f.sharedGoals.length} shared goal'
-                  '${f.sharedGoals.length == 1 ? '' : 's'}',
+          '@${f.profile.username} · '
+          '${AppLocalizations.of(context).sharedGoalsCount(f.sharedGoals.length)}',
           style: const TextStyle(color: AppColors.mossGreen),
         ),
         trailing: const Icon(Icons.chevron_right, color: AppColors.mossGreen),

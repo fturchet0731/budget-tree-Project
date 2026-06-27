@@ -49,5 +49,37 @@
   "chooseUsername": "Elige un nombre de usuario",
   "usernameRule": "3 a 20 letras, números o guion bajo",
   "usernameTaken": "Ese nombre de usuario ya está en uso. Prueba con otro.",
-  "onboardingSaveError": "No se pudo guardar tu perfil. Comprueba tu conexión e inténtalo de nuevo."
+  "onboardingSaveError": "No se pudo guardar tu perfil. Comprueba tu conexión e inténtalo de nuevo.",
+
+  "add": "Añadir",
+  "accept": "Aceptar",
+  "decline": "Rechazar",
+  "completedCheck": "Completado ✓",
+  "featured": "DESTACADO",
+
+  "myBudgets": "Mis presupuestos",
+  "noBudgetsTitle": "Aún no hay presupuestos guardados",
+  "noBudgetsBody": "Crea uno desde el panel",
+
+  "noSharedGoalsYet": "{name} aún no ha compartido ninguna meta.",
+  "percentThere": "{pct}% alcanzado",
+  "friendsNeedAccountTitle": "Los amigos requieren una cuenta",
+  "friendsNeedAccountBody": "Inicia sesión con conexión a Internet para añadir amigos y compartir metas.",
+  "couldntLoadFriends": "No se pudieron cargar los amigos",
+  "friendsTablesMissing": "Las tablas de amigos aún no están configuradas. Aplica la migración de la base de datos con `supabase db push` y vuelve a intentarlo.",
+  "couldntReachFriends": "No se pudo conectar con los amigos. Comprueba tu conexión e inténtalo de nuevo.",
+  "requestSentTo": "Solicitud enviada a @{username}",
+  "youAreUsername": "Eres @{username}",
+  "howFriendsSeeStatus": "Cómo ven tu estado tus amigos:",
+  "addAFriend": "Añadir un amigo",
+  "searchByUsername": "Buscar por nombre de usuario",
+  "requests": "Solicitudes",
+  "noFriendsYet": "Aún no tienes amigos: añade a alguien por su nombre de usuario.",
+  "sharedGoalsCount": "{count, plural, =0{ninguna meta compartida} =1{1 meta compartida} other{{count} metas compartidas}}",
+  "pinWhichGoal": "¿Qué meta fijar?",
+  "shareGoalFirstToPin": "Comparte primero una meta con amigos para fijarla como tu estado.",
+  "statusModeBest": "Mejor meta",
+  "statusModeAverage": "Promedio de metas",
+  "statusModeWorst": "Peor meta",
+  "statusModeGoal": "Una meta elegida"
 }

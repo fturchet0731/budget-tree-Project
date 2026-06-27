@@ -49,5 +49,37 @@
   "chooseUsername": "Choisissez un nom d'utilisateur",
   "usernameRule": "3 à 20 lettres, chiffres ou trait de soulignement",
   "usernameTaken": "Ce nom d'utilisateur est déjà pris. Essayez-en un autre.",
-  "onboardingSaveError": "Impossible d'enregistrer votre profil. Vérifiez votre connexion et réessayez."
+  "onboardingSaveError": "Impossible d'enregistrer votre profil. Vérifiez votre connexion et réessayez.",
+
+  "add": "Ajouter",
+  "accept": "Accepter",
+  "decline": "Refuser",
+  "completedCheck": "Terminé ✓",
+  "featured": "EN VEDETTE",
+
+  "myBudgets": "Mes budgets",
+  "noBudgetsTitle": "Aucun budget enregistré",
+  "noBudgetsBody": "Créez-en un depuis le tableau de bord",
+
+  "noSharedGoalsYet": "{name} n'a encore partagé aucun objectif.",
+  "percentThere": "{pct} % atteint",
+  "friendsNeedAccountTitle": "Les amis nécessitent un compte",
+  "friendsNeedAccountBody": "Connectez-vous avec une connexion Internet pour ajouter des amis et partager des objectifs.",
+  "couldntLoadFriends": "Impossible de charger les amis",
+  "friendsTablesMissing": "Les tables des amis ne sont pas encore configurées. Appliquez la migration de base de données avec `supabase db push`, puis réessayez.",
+  "couldntReachFriends": "Impossible de joindre les amis. Vérifiez votre connexion et réessayez.",
+  "requestSentTo": "Demande envoyée à @{username}",
+  "youAreUsername": "Vous êtes @{username}",
+  "howFriendsSeeStatus": "Comment vos amis voient votre statut :",
+  "addAFriend": "Ajouter un ami",
+  "searchByUsername": "Rechercher par nom d'utilisateur",
+  "requests": "Demandes",
+  "noFriendsYet": "Aucun ami pour l'instant — ajoutez quelqu'un par son nom d'utilisateur.",
+  "sharedGoalsCount": "{count, plural, =0{aucun objectif partagé} =1{1 objectif partagé} other{{count} objectifs partagés}}",
+  "pinWhichGoal": "Épingler quel objectif ?",
+  "shareGoalFirstToPin": "Partagez d'abord un objectif avec vos amis pour l'épingler comme statut.",
+  "statusModeBest": "Meilleur objectif",
+  "statusModeAverage": "Moyenne des objectifs",
+  "statusModeWorst": "Pire objectif",
+  "statusModeGoal": "Un objectif choisi"
 }

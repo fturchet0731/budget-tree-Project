@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/goal_model.dart';
 import '../models/profile_model.dart';
 import '../theme/app_theme.dart';
@@ -50,7 +51,8 @@ class FriendGardenScreen extends StatelessWidget {
           child: goals.isEmpty
               ? Center(
                   child: Text(
-                    '${profile.label} hasn\'t shared any goals yet.',
+                    AppLocalizations.of(context)
+                        .noSharedGoalsYet(profile.label),
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: AppColors.mossGreen),
                   ),
@@ -85,6 +87,7 @@ class _FriendGoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final pct = (goal.progress * 100).round();
     final completed = goal.isCompleted;
     // Featured and completed goals both read golden; featured adds a ribbon.
@@ -115,12 +118,12 @@ class _FriendGoalCard extends StatelessWidget {
           if (featured)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.star_rounded, size: 14, color: _gold),
-                SizedBox(width: 4),
+              children: [
+                const Icon(Icons.star_rounded, size: 14, color: _gold),
+                const SizedBox(width: 4),
                 Text(
-                  'FEATURED',
-                  style: TextStyle(
+                  l.featured,
+                  style: const TextStyle(
                     color: _gold,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -148,10 +151,10 @@ class _FriendGoalCard extends StatelessWidget {
           ),
           Text(
             completed
-                ? 'Completed ✓'
+                ? l.completedCheck
                 : goal.isUncapped
                     ? goal.tierName
-                    : '$pct% there',
+                    : l.percentThere(pct),
             style: TextStyle(
                 color: completed ? _gold : AppColors.mossGreen, fontSize: 12),
           ),

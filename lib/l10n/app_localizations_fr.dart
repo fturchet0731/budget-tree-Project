@@ -151,4 +151,113 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get onboardingSaveError =>
       'Impossible d\'enregistrer votre profil. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get add => 'Ajouter';
+
+  @override
+  String get accept => 'Accepter';
+
+  @override
+  String get decline => 'Refuser';
+
+  @override
+  String get completedCheck => 'Terminé ✓';
+
+  @override
+  String get featured => 'EN VEDETTE';
+
+  @override
+  String get myBudgets => 'Mes budgets';
+
+  @override
+  String get noBudgetsTitle => 'Aucun budget enregistré';
+
+  @override
+  String get noBudgetsBody => 'Créez-en un depuis le tableau de bord';
+
+  @override
+  String noSharedGoalsYet(String name) {
+    return '$name n\'a encore partagé aucun objectif.';
+  }
+
+  @override
+  String percentThere(int pct) {
+    return '$pct % atteint';
+  }
+
+  @override
+  String get friendsNeedAccountTitle => 'Les amis nécessitent un compte';
+
+  @override
+  String get friendsNeedAccountBody =>
+      'Connectez-vous avec une connexion Internet pour ajouter des amis et partager des objectifs.';
+
+  @override
+  String get couldntLoadFriends => 'Impossible de charger les amis';
+
+  @override
+  String get friendsTablesMissing =>
+      'Les tables des amis ne sont pas encore configurées. Appliquez la migration de base de données avec `supabase db push`, puis réessayez.';
+
+  @override
+  String get couldntReachFriends =>
+      'Impossible de joindre les amis. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String requestSentTo(String username) {
+    return 'Demande envoyée à @$username';
+  }
+
+  @override
+  String youAreUsername(String username) {
+    return 'Vous êtes @$username';
+  }
+
+  @override
+  String get howFriendsSeeStatus => 'Comment vos amis voient votre statut :';
+
+  @override
+  String get addAFriend => 'Ajouter un ami';
+
+  @override
+  String get searchByUsername => 'Rechercher par nom d\'utilisateur';
+
+  @override
+  String get requests => 'Demandes';
+
+  @override
+  String get noFriendsYet =>
+      'Aucun ami pour l\'instant — ajoutez quelqu\'un par son nom d\'utilisateur.';
+
+  @override
+  String sharedGoalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count objectifs partagés',
+      one: '1 objectif partagé',
+      zero: 'aucun objectif partagé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pinWhichGoal => 'Épingler quel objectif ?';
+
+  @override
+  String get shareGoalFirstToPin =>
+      'Partagez d\'abord un objectif avec vos amis pour l\'épingler comme statut.';
+
+  @override
+  String get statusModeBest => 'Meilleur objectif';
+
+  @override
+  String get statusModeAverage => 'Moyenne des objectifs';
+
+  @override
+  String get statusModeWorst => 'Pire objectif';
+
+  @override
+  String get statusModeGoal => 'Un objectif choisi';
 }

@@ -149,4 +149,113 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingSaveError =>
       'No se pudo guardar tu perfil. Comprueba tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get add => 'Añadir';
+
+  @override
+  String get accept => 'Aceptar';
+
+  @override
+  String get decline => 'Rechazar';
+
+  @override
+  String get completedCheck => 'Completado ✓';
+
+  @override
+  String get featured => 'DESTACADO';
+
+  @override
+  String get myBudgets => 'Mis presupuestos';
+
+  @override
+  String get noBudgetsTitle => 'Aún no hay presupuestos guardados';
+
+  @override
+  String get noBudgetsBody => 'Crea uno desde el panel';
+
+  @override
+  String noSharedGoalsYet(String name) {
+    return '$name aún no ha compartido ninguna meta.';
+  }
+
+  @override
+  String percentThere(int pct) {
+    return '$pct% alcanzado';
+  }
+
+  @override
+  String get friendsNeedAccountTitle => 'Los amigos requieren una cuenta';
+
+  @override
+  String get friendsNeedAccountBody =>
+      'Inicia sesión con conexión a Internet para añadir amigos y compartir metas.';
+
+  @override
+  String get couldntLoadFriends => 'No se pudieron cargar los amigos';
+
+  @override
+  String get friendsTablesMissing =>
+      'Las tablas de amigos aún no están configuradas. Aplica la migración de la base de datos con `supabase db push` y vuelve a intentarlo.';
+
+  @override
+  String get couldntReachFriends =>
+      'No se pudo conectar con los amigos. Comprueba tu conexión e inténtalo de nuevo.';
+
+  @override
+  String requestSentTo(String username) {
+    return 'Solicitud enviada a @$username';
+  }
+
+  @override
+  String youAreUsername(String username) {
+    return 'Eres @$username';
+  }
+
+  @override
+  String get howFriendsSeeStatus => 'Cómo ven tu estado tus amigos:';
+
+  @override
+  String get addAFriend => 'Añadir un amigo';
+
+  @override
+  String get searchByUsername => 'Buscar por nombre de usuario';
+
+  @override
+  String get requests => 'Solicitudes';
+
+  @override
+  String get noFriendsYet =>
+      'Aún no tienes amigos: añade a alguien por su nombre de usuario.';
+
+  @override
+  String sharedGoalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count metas compartidas',
+      one: '1 meta compartida',
+      zero: 'ninguna meta compartida',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pinWhichGoal => '¿Qué meta fijar?';
+
+  @override
+  String get shareGoalFirstToPin =>
+      'Comparte primero una meta con amigos para fijarla como tu estado.';
+
+  @override
+  String get statusModeBest => 'Mejor meta';
+
+  @override
+  String get statusModeAverage => 'Promedio de metas';
+
+  @override
+  String get statusModeWorst => 'Peor meta';
+
+  @override
+  String get statusModeGoal => 'Una meta elegida';
 }

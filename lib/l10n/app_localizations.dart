@@ -369,6 +369,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t save your profile. Check your connection and try again.'**
   String get onboardingSaveError;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// No description provided for @completedCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed ✓'**
+  String get completedCheck;
+
+  /// No description provided for @featured.
+  ///
+  /// In en, this message translates to:
+  /// **'FEATURED'**
+  String get featured;
+
+  /// No description provided for @myBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'My Budgets'**
+  String get myBudgets;
+
+  /// No description provided for @noBudgetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved budgets yet'**
+  String get noBudgetsTitle;
+
+  /// No description provided for @noBudgetsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create one from the dashboard'**
+  String get noBudgetsBody;
+
+  /// No description provided for @noSharedGoalsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} hasn\'t shared any goals yet.'**
+  String noSharedGoalsYet(String name);
+
+  /// No description provided for @percentThere.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% there'**
+  String percentThere(int pct);
+
+  /// No description provided for @friendsNeedAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends need an account'**
+  String get friendsNeedAccountTitle;
+
+  /// No description provided for @friendsNeedAccountBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with an internet connection to add friends and share goals.'**
+  String get friendsNeedAccountBody;
+
+  /// No description provided for @couldntLoadFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load friends'**
+  String get couldntLoadFriends;
+
+  /// No description provided for @friendsTablesMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The friends tables aren\'t set up yet. Apply the database migration with `supabase db push`, then retry.'**
+  String get friendsTablesMissing;
+
+  /// No description provided for @couldntReachFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach friends. Check your connection and try again.'**
+  String get couldntReachFriends;
+
+  /// No description provided for @requestSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent to @{username}'**
+  String requestSentTo(String username);
+
+  /// No description provided for @youAreUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'You are @{username}'**
+  String youAreUsername(String username);
+
+  /// No description provided for @howFriendsSeeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'How friends see your status:'**
+  String get howFriendsSeeStatus;
+
+  /// No description provided for @addAFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a friend'**
+  String get addAFriend;
+
+  /// No description provided for @searchByUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by username'**
+  String get searchByUsername;
+
+  /// No description provided for @requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get requests;
+
+  /// No description provided for @noFriendsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No friends yet — add someone by their username.'**
+  String get noFriendsYet;
+
+  /// No description provided for @sharedGoalsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no shared goals} =1{1 shared goal} other{{count} shared goals}}'**
+  String sharedGoalsCount(int count);
+
+  /// No description provided for @pinWhichGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin which goal?'**
+  String get pinWhichGoal;
+
+  /// No description provided for @shareGoalFirstToPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a goal with friends first to pin it as your status.'**
+  String get shareGoalFirstToPin;
+
+  /// No description provided for @statusModeBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best goal'**
+  String get statusModeBest;
+
+  /// No description provided for @statusModeAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average of goals'**
+  String get statusModeAverage;
+
+  /// No description provided for @statusModeWorst.
+  ///
+  /// In en, this message translates to:
+  /// **'Worst goal'**
+  String get statusModeWorst;
+
+  /// No description provided for @statusModeGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'A chosen goal'**
+  String get statusModeGoal;
 }
 
 class _AppLocalizationsDelegate

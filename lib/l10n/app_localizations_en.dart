@@ -148,4 +148,112 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingSaveError =>
       'Couldn\'t save your profile. Check your connection and try again.';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get completedCheck => 'Completed ✓';
+
+  @override
+  String get featured => 'FEATURED';
+
+  @override
+  String get myBudgets => 'My Budgets';
+
+  @override
+  String get noBudgetsTitle => 'No saved budgets yet';
+
+  @override
+  String get noBudgetsBody => 'Create one from the dashboard';
+
+  @override
+  String noSharedGoalsYet(String name) {
+    return '$name hasn\'t shared any goals yet.';
+  }
+
+  @override
+  String percentThere(int pct) {
+    return '$pct% there';
+  }
+
+  @override
+  String get friendsNeedAccountTitle => 'Friends need an account';
+
+  @override
+  String get friendsNeedAccountBody =>
+      'Sign in with an internet connection to add friends and share goals.';
+
+  @override
+  String get couldntLoadFriends => 'Couldn\'t load friends';
+
+  @override
+  String get friendsTablesMissing =>
+      'The friends tables aren\'t set up yet. Apply the database migration with `supabase db push`, then retry.';
+
+  @override
+  String get couldntReachFriends =>
+      'Couldn\'t reach friends. Check your connection and try again.';
+
+  @override
+  String requestSentTo(String username) {
+    return 'Request sent to @$username';
+  }
+
+  @override
+  String youAreUsername(String username) {
+    return 'You are @$username';
+  }
+
+  @override
+  String get howFriendsSeeStatus => 'How friends see your status:';
+
+  @override
+  String get addAFriend => 'Add a friend';
+
+  @override
+  String get searchByUsername => 'Search by username';
+
+  @override
+  String get requests => 'Requests';
+
+  @override
+  String get noFriendsYet => 'No friends yet — add someone by their username.';
+
+  @override
+  String sharedGoalsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shared goals',
+      one: '1 shared goal',
+      zero: 'no shared goals',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pinWhichGoal => 'Pin which goal?';
+
+  @override
+  String get shareGoalFirstToPin =>
+      'Share a goal with friends first to pin it as your status.';
+
+  @override
+  String get statusModeBest => 'Best goal';
+
+  @override
+  String get statusModeAverage => 'Average of goals';
+
+  @override
+  String get statusModeWorst => 'Worst goal';
+
+  @override
+  String get statusModeGoal => 'A chosen goal';
 }

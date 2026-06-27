@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 class ViewBudgetsScreen extends StatelessWidget {
@@ -6,32 +7,34 @@ class ViewBudgetsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.stoneBeigeColor,
-        title: const Text('My Budgets'),
+        title: Text(l.myBudgets),
       ),
       body: Container(
         decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('🌳', style: TextStyle(fontSize: 60)),
-              SizedBox(height: 16),
+              const Text('🌳', style: TextStyle(fontSize: 60)),
+              const SizedBox(height: 16),
               Text(
-                'No saved budgets yet',
-                style: TextStyle(
+                l.noBudgetsTitle,
+                style: const TextStyle(
                   color: AppColors.stoneBeigeColor,
                   fontSize: 18,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                'Create one from the dashboard',
-                style: TextStyle(color: AppColors.mossGreen, fontSize: 13),
+                l.noBudgetsBody,
+                style: const TextStyle(
+                    color: AppColors.mossGreen, fontSize: 13),
               ),
             ],
           ),
