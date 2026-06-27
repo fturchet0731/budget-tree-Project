@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/friendship_model.dart';
 import '../models/profile_model.dart';
@@ -29,6 +30,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
   List<Profile> _results = const [];
   bool _searching = false;
 
+  /// Non-null when the last load failed — shown as a retry notice instead of
+  /// an endless spinner.
+  String? _errorMsg;
+
   @override
   void initState() {
     super.initState();
@@ -46,26 +51,65 @@ class _FriendsScreenState extends State<FriendsScreen> {
       setState(() => _loading = false);
       return;
     }
-    setState(() => _loading = true);
-    final me = await ProfileService.instance.myProfile();
-    if (me == null) {
+    setState(() {
+      _loading = true;
+      _errorMsg = null;
+    });
+    try {
+      final me = await ProfileService.instance.myProfile();
+      if (me == null) {
+        if (mounted) {
+          setState(() {
+            _me = null;
+            _loading = false;
+          });
+        }
+        return;
+      }
+      final friends = await FriendsService.instance.friendSummaries();
+      final incoming = await FriendsService.instance.incomingRequests();
+      if (!mounted) return;
+      setState(() {
+        _me = me;
+        _friends = friends;
+        _incoming = incoming;
+        _loading = false;
+      });
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _me = null;
           _loading = false;
+          _errorMsg = _messageFor(e);
         });
       }
-      return;
     }
-    final friends = await FriendsService.instance.friendSummaries();
-    final incoming = await FriendsService.instance.incomingRequests();
-    if (!mounted) return;
-    setState(() {
-      _me = me;
-      _friends = friends;
-      _incoming = incoming;
-      _loading = false;
-    });
+  }
+
+  /// Turn a thrown error into a friendly line. Postgres `42P01`
+  /// (undefined_table) means the social migration hasn't been applied yet —
+  /// worth calling out explicitly since this is a dev build.
+  String _messageFor(Object e) {
+    if (e is PostgrestException && e.code == '42P01') {
+      return 'The friends tables aren\'t set up yet. Apply the database '
+          'migration with `supabase db push`, then retry.';
+    }
+    return 'Couldn\'t reach friends. Check your connection and try again.';
+  }
+
+  /// Run a mutating action, surfacing failures as a snackbar instead of an
+  /// unhandled exception. Returns whether it succeeded.
+  Future<bool> _guard(Future<void> Function() action) async {
+    try {
+      await action();
+      return true;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_messageFor(e))),
+        );
+      }
+      return false;
+    }
   }
 
   Future<void> _runSearch() async {
@@ -75,16 +119,20 @@ class _FriendsScreenState extends State<FriendsScreen> {
       return;
     }
     setState(() => _searching = true);
-    final results = await ProfileService.instance.searchByUsername(q);
+    List<Profile> results = const [];
+    final ok = await _guard(
+        () async => results = await ProfileService.instance.searchByUsername(q));
     if (!mounted) return;
     setState(() {
-      _results = results;
+      _results = ok ? results : const [];
       _searching = false;
     });
   }
 
   Future<void> _add(Profile p) async {
-    await FriendsService.instance.sendRequest(p.id);
+    final ok =
+        await _guard(() => FriendsService.instance.sendRequest(p.id));
+    if (!ok) return;
     _search.clear();
     setState(() => _results = const []);
     if (mounted) {
@@ -96,13 +144,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   Future<void> _accept(Profile p) async {
-    await FriendsService.instance.acceptRequest(p.id);
-    await _load();
+    if (await _guard(() => FriendsService.instance.acceptRequest(p.id))) {
+      await _load();
+    }
   }
 
   Future<void> _decline(Profile p) async {
-    await FriendsService.instance.removeFriend(p.id);
-    await _load();
+    if (await _guard(() => FriendsService.instance.removeFriend(p.id))) {
+      await _load();
+    }
   }
 
   Future<void> _openGarden(FriendSummary f) async {
@@ -121,14 +171,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
   // -------------------------------------------------- status-mode controls
 
   Future<void> _changeStatusMode(FriendStatusMode mode) async {
+    String? goalId;
     if (mode == FriendStatusMode.goal) {
-      final goalId = await _pickStatusGoal();
-      if (goalId == null) return; // cancelled
-      await ProfileService.instance.setStatusMode(mode, goalId: goalId);
-    } else {
-      await ProfileService.instance.setStatusMode(mode);
+      goalId = await _pickStatusGoal();
+      if (goalId == null) return; // cancelled / no shared goal
     }
-    await _load();
+    final ok = await _guard(
+        () => ProfileService.instance.setStatusMode(mode, goalId: goalId));
+    if (ok) await _load();
   }
 
   Future<String?> _pickStatusGoal() async {
@@ -188,6 +238,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
         Icons.cloud_off,
         'Friends need an account',
         'Sign in with an internet connection to add friends and share goals.',
+      );
+    }
+    if (_errorMsg != null) {
+      return _notice(
+        Icons.wifi_off,
+        'Couldn\'t load friends',
+        _errorMsg!,
+        onRetry: _load,
       );
     }
     if (_me == null) {
@@ -381,7 +439,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
         child: child,
       );
 
-  Widget _notice(IconData icon, String title, String body) => Center(
+  Widget _notice(IconData icon, String title, String body,
+          {Future<void> Function()? onRetry}) =>
+      Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
@@ -399,6 +459,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
               Text(body,
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: AppColors.mossGreen)),
+              if (onRetry != null) ...[
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                ),
+              ],
             ],
           ),
         ),
