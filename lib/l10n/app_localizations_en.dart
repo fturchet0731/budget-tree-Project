@@ -728,4 +728,175 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plantMyBudgetTree => 'Plant My Budget Tree';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get signOutQuestion => 'Sign out?';
+
+  @override
+  String get signOutBody =>
+      'Your forest is saved in the cloud — sign back in any time to bring it back.';
+
+  @override
+  String get signOut => 'Sign out';
+
+  @override
+  String get eraseAllTitle => 'Erase all data?';
+
+  @override
+  String get eraseAllBody =>
+      'This will permanently remove every budget tree and goal sapling. Your app preferences will remain. This cannot be undone.';
+
+  @override
+  String get eraseEverything => 'Erase Everything';
+
+  @override
+  String get absolutelySure => 'Are you absolutely sure?';
+
+  @override
+  String get lastChanceBody =>
+      'Last chance. After this, every saved tree and goal will be gone.';
+
+  @override
+  String get keepMyData => 'Keep my data';
+
+  @override
+  String get yesErase => 'Yes, erase';
+
+  @override
+  String get appearanceUpper => 'APPEARANCE';
+
+  @override
+  String get textSize => 'Text size';
+
+  @override
+  String get scaleCompact => 'Compact';
+
+  @override
+  String get scaleDefault => 'Default';
+
+  @override
+  String get scaleLarge => 'Large';
+
+  @override
+  String get themePalette => 'Theme palette';
+
+  @override
+  String get paletteForest => 'Forest';
+
+  @override
+  String get paletteMidnight => 'Midnight';
+
+  @override
+  String get paletteTwilight => 'Twilight';
+
+  @override
+  String get motion => 'Motion';
+
+  @override
+  String get fullAnimations => 'Full animations';
+
+  @override
+  String get fullAnimationsSub => 'Disable for snappier, less-animated screens';
+
+  @override
+  String get soundHaptics => 'Sound & haptics';
+
+  @override
+  String get feedbackCues => 'Feedback cues';
+
+  @override
+  String get feedbackCuesSub =>
+      'Taps and chimes when you plant, set goals, and save';
+
+  @override
+  String get notificationsUpper => 'NOTIFICATIONS';
+
+  @override
+  String get guideUpper => 'GUIDE';
+
+  @override
+  String get replayTutorial => 'Replay tutorial';
+
+  @override
+  String get replayTutorialSub => 'Let Acorn walk you through the app again.';
+
+  @override
+  String get accountUpper => 'ACCOUNT';
+
+  @override
+  String get signedInAs => 'Signed in as';
+
+  @override
+  String get signOutSub => 'Your data stays safe in the cloud.';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get dataUpper => 'DATA';
+
+  @override
+  String get eraseAllData => 'Erase all data';
+
+  @override
+  String get eraseAllDataSub =>
+      'Removes every saved budget tree and goal sapling.';
+
+  @override
+  String get aboutUpper => 'ABOUT';
+
+  @override
+  String get builtWith => 'Built with';
+
+  @override
+  String get budgetWarnings => 'Budget warnings';
+
+  @override
+  String get budgetWarningsSub => 'When a budget nears or passes your income';
+
+  @override
+  String get streakReminders => 'Streak reminders';
+
+  @override
+  String get streakRemindersSub =>
+      'A daily nudge to keep your saving streak alive';
+
+  @override
+  String get remindMeAt => 'Remind me at';
+
+  @override
+  String get weeklySummary => 'Weekly summary';
+
+  @override
+  String get weeklySummarySub => 'A once-a-week recap of your progress';
+
+  @override
+  String get dayLabel => 'Day';
+
+  @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get weekdayMon => 'Monday';
+
+  @override
+  String get weekdayTue => 'Tuesday';
+
+  @override
+  String get weekdayWed => 'Wednesday';
+
+  @override
+  String get weekdayThu => 'Thursday';
+
+  @override
+  String get weekdayFri => 'Friday';
+
+  @override
+  String get weekdaySat => 'Saturday';
+
+  @override
+  String get weekdaySun => 'Sunday';
 }

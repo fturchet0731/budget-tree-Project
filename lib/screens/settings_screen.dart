@@ -37,32 +37,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _signOut() async {
+    final l = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF14210C),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Sign out?',
+          l.signOutQuestion,
           style: GoogleFonts.fredoka(
               fontWeight: FontWeight.w600,
               color: AppColors.stoneBeigeColor,
               fontSize: 20),
         ),
         content: Text(
-          'Your forest is saved in the cloud — sign back in any time to bring it back.',
+          l.signOutBody,
           style: GoogleFonts.nunito(
               color: AppColors.mossGreen, fontSize: 14, height: 1.55),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
+            child: Text(l.cancel,
                 style: GoogleFonts.nunito(color: AppColors.mossGreen)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Sign out',
+            child: Text(l.signOut,
                 style: GoogleFonts.nunito(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),
@@ -75,6 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _confirmEraseAllData() async {
+    final l = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -86,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: AppColors.dangerRed, size: 24),
             const SizedBox(width: 10),
             Text(
-              'Erase all data?',
+              l.eraseAllTitle,
               style: GoogleFonts.fredoka(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
@@ -95,14 +97,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
         content: Text(
-          'This will permanently remove every budget tree and goal sapling. Your app preferences will remain. This cannot be undone.',
+          l.eraseAllBody,
           style: GoogleFonts.nunito(
               color: AppColors.mossGreen, fontSize: 14, height: 1.55),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
+            child: Text(l.cancel,
                 style: GoogleFonts.nunito(color: AppColors.mossGreen)),
           ),
           ElevatedButton(
@@ -112,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Erase Everything',
+            child: Text(l.eraseEverything,
                 style: GoogleFonts.nunito(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),
@@ -129,21 +131,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: const Color(0xFF1A0808),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Are you absolutely sure?',
+          l.absolutelySure,
           style: GoogleFonts.fredoka(
               fontWeight: FontWeight.w600,
               color: AppColors.stoneBeigeColor,
               fontSize: 19),
         ),
         content: Text(
-          'Last chance. After this, every saved tree and goal will be gone.',
+          l.lastChanceBody,
           style: GoogleFonts.nunito(
               color: AppColors.mossGreen, fontSize: 14, height: 1.55),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Keep my data',
+            child: Text(l.keepMyData,
                 style: GoogleFonts.nunito(color: AppColors.mossGreen)),
           ),
           ElevatedButton(
@@ -153,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Yes, erase',
+            child: Text(l.yesErase,
                 style: GoogleFonts.nunito(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),
@@ -208,7 +210,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
-                  'Settings',
+                  l.settingsTitle,
                   style: GoogleFonts.fredoka(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
@@ -226,46 +228,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     _SectionHeader(
-                        icon: Icons.brush_outlined, label: 'APPEARANCE'),
+                        icon: Icons.brush_outlined, label: l.appearanceUpper),
                     _SettingsCard(
                       children: [
-                        _TileLabel(text: 'Text size'),
+                        _TileLabel(text: l.textSize),
                         const SizedBox(height: 10),
                         _ChoiceRow<AppTextScale>(
                           current: settings.textScale,
-                          options: const [
-                            (AppTextScale.compact, 'Compact'),
-                            (AppTextScale.normal, 'Default'),
-                            (AppTextScale.large, 'Large'),
+                          options: [
+                            (AppTextScale.compact, l.scaleCompact),
+                            (AppTextScale.normal, l.scaleDefault),
+                            (AppTextScale.large, l.scaleLarge),
                           ],
                           onChanged: settings.setTextScale,
                         ),
                         const SizedBox(height: 18),
-                        _TileLabel(text: 'Theme palette'),
+                        _TileLabel(text: l.themePalette),
                         const SizedBox(height: 10),
                         _ChoiceRow<AppPalette>(
                           current: settings.palette,
-                          options: const [
-                            (AppPalette.forestDark, 'Forest'),
-                            (AppPalette.midnight, 'Midnight'),
-                            (AppPalette.twilight, 'Twilight'),
+                          options: [
+                            (AppPalette.forestDark, l.paletteForest),
+                            (AppPalette.midnight, l.paletteMidnight),
+                            (AppPalette.twilight, l.paletteTwilight),
                           ],
                           onChanged: settings.setPalette,
                         ),
                         const SizedBox(height: 18),
-                        _TileLabel(text: 'Motion'),
+                        _TileLabel(text: l.motion),
                         const SizedBox(height: 6),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
                           title: Text(
-                            'Full animations',
+                            l.fullAnimations,
                             style: GoogleFonts.nunito(
                                 color: AppColors.stoneBeigeColor,
                                 fontSize: 13),
                           ),
                           subtitle: Text(
-                            'Disable for snappier, less-animated screens',
+                            l.fullAnimationsSub,
                             style: GoogleFonts.nunito(
                                 color: AppColors.mossGreen.withValues(alpha: 0.7),
                                 fontSize: 11),
@@ -275,19 +277,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           onChanged: settings.setMotionFull,
                         ),
                         const SizedBox(height: 12),
-                        _TileLabel(text: 'Sound & haptics'),
+                        _TileLabel(text: l.soundHaptics),
                         const SizedBox(height: 6),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           dense: true,
                           title: Text(
-                            'Feedback cues',
+                            l.feedbackCues,
                             style: GoogleFonts.nunito(
                                 color: AppColors.stoneBeigeColor,
                                 fontSize: 13),
                           ),
                           subtitle: Text(
-                            'Taps and chimes when you plant, set goals, and save',
+                            l.feedbackCuesSub,
                             style: GoogleFonts.nunito(
                                 color: AppColors.mossGreen.withValues(alpha: 0.7),
                                 fontSize: 11),
@@ -316,19 +318,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 22),
                     _SectionHeader(
                         icon: Icons.notifications_outlined,
-                        label: 'NOTIFICATIONS'),
+                        label: l.notificationsUpper),
                     const _NotificationsCard(),
                     const SizedBox(height: 22),
                     _SectionHeader(
-                        icon: Icons.menu_book_outlined, label: 'GUIDE'),
+                        icon: Icons.menu_book_outlined, label: l.guideUpper),
                     _SettingsCard(
                       children: [
                         _ActionTile(
                           icon: Icons.school_outlined,
                           iconColor: AppColors.lightLeaf,
-                          title: 'Replay tutorial',
-                          subtitle:
-                              'Let Acorn walk you through the app again.',
+                          title: l.replayTutorial,
+                          subtitle: l.replayTutorialSub,
                           onTap: () => GuidedTour.start(context),
                         ),
                       ],
@@ -336,21 +337,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (AuthService.instance.isSignedIn) ...[
                       const SizedBox(height: 22),
                       _SectionHeader(
-                          icon: Icons.person_outline, label: 'ACCOUNT'),
+                          icon: Icons.person_outline, label: l.accountUpper),
                       _SettingsCard(
                         children: [
                           _InfoRow(
-                            label: 'Signed in as',
+                            label: l.signedInAs,
                             value: AuthService.instance.currentUser?.email ??
-                                'Unknown',
+                                l.unknown,
                           ),
                           const SizedBox(height: 6),
                           _ActionTile(
                             icon: Icons.logout,
                             iconColor: AppColors.warningAmber,
-                            title: 'Sign out',
-                            subtitle:
-                                'Your data stays safe in the cloud.',
+                            title: l.signOut,
+                            subtitle: l.signOutSub,
                             onTap: _signOut,
                           ),
                         ],
@@ -358,15 +358,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                     const SizedBox(height: 22),
                     _SectionHeader(
-                        icon: Icons.storage_outlined, label: 'DATA'),
+                        icon: Icons.storage_outlined, label: l.dataUpper),
                     _SettingsCard(
                       children: [
                         _ActionTile(
                           icon: Icons.delete_forever_outlined,
                           iconColor: AppColors.dangerRed,
-                          title: 'Erase all data',
-                          subtitle:
-                              'Removes every saved budget tree and goal sapling.',
+                          title: l.eraseAllData,
+                          subtitle: l.eraseAllDataSub,
                           onTap: _confirmEraseAllData,
                           danger: true,
                         ),
@@ -374,14 +373,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 22),
                     _SectionHeader(
-                        icon: Icons.info_outline, label: 'ABOUT'),
+                        icon: Icons.info_outline, label: l.aboutUpper),
                     _SettingsCard(
                       children: [
                         _InfoRow(
                             label: 'Budget Tree',
                             value: 'v1.0.0'),
                         _InfoRow(
-                            label: 'Built with', value: 'Flutter / Dart'),
+                            label: l.builtWith, value: 'Flutter / Dart'),
                       ],
                     ),
                   ]),
@@ -704,10 +703,10 @@ class _InfoRow extends StatelessWidget {
 class _NotificationsCard extends StatelessWidget {
   const _NotificationsCard();
 
-  static const _weekdayNames = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-    'Friday', 'Saturday', 'Sunday',
-  ];
+  static List<String> _weekdayNames(AppLocalizations l) => [
+        l.weekdayMon, l.weekdayTue, l.weekdayWed, l.weekdayThu,
+        l.weekdayFri, l.weekdaySat, l.weekdaySun,
+      ];
 
   Future<void> _apply(Future<void> Function() change) async {
     await change();
@@ -717,24 +716,26 @@ class _NotificationsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppSettings.instance;
+    final l = AppLocalizations.of(context);
+    final weekdayNames = _weekdayNames(l);
     return _SettingsCard(
       children: [
         _NotifSwitch(
-          title: 'Budget warnings',
-          subtitle: 'When a budget nears or passes your income',
+          title: l.budgetWarnings,
+          subtitle: l.budgetWarningsSub,
           value: s.notifBudgetWarnings,
           onChanged: (v) => _apply(() => s.setNotifBudgetWarnings(v)),
         ),
         const SizedBox(height: 6),
         _NotifSwitch(
-          title: 'Streak reminders',
-          subtitle: 'A daily nudge to keep your saving streak alive',
+          title: l.streakReminders,
+          subtitle: l.streakRemindersSub,
           value: s.notifStreakReminders,
           onChanged: (v) => _apply(() => s.setNotifStreakReminders(v)),
         ),
         if (s.notifStreakReminders)
           _TapRow(
-            label: 'Remind me at',
+            label: l.remindMeAt,
             value: TimeOfDay(hour: s.streakHour, minute: s.streakMinute)
                 .format(context),
             onTap: () async {
@@ -750,15 +751,15 @@ class _NotificationsCard extends StatelessWidget {
           ),
         const SizedBox(height: 6),
         _NotifSwitch(
-          title: 'Weekly summary',
-          subtitle: 'A once-a-week recap of your progress',
+          title: l.weeklySummary,
+          subtitle: l.weeklySummarySub,
           value: s.notifWeeklySummary,
           onChanged: (v) => _apply(() => s.setNotifWeeklySummary(v)),
         ),
         if (s.notifWeeklySummary) ...[
           _TapRow(
-            label: 'Day',
-            value: _weekdayNames[(s.weeklyWeekday - 1).clamp(0, 6)],
+            label: l.dayLabel,
+            value: weekdayNames[(s.weeklyWeekday - 1).clamp(0, 6)],
             onTap: () async {
               final picked = await showModalBottomSheet<int>(
                 context: context,
@@ -770,7 +771,7 @@ class _NotificationsCard extends StatelessWidget {
                       final weekday = i + 1;
                       return ListTile(
                         title: Text(
-                          _weekdayNames[i],
+                          weekdayNames[i],
                           style: GoogleFonts.nunito(
                               color: AppColors.stoneBeigeColor),
                         ),
@@ -790,7 +791,7 @@ class _NotificationsCard extends StatelessWidget {
             },
           ),
           _TapRow(
-            label: 'Time',
+            label: l.timeLabel,
             value: TimeOfDay(hour: s.weeklyHour, minute: 0).format(context),
             onTap: () async {
               final picked = await showTimePicker(

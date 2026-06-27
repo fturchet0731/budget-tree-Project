@@ -735,4 +735,177 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get plantMyBudgetTree => 'Plantar mi árbol de presupuesto';
+
+  @override
+  String get settingsTitle => 'Ajustes';
+
+  @override
+  String get signOutQuestion => '¿Cerrar sesión?';
+
+  @override
+  String get signOutBody =>
+      'Tu bosque está guardado en la nube: vuelve a iniciar sesión cuando quieras para recuperarlo.';
+
+  @override
+  String get signOut => 'Cerrar sesión';
+
+  @override
+  String get eraseAllTitle => '¿Borrar todos los datos?';
+
+  @override
+  String get eraseAllBody =>
+      'Esto eliminará permanentemente cada árbol de presupuesto y cada meta. Tus preferencias se conservarán. Esto no se puede deshacer.';
+
+  @override
+  String get eraseEverything => 'Borrar todo';
+
+  @override
+  String get absolutelySure => '¿Estás totalmente seguro?';
+
+  @override
+  String get lastChanceBody =>
+      'Última oportunidad. Después de esto, cada árbol y meta guardados desaparecerán.';
+
+  @override
+  String get keepMyData => 'Conservar mis datos';
+
+  @override
+  String get yesErase => 'Sí, borrar';
+
+  @override
+  String get appearanceUpper => 'APARIENCIA';
+
+  @override
+  String get textSize => 'Tamaño del texto';
+
+  @override
+  String get scaleCompact => 'Compacto';
+
+  @override
+  String get scaleDefault => 'Predeterminado';
+
+  @override
+  String get scaleLarge => 'Grande';
+
+  @override
+  String get themePalette => 'Paleta de tema';
+
+  @override
+  String get paletteForest => 'Bosque';
+
+  @override
+  String get paletteMidnight => 'Medianoche';
+
+  @override
+  String get paletteTwilight => 'Crepúsculo';
+
+  @override
+  String get motion => 'Animaciones';
+
+  @override
+  String get fullAnimations => 'Animaciones completas';
+
+  @override
+  String get fullAnimationsSub =>
+      'Desactiva para pantallas más rápidas y con menos animación';
+
+  @override
+  String get soundHaptics => 'Sonido y vibración';
+
+  @override
+  String get feedbackCues => 'Señales de respuesta';
+
+  @override
+  String get feedbackCuesSub =>
+      'Toques y sonidos al plantar, fijar metas y ahorrar';
+
+  @override
+  String get notificationsUpper => 'NOTIFICACIONES';
+
+  @override
+  String get guideUpper => 'GUÍA';
+
+  @override
+  String get replayTutorial => 'Repetir tutorial';
+
+  @override
+  String get replayTutorialSub => 'Deja que Acorn te guíe por la app de nuevo.';
+
+  @override
+  String get accountUpper => 'CUENTA';
+
+  @override
+  String get signedInAs => 'Sesión iniciada como';
+
+  @override
+  String get signOutSub => 'Tus datos siguen seguros en la nube.';
+
+  @override
+  String get unknown => 'Desconocido';
+
+  @override
+  String get dataUpper => 'DATOS';
+
+  @override
+  String get eraseAllData => 'Borrar todos los datos';
+
+  @override
+  String get eraseAllDataSub =>
+      'Elimina cada árbol de presupuesto y meta guardados.';
+
+  @override
+  String get aboutUpper => 'ACERCA DE';
+
+  @override
+  String get builtWith => 'Hecho con';
+
+  @override
+  String get budgetWarnings => 'Avisos de presupuesto';
+
+  @override
+  String get budgetWarningsSub =>
+      'Cuando un presupuesto se acerca o supera tus ingresos';
+
+  @override
+  String get streakReminders => 'Recordatorios de racha';
+
+  @override
+  String get streakRemindersSub =>
+      'Un aviso diario para mantener viva tu racha de ahorro';
+
+  @override
+  String get remindMeAt => 'Recordarme a las';
+
+  @override
+  String get weeklySummary => 'Resumen semanal';
+
+  @override
+  String get weeklySummarySub => 'Un repaso semanal de tu progreso';
+
+  @override
+  String get dayLabel => 'Día';
+
+  @override
+  String get timeLabel => 'Hora';
+
+  @override
+  String get weekdayMon => 'Lunes';
+
+  @override
+  String get weekdayTue => 'Martes';
+
+  @override
+  String get weekdayWed => 'Miércoles';
+
+  @override
+  String get weekdayThu => 'Jueves';
+
+  @override
+  String get weekdayFri => 'Viernes';
+
+  @override
+  String get weekdaySat => 'Sábado';
+
+  @override
+  String get weekdaySun => 'Domingo';
 }

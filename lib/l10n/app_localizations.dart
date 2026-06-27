@@ -1329,6 +1329,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plant My Budget Tree'**
   String get plantMyBudgetTree;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @signOutQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out?'**
+  String get signOutQuestion;
+
+  /// No description provided for @signOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your forest is saved in the cloud — sign back in any time to bring it back.'**
+  String get signOutBody;
+
+  /// No description provided for @signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get signOut;
+
+  /// No description provided for @eraseAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase all data?'**
+  String get eraseAllTitle;
+
+  /// No description provided for @eraseAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently remove every budget tree and goal sapling. Your app preferences will remain. This cannot be undone.'**
+  String get eraseAllBody;
+
+  /// No description provided for @eraseEverything.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase Everything'**
+  String get eraseEverything;
+
+  /// No description provided for @absolutelySure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you absolutely sure?'**
+  String get absolutelySure;
+
+  /// No description provided for @lastChanceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Last chance. After this, every saved tree and goal will be gone.'**
+  String get lastChanceBody;
+
+  /// No description provided for @keepMyData.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my data'**
+  String get keepMyData;
+
+  /// No description provided for @yesErase.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, erase'**
+  String get yesErase;
+
+  /// No description provided for @appearanceUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'APPEARANCE'**
+  String get appearanceUpper;
+
+  /// No description provided for @textSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get textSize;
+
+  /// No description provided for @scaleCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get scaleCompact;
+
+  /// No description provided for @scaleDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get scaleDefault;
+
+  /// No description provided for @scaleLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get scaleLarge;
+
+  /// No description provided for @themePalette.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme palette'**
+  String get themePalette;
+
+  /// No description provided for @paletteForest.
+  ///
+  /// In en, this message translates to:
+  /// **'Forest'**
+  String get paletteForest;
+
+  /// No description provided for @paletteMidnight.
+  ///
+  /// In en, this message translates to:
+  /// **'Midnight'**
+  String get paletteMidnight;
+
+  /// No description provided for @paletteTwilight.
+  ///
+  /// In en, this message translates to:
+  /// **'Twilight'**
+  String get paletteTwilight;
+
+  /// No description provided for @motion.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion'**
+  String get motion;
+
+  /// No description provided for @fullAnimations.
+  ///
+  /// In en, this message translates to:
+  /// **'Full animations'**
+  String get fullAnimations;
+
+  /// No description provided for @fullAnimationsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable for snappier, less-animated screens'**
+  String get fullAnimationsSub;
+
+  /// No description provided for @soundHaptics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound & haptics'**
+  String get soundHaptics;
+
+  /// No description provided for @feedbackCues.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback cues'**
+  String get feedbackCues;
+
+  /// No description provided for @feedbackCuesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Taps and chimes when you plant, set goals, and save'**
+  String get feedbackCuesSub;
+
+  /// No description provided for @notificationsUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'NOTIFICATIONS'**
+  String get notificationsUpper;
+
+  /// No description provided for @guideUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'GUIDE'**
+  String get guideUpper;
+
+  /// No description provided for @replayTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay tutorial'**
+  String get replayTutorial;
+
+  /// No description provided for @replayTutorialSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Let Acorn walk you through the app again.'**
+  String get replayTutorialSub;
+
+  /// No description provided for @accountUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'ACCOUNT'**
+  String get accountUpper;
+
+  /// No description provided for @signedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as'**
+  String get signedInAs;
+
+  /// No description provided for @signOutSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays safe in the cloud.'**
+  String get signOutSub;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @dataUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'DATA'**
+  String get dataUpper;
+
+  /// No description provided for @eraseAllData.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase all data'**
+  String get eraseAllData;
+
+  /// No description provided for @eraseAllDataSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes every saved budget tree and goal sapling.'**
+  String get eraseAllDataSub;
+
+  /// No description provided for @aboutUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'ABOUT'**
+  String get aboutUpper;
+
+  /// No description provided for @builtWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Built with'**
+  String get builtWith;
+
+  /// No description provided for @budgetWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget warnings'**
+  String get budgetWarnings;
+
+  /// No description provided for @budgetWarningsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When a budget nears or passes your income'**
+  String get budgetWarningsSub;
+
+  /// No description provided for @streakReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak reminders'**
+  String get streakReminders;
+
+  /// No description provided for @streakRemindersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A daily nudge to keep your saving streak alive'**
+  String get streakRemindersSub;
+
+  /// No description provided for @remindMeAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me at'**
+  String get remindMeAt;
+
+  /// No description provided for @weeklySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly summary'**
+  String get weeklySummary;
+
+  /// No description provided for @weeklySummarySub.
+  ///
+  /// In en, this message translates to:
+  /// **'A once-a-week recap of your progress'**
+  String get weeklySummarySub;
+
+  /// No description provided for @dayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get dayLabel;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get timeLabel;
+
+  /// No description provided for @weekdayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get weekdayMon;
+
+  /// No description provided for @weekdayTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get weekdayTue;
+
+  /// No description provided for @weekdayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get weekdayWed;
+
+  /// No description provided for @weekdayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get weekdayThu;
+
+  /// No description provided for @weekdayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get weekdayFri;
+
+  /// No description provided for @weekdaySat.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get weekdaySat;
+
+  /// No description provided for @weekdaySun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get weekdaySun;
 }
 
 class _AppLocalizationsDelegate

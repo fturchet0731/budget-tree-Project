@@ -736,4 +736,178 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get plantMyBudgetTree => 'Planter mon arbre budgétaire';
+
+  @override
+  String get settingsTitle => 'Réglages';
+
+  @override
+  String get signOutQuestion => 'Se déconnecter ?';
+
+  @override
+  String get signOutBody =>
+      'Votre forêt est enregistrée dans le nuage — reconnectez-vous à tout moment pour la récupérer.';
+
+  @override
+  String get signOut => 'Se déconnecter';
+
+  @override
+  String get eraseAllTitle => 'Effacer toutes les données ?';
+
+  @override
+  String get eraseAllBody =>
+      'Cela supprimera définitivement chaque arbre budgétaire et chaque objectif. Vos préférences seront conservées. Cette action est irréversible.';
+
+  @override
+  String get eraseEverything => 'Tout effacer';
+
+  @override
+  String get absolutelySure => 'Êtes-vous absolument sûr ?';
+
+  @override
+  String get lastChanceBody =>
+      'Dernière chance. Après cela, chaque arbre et objectif enregistré sera perdu.';
+
+  @override
+  String get keepMyData => 'Conserver mes données';
+
+  @override
+  String get yesErase => 'Oui, effacer';
+
+  @override
+  String get appearanceUpper => 'APPARENCE';
+
+  @override
+  String get textSize => 'Taille du texte';
+
+  @override
+  String get scaleCompact => 'Compact';
+
+  @override
+  String get scaleDefault => 'Par défaut';
+
+  @override
+  String get scaleLarge => 'Grand';
+
+  @override
+  String get themePalette => 'Palette de thème';
+
+  @override
+  String get paletteForest => 'Forêt';
+
+  @override
+  String get paletteMidnight => 'Minuit';
+
+  @override
+  String get paletteTwilight => 'Crépuscule';
+
+  @override
+  String get motion => 'Animations';
+
+  @override
+  String get fullAnimations => 'Animations complètes';
+
+  @override
+  String get fullAnimationsSub =>
+      'Désactivez pour des écrans plus rapides et moins animés';
+
+  @override
+  String get soundHaptics => 'Son et vibrations';
+
+  @override
+  String get feedbackCues => 'Retours sonores';
+
+  @override
+  String get feedbackCuesSub =>
+      'Sons et tapotements quand vous plantez, fixez des objectifs et épargnez';
+
+  @override
+  String get notificationsUpper => 'NOTIFICATIONS';
+
+  @override
+  String get guideUpper => 'GUIDE';
+
+  @override
+  String get replayTutorial => 'Revoir le tutoriel';
+
+  @override
+  String get replayTutorialSub =>
+      'Laissez Acorn vous guider à nouveau dans l\'application.';
+
+  @override
+  String get accountUpper => 'COMPTE';
+
+  @override
+  String get signedInAs => 'Connecté en tant que';
+
+  @override
+  String get signOutSub => 'Vos données restent en sécurité dans le nuage.';
+
+  @override
+  String get unknown => 'Inconnu';
+
+  @override
+  String get dataUpper => 'DONNÉES';
+
+  @override
+  String get eraseAllData => 'Effacer toutes les données';
+
+  @override
+  String get eraseAllDataSub =>
+      'Supprime chaque arbre budgétaire et objectif enregistré.';
+
+  @override
+  String get aboutUpper => 'À PROPOS';
+
+  @override
+  String get builtWith => 'Conçu avec';
+
+  @override
+  String get budgetWarnings => 'Alertes de budget';
+
+  @override
+  String get budgetWarningsSub =>
+      'Quand un budget approche ou dépasse votre revenu';
+
+  @override
+  String get streakReminders => 'Rappels de série';
+
+  @override
+  String get streakRemindersSub =>
+      'Un rappel quotidien pour garder votre série d\'épargne active';
+
+  @override
+  String get remindMeAt => 'Me rappeler à';
+
+  @override
+  String get weeklySummary => 'Résumé hebdomadaire';
+
+  @override
+  String get weeklySummarySub => 'Un récapitulatif hebdomadaire de vos progrès';
+
+  @override
+  String get dayLabel => 'Jour';
+
+  @override
+  String get timeLabel => 'Heure';
+
+  @override
+  String get weekdayMon => 'Lundi';
+
+  @override
+  String get weekdayTue => 'Mardi';
+
+  @override
+  String get weekdayWed => 'Mercredi';
+
+  @override
+  String get weekdayThu => 'Jeudi';
+
+  @override
+  String get weekdayFri => 'Vendredi';
+
+  @override
+  String get weekdaySat => 'Samedi';
+
+  @override
+  String get weekdaySun => 'Dimanche';
 }
