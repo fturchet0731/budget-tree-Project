@@ -17,6 +17,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen>
     with SingleTickerProviderStateMixin {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   late AnimationController _entryController;
   late Animation<double> _entryAnimation;
 
@@ -49,6 +50,16 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      // Friends live in a swipe-in sidebar (swipe from the right edge or tap
+      // the handle) rather than a separate screen — keeps the app shallow.
+      endDrawer: Drawer(
+        backgroundColor: Colors.transparent,
+        width: MediaQuery.of(context).size.width * 0.86,
+        child: FriendsScreen(
+          onClose: () => _scaffoldKey.currentState?.closeEndDrawer(),
+        ),
+      ),
       body: Stack(
         children: [
           Container(
@@ -64,23 +75,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           SafeArea(
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8, right: 8),
-                    child: TextButton.icon(
-                      onPressed: () =>
-                          _navigate(context, const FriendsScreen()),
-                      icon: const Icon(Icons.people_alt_rounded,
-                          color: AppColors.lightLeaf, size: 20),
-                      label: const Text(
-                        'Friends',
-                        style: TextStyle(
-                            color: AppColors.lightLeaf, letterSpacing: 0.5),
-                      ),
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 12),
                 Text(
                   'Budget Tree',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -132,7 +127,99 @@ class _DashboardScreenState extends State<DashboardScreen>
               ],
             ),
           ),
+          // Right-edge handle hinting the swipe-in Friends sidebar.
+          Positioned.fill(
+            child: Align(
+              alignment: const Alignment(1.0, -0.05),
+              child: _FriendsHandle(
+                onTap: () => _scaffoldKey.currentState?.openEndDrawer(),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Friends sidebar handle (swipe hint)
+// ──────────────────────────────────────────────
+
+class _FriendsHandle extends StatefulWidget {
+  final VoidCallback onTap;
+  const _FriendsHandle({required this.onTap});
+
+  @override
+  State<_FriendsHandle> createState() => _FriendsHandleState();
+}
+
+class _FriendsHandleState extends State<_FriendsHandle>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _nudge = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _nudge.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _nudge,
+        builder: (context, child) {
+          // Gentle leftward bob to suggest "pull me".
+          final dx = -3.0 * Curves.easeInOut.transform(_nudge.value);
+          return Transform.translate(offset: Offset(dx, 0), child: child);
+        },
+        child: Container(
+          width: 30,
+          height: 116,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(16)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.forestGreen.withValues(alpha: 0.55),
+                blurRadius: 12,
+                offset: const Offset(-2, 0),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+              const SizedBox(height: 4),
+              const Icon(Icons.people_alt_rounded,
+                  color: Colors.white, size: 16),
+              const SizedBox(height: 6),
+              RotatedBox(
+                quarterTurns: 1,
+                child: Text(
+                  'FRIENDS',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.95),
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

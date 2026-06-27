@@ -14,7 +14,12 @@ import 'friend_garden_screen.dart';
 /// garden. Online-only — when the social layer is unavailable it shows a
 /// sign-in / connectivity notice instead of crashing.
 class FriendsScreen extends StatefulWidget {
-  const FriendsScreen({super.key});
+  /// When hosted in the dashboard's swipe-in sidebar, [onClose] closes the
+  /// drawer (and replaces the AppBar's automatic back button with an X). Null
+  /// when shown as a standalone screen.
+  const FriendsScreen({super.key, this.onClose});
+
+  final VoidCallback? onClose;
 
   @override
   State<FriendsScreen> createState() => _FriendsScreenState();
@@ -217,6 +222,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: widget.onClose == null,
+        leading: widget.onClose == null
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: widget.onClose,
+              ),
         title: const Text('Friends'),
         foregroundColor: AppColors.stoneBeigeColor,
       ),
