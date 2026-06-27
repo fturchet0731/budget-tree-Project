@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/profile_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/acorn_mascot.dart';
 
 /// Forced first-run onboarding for a signed-in user who hasn't claimed a
 /// profile yet. Every account needs a username (it's how friends find them and
@@ -65,6 +66,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  /// What Acorn says, reacting to the form state.
+  String get _acornLine {
+    if (_busy) return 'Planting your account… one sec! 🌱';
+    if (_error != null) {
+      return 'Hmm, that didn\'t take — let\'s try a different name!';
+    }
+    return "Hi, I'm Acorn! 🌰 Welcome to Budget Tree. Pick a username to "
+        'finish setting up — it\'s how friends find you, but you can grow '
+        'your forest with or without them.';
+  }
+
+  AcornExpression get _acornFace =>
+      _error != null ? AcornExpression.idle : AcornExpression.happy;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,32 +97,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Icon(Icons.eco_rounded,
-                          color: AppColors.lightLeaf, size: 64),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Welcome to your grove',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          color: AppColors.stoneBeigeColor,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+                      AcornMascot(
+                        size: 104,
+                        speaking: !_busy,
+                        expression: _acornFace,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Pick a username to finish setting up your account. '
-                        'It\'s how friends find you — but you can plant and grow '
-                        'your forest whether or not you ever add any.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          color: AppColors.mossGreen,
-                          fontSize: 14,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 12),
+                      _AcornBubble(text: _acornLine),
+                      const SizedBox(height: 28),
                       TextFormField(
                         controller: _username,
                         autocorrect: false,
@@ -202,4 +199,62 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
+}
+
+/// A small rounded speech bubble with a pointer up toward Acorn. Animates its
+/// text so each new line from Acorn feels like he's talking.
+class _AcornBubble extends StatelessWidget {
+  const _AcornBubble({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Little pointer triangle toward Acorn.
+        ClipPath(
+          clipper: _TriangleClipper(),
+          child: Container(
+            width: 18,
+            height: 9,
+            color: Colors.black.withValues(alpha: 0.30),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.30),
+            borderRadius: BorderRadius.circular(16),
+            border:
+                Border.all(color: AppColors.lightLeaf.withValues(alpha: 0.45)),
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: Text(
+              text,
+              key: ValueKey(text),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                color: AppColors.stoneBeigeColor,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TriangleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) => Path()
+    ..moveTo(size.width / 2, 0)
+    ..lineTo(0, size.height)
+    ..lineTo(size.width, size.height)
+    ..close();
+
+  @override
+  bool shouldReclip(_TriangleClipper old) => false;
 }
