@@ -102,5 +102,27 @@
   "plantFirstSapling": "Planta tu primer arbolito",
   "noSaplingsCategoryTitle": "Aún no hay arbolitos en esta categoría",
   "noSaplingsCategoryBody": "Planta una meta en esta categoría o quita el filtro para ver todos los arbolitos.",
-  "showAll": "Mostrar todo"
+  "showAll": "Mostrar todo",
+
+  "shareThisGoalTitle": "¿Compartir esta meta?",
+  "shareThisGoalBody": "¿Quieres que tus amigos vean esta meta y su planta en su lista de amigos? Puedes cambiarlo en cualquier momento en la meta.",
+  "keepPrivate": "Mantener privada",
+  "shareWithFriends": "Compartir con amigos",
+  "newSapling": "Nuevo arbolito",
+  "aboutThisGoal": "Sobre esta meta",
+  "goalName": "Nombre de la meta",
+  "goalNameHint": "p. ej. Viaje a Japón",
+  "notesOptional": "Notas (opcional)",
+  "notesHint": "¿Por qué te importa esto?",
+  "howMuch": "¿Cuánto?",
+  "targetAmount": "Cantidad objetivo",
+  "targetHint": "p. ej. 3500",
+  "growForever": "Crecer sin límite (sin objetivo)",
+  "growForeverDesc": "El arbolito crece por niveles (Plántula → Roble antiguo) en lugar de tener un tope.",
+  "iconLabel": "Icono",
+  "groupOptional": "Grupo (opcional)",
+  "groupNote": "Asignar un grupo tiñe este arbolito con el color del grupo.",
+  "plantASaplingTitle": "Plantar un arbolito",
+  "plantASaplingSub": "Una nueva meta comienza como una sola semilla",
+  "plantSapling": "Plantar arbolito"
 }

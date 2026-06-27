@@ -663,6 +663,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show all'**
   String get showAll;
+
+  /// No description provided for @shareThisGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this goal?'**
+  String get shareThisGoalTitle;
+
+  /// No description provided for @shareThisGoalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want your friends to see this goal and its plant in their friends list? You can change this anytime on the goal.'**
+  String get shareThisGoalBody;
+
+  /// No description provided for @keepPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep private'**
+  String get keepPrivate;
+
+  /// No description provided for @shareWithFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with friends'**
+  String get shareWithFriends;
+
+  /// No description provided for @newSapling.
+  ///
+  /// In en, this message translates to:
+  /// **'New Sapling'**
+  String get newSapling;
+
+  /// No description provided for @aboutThisGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'About this goal'**
+  String get aboutThisGoal;
+
+  /// No description provided for @goalName.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal name'**
+  String get goalName;
+
+  /// No description provided for @goalNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Trip to Japan'**
+  String get goalNameHint;
+
+  /// No description provided for @notesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get notesOptional;
+
+  /// No description provided for @notesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Why does this matter to you?'**
+  String get notesHint;
+
+  /// No description provided for @howMuch.
+  ///
+  /// In en, this message translates to:
+  /// **'How much?'**
+  String get howMuch;
+
+  /// No description provided for @targetAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Target amount'**
+  String get targetAmount;
+
+  /// No description provided for @targetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 3500'**
+  String get targetHint;
+
+  /// No description provided for @growForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow forever (no target)'**
+  String get growForever;
+
+  /// No description provided for @growForeverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sapling grows through tiers (Seedling → Ancient Oak) instead of capping.'**
+  String get growForeverDesc;
+
+  /// No description provided for @iconLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get iconLabel;
+
+  /// No description provided for @groupOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Group (optional)'**
+  String get groupOptional;
+
+  /// No description provided for @groupNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigning a group tints this sapling with the group colour.'**
+  String get groupNote;
+
+  /// No description provided for @plantASaplingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant a Sapling'**
+  String get plantASaplingTitle;
+
+  /// No description provided for @plantASaplingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A new goal begins as a single seed'**
+  String get plantASaplingSub;
+
+  /// No description provided for @plantSapling.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant Sapling'**
+  String get plantSapling;
 }
 
 class _AppLocalizationsDelegate

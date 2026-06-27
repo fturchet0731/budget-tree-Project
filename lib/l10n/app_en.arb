@@ -115,5 +115,27 @@
   "plantFirstSapling": "Plant Your First Sapling",
   "noSaplingsCategoryTitle": "No saplings in this category yet",
   "noSaplingsCategoryBody": "Plant a goal in this category or clear the filter to see all saplings.",
-  "showAll": "Show all"
+  "showAll": "Show all",
+
+  "shareThisGoalTitle": "Share this goal?",
+  "shareThisGoalBody": "Do you want your friends to see this goal and its plant in their friends list? You can change this anytime on the goal.",
+  "keepPrivate": "Keep private",
+  "shareWithFriends": "Share with friends",
+  "newSapling": "New Sapling",
+  "aboutThisGoal": "About this goal",
+  "goalName": "Goal name",
+  "goalNameHint": "e.g. Trip to Japan",
+  "notesOptional": "Notes (optional)",
+  "notesHint": "Why does this matter to you?",
+  "howMuch": "How much?",
+  "targetAmount": "Target amount",
+  "targetHint": "e.g. 3500",
+  "growForever": "Grow forever (no target)",
+  "growForeverDesc": "Sapling grows through tiers (Seedling → Ancient Oak) instead of capping.",
+  "iconLabel": "Icon",
+  "groupOptional": "Group (optional)",
+  "groupNote": "Assigning a group tints this sapling with the group colour.",
+  "plantASaplingTitle": "Plant a Sapling",
+  "plantASaplingSub": "A new goal begins as a single seed",
+  "plantSapling": "Plant Sapling"
 }

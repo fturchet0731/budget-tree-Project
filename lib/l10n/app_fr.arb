@@ -102,5 +102,27 @@
   "plantFirstSapling": "Plantez votre premier arbre",
   "noSaplingsCategoryTitle": "Aucun arbre dans cette catégorie",
   "noSaplingsCategoryBody": "Plantez un objectif dans cette catégorie ou effacez le filtre pour voir tous les arbres.",
-  "showAll": "Tout afficher"
+  "showAll": "Tout afficher",
+
+  "shareThisGoalTitle": "Partager cet objectif ?",
+  "shareThisGoalBody": "Voulez-vous que vos amis voient cet objectif et sa plante dans leur liste d'amis ? Vous pouvez changer cela à tout moment sur l'objectif.",
+  "keepPrivate": "Garder privé",
+  "shareWithFriends": "Partager avec les amis",
+  "newSapling": "Nouvel arbre",
+  "aboutThisGoal": "À propos de cet objectif",
+  "goalName": "Nom de l'objectif",
+  "goalNameHint": "ex. Voyage au Japon",
+  "notesOptional": "Notes (facultatif)",
+  "notesHint": "Pourquoi est-ce important pour vous ?",
+  "howMuch": "Combien ?",
+  "targetAmount": "Montant cible",
+  "targetHint": "ex. 3500",
+  "growForever": "Grandir sans fin (sans cible)",
+  "growForeverDesc": "L'arbre grandit par paliers (Jeune pousse → Chêne ancien) au lieu d'être plafonné.",
+  "iconLabel": "Icône",
+  "groupOptional": "Groupe (facultatif)",
+  "groupNote": "Attribuer un groupe colore cet arbre avec la couleur du groupe.",
+  "plantASaplingTitle": "Planter un arbre",
+  "plantASaplingSub": "Un nouvel objectif commence par une simple graine",
+  "plantSapling": "Planter l'arbre"
 }

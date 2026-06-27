@@ -355,4 +355,71 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get showAll => 'Tout afficher';
+
+  @override
+  String get shareThisGoalTitle => 'Partager cet objectif ?';
+
+  @override
+  String get shareThisGoalBody =>
+      'Voulez-vous que vos amis voient cet objectif et sa plante dans leur liste d\'amis ? Vous pouvez changer cela à tout moment sur l\'objectif.';
+
+  @override
+  String get keepPrivate => 'Garder privé';
+
+  @override
+  String get shareWithFriends => 'Partager avec les amis';
+
+  @override
+  String get newSapling => 'Nouvel arbre';
+
+  @override
+  String get aboutThisGoal => 'À propos de cet objectif';
+
+  @override
+  String get goalName => 'Nom de l\'objectif';
+
+  @override
+  String get goalNameHint => 'ex. Voyage au Japon';
+
+  @override
+  String get notesOptional => 'Notes (facultatif)';
+
+  @override
+  String get notesHint => 'Pourquoi est-ce important pour vous ?';
+
+  @override
+  String get howMuch => 'Combien ?';
+
+  @override
+  String get targetAmount => 'Montant cible';
+
+  @override
+  String get targetHint => 'ex. 3500';
+
+  @override
+  String get growForever => 'Grandir sans fin (sans cible)';
+
+  @override
+  String get growForeverDesc =>
+      'L\'arbre grandit par paliers (Jeune pousse → Chêne ancien) au lieu d\'être plafonné.';
+
+  @override
+  String get iconLabel => 'Icône';
+
+  @override
+  String get groupOptional => 'Groupe (facultatif)';
+
+  @override
+  String get groupNote =>
+      'Attribuer un groupe colore cet arbre avec la couleur du groupe.';
+
+  @override
+  String get plantASaplingTitle => 'Planter un arbre';
+
+  @override
+  String get plantASaplingSub =>
+      'Un nouvel objectif commence par une simple graine';
+
+  @override
+  String get plantSapling => 'Planter l\'arbre';
 }

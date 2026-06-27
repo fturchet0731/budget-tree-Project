@@ -354,4 +354,71 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get showAll => 'Mostrar todo';
+
+  @override
+  String get shareThisGoalTitle => '¿Compartir esta meta?';
+
+  @override
+  String get shareThisGoalBody =>
+      '¿Quieres que tus amigos vean esta meta y su planta en su lista de amigos? Puedes cambiarlo en cualquier momento en la meta.';
+
+  @override
+  String get keepPrivate => 'Mantener privada';
+
+  @override
+  String get shareWithFriends => 'Compartir con amigos';
+
+  @override
+  String get newSapling => 'Nuevo arbolito';
+
+  @override
+  String get aboutThisGoal => 'Sobre esta meta';
+
+  @override
+  String get goalName => 'Nombre de la meta';
+
+  @override
+  String get goalNameHint => 'p. ej. Viaje a Japón';
+
+  @override
+  String get notesOptional => 'Notas (opcional)';
+
+  @override
+  String get notesHint => '¿Por qué te importa esto?';
+
+  @override
+  String get howMuch => '¿Cuánto?';
+
+  @override
+  String get targetAmount => 'Cantidad objetivo';
+
+  @override
+  String get targetHint => 'p. ej. 3500';
+
+  @override
+  String get growForever => 'Crecer sin límite (sin objetivo)';
+
+  @override
+  String get growForeverDesc =>
+      'El arbolito crece por niveles (Plántula → Roble antiguo) en lugar de tener un tope.';
+
+  @override
+  String get iconLabel => 'Icono';
+
+  @override
+  String get groupOptional => 'Grupo (opcional)';
+
+  @override
+  String get groupNote =>
+      'Asignar un grupo tiñe este arbolito con el color del grupo.';
+
+  @override
+  String get plantASaplingTitle => 'Plantar un arbolito';
+
+  @override
+  String get plantASaplingSub =>
+      'Una nueva meta comienza como una sola semilla';
+
+  @override
+  String get plantSapling => 'Plantar arbolito';
 }

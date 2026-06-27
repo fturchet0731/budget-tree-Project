@@ -350,4 +350,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showAll => 'Show all';
+
+  @override
+  String get shareThisGoalTitle => 'Share this goal?';
+
+  @override
+  String get shareThisGoalBody =>
+      'Do you want your friends to see this goal and its plant in their friends list? You can change this anytime on the goal.';
+
+  @override
+  String get keepPrivate => 'Keep private';
+
+  @override
+  String get shareWithFriends => 'Share with friends';
+
+  @override
+  String get newSapling => 'New Sapling';
+
+  @override
+  String get aboutThisGoal => 'About this goal';
+
+  @override
+  String get goalName => 'Goal name';
+
+  @override
+  String get goalNameHint => 'e.g. Trip to Japan';
+
+  @override
+  String get notesOptional => 'Notes (optional)';
+
+  @override
+  String get notesHint => 'Why does this matter to you?';
+
+  @override
+  String get howMuch => 'How much?';
+
+  @override
+  String get targetAmount => 'Target amount';
+
+  @override
+  String get targetHint => 'e.g. 3500';
+
+  @override
+  String get growForever => 'Grow forever (no target)';
+
+  @override
+  String get growForeverDesc =>
+      'Sapling grows through tiers (Seedling → Ancient Oak) instead of capping.';
+
+  @override
+  String get iconLabel => 'Icon';
+
+  @override
+  String get groupOptional => 'Group (optional)';
+
+  @override
+  String get groupNote =>
+      'Assigning a group tints this sapling with the group colour.';
+
+  @override
+  String get plantASaplingTitle => 'Plant a Sapling';
+
+  @override
+  String get plantASaplingSub => 'A new goal begins as a single seed';
+
+  @override
+  String get plantSapling => 'Plant Sapling';
 }

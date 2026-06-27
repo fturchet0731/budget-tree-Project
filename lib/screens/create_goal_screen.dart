@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../services/achievement_service.dart';
@@ -66,22 +67,21 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   /// — otherwise there's nothing to share to, so it stays private.
   Future<bool> _askVisibility() async {
     if (!ProfileService.instance.isAvailable) return false;
+    final l = AppLocalizations.of(context);
     final share = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Share this goal?'),
-        content: const Text(
-            'Do you want your friends to see this goal and its plant in their '
-            'friends list? You can change this anytime on the goal.'),
+        title: Text(l.shareThisGoalTitle),
+        content: Text(l.shareThisGoalBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Keep private'),
+            child: Text(l.keepPrivate),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Share with friends'),
+            child: Text(l.shareWithFriends),
           ),
         ],
       ),
@@ -127,6 +127,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final hasName = _nameCtrl.text.trim().isNotEmpty;
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -151,7 +152,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                   palette: _previewPalette,
                   iconKey: _iconKey,
                   goalName:
-                      hasName ? _nameCtrl.text.trim() : 'New Sapling',
+                      hasName ? _nameCtrl.text.trim() : l.newSapling,
                   category: _pickedCategory,
                 ),
                 Expanded(
@@ -160,7 +161,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                     children: [
                       // ── About this goal ──────────
                       BarkCard(
-                        label: 'About this goal',
+                        label: l.aboutThisGoal,
                         icon: Icons.spa,
                         child: Column(
                           children: [
@@ -168,10 +169,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                               controller: _nameCtrl,
                               style: const TextStyle(
                                   color: AppColors.stoneBeigeColor),
-                              decoration: const InputDecoration(
-                                labelText: 'Goal name',
-                                hintText: 'e.g. Trip to Japan',
-                                prefixIcon: Icon(Icons.spa,
+                              decoration: InputDecoration(
+                                labelText: l.goalName,
+                                hintText: l.goalNameHint,
+                                prefixIcon: const Icon(Icons.spa,
                                     color: AppColors.mossGreen),
                               ),
                               textCapitalization:
@@ -184,10 +185,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                               style: const TextStyle(
                                   color: AppColors.stoneBeigeColor),
                               maxLines: 2,
-                              decoration: const InputDecoration(
-                                labelText: 'Notes (optional)',
-                                hintText: 'Why does this matter to you?',
-                                prefixIcon: Icon(Icons.notes_outlined,
+                              decoration: InputDecoration(
+                                labelText: l.notesOptional,
+                                hintText: l.notesHint,
+                                prefixIcon: const Icon(Icons.notes_outlined,
                                     color: AppColors.mossGreen),
                               ),
                               textCapitalization:
@@ -200,7 +201,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
                       // ── Target ─────────────────────
                       BarkCard(
-                        label: 'How much?',
+                        label: l.howMuch,
                         icon: Icons.flag_outlined,
                         accent: AppColors.leafYellow,
                         child: Column(
@@ -221,10 +222,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                   FilteringTextInputFormatter.allow(
                                       RegExp(r'[0-9.]')),
                                 ],
-                                decoration: const InputDecoration(
-                                  labelText: 'Target amount',
-                                  hintText: 'e.g. 3500',
-                                  prefixIcon: Icon(Icons.flag_outlined,
+                                decoration: InputDecoration(
+                                  labelText: l.targetAmount,
+                                  hintText: l.targetHint,
+                                  prefixIcon: const Icon(Icons.flag_outlined,
                                       color: AppColors.mossGreen),
                                   prefixText: '\$ ',
                                 ),
@@ -297,7 +298,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Grow forever (no target)',
+                                            l.growForever,
                                             style: GoogleFonts.nunito(
                                               color: AppColors
                                                   .stoneBeigeColor,
@@ -307,7 +308,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            'Sapling grows through tiers (Seedling → Ancient Oak) instead of capping.',
+                                            l.growForeverDesc,
                                             style: GoogleFonts.nunito(
                                                 color: AppColors.mossGreen,
                                                 fontSize: 11,
@@ -327,7 +328,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
                       // ── Icon ───────────────────────
                       BarkCard(
-                        label: 'Icon',
+                        label: l.iconLabel,
                         icon: Icons.local_florist_outlined,
                         child: Wrap(
                           spacing: 8,
@@ -397,14 +398,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
                       // ── Group ──────────────────────
                       BarkCard(
-                        label: 'Group (optional)',
+                        label: l.groupOptional,
                         icon: Icons.label_outline,
                         accent: AppColors.riverBlue,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Assigning a group tints this sapling with the group colour.',
+                              l.groupNote,
                               style: GoogleFonts.nunito(
                                   color: AppColors.mossGreen
                                       .withValues(alpha: 0.85),
@@ -471,7 +472,7 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Plant a Sapling',
+                  AppLocalizations.of(context).plantASaplingTitle,
                   style: GoogleFonts.fredoka(
                     fontWeight: FontWeight.w600,
                     color: AppColors.stoneBeigeColor,
@@ -485,7 +486,7 @@ class _Header extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'A new goal begins as a single seed',
+                  AppLocalizations.of(context).plantASaplingSub,
                   style: GoogleFonts.nunito(
                     color: AppColors.mossGreen,
                     fontSize: 12.5,
@@ -754,7 +755,7 @@ class _PlantButton extends StatelessWidget {
                         ),
                   const SizedBox(width: 10),
                   Text(
-                    'Plant Sapling',
+                    AppLocalizations.of(context).plantSapling,
                     style: GoogleFonts.fredoka(
                       fontWeight: FontWeight.w600,
                       color: canSave
