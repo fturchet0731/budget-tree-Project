@@ -1137,6 +1137,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save Changes'**
   String get saveChanges;
+
+  /// No description provided for @stepIncomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income Sources'**
+  String get stepIncomeTitle;
+
+  /// No description provided for @stepExpensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Branches'**
+  String get stepExpensesTitle;
+
+  /// No description provided for @stepNamePayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name & Pay Schedule'**
+  String get stepNamePayTitle;
+
+  /// No description provided for @stepIncomeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'What flows into your tree?'**
+  String get stepIncomeSub;
+
+  /// No description provided for @stepExpensesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do the branches reach?'**
+  String get stepExpensesSub;
+
+  /// No description provided for @stepNamePaySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your tree and set how often you\'re paid'**
+  String get stepNamePaySub;
+
+  /// No description provided for @vineSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get vineSeed;
+
+  /// No description provided for @vineBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'Branches'**
+  String get vineBranches;
+
+  /// No description provided for @vineRoots.
+  ///
+  /// In en, this message translates to:
+  /// **'Roots'**
+  String get vineRoots;
+
+  /// No description provided for @quickPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick-pick'**
+  String get quickPick;
+
+  /// No description provided for @addASource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a source'**
+  String get addASource;
+
+  /// No description provided for @sourceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Source name'**
+  String get sourceName;
+
+  /// No description provided for @sourceNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Salary'**
+  String get sourceNameHint;
+
+  /// No description provided for @amountDollar.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount \$'**
+  String get amountDollar;
+
+  /// No description provided for @rootsFeedingTree.
+  ///
+  /// In en, this message translates to:
+  /// **'Roots feeding the tree'**
+  String get rootsFeedingTree;
+
+  /// No description provided for @totalMonthlyIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Total monthly income'**
+  String get totalMonthlyIncome;
+
+  /// No description provided for @canopyMeter.
+  ///
+  /// In en, this message translates to:
+  /// **'Canopy meter'**
+  String get canopyMeter;
+
+  /// No description provided for @allocatedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated: {amount}'**
+  String allocatedAmount(String amount);
+
+  /// No description provided for @overByAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Over by {amount}'**
+  String overByAmount(String amount);
+
+  /// No description provided for @remainingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {amount}'**
+  String remainingAmount(String amount);
+
+  /// No description provided for @pickABranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a branch'**
+  String get pickABranch;
+
+  /// No description provided for @addABranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a branch'**
+  String get addABranch;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryName;
+
+  /// No description provided for @branchesReachingOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Branches reaching out'**
+  String get branchesReachingOut;
+
+  /// No description provided for @nameYourTree.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your tree'**
+  String get nameYourTree;
+
+  /// No description provided for @budgetNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. January Budget'**
+  String get budgetNameHint;
+
+  /// No description provided for @payScheduleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay schedule'**
+  String get payScheduleLabel;
+
+  /// No description provided for @payFrequencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay frequency'**
+  String get payFrequencyLabel;
+
+  /// No description provided for @firstPayDate.
+  ///
+  /// In en, this message translates to:
+  /// **'First pay date'**
+  String get firstPayDate;
+
+  /// No description provided for @firstPayOn.
+  ///
+  /// In en, this message translates to:
+  /// **'First pay: {date}'**
+  String firstPayOn(String date);
+
+  /// No description provided for @payScheduleInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pay schedule lets the budget tree process pay cycles and feed money into your linked goals automatically.'**
+  String get payScheduleInfo;
+
+  /// No description provided for @plantMyBudgetTree.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant My Budget Tree'**
+  String get plantMyBudgetTree;
 }
 
 class _AppLocalizationsDelegate

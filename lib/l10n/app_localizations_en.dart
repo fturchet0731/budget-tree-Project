@@ -623,4 +623,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveChanges => 'Save Changes';
+
+  @override
+  String get stepIncomeTitle => 'Income Sources';
+
+  @override
+  String get stepExpensesTitle => 'Expense Branches';
+
+  @override
+  String get stepNamePayTitle => 'Name & Pay Schedule';
+
+  @override
+  String get stepIncomeSub => 'What flows into your tree?';
+
+  @override
+  String get stepExpensesSub => 'Where do the branches reach?';
+
+  @override
+  String get stepNamePaySub => 'Name your tree and set how often you\'re paid';
+
+  @override
+  String get vineSeed => 'Seed';
+
+  @override
+  String get vineBranches => 'Branches';
+
+  @override
+  String get vineRoots => 'Roots';
+
+  @override
+  String get quickPick => 'Quick-pick';
+
+  @override
+  String get addASource => 'Add a source';
+
+  @override
+  String get sourceName => 'Source name';
+
+  @override
+  String get sourceNameHint => 'e.g. Salary';
+
+  @override
+  String get amountDollar => 'Amount \$';
+
+  @override
+  String get rootsFeedingTree => 'Roots feeding the tree';
+
+  @override
+  String get totalMonthlyIncome => 'Total monthly income';
+
+  @override
+  String get canopyMeter => 'Canopy meter';
+
+  @override
+  String allocatedAmount(String amount) {
+    return 'Allocated: $amount';
+  }
+
+  @override
+  String overByAmount(String amount) {
+    return 'Over by $amount';
+  }
+
+  @override
+  String remainingAmount(String amount) {
+    return 'Remaining: $amount';
+  }
+
+  @override
+  String get pickABranch => 'Pick a branch';
+
+  @override
+  String get addABranch => 'Add a branch';
+
+  @override
+  String get categoryName => 'Category name';
+
+  @override
+  String get branchesReachingOut => 'Branches reaching out';
+
+  @override
+  String get nameYourTree => 'Name your tree';
+
+  @override
+  String get budgetNameHint => 'e.g. January Budget';
+
+  @override
+  String get payScheduleLabel => 'Pay schedule';
+
+  @override
+  String get payFrequencyLabel => 'Pay frequency';
+
+  @override
+  String get firstPayDate => 'First pay date';
+
+  @override
+  String firstPayOn(String date) {
+    return 'First pay: $date';
+  }
+
+  @override
+  String get payScheduleInfo =>
+      'Your pay schedule lets the budget tree process pay cycles and feed money into your linked goals automatically.';
+
+  @override
+  String get plantMyBudgetTree => 'Plant My Budget Tree';
 }

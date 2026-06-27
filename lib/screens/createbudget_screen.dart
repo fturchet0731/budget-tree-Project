@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/pay_frequency.dart';
+import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
@@ -119,16 +120,17 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final stepTitle = _step == 0
-        ? 'Income Sources'
+        ? l.stepIncomeTitle
         : _step == 1
-            ? 'Expense Branches'
-            : 'Name & Pay Schedule';
+            ? l.stepExpensesTitle
+            : l.stepNamePayTitle;
     final stepSubtitle = _step == 0
-        ? 'What flows into your tree?'
+        ? l.stepIncomeSub
         : _step == 1
-            ? 'Where do the branches reach?'
-            : 'Name your tree and set how often you\'re paid';
+            ? l.stepExpensesSub
+            : l.stepNamePaySub;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -158,10 +160,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 ),
                 VineStepIndicator(
                   currentStep: _step,
-                  steps: const [
-                    VineStep(label: 'Seed', icon: Icons.eco),
-                    VineStep(label: 'Branches', icon: Icons.account_tree_outlined),
-                    VineStep(label: 'Roots', icon: Icons.park_outlined),
+                  steps: [
+                    VineStep(label: l.vineSeed, icon: Icons.eco),
+                    VineStep(
+                        label: l.vineBranches,
+                        icon: Icons.account_tree_outlined),
+                    VineStep(label: l.vineRoots, icon: Icons.park_outlined),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -466,13 +470,14 @@ class _IncomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final total = sources.fold(0.0, (s, e) => s + e.amount);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       children: [
         // Quick-picks card
         BarkCard(
-          label: 'Quick-pick',
+          label: l.quickPick,
           icon: Icons.bolt,
           accent: AppColors.riverBlue,
           child: Wrap(
@@ -511,7 +516,7 @@ class _IncomeStep extends StatelessWidget {
         const SizedBox(height: 14),
         // Add a source card
         BarkCard(
-          label: 'Add a source',
+          label: l.addASource,
           icon: Icons.add_circle_outline,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,8 +526,8 @@ class _IncomeStep extends StatelessWidget {
                 child: TextField(
                   controller: nameCtrl,
                   style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  decoration: const InputDecoration(
-                      labelText: 'Source name', hintText: 'e.g. Salary'),
+                  decoration: InputDecoration(
+                      labelText: l.sourceName, hintText: l.sourceNameHint),
                   textCapitalization: TextCapitalization.words,
                 ),
               ),
@@ -537,8 +542,8 @@ class _IncomeStep extends StatelessWidget {
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
                   ],
-                  decoration: const InputDecoration(
-                      labelText: 'Amount \$', hintText: '0.00'),
+                  decoration: InputDecoration(
+                      labelText: l.amountDollar, hintText: '0.00'),
                 ),
               ),
               const SizedBox(width: 10),
@@ -552,7 +557,7 @@ class _IncomeStep extends StatelessWidget {
         const SizedBox(height: 14),
         if (sources.isNotEmpty)
           BarkCard(
-            label: 'Roots feeding the tree',
+            label: l.rootsFeedingTree,
             icon: Icons.water_drop,
             accent: AppColors.lightLeaf,
             child: Column(
@@ -607,7 +612,7 @@ class _IncomeStep extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Total monthly income',
+                    Text(l.totalMonthlyIncome,
                         style: GoogleFonts.nunito(
                             color: AppColors.mossGreen, fontSize: 12.5)),
                     Text(
@@ -660,6 +665,7 @@ class _ExpenseStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final remaining = totalIncome - totalAllocated;
     final overBudget = remaining < 0;
 
@@ -668,7 +674,7 @@ class _ExpenseStep extends StatelessWidget {
       children: [
         // Budget meter
         BarkCard(
-          label: 'Canopy meter',
+          label: l.canopyMeter,
           icon: Icons.donut_large,
           accent: overBudget ? AppColors.dangerRed : AppColors.lightLeaf,
           child: Column(
@@ -679,13 +685,13 @@ class _ExpenseStep extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Allocated: \$${totalAllocated.toStringAsFixed(2)}',
+                  Text(l.allocatedAmount('\$${totalAllocated.toStringAsFixed(2)}'),
                       style: GoogleFonts.nunito(
                           color: AppColors.stoneBeigeColor, fontSize: 12)),
                   Text(
                     overBudget
-                        ? 'Over by \$${(-remaining).toStringAsFixed(2)}'
-                        : 'Remaining: \$${remaining.toStringAsFixed(2)}',
+                        ? l.overByAmount('\$${(-remaining).toStringAsFixed(2)}')
+                        : l.remainingAmount('\$${remaining.toStringAsFixed(2)}'),
                     style: GoogleFonts.nunito(
                       color: overBudget
                           ? AppColors.dangerRed
@@ -702,7 +708,7 @@ class _ExpenseStep extends StatelessWidget {
         const SizedBox(height: 14),
         // Presets card
         BarkCard(
-          label: 'Pick a branch',
+          label: l.pickABranch,
           icon: Icons.account_tree_outlined,
           child: Wrap(
             spacing: 8,
@@ -768,7 +774,7 @@ class _ExpenseStep extends StatelessWidget {
         const SizedBox(height: 14),
         // Add a branch card
         BarkCard(
-          label: 'Add a branch',
+          label: l.addABranch,
           icon: Icons.add_circle_outline,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -779,7 +785,7 @@ class _ExpenseStep extends StatelessWidget {
                   controller: nameCtrl,
                   style: const TextStyle(color: AppColors.stoneBeigeColor),
                   decoration:
-                      const InputDecoration(labelText: 'Category name'),
+                      InputDecoration(labelText: l.categoryName),
                   textCapitalization: TextCapitalization.words,
                 ),
               ),
@@ -794,7 +800,7 @@ class _ExpenseStep extends StatelessWidget {
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
                   ],
-                  decoration: const InputDecoration(labelText: 'Amount \$'),
+                  decoration: InputDecoration(labelText: l.amountDollar),
                 ),
               ),
               const SizedBox(width: 10),
@@ -808,7 +814,7 @@ class _ExpenseStep extends StatelessWidget {
         const SizedBox(height: 14),
         if (expenses.isNotEmpty)
           BarkCard(
-            label: 'Branches reaching out',
+            label: l.branchesReachingOut,
             icon: Icons.spa_outlined,
             child: Column(
               children: expenses.asMap().entries.map((entry) {
@@ -914,20 +920,21 @@ class _PersonalStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       children: [
         // Name card
         BarkCard(
-          label: 'Name your tree',
+          label: l.nameYourTree,
           icon: Icons.park,
           child: TextField(
             controller: nameCtrl,
             style: const TextStyle(color: AppColors.stoneBeigeColor),
-            decoration: const InputDecoration(
-              labelText: 'Budget name',
-              hintText: 'e.g. January Budget',
-              prefixIcon: Icon(Icons.park, color: AppColors.mossGreen),
+            decoration: InputDecoration(
+              labelText: l.budgetName,
+              hintText: l.budgetNameHint,
+              prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
             ),
             textCapitalization: TextCapitalization.words,
           ),
@@ -935,7 +942,7 @@ class _PersonalStep extends StatelessWidget {
         const SizedBox(height: 14),
         // Pay schedule card
         BarkCard(
-          label: 'Pay schedule',
+          label: l.payScheduleLabel,
           icon: Icons.event_repeat_outlined,
           accent: AppColors.riverBlue,
           child: Column(
@@ -945,9 +952,9 @@ class _PersonalStep extends StatelessWidget {
                 isExpanded: true,
                 dropdownColor: AppColors.darkBark,
                 style: const TextStyle(color: AppColors.stoneBeigeColor),
-                decoration: const InputDecoration(
-                  labelText: 'Pay frequency',
-                  prefixIcon: Icon(Icons.event_repeat_outlined,
+                decoration: InputDecoration(
+                  labelText: l.payFrequencyLabel,
+                  prefixIcon: const Icon(Icons.event_repeat_outlined,
                       color: AppColors.mossGreen),
                 ),
                 items: PayFrequency.values
@@ -1005,8 +1012,8 @@ class _PersonalStep extends StatelessWidget {
                       Expanded(
                         child: Text(
                           firstPayDate == null
-                              ? 'First pay date'
-                              : 'First pay: ${_formatDate(firstPayDate!)}',
+                              ? l.firstPayDate
+                              : l.firstPayOn(_formatDate(firstPayDate!)),
                           style: TextStyle(
                             color: firstPayDate == null
                                 ? AppColors.stoneBeigeColor
@@ -1044,7 +1051,7 @@ class _PersonalStep extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Your pay schedule lets the budget tree process pay cycles and feed money into your linked goals automatically.',
+                  l.payScheduleInfo,
                   style: GoogleFonts.nunito(
                       color: AppColors.stoneBeigeColor,
                       fontSize: 12,
@@ -1123,6 +1130,7 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final isLast = step == 2;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
@@ -1188,7 +1196,7 @@ class _BottomBar extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    isLast ? 'Plant My Budget Tree' : 'Next',
+                    isLast ? l.plantMyBudgetTree : l.next,
                     style: GoogleFonts.fredoka(
                       fontWeight: FontWeight.w600,
                       color: canAdvance

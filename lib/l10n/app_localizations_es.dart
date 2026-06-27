@@ -629,4 +629,110 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get saveChanges => 'Guardar cambios';
+
+  @override
+  String get stepIncomeTitle => 'Fuentes de ingresos';
+
+  @override
+  String get stepExpensesTitle => 'Ramas de gastos';
+
+  @override
+  String get stepNamePayTitle => 'Nombre y calendario de pago';
+
+  @override
+  String get stepIncomeSub => '¿Qué alimenta tu árbol?';
+
+  @override
+  String get stepExpensesSub => '¿Hasta dónde llegan las ramas?';
+
+  @override
+  String get stepNamePaySub =>
+      'Nombra tu árbol y define con qué frecuencia te pagan';
+
+  @override
+  String get vineSeed => 'Semilla';
+
+  @override
+  String get vineBranches => 'Ramas';
+
+  @override
+  String get vineRoots => 'Raíces';
+
+  @override
+  String get quickPick => 'Elección rápida';
+
+  @override
+  String get addASource => 'Añadir una fuente';
+
+  @override
+  String get sourceName => 'Nombre de la fuente';
+
+  @override
+  String get sourceNameHint => 'p. ej. Salario';
+
+  @override
+  String get amountDollar => 'Cantidad \$';
+
+  @override
+  String get rootsFeedingTree => 'Raíces que alimentan el árbol';
+
+  @override
+  String get totalMonthlyIncome => 'Ingresos mensuales totales';
+
+  @override
+  String get canopyMeter => 'Medidor de la copa';
+
+  @override
+  String allocatedAmount(String amount) {
+    return 'Asignado: $amount';
+  }
+
+  @override
+  String overByAmount(String amount) {
+    return 'Excedido por $amount';
+  }
+
+  @override
+  String remainingAmount(String amount) {
+    return 'Restante: $amount';
+  }
+
+  @override
+  String get pickABranch => 'Elige una rama';
+
+  @override
+  String get addABranch => 'Añadir una rama';
+
+  @override
+  String get categoryName => 'Nombre de la categoría';
+
+  @override
+  String get branchesReachingOut => 'Ramas que se extienden';
+
+  @override
+  String get nameYourTree => 'Nombra tu árbol';
+
+  @override
+  String get budgetNameHint => 'p. ej. Presupuesto de enero';
+
+  @override
+  String get payScheduleLabel => 'Calendario de pago';
+
+  @override
+  String get payFrequencyLabel => 'Frecuencia de pago';
+
+  @override
+  String get firstPayDate => 'Fecha del primer pago';
+
+  @override
+  String firstPayOn(String date) {
+    return 'Primer pago: $date';
+  }
+
+  @override
+  String get payScheduleInfo =>
+      'Tu calendario de pago permite que el árbol de presupuesto procese los ciclos de pago y aporte dinero a tus metas vinculadas automáticamente.';
+
+  @override
+  String get plantMyBudgetTree => 'Plantar mi árbol de presupuesto';
 }
