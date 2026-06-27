@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/profile_model.dart';
@@ -21,6 +22,12 @@ class ProfileService {
 
   static const _table = 'profiles';
 
+  /// Local marker recording which user id has finished onboarding (claimed a
+  /// username). Lets the onboarding gate skip the network profile lookup on
+  /// later launches, so a returning user can open the (offline-first) app
+  /// without connectivity. See [hasOnboardedLocally] / [markOnboardedLocally].
+  static const _onboardedKey = 'onboarded_user_id_v1';
+
   /// Username rules surfaced to the UI: 3–20 chars, letters/digits/underscore.
   static final RegExp usernamePattern = RegExp(r'^[a-zA-Z0-9_]{3,20}$');
 
@@ -28,6 +35,24 @@ class ProfileService {
       SupabaseConfig.isConfigured && AuthService.instance.isSignedIn;
 
   String? get _uid => AuthService.instance.userId;
+
+  /// True when this exact signed-in user has already completed onboarding on
+  /// this device. Cached locally so the onboarding gate doesn't have to hit the
+  /// network on every launch (and so a returning user can open the app while
+  /// offline). The stored id is compared to the current user so a different
+  /// account on the same device is still gated.
+  Future<bool> hasOnboardedLocally() async {
+    if (!isAvailable) return false;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_onboardedKey) == _uid;
+  }
+
+  /// Record that the current user finished onboarding (see [hasOnboardedLocally]).
+  Future<void> markOnboardedLocally() async {
+    if (_uid == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_onboardedKey, _uid!);
+  }
 
   /// The signed-in user's profile, or null if they haven't claimed one yet.
   Future<Profile?> myProfile() async {
@@ -65,6 +90,7 @@ class ProfileService {
           .insert(profile.toRow())
           .select()
           .single();
+      await markOnboardedLocally();
       return Profile.fromRow(row);
     } on PostgrestException catch (e) {
       if (e.code == '23505') throw const UsernameTakenException();

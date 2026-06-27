@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
-import '../../services/profile_service.dart';
 import '../../theme/app_theme.dart';
 
 /// Email + password sign-in / sign-up, themed to match the forest aesthetic.
@@ -23,7 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  final _username = TextEditingController();
 
   late bool _isSignUp = widget.startInSignUp;
   bool _busy = false;
@@ -34,7 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _email.dispose();
     _password.dispose();
-    _username.dispose();
     super.dispose();
   }
 
@@ -49,23 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final auth = AuthService.instance;
       bool hasSession = true;
       if (_isSignUp) {
-        // Reserve the username before creating the account so we don't end up
-        // with a signed-in user who couldn't claim their handle. The unique
-        // constraint is still the real guard (claimUsername below).
-        final username = _username.text.trim();
-        if (!await ProfileService.instance.isUsernameAvailable(username)) {
-          setState(() => _error = 'That username is taken. Try another.');
-          return;
-        }
+        // Username/profile setup happens after sign-in, in the OnboardingGate —
+        // so signing up is just email + password here.
         hasSession = await auth.signUp(_email.text, _password.text);
-        if (hasSession) {
-          try {
-            await ProfileService.instance.claimUsername(username);
-          } on UsernameTakenException {
-            // Lost a race for the name; the dashboard will re-prompt on first
-            // Friends open. Let the sign-in proceed rather than blocking.
-          }
-        }
         // If email confirmation is on, signUp succeeds but creates no session,
         // so AuthGate won't advance — tell the user to confirm their email
         // instead of leaving them on a screen that appears to do nothing.
@@ -159,35 +142,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                       ),
-                      if (_isSignUp) ...[
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _username,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          enabled: !_busy,
-                          style: const TextStyle(
-                              color: AppColors.stoneBeigeColor),
-                          decoration: const InputDecoration(
-                            labelText: 'Username',
-                            helperText:
-                                'How friends find you — 3-20 letters, '
-                                'numbers or _',
-                            helperStyle: TextStyle(color: AppColors.mossGreen),
-                            prefixIcon: Icon(Icons.alternate_email,
-                                color: AppColors.mossGreen),
-                          ),
-                          validator: (v) {
-                            if (!_isSignUp) return null;
-                            final s = v?.trim() ?? '';
-                            if (s.isEmpty) return 'Choose a username';
-                            if (!ProfileService.usernamePattern.hasMatch(s)) {
-                              return '3-20 letters, numbers or underscore';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _password,
