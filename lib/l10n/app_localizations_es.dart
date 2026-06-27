@@ -551,4 +551,82 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get milestoneMature => 'Maduro';
+
+  @override
+  String get edit => 'Editar';
+
+  @override
+  String get walkThroughForest => 'Recorre tu bosque';
+
+  @override
+  String get gridList => 'Lista en cuadrícula';
+
+  @override
+  String get removeTreeTitle => '¿Eliminar este árbol?';
+
+  @override
+  String removeTreeBody(String name) {
+    return '«$name» se eliminará permanentemente de tu bosque.';
+  }
+
+  @override
+  String get yourForest => 'Tu bosque';
+
+  @override
+  String budgetTreesPlanted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count árboles de presupuesto plantados',
+      one: '1 árbol de presupuesto plantado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewFullTree => 'Ver árbol completo';
+
+  @override
+  String get noTreesCategoryTitle => 'Aún no hay árboles en esta categoría';
+
+  @override
+  String get noTreesCategoryBody =>
+      'Planta un nuevo árbol en esta categoría o quita el filtro para ver todo.';
+
+  @override
+  String get forestEmptyTitle => 'Tu bosque está vacío';
+
+  @override
+  String get forestEmptyBody =>
+      'Planta tu primer árbol de presupuesto volviendo atrás y creando un presupuesto.';
+
+  @override
+  String get goPlantATree => 'Ir a plantar un árbol';
+
+  @override
+  String get editBudget => 'Editar presupuesto';
+
+  @override
+  String get budgetName => 'Nombre del presupuesto';
+
+  @override
+  String get categoryUpper => 'CATEGORÍA';
+
+  @override
+  String incomeAmount(String amount) {
+    return 'Ingresos: $amount';
+  }
+
+  @override
+  String overAmount(String amount) {
+    return '⚠ Excedido: $amount';
+  }
+
+  @override
+  String leftAmount(String amount) {
+    return 'Restante: $amount';
+  }
+
+  @override
+  String get saveChanges => 'Guardar cambios';
 }

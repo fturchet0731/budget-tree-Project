@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../services/budget_repository.dart';
@@ -63,8 +64,9 @@ class _ViewModeToggle extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           pill(Icons.forest_outlined, ForestViewMode.immersive,
-              'Walk through your forest'),
-          pill(Icons.grid_view_rounded, ForestViewMode.grid, 'Grid list'),
+              AppLocalizations.of(context).walkThroughForest),
+          pill(Icons.grid_view_rounded, ForestViewMode.grid,
+              AppLocalizations.of(context).gridList),
         ],
       ),
     );
@@ -114,24 +116,25 @@ class _ForestScreenState extends State<ForestScreen> {
   }
 
   Future<void> _deleteBudget(BudgetModel budget) async {
+    final l = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF0D2410),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Remove this tree?',
+          l.removeTreeTitle,
           style: GoogleFonts.fredoka(fontWeight: FontWeight.w600,
               color: AppColors.stoneBeigeColor, fontSize: 20),
         ),
         content: Text(
-          '"${budget.budgetName}" will be permanently removed from your forest.',
+          l.removeTreeBody(budget.budgetName),
           style: GoogleFonts.nunito(color: AppColors.mossGreen, fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(l.cancel, style: GoogleFonts.nunito(color: AppColors.mossGreen)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -139,7 +142,7 @@ class _ForestScreenState extends State<ForestScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Delete',
+            child: Text(l.delete,
                 style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
@@ -173,6 +176,7 @@ class _ForestScreenState extends State<ForestScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -211,7 +215,7 @@ class _ForestScreenState extends State<ForestScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Your Forest',
+                              l.yourForest,
                               style: GoogleFonts.fredoka(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.stoneBeigeColor,
@@ -226,8 +230,8 @@ class _ForestScreenState extends State<ForestScreen> {
                             ),
                             Text(
                               _loading
-                                  ? 'Loading…'
-                                  : '${_budgets.length} budget tree${_budgets.length == 1 ? '' : 's'} planted',
+                                  ? l.loadingEllipsis
+                                  : l.budgetTreesPlanted(_budgets.length),
                               style: GoogleFonts.nunito(
                                   color: AppColors.mossGreen, fontSize: 12),
                             ),
@@ -682,7 +686,7 @@ class _BudgetCard extends StatelessWidget {
                               ),
                               icon: const Icon(Icons.park,
                                   size: 16, color: Colors.white),
-                              label: Text('View Full Tree',
+                              label: Text(AppLocalizations.of(context).viewFullTree,
                                   style: GoogleFonts.nunito(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -706,7 +710,7 @@ class _BudgetCard extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(vertical: 11),
                                   ),
                                   icon: const Icon(Icons.edit_outlined, size: 15),
-                                  label: Text('Edit',
+                                  label: Text(AppLocalizations.of(context).edit,
                                       style: GoogleFonts.nunito(fontWeight: FontWeight.bold)),
                                   onPressed: onEdit,
                                 ),
@@ -723,7 +727,7 @@ class _BudgetCard extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(vertical: 11),
                                   ),
                                   icon: const Icon(Icons.delete_outline, size: 15),
-                                  label: Text('Delete',
+                                  label: Text(AppLocalizations.of(context).delete,
                                       style: GoogleFonts.nunito(fontWeight: FontWeight.bold)),
                                   onPressed: onDelete,
                                 ),
@@ -885,7 +889,7 @@ class _NoMatchInCategory extends StatelessWidget {
                 color: AppColors.lightLeaf, size: 56),
             const SizedBox(height: 18),
             Text(
-              'No trees in this category yet',
+              AppLocalizations.of(context).noTreesCategoryTitle,
               style: GoogleFonts.fredoka(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
@@ -894,7 +898,7 @@ class _NoMatchInCategory extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Either plant a new tree in this category or clear the filter to see everything.',
+              AppLocalizations.of(context).noTreesCategoryBody,
               style: GoogleFonts.nunito(
                   color: AppColors.mossGreen, fontSize: 13, height: 1.5),
               textAlign: TextAlign.center,
@@ -910,7 +914,7 @@ class _NoMatchInCategory extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 22, vertical: 11),
               ),
               icon: const Icon(Icons.refresh, color: Colors.white, size: 16),
-              label: Text('Show all',
+              label: Text(AppLocalizations.of(context).showAll,
                   style: GoogleFonts.nunito(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -942,7 +946,7 @@ class _EmptyForest extends StatelessWidget {
             const Icon(Icons.park, color: AppColors.lightLeaf, size: 72),
             const SizedBox(height: 22),
             Text(
-              'Your forest is empty',
+              AppLocalizations.of(context).forestEmptyTitle,
               style: GoogleFonts.fredoka(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
@@ -951,7 +955,7 @@ class _EmptyForest extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Plant your first budget tree by going back and creating a new budget.',
+              AppLocalizations.of(context).forestEmptyBody,
               style: GoogleFonts.nunito(
                   color: AppColors.mossGreen, fontSize: 14, height: 1.6),
               textAlign: TextAlign.center,
@@ -969,7 +973,7 @@ class _EmptyForest extends StatelessWidget {
               ),
               icon: const Icon(Icons.park, color: Colors.white),
               label: Text(
-                'Go Plant a Tree',
+                AppLocalizations.of(context).goPlantATree,
                 style: GoogleFonts.nunito(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -1054,6 +1058,7 @@ class _EditSheetState extends State<_EditSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final totalIncome = widget.budget.totalIncome;
     final remaining = totalIncome - _allocatedNow;
     final isOver = remaining < 0;
@@ -1079,7 +1084,7 @@ class _EditSheetState extends State<_EditSheet> {
           ),
           const SizedBox(height: 18),
           Text(
-            'Edit Budget',
+            l.editBudget,
             style: GoogleFonts.fredoka(
                 fontWeight: FontWeight.w600,
                 color: AppColors.stoneBeigeColor,
@@ -1089,9 +1094,9 @@ class _EditSheetState extends State<_EditSheet> {
           TextField(
             controller: _nameCtrl,
             style: const TextStyle(color: AppColors.stoneBeigeColor),
-            decoration: const InputDecoration(
-              labelText: 'Budget name',
-              prefixIcon: Icon(Icons.park, color: AppColors.mossGreen),
+            decoration: InputDecoration(
+              labelText: l.budgetName,
+              prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
             ),
             textCapitalization: TextCapitalization.words,
           ),
@@ -1099,7 +1104,7 @@ class _EditSheetState extends State<_EditSheet> {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'CATEGORY',
+              l.categoryUpper,
               style: GoogleFonts.nunito(
                 color: AppColors.mossGreen.withValues(alpha: 0.75),
                 fontSize: 10.5,
@@ -1124,13 +1129,13 @@ class _EditSheetState extends State<_EditSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Income: \$${totalIncome.toStringAsFixed(2)}',
+                Text(l.incomeAmount('\$${totalIncome.toStringAsFixed(2)}'),
                     style:
                         GoogleFonts.nunito(color: AppColors.mossGreen, fontSize: 12)),
                 Text(
                   isOver
-                      ? '⚠ Over: \$${(-remaining).toStringAsFixed(2)}'
-                      : 'Left: \$${remaining.toStringAsFixed(2)}',
+                      ? l.overAmount('\$${(-remaining).toStringAsFixed(2)}')
+                      : l.leftAmount('\$${remaining.toStringAsFixed(2)}'),
                   style: GoogleFonts.nunito(
                     color: isOver ? AppColors.dangerRed : AppColors.lightLeaf,
                     fontSize: 12,
@@ -1210,7 +1215,7 @@ class _EditSheetState extends State<_EditSheet> {
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2))
                   : Text(
-                      'Save Changes',
+                      l.saveChanges,
                       style: GoogleFonts.nunito(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

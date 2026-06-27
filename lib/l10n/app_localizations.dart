@@ -1017,6 +1017,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mature'**
   String get milestoneMature;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @walkThroughForest.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk through your forest'**
+  String get walkThroughForest;
+
+  /// No description provided for @gridList.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid list'**
+  String get gridList;
+
+  /// No description provided for @removeTreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this tree?'**
+  String get removeTreeTitle;
+
+  /// No description provided for @removeTreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" will be permanently removed from your forest.'**
+  String removeTreeBody(String name);
+
+  /// No description provided for @yourForest.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Forest'**
+  String get yourForest;
+
+  /// No description provided for @budgetTreesPlanted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 budget tree planted} other{{count} budget trees planted}}'**
+  String budgetTreesPlanted(int count);
+
+  /// No description provided for @viewFullTree.
+  ///
+  /// In en, this message translates to:
+  /// **'View Full Tree'**
+  String get viewFullTree;
+
+  /// No description provided for @noTreesCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No trees in this category yet'**
+  String get noTreesCategoryTitle;
+
+  /// No description provided for @noTreesCategoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Either plant a new tree in this category or clear the filter to see everything.'**
+  String get noTreesCategoryBody;
+
+  /// No description provided for @forestEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your forest is empty'**
+  String get forestEmptyTitle;
+
+  /// No description provided for @forestEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant your first budget tree by going back and creating a new budget.'**
+  String get forestEmptyBody;
+
+  /// No description provided for @goPlantATree.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Plant a Tree'**
+  String get goPlantATree;
+
+  /// No description provided for @editBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Budget'**
+  String get editBudget;
+
+  /// No description provided for @budgetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget name'**
+  String get budgetName;
+
+  /// No description provided for @categoryUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'CATEGORY'**
+  String get categoryUpper;
+
+  /// No description provided for @incomeAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Income: {amount}'**
+  String incomeAmount(String amount);
+
+  /// No description provided for @overAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠ Over: {amount}'**
+  String overAmount(String amount);
+
+  /// No description provided for @leftAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Left: {amount}'**
+  String leftAmount(String amount);
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
 }
 
 class _AppLocalizationsDelegate

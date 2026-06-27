@@ -163,5 +163,26 @@
   "fundedByUpper": "FINANCIADA POR",
   "adjust": "Ajustar",
   "milestoneSeed": "Semilla",
-  "milestoneMature": "Maduro"
+  "milestoneMature": "Maduro",
+
+  "edit": "Editar",
+  "walkThroughForest": "Recorre tu bosque",
+  "gridList": "Lista en cuadrícula",
+  "removeTreeTitle": "¿Eliminar este árbol?",
+  "removeTreeBody": "«{name}» se eliminará permanentemente de tu bosque.",
+  "yourForest": "Tu bosque",
+  "budgetTreesPlanted": "{count, plural, =1{1 árbol de presupuesto plantado} other{{count} árboles de presupuesto plantados}}",
+  "viewFullTree": "Ver árbol completo",
+  "noTreesCategoryTitle": "Aún no hay árboles en esta categoría",
+  "noTreesCategoryBody": "Planta un nuevo árbol en esta categoría o quita el filtro para ver todo.",
+  "forestEmptyTitle": "Tu bosque está vacío",
+  "forestEmptyBody": "Planta tu primer árbol de presupuesto volviendo atrás y creando un presupuesto.",
+  "goPlantATree": "Ir a plantar un árbol",
+  "editBudget": "Editar presupuesto",
+  "budgetName": "Nombre del presupuesto",
+  "categoryUpper": "CATEGORÍA",
+  "incomeAmount": "Ingresos: {amount}",
+  "overAmount": "⚠ Excedido: {amount}",
+  "leftAmount": "Restante: {amount}",
+  "saveChanges": "Guardar cambios"
 }

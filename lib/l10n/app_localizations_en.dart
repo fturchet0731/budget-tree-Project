@@ -545,4 +545,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get milestoneMature => 'Mature';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get walkThroughForest => 'Walk through your forest';
+
+  @override
+  String get gridList => 'Grid list';
+
+  @override
+  String get removeTreeTitle => 'Remove this tree?';
+
+  @override
+  String removeTreeBody(String name) {
+    return '\"$name\" will be permanently removed from your forest.';
+  }
+
+  @override
+  String get yourForest => 'Your Forest';
+
+  @override
+  String budgetTreesPlanted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budget trees planted',
+      one: '1 budget tree planted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewFullTree => 'View Full Tree';
+
+  @override
+  String get noTreesCategoryTitle => 'No trees in this category yet';
+
+  @override
+  String get noTreesCategoryBody =>
+      'Either plant a new tree in this category or clear the filter to see everything.';
+
+  @override
+  String get forestEmptyTitle => 'Your forest is empty';
+
+  @override
+  String get forestEmptyBody =>
+      'Plant your first budget tree by going back and creating a new budget.';
+
+  @override
+  String get goPlantATree => 'Go Plant a Tree';
+
+  @override
+  String get editBudget => 'Edit Budget';
+
+  @override
+  String get budgetName => 'Budget name';
+
+  @override
+  String get categoryUpper => 'CATEGORY';
+
+  @override
+  String incomeAmount(String amount) {
+    return 'Income: $amount';
+  }
+
+  @override
+  String overAmount(String amount) {
+    return '⚠ Over: $amount';
+  }
+
+  @override
+  String leftAmount(String amount) {
+    return 'Left: $amount';
+  }
+
+  @override
+  String get saveChanges => 'Save Changes';
 }
