@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
@@ -169,18 +170,20 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       await ProfileService.instance.setFeaturedGoal(feature ? _goal.id : null);
       if (mounted) {
         setState(() => _featuredGoalId = feature ? _goal.id : null);
+        final l = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(feature
-                ? 'Featured on your profile — friends will see this first.'
-                : 'Removed from your profile.'),
+            content: Text(
+                feature ? l.featuredOnProfileSnack : l.removedFromProfile),
           ),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Couldn\'t update your profile.')),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context).couldntUpdateProfile)),
         );
       }
     } finally {
@@ -189,6 +192,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   }
 
   void _showDeposit() {
+    final l = AppLocalizations.of(context);
     final ctrl = TextEditingController();
     showModalBottomSheet(
       context: context,
@@ -215,14 +219,14 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 ),
               ),
               const SizedBox(height: 18),
-              Text('Water the Sapling',
+              Text(l.waterTheSapling,
                   style: GoogleFonts.fredoka(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
                       fontSize: 20)),
               const SizedBox(height: 4),
               Text(
-                'Deposit toward "${_goal.name}"',
+                l.depositToward(_goal.name),
                 style: GoogleFonts.nunito(
                     color: AppColors.mossGreen, fontSize: 13),
               ),
@@ -289,7 +293,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     await _celebrateProgress(wasComplete, prevStage, prevTier);
                   },
                   icon: const Icon(Icons.water_drop, color: Colors.white),
-                  label: Text('Deposit',
+                  label: Text(l.deposit,
                       style: GoogleFonts.nunito(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -321,7 +325,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   },
                   icon: const Icon(Icons.remove,
                       color: AppColors.warningAmber),
-                  label: Text('Withdraw',
+                  label: Text(l.withdraw,
                       style: GoogleFonts.nunito(
                           color: AppColors.warningAmber,
                           fontWeight: FontWeight.bold)),
@@ -350,26 +354,24 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
     final earned = await AchievementService.evaluateAndUnlock();
 
     if (!mounted) return;
+    final l = AppLocalizations.of(context);
     if (!wasComplete && _goal.isComplete) {
       SoundService.celebrate();
       await showCelebration(
         context,
-        title: 'Goal Reached!',
-        message:
-            'Your "${_goal.name}" sapling has grown into a mature tree. '
-            'Well done!',
+        title: l.goalReachedTitle,
+        message: l.goalReachedMsg(_goal.name),
         icon: Icons.emoji_events,
       );
     } else if (_goal.isUncapped && _goal.tier > prevTier) {
       SoundService.milestone();
       await showCelebration(
         context,
-        title: 'New Growth!',
-        message:
-            '"${_goal.name}" reached Tier ${_goal.tier} — ${_goal.tierName}.',
+        title: l.newGrowthTitle,
+        message: l.newGrowthMsg(_goal.name, _goal.tier, _goal.tierName),
         icon: Icons.nature,
         color: AppColors.lightLeaf,
-        buttonLabel: 'Keep growing',
+        buttonLabel: l.keepGrowing,
       );
     } else if (!_goal.isUncapped &&
         _goal.stage > prevStage &&
@@ -377,13 +379,12 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       SoundService.milestone();
       await showCelebration(
         context,
-        title: 'Milestone!',
-        message:
-            '"${_goal.name}" grew to ${_goal.stageName} '
-            '(${(_goal.progress * 100).round()}%).',
+        title: l.milestoneTitle,
+        message: l.milestoneMsg(
+            _goal.name, _goal.stageName, (_goal.progress * 100).round()),
         icon: Icons.local_florist,
         color: AppColors.lightLeaf,
-        buttonLabel: 'Nice',
+        buttonLabel: l.nice,
       );
     }
 
@@ -393,27 +394,28 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   }
 
   Future<void> _confirmDelete() async {
+    final l = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF0D2410),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Remove sapling?',
+          l.removeSaplingTitle,
           style: GoogleFonts.fredoka(
               fontWeight: FontWeight.w600,
               color: AppColors.stoneBeigeColor,
               fontSize: 20),
         ),
         content: Text(
-          '"${_goal.name}" will be permanently removed from your grove.',
+          l.removeSaplingBody(_goal.name),
           style: GoogleFonts.nunito(
               color: AppColors.mossGreen, fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
+            child: Text(l.cancel,
                 style: GoogleFonts.nunito(color: AppColors.mossGreen)),
           ),
           ElevatedButton(
@@ -423,7 +425,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Delete',
+            child: Text(l.delete,
                 style: GoogleFonts.nunito(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),
@@ -438,6 +440,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   }
 
   void _showEditDialog() {
+    final l = AppLocalizations.of(context);
     final nameCtrl = TextEditingController(text: _goal.name);
     final targetCtrl = TextEditingController(
         text: _goal.targetAmount > 0
@@ -451,7 +454,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
         builder: (sbCtx, setSBState) => AlertDialog(
           backgroundColor: const Color(0xFF122B0F),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Edit Goal',
+          title: Text(l.editGoal,
               style: GoogleFonts.fredoka(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
@@ -464,7 +467,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 TextField(
                   controller: nameCtrl,
                   style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: InputDecoration(labelText: l.name),
                   textCapitalization: TextCapitalization.words,
                 ),
                 const SizedBox(height: 14),
@@ -480,8 +483,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
                     ],
-                    decoration: const InputDecoration(
-                        labelText: 'Target', prefixText: '\$ '),
+                    decoration: InputDecoration(
+                        labelText: l.target, prefixText: '\$ '),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -504,7 +507,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Grow forever (no target, uses tiers)',
+                            l.growForeverTiers,
                             style: GoogleFonts.nunito(
                               color: AppColors.stoneBeigeColor,
                               fontSize: 12.5,
@@ -517,7 +520,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'GROUP',
+                  l.groupUpper,
                   style: GoogleFonts.nunito(
                     color: AppColors.mossGreen.withValues(alpha: 0.75),
                     fontSize: 10.5,
@@ -536,7 +539,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel',
+              child: Text(l.cancel,
                   style: GoogleFonts.nunito(color: AppColors.mossGreen)),
             ),
             ElevatedButton(
@@ -562,7 +565,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 await _animateTo(_goal.progress);
                 if (ctx.mounted) Navigator.pop(ctx);
               },
-              child: Text('Save',
+              child: Text(l.save,
                   style: GoogleFonts.nunito(
                       color: Colors.white, fontWeight: FontWeight.bold)),
             ),
@@ -574,6 +577,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final complete = _goal.isComplete;
     return PopScope(
       canPop: false,
@@ -744,7 +748,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('SAVED',
+                            Text(l.savedUpper,
                                 style: GoogleFonts.nunito(
                                   color: AppColors.mossGreen
                                       .withValues(alpha: 0.7),
@@ -768,7 +772,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(_goal.isUncapped ? 'TIER' : 'TARGET',
+                            Text(_goal.isUncapped ? l.tierUpper : l.targetUpper,
                                 style: GoogleFonts.nunito(
                                   color: AppColors.mossGreen
                                       .withValues(alpha: 0.7),
@@ -812,16 +816,18 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         Text(
                           _goal.isUncapped
                               ? _goal.tierName
-                              : '${(_displayedProgress * 100).toStringAsFixed(0)}% grown',
+                              : l.percentGrown(
+                                  (_displayedProgress * 100).round()),
                           style: GoogleFonts.nunito(
                               color: AppColors.mossGreen, fontSize: 11),
                         ),
                         Text(
                           _goal.isUncapped
-                              ? 'No cap · keeps growing'
+                              ? l.noCapKeepsGrowing
                               : complete
-                                  ? 'Goal reached'
-                                  : '\$${_goal.remaining.toStringAsFixed(2)} to go',
+                                  ? l.goalReachedShort
+                                  : l.amountToGo(
+                                      '\$${_goal.remaining.toStringAsFixed(2)}'),
                           style: GoogleFonts.nunito(
                               color: complete
                                   ? const Color(0xFFFFD54F)
@@ -850,8 +856,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                           Expanded(
                             child: Text(
                               _goal.sharedWithFriends
-                                  ? 'Visible to friends'
-                                  : 'Private — only you',
+                                  ? l.visibleToFriends
+                                  : l.privateOnlyYou,
                               style: GoogleFonts.nunito(
                                   color: AppColors.stoneBeigeColor,
                                   fontSize: 13),
@@ -876,8 +882,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                             Expanded(
                               child: Text(
                                 _featuredGoalId == _goal.id
-                                    ? 'Featured on your profile'
-                                    : 'Feature on your profile',
+                                    ? l.featuredOnYourProfile
+                                    : l.featureOnYourProfile,
                                 style: GoogleFonts.nunito(
                                     color: AppColors.stoneBeigeColor,
                                     fontSize: 13),
@@ -911,7 +917,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                                   AppColors.mossGreen.withValues(alpha: 0.8)),
                           const SizedBox(width: 5),
                           Text(
-                            'FUNDED BY',
+                            l.fundedByUpper,
                             style: GoogleFonts.nunito(
                               color: AppColors.mossGreen.withValues(alpha: 0.8),
                               fontSize: 10,
@@ -977,7 +983,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         icon: const Icon(Icons.water_drop,
                             color: Colors.white),
                         label: Text(
-                          complete ? 'Adjust' : 'Water the Sapling',
+                          complete ? l.adjust : l.waterTheSapling,
                           style: GoogleFonts.nunito(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -1013,8 +1019,9 @@ class _MilestoneRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final stops = [0.0, 0.25, 0.50, 0.75, 1.0];
-    final labels = ['Seed', '25%', '50%', '75%', 'Mature'];
+    final labels = [l.milestoneSeed, '25%', '50%', '75%', l.milestoneMature];
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(5, (i) {

@@ -421,4 +421,134 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get plantSapling => 'Plantar arbolito';
+
+  @override
+  String get delete => 'Eliminar';
+
+  @override
+  String get name => 'Nombre';
+
+  @override
+  String get featuredOnProfileSnack =>
+      'Destacada en tu perfil: tus amigos la verán primero.';
+
+  @override
+  String get removedFromProfile => 'Quitada de tu perfil.';
+
+  @override
+  String get couldntUpdateProfile => 'No se pudo actualizar tu perfil.';
+
+  @override
+  String get waterTheSapling => 'Riega el arbolito';
+
+  @override
+  String depositToward(String name) {
+    return 'Depositar para «$name»';
+  }
+
+  @override
+  String get deposit => 'Depositar';
+
+  @override
+  String get withdraw => 'Retirar';
+
+  @override
+  String get goalReachedTitle => '¡Meta alcanzada!';
+
+  @override
+  String goalReachedMsg(String name) {
+    return 'Tu arbolito «$name» ha crecido hasta ser un árbol maduro. ¡Bien hecho!';
+  }
+
+  @override
+  String get newGrowthTitle => '¡Nuevo crecimiento!';
+
+  @override
+  String newGrowthMsg(String name, int tier, String tierName) {
+    return '«$name» alcanzó el nivel $tier — $tierName.';
+  }
+
+  @override
+  String get keepGrowing => 'Seguir creciendo';
+
+  @override
+  String get milestoneTitle => '¡Hito!';
+
+  @override
+  String milestoneMsg(String name, String stage, int pct) {
+    return '«$name» creció hasta $stage ($pct%).';
+  }
+
+  @override
+  String get nice => 'Genial';
+
+  @override
+  String get removeSaplingTitle => '¿Eliminar el arbolito?';
+
+  @override
+  String removeSaplingBody(String name) {
+    return '«$name» se eliminará permanentemente de tu arboleda.';
+  }
+
+  @override
+  String get editGoal => 'Editar meta';
+
+  @override
+  String get target => 'Objetivo';
+
+  @override
+  String get growForeverTiers =>
+      'Crecer sin límite (sin objetivo, por niveles)';
+
+  @override
+  String get groupUpper => 'GRUPO';
+
+  @override
+  String get savedUpper => 'AHORRADO';
+
+  @override
+  String get tierUpper => 'NIVEL';
+
+  @override
+  String get targetUpper => 'OBJETIVO';
+
+  @override
+  String percentGrown(int pct) {
+    return '$pct% crecido';
+  }
+
+  @override
+  String get noCapKeepsGrowing => 'Sin tope · sigue creciendo';
+
+  @override
+  String get goalReachedShort => 'Meta alcanzada';
+
+  @override
+  String amountToGo(String amount) {
+    return 'Faltan $amount';
+  }
+
+  @override
+  String get visibleToFriends => 'Visible para amigos';
+
+  @override
+  String get privateOnlyYou => 'Privada — solo tú';
+
+  @override
+  String get featuredOnYourProfile => 'Destacada en tu perfil';
+
+  @override
+  String get featureOnYourProfile => 'Destacar en tu perfil';
+
+  @override
+  String get fundedByUpper => 'FINANCIADA POR';
+
+  @override
+  String get adjust => 'Ajustar';
+
+  @override
+  String get milestoneSeed => 'Semilla';
+
+  @override
+  String get milestoneMature => 'Maduro';
 }

@@ -789,6 +789,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plant Sapling'**
   String get plantSapling;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @featuredOnProfileSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured on your profile — friends will see this first.'**
+  String get featuredOnProfileSnack;
+
+  /// No description provided for @removedFromProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from your profile.'**
+  String get removedFromProfile;
+
+  /// No description provided for @couldntUpdateProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update your profile.'**
+  String get couldntUpdateProfile;
+
+  /// No description provided for @waterTheSapling.
+  ///
+  /// In en, this message translates to:
+  /// **'Water the Sapling'**
+  String get waterTheSapling;
+
+  /// No description provided for @depositToward.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit toward \"{name}\"'**
+  String depositToward(String name);
+
+  /// No description provided for @deposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get deposit;
+
+  /// No description provided for @withdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get withdraw;
+
+  /// No description provided for @goalReachedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Reached!'**
+  String get goalReachedTitle;
+
+  /// No description provided for @goalReachedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your \"{name}\" sapling has grown into a mature tree. Well done!'**
+  String goalReachedMsg(String name);
+
+  /// No description provided for @newGrowthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Growth!'**
+  String get newGrowthTitle;
+
+  /// No description provided for @newGrowthMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" reached Tier {tier} — {tierName}.'**
+  String newGrowthMsg(String name, int tier, String tierName);
+
+  /// No description provided for @keepGrowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep growing'**
+  String get keepGrowing;
+
+  /// No description provided for @milestoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone!'**
+  String get milestoneTitle;
+
+  /// No description provided for @milestoneMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" grew to {stage} ({pct}%).'**
+  String milestoneMsg(String name, String stage, int pct);
+
+  /// No description provided for @nice.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice'**
+  String get nice;
+
+  /// No description provided for @removeSaplingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove sapling?'**
+  String get removeSaplingTitle;
+
+  /// No description provided for @removeSaplingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" will be permanently removed from your grove.'**
+  String removeSaplingBody(String name);
+
+  /// No description provided for @editGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Goal'**
+  String get editGoal;
+
+  /// No description provided for @target.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get target;
+
+  /// No description provided for @growForeverTiers.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow forever (no target, uses tiers)'**
+  String get growForeverTiers;
+
+  /// No description provided for @groupUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'GROUP'**
+  String get groupUpper;
+
+  /// No description provided for @savedUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVED'**
+  String get savedUpper;
+
+  /// No description provided for @tierUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'TIER'**
+  String get tierUpper;
+
+  /// No description provided for @targetUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'TARGET'**
+  String get targetUpper;
+
+  /// No description provided for @percentGrown.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% grown'**
+  String percentGrown(int pct);
+
+  /// No description provided for @noCapKeepsGrowing.
+  ///
+  /// In en, this message translates to:
+  /// **'No cap · keeps growing'**
+  String get noCapKeepsGrowing;
+
+  /// No description provided for @goalReachedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal reached'**
+  String get goalReachedShort;
+
+  /// No description provided for @amountToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to go'**
+  String amountToGo(String amount);
+
+  /// No description provided for @visibleToFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to friends'**
+  String get visibleToFriends;
+
+  /// No description provided for @privateOnlyYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Private — only you'**
+  String get privateOnlyYou;
+
+  /// No description provided for @featuredOnYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured on your profile'**
+  String get featuredOnYourProfile;
+
+  /// No description provided for @featureOnYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature on your profile'**
+  String get featureOnYourProfile;
+
+  /// No description provided for @fundedByUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'FUNDED BY'**
+  String get fundedByUpper;
+
+  /// No description provided for @adjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get adjust;
+
+  /// No description provided for @milestoneSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get milestoneSeed;
+
+  /// No description provided for @milestoneMature.
+  ///
+  /// In en, this message translates to:
+  /// **'Mature'**
+  String get milestoneMature;
 }
 
 class _AppLocalizationsDelegate
