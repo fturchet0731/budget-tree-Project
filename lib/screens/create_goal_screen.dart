@@ -6,6 +6,7 @@ import '../models/goal_model.dart';
 import '../services/achievement_service.dart';
 import '../services/category_repository.dart';
 import '../services/goal_repository.dart';
+import '../services/profile_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
@@ -60,8 +61,38 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       ? LeafPalette.fromAccent(Color(_pickedCategory!.colorValue))
       : LeafPalette.defaultGreen;
 
+  /// Ask, at creation time, whether this goal should be visible to friends.
+  /// Only shown when the social layer is available (signed in + online-capable)
+  /// — otherwise there's nothing to share to, so it stays private.
+  Future<bool> _askVisibility() async {
+    if (!ProfileService.instance.isAvailable) return false;
+    final share = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Share this goal?'),
+        content: const Text(
+            'Do you want your friends to see this goal and its plant in their '
+            'friends list? You can change this anytime on the goal.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Keep private'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Share with friends'),
+          ),
+        ],
+      ),
+    );
+    return share ?? false;
+  }
+
   Future<void> _save() async {
     if (_saving || !_canSave) return;
+    final share = await _askVisibility();
+    if (!mounted) return;
     setState(() => _saving = true);
     final goal = Goal(
       name: _nameCtrl.text.trim(),
@@ -69,6 +100,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       targetAmount: _uncapped ? 0 : double.parse(_targetCtrl.text),
       iconKey: _iconKey,
       categoryId: _categoryId,
+      sharedWithFriends: share,
     );
     await GoalRepository.saveNew(goal);
     SoundService.goalSet();

@@ -8,6 +8,7 @@ import '../services/achievement_service.dart';
 import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
 import '../services/goal_repository.dart';
+import '../services/profile_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
@@ -130,6 +131,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   Future<void> _persist() async {
     _changed = true;
     await GoalRepository.update(_goal);
+  }
+
+  /// Flip whether friends can see this goal. Persists immediately so the
+  /// Supabase row's `sharedWithFriends` flag (read by the RLS policy) updates.
+  Future<void> _toggleShared(bool v) async {
+    setState(() => _goal.sharedWithFriends = v);
+    await _persist();
   }
 
   void _showDeposit() {
@@ -782,6 +790,36 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     ),
                     const SizedBox(height: 8),
                     _MilestoneRow(progress: _displayedProgress),
+                    if (ProfileService.instance.isAvailable) ...[
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Icon(
+                            _goal.sharedWithFriends
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            size: 16,
+                            color: AppColors.mossGreen,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _goal.sharedWithFriends
+                                  ? 'Visible to friends'
+                                  : 'Private — only you',
+                              style: GoogleFonts.nunito(
+                                  color: AppColors.stoneBeigeColor,
+                                  fontSize: 13),
+                            ),
+                          ),
+                          Switch(
+                            value: _goal.sharedWithFriends,
+                            activeThumbColor: AppColors.lightLeaf,
+                            onChanged: _toggleShared,
+                          ),
+                        ],
+                      ),
+                    ],
                     if (_linkedBranches.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Row(

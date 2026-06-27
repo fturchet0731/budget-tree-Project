@@ -4,6 +4,7 @@ import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
+import 'friends_screen.dart';
 import 'goals_screen.dart';
 import 'settings_screen.dart';
 
@@ -63,7 +64,23 @@ class _DashboardScreenState extends State<DashboardScreen>
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8, right: 8),
+                    child: TextButton.icon(
+                      onPressed: () =>
+                          _navigate(context, const FriendsScreen()),
+                      icon: const Icon(Icons.people_alt_rounded,
+                          color: AppColors.lightLeaf, size: 20),
+                      label: const Text(
+                        'Friends',
+                        style: TextStyle(
+                            color: AppColors.lightLeaf, letterSpacing: 0.5),
+                      ),
+                    ),
+                  ),
+                ),
                 Text(
                   'Budget Tree',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(

@@ -49,6 +49,12 @@ class Goal {
   DateTime? targetDate;
   String? categoryId;
 
+  /// When true, accepted friends may view this goal (its sapling + progress)
+  /// in their friends list. Defaults to false — sharing is always opt-in, and
+  /// this exact field is what the Supabase "friends read shared goals" RLS
+  /// policy reads (`data->>'sharedWithFriends'`). Budgets are never shared.
+  bool sharedWithFriends;
+
   /// Dated history of every deposit/withdrawal. Source of truth for
   /// [currentAmount] is still the running field (so legacy records load
   /// unchanged), but new money always also lands here.
@@ -65,6 +71,7 @@ class Goal {
     this.completedAt,
     this.targetDate,
     this.categoryId,
+    this.sharedWithFriends = false,
     List<Contribution>? contributions,
   })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         createdAt = createdAt ?? DateTime.now(),
@@ -187,6 +194,7 @@ class Goal {
         'completedAt': completedAt?.millisecondsSinceEpoch,
         'targetDate': targetDate?.millisecondsSinceEpoch,
         'categoryId': categoryId,
+        'sharedWithFriends': sharedWithFriends,
         'contributions': contributions.map((c) => c.toJson()).toList(),
       };
 
@@ -206,6 +214,7 @@ class Goal {
             ? DateTime.fromMillisecondsSinceEpoch(j['targetDate'] as int)
             : null,
         categoryId: j['categoryId'] as String?,
+        sharedWithFriends: (j['sharedWithFriends'] as bool?) ?? false,
         contributions: (j['contributions'] as List?)
                 ?.map((e) =>
                     Contribution.fromJson(e as Map<String, dynamic>))
