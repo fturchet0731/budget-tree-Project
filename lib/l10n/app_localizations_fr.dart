@@ -260,4 +260,99 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get statusModeGoal => 'Un objectif choisi';
+
+  @override
+  String get groveTitle => 'Le Bosquet';
+
+  @override
+  String get loadingEllipsis => 'Chargement…';
+
+  @override
+  String get plantAGoal => 'Planter un objectif';
+
+  @override
+  String get goalReached => 'Objectif atteint !';
+
+  @override
+  String goalsGrowing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count objectifs grandissent',
+      one: '1 objectif grandit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String completedFilter(int count) {
+    return 'Terminés · $count';
+  }
+
+  @override
+  String savingStreakWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'série d\'épargne de $count semaines',
+      one: 'série d\'épargne de 1 semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get startSavingStreak => 'Commencez une série d\'épargne';
+
+  @override
+  String get streakAtRisk =>
+      'Ajoutez à un objectif cette semaine pour la garder active';
+
+  @override
+  String streakBest(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines',
+      one: '1 semaine',
+    );
+    return 'Record : $_temp0 · bravo !';
+  }
+
+  @override
+  String get depositEachWeek => 'Déposez chaque semaine pour bâtir une série';
+
+  @override
+  String monthThisAmount(String amount) {
+    return '$amount ce mois-ci';
+  }
+
+  @override
+  String monthVsLastUp(int pct) {
+    return '+$pct % vs le mois dernier';
+  }
+
+  @override
+  String monthVsLastDown(int pct) {
+    return '$pct % vs le mois dernier';
+  }
+
+  @override
+  String get noSaplingsTitle => 'Aucun jeune arbre pour l\'instant';
+
+  @override
+  String get noSaplingsBody =>
+      'Plantez un objectif et regardez-le grandir à mesure que vous épargnez.';
+
+  @override
+  String get plantFirstSapling => 'Plantez votre premier arbre';
+
+  @override
+  String get noSaplingsCategoryTitle => 'Aucun arbre dans cette catégorie';
+
+  @override
+  String get noSaplingsCategoryBody =>
+      'Plantez un objectif dans cette catégorie ou effacez le filtre pour voir tous les arbres.';
+
+  @override
+  String get showAll => 'Tout afficher';
 }

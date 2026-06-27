@@ -258,4 +258,100 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get statusModeGoal => 'Una meta elegida';
+
+  @override
+  String get groveTitle => 'La Arboleda';
+
+  @override
+  String get loadingEllipsis => 'Cargando…';
+
+  @override
+  String get plantAGoal => 'Plantar una meta';
+
+  @override
+  String get goalReached => '¡Meta alcanzada!';
+
+  @override
+  String goalsGrowing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count metas están creciendo',
+      one: '1 meta está creciendo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String completedFilter(int count) {
+    return 'Completadas · $count';
+  }
+
+  @override
+  String savingStreakWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'racha de ahorro de $count semanas',
+      one: 'racha de ahorro de 1 semana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get startSavingStreak => 'Empieza una racha de ahorro';
+
+  @override
+  String get streakAtRisk =>
+      'Añade a una meta esta semana para mantenerla viva';
+
+  @override
+  String streakBest(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semanas',
+      one: '1 semana',
+    );
+    return 'Mejor: $_temp0 · ¡bien hecho!';
+  }
+
+  @override
+  String get depositEachWeek => 'Deposita cada semana para crear una racha';
+
+  @override
+  String monthThisAmount(String amount) {
+    return '$amount este mes';
+  }
+
+  @override
+  String monthVsLastUp(int pct) {
+    return '+$pct% vs el mes pasado';
+  }
+
+  @override
+  String monthVsLastDown(int pct) {
+    return '$pct% vs el mes pasado';
+  }
+
+  @override
+  String get noSaplingsTitle => 'Aún no hay arbolitos';
+
+  @override
+  String get noSaplingsBody =>
+      'Planta una meta y mírala crecer a medida que ahorras para ella.';
+
+  @override
+  String get plantFirstSapling => 'Planta tu primer arbolito';
+
+  @override
+  String get noSaplingsCategoryTitle =>
+      'Aún no hay arbolitos en esta categoría';
+
+  @override
+  String get noSaplingsCategoryBody =>
+      'Planta una meta en esta categoría o quita el filtro para ver todos los arbolitos.';
+
+  @override
+  String get showAll => 'Mostrar todo';
 }

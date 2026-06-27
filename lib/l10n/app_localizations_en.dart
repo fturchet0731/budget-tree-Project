@@ -256,4 +256,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusModeGoal => 'A chosen goal';
+
+  @override
+  String get groveTitle => 'The Grove';
+
+  @override
+  String get loadingEllipsis => 'Loading…';
+
+  @override
+  String get plantAGoal => 'Plant a Goal';
+
+  @override
+  String get goalReached => 'Goal reached!';
+
+  @override
+  String goalsGrowing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals are growing',
+      one: '1 goal is growing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String completedFilter(int count) {
+    return 'Completed · $count';
+  }
+
+  @override
+  String savingStreakWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count-week saving streak',
+      one: '1-week saving streak',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get startSavingStreak => 'Start a saving streak';
+
+  @override
+  String get streakAtRisk => 'Add to a goal this week to keep it alive';
+
+  @override
+  String streakBest(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return 'Best: $_temp0 · nice work!';
+  }
+
+  @override
+  String get depositEachWeek => 'Deposit each week to grow a streak';
+
+  @override
+  String monthThisAmount(String amount) {
+    return '$amount this month';
+  }
+
+  @override
+  String monthVsLastUp(int pct) {
+    return '+$pct% vs last month';
+  }
+
+  @override
+  String monthVsLastDown(int pct) {
+    return '$pct% vs last month';
+  }
+
+  @override
+  String get noSaplingsTitle => 'No saplings yet';
+
+  @override
+  String get noSaplingsBody =>
+      'Plant a goal sapling and watch it grow as you save toward it.';
+
+  @override
+  String get plantFirstSapling => 'Plant Your First Sapling';
+
+  @override
+  String get noSaplingsCategoryTitle => 'No saplings in this category yet';
+
+  @override
+  String get noSaplingsCategoryBody =>
+      'Plant a goal in this category or clear the filter to see all saplings.';
+
+  @override
+  String get showAll => 'Show all';
 }

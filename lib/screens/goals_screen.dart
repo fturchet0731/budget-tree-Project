@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../services/category_repository.dart';
@@ -85,6 +86,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final l = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createGoal,
@@ -92,7 +94,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
         elevation: 6,
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
-          'Plant a Goal',
+          l.plantAGoal,
           style: GoogleFonts.nunito(
               color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -135,7 +137,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'The Grove',
+                              l.groveTitle,
                               style: GoogleFonts.fredoka(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.stoneBeigeColor,
@@ -150,8 +152,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
                             ),
                             Text(
                               _loading
-                                  ? 'Loading…'
-                                  : '${_goals.length} goal${_goals.length == 1 ? '' : 's'} ${_goals.length == 1 ? "is" : "are"} growing',
+                                  ? l.loadingEllipsis
+                                  : l.goalsGrowing(_goals.length),
                               style: GoogleFonts.nunito(
                                   color: AppColors.mossGreen, fontSize: 12),
                             ),
@@ -202,7 +204,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               ? const Color(0xFF2E1F00)
                               : const Color(0xFFFFD54F),
                         ),
-                        label: Text('Completed · $_completedCount'),
+                        label: Text(l.completedFilter(_completedCount)),
                         labelStyle: GoogleFonts.nunito(
                           color: _completedOnly
                               ? const Color(0xFF2E1F00)
@@ -293,6 +295,7 @@ class _GroveStatsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final streak = StreakService.weeklyStreak(goals);
     final month = ComparisonService.monthOverMonth(goals);
     return Container(
@@ -324,8 +327,8 @@ class _GroveStatsBar extends StatelessWidget {
               children: [
                 Text(
                   streak.hasStreak
-                      ? '${streak.currentWeeks}-week saving streak'
-                      : 'Start a saving streak',
+                      ? l.savingStreakWeeks(streak.currentWeeks)
+                      : l.startSavingStreak,
                   style: GoogleFonts.nunito(
                     color: AppColors.stoneBeigeColor,
                     fontWeight: FontWeight.bold,
@@ -335,9 +338,9 @@ class _GroveStatsBar extends StatelessWidget {
                 Text(
                   streak.hasStreak
                       ? (streak.atRisk
-                          ? 'Add to a goal this week to keep it alive'
-                          : 'Best: ${streak.bestWeeks} week${streak.bestWeeks == 1 ? '' : 's'} · nice work!')
-                      : 'Deposit each week to grow a streak',
+                          ? l.streakAtRisk
+                          : l.streakBest(streak.bestWeeks))
+                      : l.depositEachWeek,
                   style: GoogleFonts.nunito(
                     color: AppColors.mossGreen,
                     fontSize: 11,
@@ -360,21 +363,22 @@ class _MonthComparisonChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!month.hasActivity) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context);
     final pct = month.percentChange;
     final String text;
     final IconData icon;
     final Color color;
     if (pct == null) {
       // First month with savings — no prior baseline.
-      text = '\$${month.current.toStringAsFixed(0)} this month';
+      text = l.monthThisAmount('\$${month.current.toStringAsFixed(0)}');
       icon = Icons.savings_outlined;
       color = AppColors.lightLeaf;
     } else if (pct >= 0) {
-      text = '+${pct.round()}% vs last month';
+      text = l.monthVsLastUp(pct.round());
       icon = Icons.trending_up;
       color = const Color(0xFF8BC34A);
     } else {
-      text = '${pct.round()}% vs last month';
+      text = l.monthVsLastDown(pct.round());
       icon = Icons.trending_down;
       color = const Color(0xFFFFB74D);
     }
@@ -641,7 +645,9 @@ class _GoalCardState extends State<_GoalCard> {
                         const SizedBox(height: 3),
                         Text(
                           complete
-                              ? (goal.isComplete ? 'Goal reached!' : 'Completed ✓')
+                              ? (goal.isComplete
+                                  ? AppLocalizations.of(context).goalReached
+                                  : AppLocalizations.of(context).completedCheck)
                               : goal.isUncapped
                                   ? goal.tierName
                                   : '${(goal.progress * 100).toStringAsFixed(0)}% · ${goal.stageName}',
@@ -678,6 +684,7 @@ class _EmptyGrove extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(44),
@@ -688,7 +695,7 @@ class _EmptyGrove extends StatelessWidget {
                 color: AppColors.lightLeaf, size: 72),
             const SizedBox(height: 22),
             Text(
-              'No saplings yet',
+              l.noSaplingsTitle,
               style: GoogleFonts.fredoka(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
@@ -697,7 +704,7 @@ class _EmptyGrove extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Plant a goal sapling and watch it grow as you save toward it.',
+              l.noSaplingsBody,
               style: GoogleFonts.nunito(
                   color: AppColors.mossGreen, fontSize: 14, height: 1.55),
               textAlign: TextAlign.center,
@@ -715,7 +722,7 @@ class _EmptyGrove extends StatelessWidget {
               ),
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text(
-                'Plant Your First Sapling',
+                l.plantFirstSapling,
                 style: GoogleFonts.nunito(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -735,6 +742,7 @@ class _NoGoalsInCategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -745,7 +753,7 @@ class _NoGoalsInCategory extends StatelessWidget {
                 color: AppColors.lightLeaf, size: 56),
             const SizedBox(height: 18),
             Text(
-              'No saplings in this category yet',
+              l.noSaplingsCategoryTitle,
               style: GoogleFonts.fredoka(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
@@ -754,7 +762,7 @@ class _NoGoalsInCategory extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Plant a goal in this category or clear the filter to see all saplings.',
+              l.noSaplingsCategoryBody,
               style: GoogleFonts.nunito(
                   color: AppColors.mossGreen, fontSize: 13, height: 1.5),
               textAlign: TextAlign.center,
@@ -770,7 +778,7 @@ class _NoGoalsInCategory extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 22, vertical: 11),
               ),
               icon: const Icon(Icons.refresh, color: Colors.white, size: 16),
-              label: Text('Show all',
+              label: Text(l.showAll,
                   style: GoogleFonts.nunito(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

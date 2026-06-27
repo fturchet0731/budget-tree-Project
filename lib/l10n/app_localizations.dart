@@ -543,6 +543,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A chosen goal'**
   String get statusModeGoal;
+
+  /// No description provided for @groveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The Grove'**
+  String get groveTitle;
+
+  /// No description provided for @loadingEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get loadingEllipsis;
+
+  /// No description provided for @plantAGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant a Goal'**
+  String get plantAGoal;
+
+  /// No description provided for @goalReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal reached!'**
+  String get goalReached;
+
+  /// No description provided for @goalsGrowing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 goal is growing} other{{count} goals are growing}}'**
+  String goalsGrowing(int count);
+
+  /// No description provided for @completedFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed · {count}'**
+  String completedFilter(int count);
+
+  /// No description provided for @savingStreakWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1-week saving streak} other{{count}-week saving streak}}'**
+  String savingStreakWeeks(int count);
+
+  /// No description provided for @startSavingStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a saving streak'**
+  String get startSavingStreak;
+
+  /// No description provided for @streakAtRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to a goal this week to keep it alive'**
+  String get streakAtRisk;
+
+  /// No description provided for @streakBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {count, plural, =1{1 week} other{{count} weeks}} · nice work!'**
+  String streakBest(int count);
+
+  /// No description provided for @depositEachWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit each week to grow a streak'**
+  String get depositEachWeek;
+
+  /// No description provided for @monthThisAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} this month'**
+  String monthThisAmount(String amount);
+
+  /// No description provided for @monthVsLastUp.
+  ///
+  /// In en, this message translates to:
+  /// **'+{pct}% vs last month'**
+  String monthVsLastUp(int pct);
+
+  /// No description provided for @monthVsLastDown.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% vs last month'**
+  String monthVsLastDown(int pct);
+
+  /// No description provided for @noSaplingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saplings yet'**
+  String get noSaplingsTitle;
+
+  /// No description provided for @noSaplingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant a goal sapling and watch it grow as you save toward it.'**
+  String get noSaplingsBody;
+
+  /// No description provided for @plantFirstSapling.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant Your First Sapling'**
+  String get plantFirstSapling;
+
+  /// No description provided for @noSaplingsCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saplings in this category yet'**
+  String get noSaplingsCategoryTitle;
+
+  /// No description provided for @noSaplingsCategoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant a goal in this category or clear the filter to see all saplings.'**
+  String get noSaplingsCategoryBody;
+
+  /// No description provided for @showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get showAll;
 }
 
 class _AppLocalizationsDelegate

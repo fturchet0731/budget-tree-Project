@@ -81,5 +81,26 @@
   "statusModeBest": "Meilleur objectif",
   "statusModeAverage": "Moyenne des objectifs",
   "statusModeWorst": "Pire objectif",
-  "statusModeGoal": "Un objectif choisi"
+  "statusModeGoal": "Un objectif choisi",
+
+  "groveTitle": "Le Bosquet",
+  "loadingEllipsis": "Chargement…",
+  "plantAGoal": "Planter un objectif",
+  "goalReached": "Objectif atteint !",
+  "goalsGrowing": "{count, plural, =1{1 objectif grandit} other{{count} objectifs grandissent}}",
+  "completedFilter": "Terminés · {count}",
+  "savingStreakWeeks": "{count, plural, =1{série d'épargne de 1 semaine} other{série d'épargne de {count} semaines}}",
+  "startSavingStreak": "Commencez une série d'épargne",
+  "streakAtRisk": "Ajoutez à un objectif cette semaine pour la garder active",
+  "streakBest": "Record : {count, plural, =1{1 semaine} other{{count} semaines}} · bravo !",
+  "depositEachWeek": "Déposez chaque semaine pour bâtir une série",
+  "monthThisAmount": "{amount} ce mois-ci",
+  "monthVsLastUp": "+{pct} % vs le mois dernier",
+  "monthVsLastDown": "{pct} % vs le mois dernier",
+  "noSaplingsTitle": "Aucun jeune arbre pour l'instant",
+  "noSaplingsBody": "Plantez un objectif et regardez-le grandir à mesure que vous épargnez.",
+  "plantFirstSapling": "Plantez votre premier arbre",
+  "noSaplingsCategoryTitle": "Aucun arbre dans cette catégorie",
+  "noSaplingsCategoryBody": "Plantez un objectif dans cette catégorie ou effacez le filtre pour voir tous les arbres.",
+  "showAll": "Tout afficher"
 }

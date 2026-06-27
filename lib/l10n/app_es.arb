@@ -81,5 +81,26 @@
   "statusModeBest": "Mejor meta",
   "statusModeAverage": "Promedio de metas",
   "statusModeWorst": "Peor meta",
-  "statusModeGoal": "Una meta elegida"
+  "statusModeGoal": "Una meta elegida",
+
+  "groveTitle": "La Arboleda",
+  "loadingEllipsis": "Cargando…",
+  "plantAGoal": "Plantar una meta",
+  "goalReached": "¡Meta alcanzada!",
+  "goalsGrowing": "{count, plural, =1{1 meta está creciendo} other{{count} metas están creciendo}}",
+  "completedFilter": "Completadas · {count}",
+  "savingStreakWeeks": "{count, plural, =1{racha de ahorro de 1 semana} other{racha de ahorro de {count} semanas}}",
+  "startSavingStreak": "Empieza una racha de ahorro",
+  "streakAtRisk": "Añade a una meta esta semana para mantenerla viva",
+  "streakBest": "Mejor: {count, plural, =1{1 semana} other{{count} semanas}} · ¡bien hecho!",
+  "depositEachWeek": "Deposita cada semana para crear una racha",
+  "monthThisAmount": "{amount} este mes",
+  "monthVsLastUp": "+{pct}% vs el mes pasado",
+  "monthVsLastDown": "{pct}% vs el mes pasado",
+  "noSaplingsTitle": "Aún no hay arbolitos",
+  "noSaplingsBody": "Planta una meta y mírala crecer a medida que ahorras para ella.",
+  "plantFirstSapling": "Planta tu primer arbolito",
+  "noSaplingsCategoryTitle": "Aún no hay arbolitos en esta categoría",
+  "noSaplingsCategoryBody": "Planta una meta en esta categoría o quita el filtro para ver todos los arbolitos.",
+  "showAll": "Mostrar todo"
 }
