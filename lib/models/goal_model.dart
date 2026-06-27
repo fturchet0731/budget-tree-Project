@@ -113,7 +113,28 @@ class Goal {
         : 0.0;
   }
 
+  /// Live check: the balance is currently at or over the target. Always false
+  /// for uncapped goals (they grow forever and are never "finished").
   bool get isComplete => !isUncapped && currentAmount >= targetAmount;
+
+  /// Durable "completed" status — true once the goal has *ever* reached its
+  /// target (i.e. [completedAt] was stamped). Unlike [isComplete] this stays
+  /// true even if money is later withdrawn, so completion reads as a permanent
+  /// trophy: it drives the golden card border, the Completed filter, and
+  /// profile featuring.
+  bool get isCompleted => completedAt != null;
+
+  /// Stamp the moment this goal first reaches its target. Idempotent and
+  /// permanent — once set, [completedAt] is never cleared. Returns true only on
+  /// the transition into completion (so callers can fire a celebration once).
+  bool stampCompletionIfReached() {
+    if (isComplete && completedAt == null) {
+      completedAt = DateTime.now();
+      return true;
+    }
+    return false;
+  }
+
   double get remaining => isUncapped
       ? 0
       : (targetAmount - currentAmount).clamp(0.0, double.infinity);

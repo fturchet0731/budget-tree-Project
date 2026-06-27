@@ -20,8 +20,23 @@ class FriendGardenScreen extends StatelessWidget {
   final String statusEmoji;
   final List<Goal> sharedGoals;
 
+  /// Shared goals with the profile's featured goal (if shared) pulled to the
+  /// front so it shows first.
+  List<Goal> get _orderedGoals {
+    final featured = profile.featuredGoalId;
+    if (featured == null) return sharedGoals;
+    final ordered = [...sharedGoals]
+      ..sort((a, b) {
+        if (a.id == featured) return -1;
+        if (b.id == featured) return 1;
+        return 0;
+      });
+    return ordered;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final goals = _orderedGoals;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -32,7 +47,7 @@ class FriendGardenScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
         child: SafeArea(
-          child: sharedGoals.isEmpty
+          child: goals.isEmpty
               ? Center(
                   child: Text(
                     '${profile.label} hasn\'t shared any goals yet.',
@@ -49,8 +64,11 @@ class FriendGardenScreen extends StatelessWidget {
                     crossAxisSpacing: 16,
                     childAspectRatio: 0.72,
                   ),
-                  itemCount: sharedGoals.length,
-                  itemBuilder: (_, i) => _FriendGoalCard(goal: sharedGoals[i]),
+                  itemCount: goals.length,
+                  itemBuilder: (_, i) => _FriendGoalCard(
+                    goal: goals[i],
+                    featured: goals[i].id == profile.featuredGoalId,
+                  ),
                 ),
         ),
       ),
@@ -59,21 +77,58 @@ class FriendGardenScreen extends StatelessWidget {
 }
 
 class _FriendGoalCard extends StatelessWidget {
-  const _FriendGoalCard({required this.goal});
+  const _FriendGoalCard({required this.goal, this.featured = false});
   final Goal goal;
+  final bool featured;
+
+  static const _gold = Color(0xFFFFD54F);
 
   @override
   Widget build(BuildContext context) {
     final pct = (goal.progress * 100).round();
+    final completed = goal.isCompleted;
+    // Featured and completed goals both read golden; featured adds a ribbon.
+    final golden = featured || completed;
     return Container(
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.mossGreen.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: golden
+              ? _gold.withValues(alpha: 0.85)
+              : AppColors.mossGreen.withValues(alpha: 0.3),
+          width: golden ? 2 : 1,
+        ),
+        boxShadow: featured
+            ? [
+                BoxShadow(
+                  color: _gold.withValues(alpha: 0.22),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
       ),
       padding: const EdgeInsets.all(10),
       child: Column(
         children: [
+          if (featured)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.star_rounded, size: 14, color: _gold),
+                SizedBox(width: 4),
+                Text(
+                  'FEATURED',
+                  style: TextStyle(
+                    color: _gold,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
           Expanded(
             child: Center(
               child: SaplingView(
@@ -92,8 +147,13 @@ class _FriendGoalCard extends StatelessWidget {
             ),
           ),
           Text(
-            goal.isUncapped ? goal.tierName : '$pct% there',
-            style: const TextStyle(color: AppColors.mossGreen, fontSize: 12),
+            completed
+                ? 'Completed ✓'
+                : goal.isUncapped
+                    ? goal.tierName
+                    : '$pct% there',
+            style: TextStyle(
+                color: completed ? _gold : AppColors.mossGreen, fontSize: 12),
           ),
         ],
       ),

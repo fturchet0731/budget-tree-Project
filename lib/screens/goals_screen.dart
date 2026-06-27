@@ -29,6 +29,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
   List<Goal> _goals = [];
   List<TreeCategory> _categories = [];
   String? _filterCategoryId;
+  bool _completedOnly = false;
   bool _loading = true;
 
   @override
@@ -54,9 +55,16 @@ class _GoalsScreenState extends State<GoalsScreen> {
       {for (final c in _categories) c.id: c};
 
   List<Goal> get _filteredGoals {
-    if (_filterCategoryId == null) return _goals;
-    return _goals.where((g) => g.categoryId == _filterCategoryId).toList();
+    return _goals.where((g) {
+      if (_filterCategoryId != null && g.categoryId != _filterCategoryId) {
+        return false;
+      }
+      if (_completedOnly && !g.isCompleted) return false;
+      return true;
+    }).toList();
   }
+
+  int get _completedCount => _goals.where((g) => g.isCompleted).length;
 
   Future<void> _createGoal() async {
     final created = await Navigator.push<bool>(
@@ -177,6 +185,39 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     child: _GroveStatsBar(goals: _goals),
                   ),
                 const SizedBox(height: 12),
+                if (!_loading && _completedCount > 0)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: FilterChip(
+                        selected: _completedOnly,
+                        onSelected: (v) =>
+                            setState(() => _completedOnly = v),
+                        showCheckmark: false,
+                        avatar: Icon(
+                          Icons.emoji_events,
+                          size: 16,
+                          color: _completedOnly
+                              ? const Color(0xFF2E1F00)
+                              : const Color(0xFFFFD54F),
+                        ),
+                        label: Text('Completed · $_completedCount'),
+                        labelStyle: GoogleFonts.nunito(
+                          color: _completedOnly
+                              ? const Color(0xFF2E1F00)
+                              : AppColors.stoneBeigeColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.5,
+                        ),
+                        backgroundColor: Colors.black.withValues(alpha: 0.22),
+                        selectedColor: const Color(0xFFFFD54F),
+                        side: BorderSide(
+                            color: const Color(0xFFFFD54F)
+                                .withValues(alpha: 0.55)),
+                      ),
+                    ),
+                  ),
                 if (!_loading && _goals.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
@@ -203,8 +244,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           ? _EmptyGrove(onPlant: _createGoal)
                           : _filteredGoals.isEmpty
                               ? _NoGoalsInCategory(
-                                  onClear: () => setState(
-                                      () => _filterCategoryId = null),
+                                  onClear: () => setState(() {
+                                    _filterCategoryId = null;
+                                    _completedOnly = false;
+                                  }),
                                 )
                               : RefreshIndicator(
                               color: AppColors.lightLeaf,
@@ -385,7 +428,9 @@ class _GoalCardState extends State<_GoalCard> {
   @override
   Widget build(BuildContext context) {
     final goal = widget.goal;
-    final complete = goal.isComplete;
+    // Durable completion — a goal that has ever reached its target stays golden
+    // (a trophy), even if money was later withdrawn below the line.
+    final complete = goal.isCompleted;
     // Card uses the same gradient as the sky+ground palette so it never
     // clashes when the user changes the global theme.
     final skyGradient = AppPalettes.sky();
@@ -494,6 +539,21 @@ class _GoalCardState extends State<_GoalCard> {
                           ),
                         ),
                       ),
+                      if (complete)
+                        Container(
+                          margin: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD54F)
+                                .withValues(alpha: 0.22),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: const Color(0xFFFFD54F)
+                                    .withValues(alpha: 0.85)),
+                          ),
+                          child: const Icon(Icons.emoji_events,
+                              size: 12, color: Color(0xFFFFD54F)),
+                        ),
                       if (widget.category != null)
                         Container(
                           width: 10,
@@ -581,7 +641,7 @@ class _GoalCardState extends State<_GoalCard> {
                         const SizedBox(height: 3),
                         Text(
                           complete
-                              ? 'Goal reached!'
+                              ? (goal.isComplete ? 'Goal reached!' : 'Completed ✓')
                               : goal.isUncapped
                                   ? goal.tierName
                                   : '${(goal.progress * 100).toStringAsFixed(0)}% · ${goal.stageName}',

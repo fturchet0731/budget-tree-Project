@@ -108,6 +108,16 @@ class ProfileService {
     }).eq('id', _uid!);
   }
 
+  /// Pin (or clear, with null) the completed goal the user shows off on their
+  /// profile. Friends see it highlighted at the front of the user's garden.
+  Future<void> setFeaturedGoal(String? goalId) async {
+    if (!isAvailable) return;
+    await SupabaseConfig.client.from(_table).update({
+      'featured_goal_id': goalId,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', _uid!);
+  }
+
   /// Fetch a single profile by user id (used to resolve friends/requests).
   Future<Profile?> byId(String userId) async {
     if (!isAvailable) return null;

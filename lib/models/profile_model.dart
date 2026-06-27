@@ -51,12 +51,19 @@ class Profile {
   final FriendStatusMode statusMode;
   final String? statusGoalId;
 
+  /// A completed goal the user pins to show off on their profile. Friends see
+  /// it highlighted (golden "Featured") at the front of the user's garden. Null
+  /// when nothing is featured. Only meaningful for goals the user has also
+  /// shared, since friends can only read shared goals.
+  final String? featuredGoalId;
+
   const Profile({
     required this.id,
     required this.username,
     this.displayName,
     this.statusMode = FriendStatusMode.best,
     this.statusGoalId,
+    this.featuredGoalId,
   });
 
   /// Name to show in the UI — the display name if set, else the @username.
@@ -71,6 +78,7 @@ class Profile {
         displayName: r['display_name'] as String?,
         statusMode: FriendStatusModeWire.fromWire(r['status_mode'] as String?),
         statusGoalId: r['status_goal_id'] as String?,
+        featuredGoalId: r['featured_goal_id'] as String?,
       );
 
   /// Columns to insert/update. `id` is set by the service from `auth.uid()`.
@@ -82,5 +90,6 @@ class Profile {
         'status_goal_id': statusMode == FriendStatusMode.goal
             ? statusGoalId
             : null,
+        'featured_goal_id': featuredGoalId,
       };
 }
