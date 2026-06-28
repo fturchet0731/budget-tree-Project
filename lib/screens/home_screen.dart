@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
-import '../tutorial/tutorial_tour.dart';
 import '../widgets/acorn_mascot.dart';
 import 'auth/login_screen.dart';
 import 'dashboard_screen.dart';
@@ -53,6 +52,11 @@ class _HomeScreenState extends State<HomeScreen>
   late final AnimationController _clouds;
 
   _Phase _phase = _Phase.ground;
+
+  // First launch: the dashboard runs the guided tour once we arrive there, so
+  // Acorn greets the user at the four-leaf menu and every section pops back to
+  // it. Captured when Start is pressed, consumed by the dashboard route.
+  bool _runTour = false;
 
   static const _ascentMs = 1600;
 
@@ -128,14 +132,11 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _start() async {
     if (_phase != _Phase.ground) return;
-    // First time the user presses Start, the acorn walks them through the
-    // whole app before we climb the tree. They can skip it; either way we
-    // only auto-play it once.
-    if (!AppSettings.instance.tutorialSeen) {
-      await GuidedTour.start(context);
-      await AppSettings.instance.setTutorialSeen(true);
-      if (!mounted) return;
-    }
+    // First time the user presses Start, the acorn walks them through the whole
+    // app. We climb the tree first so the tour begins at the four-leaf menu
+    // (the dashboard runs it on arrival); that way Acorn shows the menu before
+    // diving into Create, and each section pops back to it.
+    _runTour = !AppSettings.instance.tutorialSeen;
     _beginAscent();
   }
 
@@ -152,20 +153,22 @@ class _HomeScreenState extends State<HomeScreen>
     if (status == AnimationStatus.completed && mounted) {
       setState(() => _phase = _Phase.arrived);
       _fx.stop();
-      // We've arrived deep in the leaves — hand off to the four-leaf menu.
-      Navigator.of(context).push(_dashboardRoute()).then((_) {
+      // We've arrived deep in the leaves — hand off to the four-leaf menu,
+      // telling it to run the guided tour if this is the first launch.
+      Navigator.of(context).push(_dashboardRoute(runTour: _runTour)).then((_) {
         // Coming back from the dashboard resets us to the ground state.
         if (!mounted) return;
+        _runTour = false;
         _ascent.reset();
         setState(() => _phase = _Phase.ground);
       });
     }
   }
 
-  Route _dashboardRoute() {
+  Route _dashboardRoute({bool runTour = false}) {
     return PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 700),
-      pageBuilder: (_, a, _) => const DashboardScreen(),
+      pageBuilder: (_, a, _) => DashboardScreen(runTour: runTour),
       transitionsBuilder: (_, a, _, child) => FadeTransition(
         opacity: CurvedAnimation(parent: a, curve: Curves.easeIn),
         child: child,

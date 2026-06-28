@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../services/app_settings.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../tutorial/tutorial_tour.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
 import 'friends_screen.dart';
@@ -10,7 +12,11 @@ import 'goals_screen.dart';
 import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  /// First launch only: play the guided tour once this menu appears, so Acorn
+  /// greets the user at the four-leaf area before handing them the Create flow,
+  /// and every section pops back here.
+  final bool runTour;
+  const DashboardScreen({super.key, this.runTour = false});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -33,6 +39,17 @@ class _DashboardScreenState extends State<DashboardScreen>
       parent: _entryController,
       curve: Curves.easeOutBack,
     );
+    if (widget.runTour) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _runTour());
+    }
+  }
+
+  /// Plays the guided tour over the four-leaf menu on first launch, then marks
+  /// it seen so it never auto-plays again.
+  Future<void> _runTour() async {
+    if (!mounted) return;
+    await GuidedTour.start(context);
+    await AppSettings.instance.setTutorialSeen(true);
   }
 
   @override
