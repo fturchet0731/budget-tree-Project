@@ -247,7 +247,7 @@ abstract class AppLocalizations {
   /// No description provided for @usernameHelper.
   ///
   /// In en, this message translates to:
-  /// **'How friends find you — 3-20 letters, numbers or _'**
+  /// **'How friends find you. 3 to 20 letters, numbers or _'**
   String get usernameHelper;
 
   /// No description provided for @createAccount.
@@ -319,7 +319,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingUsernameHelper.
   ///
   /// In en, this message translates to:
-  /// **'3-20 letters, numbers or _'**
+  /// **'3 to 20 letters, numbers or _'**
   String get onboardingUsernameHelper;
 
   /// No description provided for @onboardingEnterForest.
@@ -331,7 +331,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingAcornWelcome.
   ///
   /// In en, this message translates to:
-  /// **'Hi, I\'m Acorn! 🌰 Welcome to Budget Tree. Pick a username to finish setting up — it\'s how friends find you, but you can grow your forest with or without them.'**
+  /// **'Hi, I\'m Acorn! 🌰 Welcome to Budget Tree. Pick a username to finish setting up. It\'s how friends find you, but you can grow your forest with or without them.'**
   String get onboardingAcornWelcome;
 
   /// No description provided for @onboardingAcornBusy.
@@ -343,7 +343,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingAcornError.
   ///
   /// In en, this message translates to:
-  /// **'Hmm, that didn\'t take — let\'s try a different name!'**
+  /// **'Hmm, that didn\'t take. Let\'s try a different name!'**
   String get onboardingAcornError;
 
   /// No description provided for @chooseUsername.
@@ -355,7 +355,7 @@ abstract class AppLocalizations {
   /// No description provided for @usernameRule.
   ///
   /// In en, this message translates to:
-  /// **'3-20 letters, numbers or underscore'**
+  /// **'3 to 20 letters, numbers or underscore'**
   String get usernameRule;
 
   /// No description provided for @usernameTaken.
@@ -499,7 +499,7 @@ abstract class AppLocalizations {
   /// No description provided for @noFriendsYet.
   ///
   /// In en, this message translates to:
-  /// **'No friends yet — add someone by their username.'**
+  /// **'No friends yet. Add someone by their username.'**
   String get noFriendsYet;
 
   /// No description provided for @sharedGoalsCount.
@@ -583,7 +583,7 @@ abstract class AppLocalizations {
   /// No description provided for @savingStreakWeeks.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1-week saving streak} other{{count}-week saving streak}}'**
+  /// **'{count, plural, =1{1 week saving streak} other{{count} week saving streak}}'**
   String savingStreakWeeks(int count);
 
   /// No description provided for @startSavingStreak.
@@ -805,7 +805,7 @@ abstract class AppLocalizations {
   /// No description provided for @featuredOnProfileSnack.
   ///
   /// In en, this message translates to:
-  /// **'Featured on your profile — friends will see this first.'**
+  /// **'Featured on your profile. Friends will see this first.'**
   String get featuredOnProfileSnack;
 
   /// No description provided for @removedFromProfile.
@@ -865,7 +865,7 @@ abstract class AppLocalizations {
   /// No description provided for @newGrowthMsg.
   ///
   /// In en, this message translates to:
-  /// **'\"{name}\" reached Tier {tier} — {tierName}.'**
+  /// **'\"{name}\" reached Tier {tier}, now a {tierName}.'**
   String newGrowthMsg(String name, int tier, String tierName);
 
   /// No description provided for @keepGrowing.
@@ -979,7 +979,7 @@ abstract class AppLocalizations {
   /// No description provided for @privateOnlyYou.
   ///
   /// In en, this message translates to:
-  /// **'Private — only you'**
+  /// **'Private to you'**
   String get privateOnlyYou;
 
   /// No description provided for @featuredOnYourProfile.
@@ -1195,7 +1195,7 @@ abstract class AppLocalizations {
   /// No description provided for @quickPick.
   ///
   /// In en, this message translates to:
-  /// **'Quick-pick'**
+  /// **'Quick pick'**
   String get quickPick;
 
   /// No description provided for @addASource.
@@ -1345,7 +1345,7 @@ abstract class AppLocalizations {
   /// No description provided for @signOutBody.
   ///
   /// In en, this message translates to:
-  /// **'Your forest is saved in the cloud — sign back in any time to bring it back.'**
+  /// **'Your forest is saved in the cloud. Sign back in any time to bring it back.'**
   String get signOutBody;
 
   /// No description provided for @signOut.
@@ -1465,7 +1465,7 @@ abstract class AppLocalizations {
   /// No description provided for @fullAnimationsSub.
   ///
   /// In en, this message translates to:
-  /// **'Disable for snappier, less-animated screens'**
+  /// **'Turn off for snappier, calmer screens'**
   String get fullAnimationsSub;
 
   /// No description provided for @soundHaptics.
@@ -1603,7 +1603,7 @@ abstract class AppLocalizations {
   /// No description provided for @weeklySummarySub.
   ///
   /// In en, this message translates to:
-  /// **'A once-a-week recap of your progress'**
+  /// **'A weekly recap of your progress'**
   String get weeklySummarySub;
 
   /// No description provided for @dayLabel.
@@ -1687,7 +1687,7 @@ abstract class AppLocalizations {
   /// No description provided for @autoLinkBranches.
   ///
   /// In en, this message translates to:
-  /// **'Auto-link branches to goals'**
+  /// **'Automatically link branches to goals'**
   String get autoLinkBranches;
 
   /// No description provided for @autoLinkBranchesDesc.
@@ -1699,7 +1699,7 @@ abstract class AppLocalizations {
   /// No description provided for @autoLinkedSnack.
   ///
   /// In en, this message translates to:
-  /// **'Auto-linked {count, plural, =1{1 branch} other{{count} branches}} to matching goals.'**
+  /// **'Linked {count, plural, =1{1 branch} other{{count} branches}} to matching goals automatically.'**
   String autoLinkedSnack(int count);
 
   /// No description provided for @treePlantedSnack.

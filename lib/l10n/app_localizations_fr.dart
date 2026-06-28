@@ -82,7 +82,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get usernameHelper =>
-      'Comment vos amis vous trouvent — 3 à 20 lettres, chiffres ou _';
+      'Comment vos amis vous trouvent. 3 à 20 lettres, chiffres ou _';
 
   @override
   String get createAccount => 'Créer un compte';
@@ -128,14 +128,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingAcornWelcome =>
-      'Salut, je suis Acorn ! 🌰 Bienvenue dans Budget Tree. Choisissez un nom d\'utilisateur pour terminer la configuration — c\'est ainsi que vos amis vous trouvent, mais vous pouvez faire grandir votre forêt avec ou sans eux.';
+      'Salut, je suis Acorn ! 🌰 Bienvenue dans Budget Tree. Choisissez un nom d\'utilisateur pour terminer la configuration. C\'est ainsi que vos amis vous trouvent, mais vous pouvez faire grandir votre forêt avec ou sans eux.';
 
   @override
   String get onboardingAcornBusy => 'Je plante votre compte… une seconde ! 🌱';
 
   @override
   String get onboardingAcornError =>
-      'Hmm, ça n\'a pas marché — essayons un autre nom !';
+      'Hmm, ça n\'a pas marché. Essayons un autre nom !';
 
   @override
   String get chooseUsername => 'Choisissez un nom d\'utilisateur';
@@ -228,7 +228,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noFriendsYet =>
-      'Aucun ami pour l\'instant — ajoutez quelqu\'un par son nom d\'utilisateur.';
+      'Aucun ami pour l\'instant. Ajoutez quelqu\'un par son nom d\'utilisateur.';
 
   @override
   String sharedGoalsCount(int count) {
@@ -431,7 +431,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get featuredOnProfileSnack =>
-      'Mis en vedette sur votre profil — vos amis le verront en premier.';
+      'Mis en vedette sur votre profil. Vos amis le verront en premier.';
 
   @override
   String get removedFromProfile => 'Retiré de votre profil.';
@@ -467,7 +467,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String newGrowthMsg(String name, int tier, String tierName) {
-    return '« $name » a atteint le palier $tier — $tierName.';
+    return '« $name » a atteint le palier $tier, désormais un $tierName.';
   }
 
   @override
@@ -533,7 +533,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get visibleToFriends => 'Visible par les amis';
 
   @override
-  String get privateOnlyYou => 'Privé — vous seul';
+  String get privateOnlyYou => 'Privé, pour vous seul';
 
   @override
   String get featuredOnYourProfile => 'En vedette sur votre profil';
@@ -745,7 +745,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signOutBody =>
-      'Votre forêt est enregistrée dans le nuage — reconnectez-vous à tout moment pour la récupérer.';
+      'Votre forêt est enregistrée dans le nuage. Reconnectez-vous à tout moment pour la récupérer.';
 
   @override
   String get signOut => 'Se déconnecter';

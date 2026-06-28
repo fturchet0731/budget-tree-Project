@@ -82,7 +82,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get usernameHelper =>
-      'Cómo te encuentran tus amigos — 3 a 20 letras, números o _';
+      'Cómo te encuentran tus amigos. 3 a 20 letras, números o _';
 
   @override
   String get createAccount => 'Crear cuenta';
@@ -127,14 +127,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingAcornWelcome =>
-      '¡Hola, soy Acorn! 🌰 Bienvenido a Budget Tree. Elige un nombre de usuario para terminar de configurar — así te encuentran tus amigos, pero puedes hacer crecer tu bosque con o sin ellos.';
+      '¡Hola, soy Acorn! 🌰 Bienvenido a Budget Tree. Elige un nombre de usuario para terminar de configurar. Así te encuentran tus amigos, pero puedes hacer crecer tu bosque con o sin ellos.';
 
   @override
   String get onboardingAcornBusy => 'Plantando tu cuenta… ¡un momento! 🌱';
 
   @override
-  String get onboardingAcornError =>
-      'Mmm, no funcionó — ¡probemos otro nombre!';
+  String get onboardingAcornError => 'Mmm, no funcionó. ¡Probemos otro nombre!';
 
   @override
   String get chooseUsername => 'Elige un nombre de usuario';
@@ -465,7 +464,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String newGrowthMsg(String name, int tier, String tierName) {
-    return '«$name» alcanzó el nivel $tier — $tierName.';
+    return '«$name» alcanzó el nivel $tier, ahora un $tierName.';
   }
 
   @override
@@ -532,7 +531,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get visibleToFriends => 'Visible para amigos';
 
   @override
-  String get privateOnlyYou => 'Privada — solo tú';
+  String get privateOnlyYou => 'Privada, solo para ti';
 
   @override
   String get featuredOnYourProfile => 'Destacada en tu perfil';

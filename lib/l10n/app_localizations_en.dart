@@ -82,7 +82,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usernameHelper =>
-      'How friends find you — 3-20 letters, numbers or _';
+      'How friends find you. 3 to 20 letters, numbers or _';
 
   @override
   String get createAccount => 'Create account';
@@ -120,27 +120,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shown to friends instead of @username';
 
   @override
-  String get onboardingUsernameHelper => '3-20 letters, numbers or _';
+  String get onboardingUsernameHelper => '3 to 20 letters, numbers or _';
 
   @override
   String get onboardingEnterForest => 'Enter the forest';
 
   @override
   String get onboardingAcornWelcome =>
-      'Hi, I\'m Acorn! 🌰 Welcome to Budget Tree. Pick a username to finish setting up — it\'s how friends find you, but you can grow your forest with or without them.';
+      'Hi, I\'m Acorn! 🌰 Welcome to Budget Tree. Pick a username to finish setting up. It\'s how friends find you, but you can grow your forest with or without them.';
 
   @override
   String get onboardingAcornBusy => 'Planting your account… one sec! 🌱';
 
   @override
   String get onboardingAcornError =>
-      'Hmm, that didn\'t take — let\'s try a different name!';
+      'Hmm, that didn\'t take. Let\'s try a different name!';
 
   @override
   String get chooseUsername => 'Choose a username';
 
   @override
-  String get usernameRule => '3-20 letters, numbers or underscore';
+  String get usernameRule => '3 to 20 letters, numbers or underscore';
 
   @override
   String get usernameTaken => 'That username is taken. Try another.';
@@ -224,7 +224,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requests => 'Requests';
 
   @override
-  String get noFriendsYet => 'No friends yet — add someone by their username.';
+  String get noFriendsYet => 'No friends yet. Add someone by their username.';
 
   @override
   String sharedGoalsCount(int count) {
@@ -290,8 +290,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count-week saving streak',
-      one: '1-week saving streak',
+      other: '$count week saving streak',
+      one: '1 week saving streak',
     );
     return '$_temp0';
   }
@@ -425,7 +425,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featuredOnProfileSnack =>
-      'Featured on your profile — friends will see this first.';
+      'Featured on your profile. Friends will see this first.';
 
   @override
   String get removedFromProfile => 'Removed from your profile.';
@@ -460,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String newGrowthMsg(String name, int tier, String tierName) {
-    return '\"$name\" reached Tier $tier — $tierName.';
+    return '\"$name\" reached Tier $tier, now a $tierName.';
   }
 
   @override
@@ -526,7 +526,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visibleToFriends => 'Visible to friends';
 
   @override
-  String get privateOnlyYou => 'Private — only you';
+  String get privateOnlyYou => 'Private to you';
 
   @override
   String get featuredOnYourProfile => 'Featured on your profile';
@@ -652,7 +652,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vineRoots => 'Roots';
 
   @override
-  String get quickPick => 'Quick-pick';
+  String get quickPick => 'Quick pick';
 
   @override
   String get addASource => 'Add a source';
@@ -737,7 +737,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signOutBody =>
-      'Your forest is saved in the cloud — sign back in any time to bring it back.';
+      'Your forest is saved in the cloud. Sign back in any time to bring it back.';
 
   @override
   String get signOut => 'Sign out';
@@ -799,7 +799,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullAnimations => 'Full animations';
 
   @override
-  String get fullAnimationsSub => 'Disable for snappier, less-animated screens';
+  String get fullAnimationsSub => 'Turn off for snappier, calmer screens';
 
   @override
   String get soundHaptics => 'Sound & haptics';
@@ -871,7 +871,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklySummary => 'Weekly summary';
 
   @override
-  String get weeklySummarySub => 'A once-a-week recap of your progress';
+  String get weeklySummarySub => 'A weekly recap of your progress';
 
   @override
   String get dayLabel => 'Day';
@@ -915,7 +915,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupOptionalUpper => 'GROUP (OPTIONAL)';
 
   @override
-  String get autoLinkBranches => 'Auto-link branches to goals';
+  String get autoLinkBranches => 'Automatically link branches to goals';
 
   @override
   String get autoLinkBranchesDesc =>
@@ -929,7 +929,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count branches',
       one: '1 branch',
     );
-    return 'Auto-linked $_temp0 to matching goals.';
+    return 'Linked $_temp0 to matching goals automatically.';
   }
 
   @override
