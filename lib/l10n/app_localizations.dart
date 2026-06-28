@@ -2193,6 +2193,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your branches are well proportioned and within your income. Nothing to change. Just keep watering your goals.'**
   String get sugHealthyReason;
+
+  /// No description provided for @giconSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get giconSavings;
+
+  /// No description provided for @giconTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get giconTravel;
+
+  /// No description provided for @giconVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get giconVehicle;
+
+  /// No description provided for @giconHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get giconHome;
+
+  /// No description provided for @giconEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get giconEducation;
+
+  /// No description provided for @giconWedding.
+  ///
+  /// In en, this message translates to:
+  /// **'Wedding'**
+  String get giconWedding;
+
+  /// No description provided for @giconEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get giconEmergency;
+
+  /// No description provided for @giconTech.
+  ///
+  /// In en, this message translates to:
+  /// **'Tech'**
+  String get giconTech;
+
+  /// No description provided for @giconGift.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift'**
+  String get giconGift;
+
+  /// No description provided for @giconOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get giconOther;
+
+  /// No description provided for @expHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing'**
+  String get expHousing;
+
+  /// No description provided for @expFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get expFood;
+
+  /// No description provided for @expTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get expTransport;
+
+  /// No description provided for @expSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get expSavings;
+
+  /// No description provided for @expEntertainment.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get expEntertainment;
+
+  /// No description provided for @expSubscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get expSubscriptions;
+
+  /// No description provided for @expHealthcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthcare'**
+  String get expHealthcare;
+
+  /// No description provided for @expPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get expPersonal;
+
+  /// No description provided for @expOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get expOther;
+
+  /// No description provided for @incSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary'**
+  String get incSalary;
+
+  /// No description provided for @incWages.
+  ///
+  /// In en, this message translates to:
+  /// **'Wages'**
+  String get incWages;
+
+  /// No description provided for @incPartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Part time Job'**
+  String get incPartTime;
+
+  /// No description provided for @incFreelance.
+  ///
+  /// In en, this message translates to:
+  /// **'Freelance'**
+  String get incFreelance;
+
+  /// No description provided for @incInvestments.
+  ///
+  /// In en, this message translates to:
+  /// **'Investments'**
+  String get incInvestments;
+
+  /// No description provided for @incDividends.
+  ///
+  /// In en, this message translates to:
+  /// **'Dividends'**
+  String get incDividends;
+
+  /// No description provided for @incRental.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental Income'**
+  String get incRental;
+
+  /// No description provided for @incBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Income'**
+  String get incBusiness;
+
+  /// No description provided for @incBenefits.
+  ///
+  /// In en, this message translates to:
+  /// **'Government Benefits'**
+  String get incBenefits;
+
+  /// No description provided for @incScholarship.
+  ///
+  /// In en, this message translates to:
+  /// **'Scholarship'**
+  String get incScholarship;
+
+  /// No description provided for @incPension.
+  ///
+  /// In en, this message translates to:
+  /// **'Pension'**
+  String get incPension;
+
+  /// No description provided for @monJan.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan'**
+  String get monJan;
+
+  /// No description provided for @monFeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Feb'**
+  String get monFeb;
+
+  /// No description provided for @monMar.
+  ///
+  /// In en, this message translates to:
+  /// **'Mar'**
+  String get monMar;
+
+  /// No description provided for @monApr.
+  ///
+  /// In en, this message translates to:
+  /// **'Apr'**
+  String get monApr;
+
+  /// No description provided for @monMay.
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get monMay;
+
+  /// No description provided for @monJun.
+  ///
+  /// In en, this message translates to:
+  /// **'Jun'**
+  String get monJun;
+
+  /// No description provided for @monJul.
+  ///
+  /// In en, this message translates to:
+  /// **'Jul'**
+  String get monJul;
+
+  /// No description provided for @monAug.
+  ///
+  /// In en, this message translates to:
+  /// **'Aug'**
+  String get monAug;
+
+  /// No description provided for @monSep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sep'**
+  String get monSep;
+
+  /// No description provided for @monOct.
+  ///
+  /// In en, this message translates to:
+  /// **'Oct'**
+  String get monOct;
+
+  /// No description provided for @monNov.
+  ///
+  /// In en, this message translates to:
+  /// **'Nov'**
+  String get monNov;
+
+  /// No description provided for @monDec.
+  ///
+  /// In en, this message translates to:
+  /// **'Dec'**
+  String get monDec;
+
+  /// No description provided for @budgetCardCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{expenses, plural, =1{1 expense} other{{expenses} expenses}} · {sources, plural, =1{1 source} other{{sources} sources}}'**
+  String budgetCardCounts(int expenses, int sources);
 }
 
 class _AppLocalizationsDelegate

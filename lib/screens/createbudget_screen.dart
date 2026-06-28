@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/pay_frequency.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/preset_labels.dart';
 import '../models/budget_model.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
@@ -52,12 +53,6 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     ('healthcare', 'Healthcare'),
     ('personal', 'Personal'),
     ('other', 'Other'),
-  ];
-
-  static const _incomeSuggestions = [
-    'Salary', 'Wages', 'Part-time Job', 'Freelance',
-    'Investments', 'Dividends', 'Rental Income',
-    'Business Income', 'Government Benefits', 'Scholarship', 'Pension',
   ];
 
   @override
@@ -190,7 +185,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             sources: _incomeSources,
                             nameCtrl: _incomeNameCtrl,
                             amountCtrl: _incomeAmountCtrl,
-                            suggestions: _incomeSuggestions,
+                            suggestions: incomeSuggestionKeys,
                             onAdd: _addIncome,
                             onRemove: (i) =>
                                 setState(() => _incomeSources.removeAt(i)),
@@ -210,7 +205,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                                     setState(() => _expenses.removeAt(i)),
                                 onPresetTap: (name, iconKey) => setState(() {
                                   _expNameCtrl.text =
-                                      name == 'Other' ? '' : name;
+                                      iconKey == 'other' ? '' : name;
                                   _selectedIconKey = iconKey;
                                 }),
                               )
@@ -485,7 +480,8 @@ class _IncomeStep extends StatelessWidget {
             runSpacing: 8,
             children: suggestions
                 .map((s) => GestureDetector(
-                      onTap: () => nameCtrl.text = s,
+                      onTap: () =>
+                          nameCtrl.text = incomeSuggestionLabel(l, s),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 13, vertical: 8),
@@ -502,7 +498,7 @@ class _IncomeStep extends StatelessWidget {
                             const Icon(Icons.water_drop_outlined,
                                 size: 12, color: AppColors.skyBlue),
                             const SizedBox(width: 5),
-                            Text(s,
+                            Text(incomeSuggestionLabel(l, s),
                                 style: GoogleFonts.nunito(
                                     color: AppColors.stoneBeigeColor,
                                     fontSize: 12)),
@@ -714,7 +710,8 @@ class _ExpenseStep extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: presets.map((p) {
-              final (iconKey, name) = p;
+              final iconKey = p.$1;
+              final name = expensePresetLabel(l, iconKey);
               final isSelected = selectedIconKey == iconKey;
               return GestureDetector(
                 onTap: () => onPresetTap(name, iconKey),
@@ -1013,7 +1010,7 @@ class _PersonalStep extends StatelessWidget {
                         child: Text(
                           firstPayDate == null
                               ? l.firstPayDate
-                              : l.firstPayOn(_formatDate(firstPayDate!)),
+                              : l.firstPayOn(_formatDate(firstPayDate!, l)),
                           style: TextStyle(
                             color: firstPayDate == null
                                 ? AppColors.stoneBeigeColor
@@ -1065,11 +1062,8 @@ class _PersonalStep extends StatelessWidget {
     );
   }
 
-  static String _formatDate(DateTime d) {
-    const m = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
+  static String _formatDate(DateTime d, AppLocalizations l) {
+    final m = monthAbbrevs(l);
     return '${m[d.month - 1]} ${d.day}, ${d.year}';
   }
 }

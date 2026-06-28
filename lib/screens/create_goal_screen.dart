@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/preset_labels.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../services/achievement_service.dart';
@@ -334,7 +335,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           spacing: 8,
                           runSpacing: 8,
                           children: GoalIcons.presets.map((p) {
-                            final (key, name, icon) = p;
+                            final (key, _, icon) = p;
                             final selected = _iconKey == key;
                             return GestureDetector(
                               onTap: () => setState(() => _iconKey = key),
@@ -376,7 +377,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                             : AppColors.mossGreen),
                                     const SizedBox(width: 6),
                                     Text(
-                                      name,
+                                      goalIconLabel(l, key),
                                       style: GoogleFonts.nunito(
                                         color: selected
                                             ? AppColors.lightLeaf

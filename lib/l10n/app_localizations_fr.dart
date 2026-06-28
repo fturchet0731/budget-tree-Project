@@ -1241,4 +1241,147 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sugHealthyReason =>
       'Vos branches sont bien proportionnées et dans les limites de vos revenus. Rien à changer. Continuez simplement d\'arroser vos objectifs.';
+
+  @override
+  String get giconSavings => 'Épargne';
+
+  @override
+  String get giconTravel => 'Voyage';
+
+  @override
+  String get giconVehicle => 'Véhicule';
+
+  @override
+  String get giconHome => 'Maison';
+
+  @override
+  String get giconEducation => 'Études';
+
+  @override
+  String get giconWedding => 'Mariage';
+
+  @override
+  String get giconEmergency => 'Urgence';
+
+  @override
+  String get giconTech => 'Tech';
+
+  @override
+  String get giconGift => 'Cadeau';
+
+  @override
+  String get giconOther => 'Autre';
+
+  @override
+  String get expHousing => 'Logement';
+
+  @override
+  String get expFood => 'Nourriture';
+
+  @override
+  String get expTransport => 'Transport';
+
+  @override
+  String get expSavings => 'Épargne';
+
+  @override
+  String get expEntertainment => 'Loisirs';
+
+  @override
+  String get expSubscriptions => 'Abonnements';
+
+  @override
+  String get expHealthcare => 'Santé';
+
+  @override
+  String get expPersonal => 'Personnel';
+
+  @override
+  String get expOther => 'Autre';
+
+  @override
+  String get incSalary => 'Salaire';
+
+  @override
+  String get incWages => 'Paie';
+
+  @override
+  String get incPartTime => 'Emploi à temps partiel';
+
+  @override
+  String get incFreelance => 'Travail indépendant';
+
+  @override
+  String get incInvestments => 'Investissements';
+
+  @override
+  String get incDividends => 'Dividendes';
+
+  @override
+  String get incRental => 'Revenu locatif';
+
+  @override
+  String get incBusiness => 'Revenu d\'entreprise';
+
+  @override
+  String get incBenefits => 'Prestations sociales';
+
+  @override
+  String get incScholarship => 'Bourse';
+
+  @override
+  String get incPension => 'Pension';
+
+  @override
+  String get monJan => 'janv.';
+
+  @override
+  String get monFeb => 'févr.';
+
+  @override
+  String get monMar => 'mars';
+
+  @override
+  String get monApr => 'avr.';
+
+  @override
+  String get monMay => 'mai';
+
+  @override
+  String get monJun => 'juin';
+
+  @override
+  String get monJul => 'juil.';
+
+  @override
+  String get monAug => 'août';
+
+  @override
+  String get monSep => 'sept.';
+
+  @override
+  String get monOct => 'oct.';
+
+  @override
+  String get monNov => 'nov.';
+
+  @override
+  String get monDec => 'déc.';
+
+  @override
+  String budgetCardCounts(int expenses, int sources) {
+    String _temp0 = intl.Intl.pluralLogic(
+      expenses,
+      locale: localeName,
+      other: '$expenses dépenses',
+      one: '1 dépense',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      sources,
+      locale: localeName,
+      other: '$sources sources',
+      one: '1 source',
+    );
+    return '$_temp0 · $_temp1';
+  }
 }

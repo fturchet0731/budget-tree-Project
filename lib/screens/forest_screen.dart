@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/preset_labels.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../services/budget_repository.dart';
@@ -384,6 +385,7 @@ class _BudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final allocPct = budget.totalIncome > 0
         ? (budget.totalAllocated / budget.totalIncome).clamp(0.0, 1.0)
         : 0.0;
@@ -527,14 +529,15 @@ class _BudgetCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          '${budget.expenses.length} expense${budget.expenses.length == 1 ? '' : 's'} · ${budget.incomeSources.length} source${budget.incomeSources.length == 1 ? '' : 's'}',
+                          l.budgetCardCounts(
+                              budget.expenses.length, budget.incomeSources.length),
                           style: GoogleFonts.nunito(
                               color: AppColors.mossGreen, fontSize: 11),
                         ),
                         if (budget.savedAt != null) ...[
                           const SizedBox(height: 2),
                           Text(
-                            _formatDate(budget.savedAt!),
+                            _formatDate(budget.savedAt!, l),
                             style: GoogleFonts.nunito(
                               color: AppColors.mossGreen.withValues(alpha: 0.6),
                               fontSize: 10,
@@ -745,11 +748,8 @@ class _BudgetCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
+  String _formatDate(DateTime dt, AppLocalizations l) {
+    final months = monthAbbrevs(l);
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 }
