@@ -1090,4 +1090,155 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tierAncientOak => 'Chêne ancien';
+
+  @override
+  String get badgesTitle => 'Badges';
+
+  @override
+  String badgesEarned(int earned, int total) {
+    return '$earned sur $total obtenus';
+  }
+
+  @override
+  String get badgeUnlocked => 'Badge débloqué !';
+
+  @override
+  String get niceExcl => 'Super !';
+
+  @override
+  String badgeMessage(String title, String desc) {
+    return '$title. $desc';
+  }
+
+  @override
+  String get achFirstSproutTitle => 'Première pousse';
+
+  @override
+  String get achFirstSproutDesc => 'Plantez votre premier arbre budgétaire.';
+
+  @override
+  String get achFirstSaplingTitle => 'Premier arbre';
+
+  @override
+  String get achFirstSaplingDesc => 'Créez votre premier objectif d\'épargne.';
+
+  @override
+  String get achFirstDropTitle => 'Première goutte';
+
+  @override
+  String get achFirstDropDesc => 'Faites votre premier dépôt vers un objectif.';
+
+  @override
+  String get achOrchardKeeperTitle => 'Gardien du verger';
+
+  @override
+  String get achOrchardKeeperDesc => 'Entretenez trois objectifs à la fois.';
+
+  @override
+  String get achGreenThumbTitle => 'Main verte';
+
+  @override
+  String get achGreenThumbDesc => 'Épargnez 1 000 \$ dans votre bosquet.';
+
+  @override
+  String get achConsistentTitle => 'Régulier';
+
+  @override
+  String get achConsistentDesc =>
+      'Atteignez une série d\'épargne de 3 semaines.';
+
+  @override
+  String get achFirstHarvestTitle => 'Première récolte';
+
+  @override
+  String get achFirstHarvestDesc => 'Terminez un objectif d\'épargne.';
+
+  @override
+  String get achDevotedTitle => 'Dévoué';
+
+  @override
+  String get achDevotedDesc => 'Atteignez une série d\'épargne de 8 semaines.';
+
+  @override
+  String get achMightyOakTitle => 'Chêne puissant';
+
+  @override
+  String get achMightyOakDesc =>
+      'Faites grandir un objectif jusqu\'au palier 5 ou plus.';
+
+  @override
+  String get achOldGrowthTitle => 'Forêt ancienne';
+
+  @override
+  String get achOldGrowthDesc => 'Épargnez 10 000 \$ dans votre bosquet.';
+
+  @override
+  String get sugAddIncomeTitle => 'Ajoutez d\'abord vos revenus';
+
+  @override
+  String get sugAddIncomeReason =>
+      'Un arbre a besoin de racines. Ajoutez une source de revenu pour que nous puissions suggérer comment la répartir entre branches et objectifs.';
+
+  @override
+  String get sugOverAllocTitle => 'Les branches dépassent le tronc';
+
+  @override
+  String sugOverAllocReason(String amount) {
+    return 'Vous avez attribué $amount de plus que vos revenus. Coupez une branche ou deux pour que l\'arbre puisse les soutenir.';
+  }
+
+  @override
+  String get sugIdleTitle => 'Faites travailler l\'argent inactif';
+
+  @override
+  String sugIdleReason(String amount, int pct) {
+    return '$amount ($pct %) de vos revenus ne sont pas encore attribués. Ajoutez une branche d\'épargne et liez-la à un objectif pour qu\'ils grandissent au lieu de partir à la dérive.';
+  }
+
+  @override
+  String sugPruneTitle(String name) {
+    return 'Tailler « $name »';
+  }
+
+  @override
+  String get sugPruneReason =>
+      'Cette branche ne reçoit aucun argent. Financez-la ou taillez-la pour garder votre arbre concentré.';
+
+  @override
+  String sugHeavyTitle(String name) {
+    return '« $name » est une branche lourde';
+  }
+
+  @override
+  String sugHeavyReason(int pct) {
+    return 'Elle prend $pct % de vos revenus. Si vous pouvez la réduire, cet argent pourrait plutôt nourrir un objectif d\'épargne.';
+  }
+
+  @override
+  String get sugFedTitle => 'Vos objectifs sont nourris';
+
+  @override
+  String sugFedReason(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count branches envoient',
+      one: '1 branche envoie',
+    );
+    return '$_temp0 de l\'argent à un objectif à chaque cycle de paie. Continuez. C\'est ainsi que poussent les arbres.';
+  }
+
+  @override
+  String get sugLinkTitle => 'Liez une branche à un objectif';
+
+  @override
+  String get sugLinkReason =>
+      'Aucune de vos branches n\'alimente encore un objectif d\'épargne. En lier une signifie que chaque cycle de paie arrose automatiquement un arbre pour vous.';
+
+  @override
+  String get sugHealthyTitle => 'Arbre sain et équilibré';
+
+  @override
+  String get sugHealthyReason =>
+      'Vos branches sont bien proportionnées et dans les limites de vos revenus. Rien à changer. Continuez simplement d\'arroser vos objectifs.';
 }

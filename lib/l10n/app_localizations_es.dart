@@ -1086,4 +1086,153 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tierAncientOak => 'Roble antiguo';
+
+  @override
+  String get badgesTitle => 'Insignias';
+
+  @override
+  String badgesEarned(int earned, int total) {
+    return '$earned de $total obtenidas';
+  }
+
+  @override
+  String get badgeUnlocked => '¡Insignia desbloqueada!';
+
+  @override
+  String get niceExcl => '¡Genial!';
+
+  @override
+  String badgeMessage(String title, String desc) {
+    return '$title. $desc';
+  }
+
+  @override
+  String get achFirstSproutTitle => 'Primer brote';
+
+  @override
+  String get achFirstSproutDesc => 'Planta tu primer árbol de presupuesto.';
+
+  @override
+  String get achFirstSaplingTitle => 'Primer arbolito';
+
+  @override
+  String get achFirstSaplingDesc => 'Crea tu primera meta de ahorro.';
+
+  @override
+  String get achFirstDropTitle => 'Primera gota';
+
+  @override
+  String get achFirstDropDesc => 'Haz tu primer depósito hacia una meta.';
+
+  @override
+  String get achOrchardKeeperTitle => 'Guardián del huerto';
+
+  @override
+  String get achOrchardKeeperDesc => 'Cuida tres metas a la vez.';
+
+  @override
+  String get achGreenThumbTitle => 'Mano verde';
+
+  @override
+  String get achGreenThumbDesc => 'Ahorra \$1,000 en tu arboleda.';
+
+  @override
+  String get achConsistentTitle => 'Constante';
+
+  @override
+  String get achConsistentDesc => 'Alcanza una racha de ahorro de 3 semanas.';
+
+  @override
+  String get achFirstHarvestTitle => 'Primera cosecha';
+
+  @override
+  String get achFirstHarvestDesc => 'Completa una meta de ahorro.';
+
+  @override
+  String get achDevotedTitle => 'Devoto';
+
+  @override
+  String get achDevotedDesc => 'Alcanza una racha de ahorro de 8 semanas.';
+
+  @override
+  String get achMightyOakTitle => 'Roble poderoso';
+
+  @override
+  String get achMightyOakDesc => 'Haz crecer una meta hasta el nivel 5 o más.';
+
+  @override
+  String get achOldGrowthTitle => 'Bosque antiguo';
+
+  @override
+  String get achOldGrowthDesc => 'Ahorra \$10,000 en tu arboleda.';
+
+  @override
+  String get sugAddIncomeTitle => 'Añade tus ingresos primero';
+
+  @override
+  String get sugAddIncomeReason =>
+      'Un árbol necesita raíces. Añade una fuente de ingresos para que podamos sugerir cómo repartirla entre ramas y metas.';
+
+  @override
+  String get sugOverAllocTitle => 'Las ramas superan al tronco';
+
+  @override
+  String sugOverAllocReason(String amount) {
+    return 'Has asignado $amount más de lo que ganas. Recorta una rama o dos para que el árbol pueda sostenerlas.';
+  }
+
+  @override
+  String get sugIdleTitle => 'Pon a trabajar el dinero inactivo';
+
+  @override
+  String sugIdleReason(String amount, int pct) {
+    return '$amount ($pct%) de tus ingresos aún no está asignado. Añade una rama de ahorro y vincúlala a una meta para que crezca en vez de perderse.';
+  }
+
+  @override
+  String sugPruneTitle(String name) {
+    return 'Podar «$name»';
+  }
+
+  @override
+  String get sugPruneReason =>
+      'Esta rama no recibe dinero. Finánciala o pódala para mantener tu árbol enfocado.';
+
+  @override
+  String sugHeavyTitle(String name) {
+    return '«$name» es una rama pesada';
+  }
+
+  @override
+  String sugHeavyReason(int pct) {
+    return 'Se lleva el $pct% de tus ingresos. Si puedes recortarla, ese dinero podría alimentar una meta de ahorro.';
+  }
+
+  @override
+  String get sugFedTitle => 'Tus metas se están alimentando';
+
+  @override
+  String sugFedReason(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ramas envían',
+      one: '1 rama envía',
+    );
+    return '$_temp0 dinero a una meta en cada ciclo de pago. Sigue así. Así crecen los arbolitos.';
+  }
+
+  @override
+  String get sugLinkTitle => 'Vincula una rama a una meta';
+
+  @override
+  String get sugLinkReason =>
+      'Ninguna de tus ramas alimenta todavía una meta de ahorro. Vincular una significa que cada ciclo de pago riega un arbolito por ti automáticamente.';
+
+  @override
+  String get sugHealthyTitle => 'Árbol sano y equilibrado';
+
+  @override
+  String get sugHealthyReason =>
+      'Tus ramas están bien proporcionadas y dentro de tus ingresos. Nada que cambiar. Solo sigue regando tus metas.';
 }

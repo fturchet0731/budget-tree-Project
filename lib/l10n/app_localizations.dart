@@ -1947,6 +1947,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ancient Oak'**
   String get tierAncientOak;
+
+  /// No description provided for @badgesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges'**
+  String get badgesTitle;
+
+  /// No description provided for @badgesEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'{earned} of {total} earned'**
+  String badgesEarned(int earned, int total);
+
+  /// No description provided for @badgeUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge Unlocked!'**
+  String get badgeUnlocked;
+
+  /// No description provided for @niceExcl.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice!'**
+  String get niceExcl;
+
+  /// No description provided for @badgeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}. {desc}'**
+  String badgeMessage(String title, String desc);
+
+  /// No description provided for @achFirstSproutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First Sprout'**
+  String get achFirstSproutTitle;
+
+  /// No description provided for @achFirstSproutDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant your first budget tree.'**
+  String get achFirstSproutDesc;
+
+  /// No description provided for @achFirstSaplingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First Sapling'**
+  String get achFirstSaplingTitle;
+
+  /// No description provided for @achFirstSaplingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first savings goal.'**
+  String get achFirstSaplingDesc;
+
+  /// No description provided for @achFirstDropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First Drop'**
+  String get achFirstDropTitle;
+
+  /// No description provided for @achFirstDropDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Make your first deposit toward a goal.'**
+  String get achFirstDropDesc;
+
+  /// No description provided for @achOrchardKeeperTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Orchard Keeper'**
+  String get achOrchardKeeperTitle;
+
+  /// No description provided for @achOrchardKeeperDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tend three goals at once.'**
+  String get achOrchardKeeperDesc;
+
+  /// No description provided for @achGreenThumbTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Green Thumb'**
+  String get achGreenThumbTitle;
+
+  /// No description provided for @achGreenThumbDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save \$1,000 across your grove.'**
+  String get achGreenThumbDesc;
+
+  /// No description provided for @achConsistentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Consistent'**
+  String get achConsistentTitle;
+
+  /// No description provided for @achConsistentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach a 3 week saving streak.'**
+  String get achConsistentDesc;
+
+  /// No description provided for @achFirstHarvestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First Harvest'**
+  String get achFirstHarvestTitle;
+
+  /// No description provided for @achFirstHarvestDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete a savings goal.'**
+  String get achFirstHarvestDesc;
+
+  /// No description provided for @achDevotedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Devoted'**
+  String get achDevotedTitle;
+
+  /// No description provided for @achDevotedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach an 8 week saving streak.'**
+  String get achDevotedDesc;
+
+  /// No description provided for @achMightyOakTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mighty Oak'**
+  String get achMightyOakTitle;
+
+  /// No description provided for @achMightyOakDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow a goal to Tier 5 or beyond.'**
+  String get achMightyOakDesc;
+
+  /// No description provided for @achOldGrowthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Growth Forest'**
+  String get achOldGrowthTitle;
+
+  /// No description provided for @achOldGrowthDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save \$10,000 across your grove.'**
+  String get achOldGrowthDesc;
+
+  /// No description provided for @sugAddIncomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your income first'**
+  String get sugAddIncomeTitle;
+
+  /// No description provided for @sugAddIncomeReason.
+  ///
+  /// In en, this message translates to:
+  /// **'A tree needs roots. Add an income source so we can suggest how to split it between branches and goals.'**
+  String get sugAddIncomeReason;
+
+  /// No description provided for @sugOverAllocTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Branches outgrow the trunk'**
+  String get sugOverAllocTitle;
+
+  /// No description provided for @sugOverAllocReason.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve assigned {amount} more than you earn. Trim a branch or two so the tree can actually support them.'**
+  String sugOverAllocReason(String amount);
+
+  /// No description provided for @sugIdleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put idle money to work'**
+  String get sugIdleTitle;
+
+  /// No description provided for @sugIdleReason.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} ({pct}%) of your income isn\'t assigned yet. Add a savings branch and link it to a goal so it grows instead of drifting away.'**
+  String sugIdleReason(String amount, int pct);
+
+  /// No description provided for @sugPruneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prune \"{name}\"'**
+  String sugPruneTitle(String name);
+
+  /// No description provided for @sugPruneReason.
+  ///
+  /// In en, this message translates to:
+  /// **'This branch has no money flowing to it. Fund it or prune it to keep your tree focused.'**
+  String get sugPruneReason;
+
+  /// No description provided for @sugHeavyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" is a heavy branch'**
+  String sugHeavyTitle(String name);
+
+  /// No description provided for @sugHeavyReason.
+  ///
+  /// In en, this message translates to:
+  /// **'It takes {pct}% of your income. If you can trim it, that money could feed a savings goal instead.'**
+  String sugHeavyReason(int pct);
+
+  /// No description provided for @sugFedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals are being fed'**
+  String get sugFedTitle;
+
+  /// No description provided for @sugFedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 branch sends} other{{count} branches send}} money to a goal every pay cycle. Keep it up. That\'s how saplings grow.'**
+  String sugFedReason(int count);
+
+  /// No description provided for @sugLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link a branch to a goal'**
+  String get sugLinkTitle;
+
+  /// No description provided for @sugLinkReason.
+  ///
+  /// In en, this message translates to:
+  /// **'None of your branches feed a savings goal yet. Linking one means every pay cycle automatically waters a sapling for you.'**
+  String get sugLinkReason;
+
+  /// No description provided for @sugHealthyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthy, balanced tree'**
+  String get sugHealthyTitle;
+
+  /// No description provided for @sugHealthyReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Your branches are well proportioned and within your income. Nothing to change. Just keep watering your goals.'**
+  String get sugHealthyReason;
 }
 
 class _AppLocalizationsDelegate

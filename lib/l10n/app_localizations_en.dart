@@ -1078,4 +1078,153 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tierAncientOak => 'Ancient Oak';
+
+  @override
+  String get badgesTitle => 'Badges';
+
+  @override
+  String badgesEarned(int earned, int total) {
+    return '$earned of $total earned';
+  }
+
+  @override
+  String get badgeUnlocked => 'Badge Unlocked!';
+
+  @override
+  String get niceExcl => 'Nice!';
+
+  @override
+  String badgeMessage(String title, String desc) {
+    return '$title. $desc';
+  }
+
+  @override
+  String get achFirstSproutTitle => 'First Sprout';
+
+  @override
+  String get achFirstSproutDesc => 'Plant your first budget tree.';
+
+  @override
+  String get achFirstSaplingTitle => 'First Sapling';
+
+  @override
+  String get achFirstSaplingDesc => 'Create your first savings goal.';
+
+  @override
+  String get achFirstDropTitle => 'First Drop';
+
+  @override
+  String get achFirstDropDesc => 'Make your first deposit toward a goal.';
+
+  @override
+  String get achOrchardKeeperTitle => 'Orchard Keeper';
+
+  @override
+  String get achOrchardKeeperDesc => 'Tend three goals at once.';
+
+  @override
+  String get achGreenThumbTitle => 'Green Thumb';
+
+  @override
+  String get achGreenThumbDesc => 'Save \$1,000 across your grove.';
+
+  @override
+  String get achConsistentTitle => 'Consistent';
+
+  @override
+  String get achConsistentDesc => 'Reach a 3 week saving streak.';
+
+  @override
+  String get achFirstHarvestTitle => 'First Harvest';
+
+  @override
+  String get achFirstHarvestDesc => 'Complete a savings goal.';
+
+  @override
+  String get achDevotedTitle => 'Devoted';
+
+  @override
+  String get achDevotedDesc => 'Reach an 8 week saving streak.';
+
+  @override
+  String get achMightyOakTitle => 'Mighty Oak';
+
+  @override
+  String get achMightyOakDesc => 'Grow a goal to Tier 5 or beyond.';
+
+  @override
+  String get achOldGrowthTitle => 'Old Growth Forest';
+
+  @override
+  String get achOldGrowthDesc => 'Save \$10,000 across your grove.';
+
+  @override
+  String get sugAddIncomeTitle => 'Add your income first';
+
+  @override
+  String get sugAddIncomeReason =>
+      'A tree needs roots. Add an income source so we can suggest how to split it between branches and goals.';
+
+  @override
+  String get sugOverAllocTitle => 'Branches outgrow the trunk';
+
+  @override
+  String sugOverAllocReason(String amount) {
+    return 'You\'ve assigned $amount more than you earn. Trim a branch or two so the tree can actually support them.';
+  }
+
+  @override
+  String get sugIdleTitle => 'Put idle money to work';
+
+  @override
+  String sugIdleReason(String amount, int pct) {
+    return '$amount ($pct%) of your income isn\'t assigned yet. Add a savings branch and link it to a goal so it grows instead of drifting away.';
+  }
+
+  @override
+  String sugPruneTitle(String name) {
+    return 'Prune \"$name\"';
+  }
+
+  @override
+  String get sugPruneReason =>
+      'This branch has no money flowing to it. Fund it or prune it to keep your tree focused.';
+
+  @override
+  String sugHeavyTitle(String name) {
+    return '\"$name\" is a heavy branch';
+  }
+
+  @override
+  String sugHeavyReason(int pct) {
+    return 'It takes $pct% of your income. If you can trim it, that money could feed a savings goal instead.';
+  }
+
+  @override
+  String get sugFedTitle => 'Goals are being fed';
+
+  @override
+  String sugFedReason(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count branches send',
+      one: '1 branch sends',
+    );
+    return '$_temp0 money to a goal every pay cycle. Keep it up. That\'s how saplings grow.';
+  }
+
+  @override
+  String get sugLinkTitle => 'Link a branch to a goal';
+
+  @override
+  String get sugLinkReason =>
+      'None of your branches feed a savings goal yet. Linking one means every pay cycle automatically waters a sapling for you.';
+
+  @override
+  String get sugHealthyTitle => 'Healthy, balanced tree';
+
+  @override
+  String get sugHealthyReason =>
+      'Your branches are well proportioned and within your income. Nothing to change. Just keep watering your goals.';
 }

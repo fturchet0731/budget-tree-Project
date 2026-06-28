@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/achievement_labels.dart';
+import '../l10n/app_localizations.dart';
 import '../models/achievement.dart';
 import '../services/achievement_service.dart';
 import '../theme/app_theme.dart';
@@ -10,15 +12,16 @@ import 'celebration_overlay.dart';
 /// non-empty list so the user actually sees what they earned.
 Future<void> presentNewAchievements(
     BuildContext context, List<Achievement> earned) async {
+  final l = AppLocalizations.of(context);
   for (final a in earned) {
     if (!context.mounted) return;
     await showCelebration(
       context,
-      title: 'Badge Unlocked!',
-      message: '${a.title} — ${a.description}',
+      title: l.badgeUnlocked,
+      message: l.badgeMessage(a.localizedTitle(l), a.localizedDescription(l)),
       icon: a.icon,
       color: a.tint,
-      buttonLabel: 'Nice!',
+      buttonLabel: l.niceExcl,
     );
   }
 }
@@ -52,6 +55,7 @@ class _AchievementsSheet extends StatelessWidget {
         child: FutureBuilder<Map<String, DateTime>>(
           future: AchievementService.loadUnlocked(),
           builder: (ctx, snap) {
+            final l = AppLocalizations.of(context);
             final unlocked = snap.data ?? const {};
             final earnedCount = unlocked.length;
             final total = AchievementCatalog.all.length;
@@ -67,13 +71,13 @@ class _AchievementsSheet extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Badges',
+                Text(l.badgesTitle,
                     style: GoogleFonts.fredoka(
                         fontWeight: FontWeight.w600,
                         color: AppColors.stoneBeigeColor,
                         fontSize: 22)),
                 const SizedBox(height: 2),
-                Text('$earnedCount of $total earned',
+                Text(l.badgesEarned(earnedCount, total),
                     style: GoogleFonts.nunito(
                         color: AppColors.mossGreen, fontSize: 13)),
                 const SizedBox(height: 14),
@@ -114,6 +118,7 @@ class _BadgeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final tint = achievement.tint;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -156,7 +161,7 @@ class _BadgeTile extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            achievement.title,
+            achievement.localizedTitle(l),
             style: GoogleFonts.nunito(
               color: earned
                   ? AppColors.stoneBeigeColor
@@ -167,7 +172,7 @@ class _BadgeTile extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            achievement.description,
+            achievement.localizedDescription(l),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.nunito(

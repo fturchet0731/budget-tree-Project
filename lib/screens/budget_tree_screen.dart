@@ -374,7 +374,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   /// pruning, or trimming branches based on the current budget.
   void _showSuggestions() {
     final l = AppLocalizations.of(context);
-    final suggestions = SuggestionService.forBudget(widget.budget);
+    final suggestions = SuggestionService.forBudget(widget.budget, l);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

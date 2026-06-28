@@ -2,7 +2,9 @@
 // period comparisons, and allocation suggestions. These are pure functions,
 // so no widget/pump harness is needed.
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:budget_app_project/l10n/app_localizations.dart';
 import 'package:budget_app_project/models/budget_model.dart';
 import 'package:budget_app_project/models/goal_model.dart';
 import 'package:budget_app_project/services/comparison_service.dart';
@@ -119,6 +121,7 @@ void main() {
   });
 
   group('Allocation suggestions', () {
+    final l = lookupAppLocalizations(const Locale('en'));
     BudgetModel budget(List<ExpenseCategory> exp, double income) => BudgetModel(
           budgetName: 'B',
           incomeSources: [IncomeSource(name: 'Job', amount: income)],
@@ -131,7 +134,7 @@ void main() {
       final b = budget([
         ExpenseCategory(name: 'Rent', allocated: 1200, emoji: 'home'),
       ], 1000);
-      final s = SuggestionService.forBudget(b);
+      final s = SuggestionService.forBudget(b, l);
       expect(s.any((x) => x.tone == SuggestionTone.warn), isTrue);
     });
 
@@ -139,7 +142,7 @@ void main() {
       final b = budget([
         ExpenseCategory(name: 'Rent', allocated: 600, emoji: 'home'),
       ], 1000);
-      final s = SuggestionService.forBudget(b);
+      final s = SuggestionService.forBudget(b, l);
       expect(s.any((x) => x.title.contains('heavy branch')), isTrue);
     });
 
@@ -151,7 +154,7 @@ void main() {
             emoji: 'savings',
             linkedGoalIds: ['g1']),
       ], 1000);
-      final s = SuggestionService.forBudget(b);
+      final s = SuggestionService.forBudget(b, l);
       expect(s.any((x) => x.tone == SuggestionTone.good), isTrue);
     });
   });
