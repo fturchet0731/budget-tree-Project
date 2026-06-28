@@ -1727,4 +1727,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colourUpper => 'COLOUR';
+
+  @override
+  String get homeSlogan => 'Grow your Forest, Grow your Savings';
+
+  @override
+  String get newTreeInForest => 'A new tree is growing in your forest!';
 }

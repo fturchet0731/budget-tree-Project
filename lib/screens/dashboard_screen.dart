@@ -48,6 +48,41 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  /// Opens the Create flow. When a tree is actually planted the flow pops back
+  /// here with `true`, so we land on the four-leaf menu and announce the new
+  /// tree growing in the forest.
+  Future<void> _openCreate() async {
+    final planted = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const CreateBudgetScreen()),
+    );
+    if (!mounted) return;
+    if (planted == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF122B0F),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              const Icon(Icons.park, color: AppColors.lightLeaf, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).newTreeInForest,
+                  style: const TextStyle(
+                      color: AppColors.stoneBeigeColor, fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,8 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     child: FadeTransition(
                       opacity: _entryAnimation,
                       child: _LeafGrid(
-                        onTapCreate: () =>
-                            _navigate(context, const CreateBudgetScreen()),
+                        onTapCreate: () => _openCreate(),
                         onTapModify: () =>
                             _navigate(context, const ForestScreen()),
                         onTapGoals: () =>
@@ -583,31 +617,43 @@ class _LeafButtonState extends State<_LeafButton> {
                     painter: _LeafVeinPainter(widget.color),
                   ),
                   Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(widget.icon,
-                            color: Colors.white.withValues(alpha: 0.92),
-                            size: 30),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.label,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
+                    child: Padding(
+                      // Keep longer translations (FR/ES) off the leaf's curved
+                      // edges so nothing looks crammed against the clip.
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(widget.icon,
+                              color: Colors.white.withValues(alpha: 0.92),
+                              size: 30),
+                          const SizedBox(height: 8),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              widget.label,
+                              maxLines: 1,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          widget.sublabel,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 11,
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.sublabel,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 11,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],

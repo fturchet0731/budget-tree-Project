@@ -59,10 +59,14 @@ class GuidedTour {
         if (!context.mounted) return false;
         final before = await _count(section);
         if (!context.mounted) return false;
-        await _open(context, section); // hand over the real screen
+        // Hand over the real screen. The Create flow pops back a `true` signal
+        // the moment a tree is planted, which is authoritative — counting the
+        // repository afterwards can race with the background Supabase pull and
+        // briefly miss the new row, which used to make this step restart.
+        final result = await _open(context, section);
         if (!context.mounted) return false;
         final after = await _count(section);
-        if (after > before) {
+        if (result == true || after > before) {
           completed = true;
           break;
         }
@@ -109,9 +113,11 @@ class GuidedTour {
     );
   }
 
-  /// Pushes the genuine, fully-interactive screen for a section.
-  static Future<void> _open(BuildContext context, TutorialSection section) {
-    return Navigator.of(context).push(
+  /// Pushes the genuine, fully-interactive screen for a section. Returns
+  /// whatever that screen pops with (the Create flow returns `true` once a
+  /// tree is actually planted).
+  static Future<Object?> _open(BuildContext context, TutorialSection section) {
+    return Navigator.of(context).push<Object?>(
       MaterialPageRoute(builder: (_) => _screenFor(section)),
     );
   }

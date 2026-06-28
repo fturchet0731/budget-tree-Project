@@ -572,5 +572,7 @@
   "tapForDetails": "Tap for details",
   "newCategoryTitle": "New Category",
   "newCategoryBody": "Name your category. Trees and saplings in this category will be tinted with the chosen colour.",
-  "colourUpper": "COLOUR"
+  "colourUpper": "COLOUR",
+  "homeSlogan": "Grow your Forest, Grow your Savings",
+  "newTreeInForest": "A new tree is growing in your forest!"
 }

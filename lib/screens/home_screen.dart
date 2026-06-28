@@ -514,19 +514,22 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    'Climb to grow your savings',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.nunito(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.92),
-                      fontSize: 17,
-                      shadows: [
-                        Shadow(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2)),
-                      ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      AppLocalizations.of(context).homeSlogan,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontSize: 17,
+                        shadows: [
+                          Shadow(
+                              color: Colors.black.withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2)),
+                        ],
+                      ),
                     ),
                   ),
                   // Buttons sit directly beneath the title.

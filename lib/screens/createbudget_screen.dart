@@ -91,7 +91,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     });
   }
 
-  void _plantTree() {
+  Future<void> _plantTree() async {
     final model = BudgetModel(
       budgetName: _budgetNameCtrl.text.trim().isEmpty
           ? 'My Budget'
@@ -101,7 +101,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       payFrequency: _payFrequency,
       firstPayDate: _firstPayDate,
     );
-    Navigator.push(
+    final planted = await Navigator.push<bool>(
       context,
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 800),
@@ -111,6 +111,10 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
             FadeTransition(opacity: anim, child: child),
       ),
     );
+    // The tree was saved into the forest. Close the create flow too, handing
+    // the "planted" signal to whoever opened us (the dashboard announces the
+    // new tree; the guided tour uses it to mark the step complete).
+    if (planted == true && mounted) Navigator.of(context).pop(true);
   }
 
   @override
@@ -1189,16 +1193,21 @@ class _BottomBar extends StatelessWidget {
                     size: 18,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    isLast ? l.plantMyBudgetTree : l.next,
-                    style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.w600,
-                      color: canAdvance
-                          ? Colors.white
-                          : AppColors.stoneBeigeColor
-                              .withValues(alpha: 0.5),
-                      fontSize: 16,
-                      letterSpacing: 0.5,
+                  Flexible(
+                    child: Text(
+                      isLast ? l.plantMyBudgetTree : l.next,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.fredoka(
+                        fontWeight: FontWeight.w600,
+                        color: canAdvance
+                            ? Colors.white
+                            : AppColors.stoneBeigeColor
+                                .withValues(alpha: 0.5),
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                 ],

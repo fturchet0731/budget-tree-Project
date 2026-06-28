@@ -11,7 +11,9 @@ import 'acorn_mascot.dart';
 /// It's compact, collapsible, and **draggable** — the user can grab Acorn and
 /// move his tip anywhere on the screen so it never sits over the field they're
 /// filling in. Read the tip, tap "Got it" to shrink him into a corner pill, do
-/// the task, then tap him again to re-read. When the host changes [lessonKey]
+/// the task, then tap him again to re-read. Dragging the tip off the left or
+/// right edge tucks Acorn away entirely, leaving a little edge handle; tap or
+/// swipe that handle inward to bring him back. When the host changes [lessonKey]
 /// (e.g. the user advances to the next form step), the coach automatically
 /// re-opens with the new [lines].
 ///
@@ -46,6 +48,11 @@ class _AcornCoachState extends State<AcornCoach>
   bool _expanded = true;
   int _index = 0;
 
+  /// When true, Acorn has been swiped off-screen and only a small edge handle
+  /// remains; [_hiddenOnRight] records which edge he tucked behind.
+  bool _hidden = false;
+  bool _hiddenOnRight = false;
+
   /// Top-left of the floating panel within the host box. Null until the first
   /// layout, when we seed it from [initialAlignment].
   Offset? _pos;
@@ -68,6 +75,12 @@ class _AcornCoachState extends State<AcornCoach>
       // New step — re-open and start fresh (keep wherever it was dragged to).
       _index = 0;
       _expanded = true;
+      // If Acorn was swiped away, bring him back so the new tip is seen. His
+      // stored position is off-screen, so re-seed it to the default corner.
+      if (_hidden) {
+        _hidden = false;
+        _pos = null;
+      }
       _startLine();
     }
   }
@@ -114,11 +127,56 @@ class _AcornCoachState extends State<AcornCoach>
     final panel = _panelKey.currentContext?.size ?? const Size(300, 150);
     final next = (_pos ?? Offset.zero) + d.delta;
     const m = 4.0;
-    // Keep the panel from being dragged off-screen.
-    final maxX = (area.width - panel.width - m).clamp(m, double.infinity);
+    // Allow the panel to be pushed well past the left/right edges so the user
+    // can swipe Acorn off-screen; only a sliver needs to stay grabbable. The
+    // vertical axis stays inside the host box.
+    final minX = -panel.width + 40;
+    final maxX = area.width - 40;
     final maxY = (area.height - panel.height - m).clamp(m, double.infinity);
     setState(() {
-      _pos = Offset(next.dx.clamp(m, maxX), next.dy.clamp(m, maxY));
+      _pos = Offset(next.dx.clamp(minX, maxX), next.dy.clamp(m, maxY));
+    });
+  }
+
+  /// On release, decide whether Acorn was flung far enough past an edge to be
+  /// tucked away into a handle, or should snap back fully on-screen.
+  void _onDragEnd(Size area) {
+    final panel = _panelKey.currentContext?.size ?? const Size(300, 150);
+    final pos = _pos ?? Offset.zero;
+    final offLeft = -pos.dx; // how far the left edge is past the screen edge
+    final offRight = (pos.dx + panel.width) - area.width;
+    final threshold = panel.width * 0.4;
+    if (offLeft > threshold) {
+      setState(() {
+        _hidden = true;
+        _hiddenOnRight = false;
+      });
+    } else if (offRight > threshold) {
+      setState(() {
+        _hidden = true;
+        _hiddenOnRight = true;
+      });
+    } else {
+      // Snap back so no part is left hanging off an edge.
+      const m = 4.0;
+      final maxX = (area.width - panel.width - m).clamp(m, double.infinity);
+      setState(() {
+        _pos = Offset(pos.dx.clamp(m, maxX), pos.dy);
+      });
+    }
+  }
+
+  /// Bring Acorn back from his hidden edge, parked just inside that edge at the
+  /// height the handle was resting at.
+  void _restoreFromHidden(Size area) {
+    final panel = _panelKey.currentContext?.size ?? const Size(300, 150);
+    const m = 8.0;
+    final maxX = (area.width - panel.width - m).clamp(m, double.infinity);
+    final maxY = (area.height - panel.height - m).clamp(m, double.infinity);
+    final y = (_pos?.dy ?? area.height * 0.5).clamp(m, maxY);
+    setState(() {
+      _hidden = false;
+      _pos = Offset(_hiddenOnRight ? maxX : m, y.toDouble());
     });
   }
 
@@ -136,6 +194,7 @@ class _AcornCoachState extends State<AcornCoach>
         final estimate =
             Size(area.width.clamp(0, 340).toDouble() - 24, 150);
         final pos = _pos ??= _seedPos(area, estimate);
+        if (_hidden) return _buildHiddenHandle(area);
         return Stack(
           children: [
             Positioned(
@@ -145,6 +204,7 @@ class _AcornCoachState extends State<AcornCoach>
                 behavior: HitTestBehavior.opaque,
                 onTap: _onTap,
                 onPanUpdate: (d) => _onDrag(d, area),
+                onPanEnd: (_) => _onDragEnd(area),
                 child: KeyedSubtree(
                   key: _panelKey,
                   child: AnimatedSize(
@@ -160,6 +220,62 @@ class _AcornCoachState extends State<AcornCoach>
           ],
         );
       },
+    );
+  }
+
+  /// The little tab that peeks from an edge once Acorn has been swiped away.
+  /// Tapping it, or swiping it back inward, restores the coach.
+  Widget _buildHiddenHandle(Size area) {
+    const handleH = 88.0;
+    final maxTop = (area.height - handleH - 8).clamp(8.0, double.infinity);
+    final top = (_pos?.dy ?? area.height * 0.5).clamp(8.0, maxTop);
+    return Stack(
+      children: [
+        Positioned(
+          top: top.toDouble(),
+          left: _hiddenOnRight ? null : 0,
+          right: _hiddenOnRight ? 0 : null,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _restoreFromHidden(area),
+            onHorizontalDragUpdate: (d) {
+              // A nudge inward (away from the edge) brings Acorn back.
+              final inward = _hiddenOnRight ? -d.delta.dx : d.delta.dx;
+              if (inward > 6) _restoreFromHidden(area);
+            },
+            child: Container(
+              width: 34,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFDF6E3),
+                borderRadius: _hiddenOnRight
+                    ? const BorderRadius.horizontal(left: Radius.circular(16))
+                    : const BorderRadius.horizontal(right: Radius.circular(16)),
+                border: Border.all(color: AppColors.barkBrown, width: 2.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.30),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AcornMascot(size: 26, sway: true),
+                  const SizedBox(height: 4),
+                  Icon(
+                    _hiddenOnRight ? Icons.chevron_left : Icons.chevron_right,
+                    size: 16,
+                    color: AppColors.barkBrown,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

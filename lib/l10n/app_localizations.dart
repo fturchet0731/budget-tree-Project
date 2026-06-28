@@ -3027,6 +3027,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'COLOUR'**
   String get colourUpper;
+
+  /// No description provided for @homeSlogan.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow your Forest, Grow your Savings'**
+  String get homeSlogan;
+
+  /// No description provided for @newTreeInForest.
+  ///
+  /// In en, this message translates to:
+  /// **'A new tree is growing in your forest!'**
+  String get newTreeInForest;
 }
 
 class _AppLocalizationsDelegate

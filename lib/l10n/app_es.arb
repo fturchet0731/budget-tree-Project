@@ -513,5 +513,7 @@
   "tapForDetails": "Toca para ver detalles",
   "newCategoryTitle": "Nueva categoría",
   "newCategoryBody": "Nombra tu categoría. Los árboles y arbolitos de esta categoría se teñirán con el color elegido.",
-  "colourUpper": "COLOR"
+  "colourUpper": "COLOR",
+  "homeSlogan": "Haz crecer tu bosque, haz crecer tus ahorros",
+  "newTreeInForest": "¡Un nuevo árbol crece en tu bosque!"
 }

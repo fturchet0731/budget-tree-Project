@@ -306,6 +306,9 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               ),
               onPressed: () async {
                 Navigator.pop(ctx);
+                // Capture before stamping savedAt: a never-saved budget is a
+                // brand-new tree being planted (vs. updating one from the forest).
+                final wasNew = widget.budget.savedAt == null;
                 widget.budget.categoryId = chosenCategoryId;
                 widget.budget.savedAt = DateTime.now();
                 int autoLinkedCount = 0;
@@ -317,7 +320,18 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 SoundService.treePlanted();
                 await AchievementService.evaluateAndUnlock();
                 await NotificationScheduler.checkBudget(widget.budget);
-                if (autoLinkedCount > 0 && mounted) {
+                if (!mounted) return;
+                if (wasNew) {
+                  // A freshly planted tree: hand a "planted" signal back up the
+                  // create flow so it lands on the four-leaf menu and announces
+                  // the new tree there, instead of dropping a snackbar on a
+                  // screen we're about to leave.
+                  Future.delayed(const Duration(milliseconds: 600), () {
+                    if (mounted) Navigator.of(context).pop(true);
+                  });
+                  return;
+                }
+                if (autoLinkedCount > 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       backgroundColor: const Color(0xFF122B0F),
@@ -333,7 +347,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     ),
                   );
                 }
-                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     backgroundColor: const Color(0xFF122B0F),

@@ -1735,4 +1735,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get colourUpper => 'COLOR';
+
+  @override
+  String get homeSlogan => 'Haz crecer tu bosque, haz crecer tus ahorros';
+
+  @override
+  String get newTreeInForest => '¡Un nuevo árbol crece en tu bosque!';
 }
