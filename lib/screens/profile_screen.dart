@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../models/profile_model.dart';
+import '../services/category_repository.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
 import '../widgets/social_tab_bar.dart';
+import 'goal_detail_screen.dart';
 
 /// The signed-in user's own profile, shown in the dashboard's social sidebar:
 /// their username, an editable bio, and the goals they've shared drawn as
@@ -15,11 +19,7 @@ import '../widgets/social_tab_bar.dart';
 /// they open this user's profile, so the user controls visibility per goal via
 /// each goal's "visible to friends" toggle.
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({
-    super.key,
-    this.onClose,
-    required this.onSelectTab,
-  });
+  const ProfileScreen({super.key, this.onClose, required this.onSelectTab});
 
   /// Closes the sidebar drawer (shows an X instead of a back button).
   final VoidCallback? onClose;
@@ -59,6 +59,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final shared = (await GoalRepository.loadAll())
           .where((g) => g.sharedWithFriends)
           .toList();
+      // Backfill each shared goal's denormalised tree colour from the local
+      // category so the sapling renders in the right colour AND that colour
+      // gets pushed to Supabase for friends to see. Persist only when it
+      // actually changed (e.g. legacy goals saved before this field existed).
+      final cats = await CategoryRepository.loadAll();
+      final colorById = {for (final TreeCategory c in cats) c.id: c.colorValue};
+      for (final g in shared) {
+        final resolved = g.categoryId == null ? null : colorById[g.categoryId];
+        if (g.leafColorValue != resolved) {
+          g.leafColorValue = resolved;
+          await GoalRepository.update(g);
+        }
+      }
       if (!mounted) return;
       setState(() {
         _me = me;
@@ -83,8 +96,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF0D2410),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(l.bio,
-            style: const TextStyle(color: AppColors.stoneBeigeColor)),
+        title: Text(
+          l.bio,
+          style: const TextStyle(color: AppColors.stoneBeigeColor),
+        ),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -99,19 +114,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(l.cancel,
-                style: const TextStyle(color: AppColors.mossGreen)),
+            child: Text(
+              l.cancel,
+              style: const TextStyle(color: AppColors.mossGreen),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.forestGreen,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: Text(l.save,
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              l.save,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -121,22 +143,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await ProfileService.instance.setBio(trimmed);
       if (mounted) {
-        setState(() => _me = _me == null
-            ? null
-            : Profile(
-                id: _me!.id,
-                username: _me!.username,
-                displayName: _me!.displayName,
-                bio: trimmed.isEmpty ? null : trimmed,
-                statusMode: _me!.statusMode,
-                statusGoalId: _me!.statusGoalId,
-              ));
+        setState(
+          () => _me = _me == null
+              ? null
+              : Profile(
+                  id: _me!.id,
+                  username: _me!.username,
+                  displayName: _me!.displayName,
+                  bio: trimmed.isEmpty ? null : trimmed,
+                  statusMode: _me!.statusMode,
+                  statusGoalId: _me!.statusGoalId,
+                ),
+        );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.somethingWentWrong)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.somethingWentWrong)));
       }
     }
   }
@@ -172,56 +196,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _body(AppLocalizations l) {
     if (_loading) {
       return const Center(
-          child: CircularProgressIndicator(color: AppColors.lightLeaf));
+        child: CircularProgressIndicator(color: AppColors.lightLeaf),
+      );
     }
     if (!ProfileService.instance.isAvailable) {
-      return _notice(Icons.cloud_off, l.friendsNeedAccountTitle,
-          l.friendsNeedAccountBody);
+      return _notice(
+        Icons.cloud_off,
+        l.friendsNeedAccountTitle,
+        l.friendsNeedAccountBody,
+      );
     }
     if (_errorMsg != null) {
-      return _notice(Icons.wifi_off, l.couldntLoadFriends, _errorMsg!,
-          onRetry: _load);
+      return _notice(
+        Icons.wifi_off,
+        l.couldntLoadFriends,
+        _errorMsg!,
+        onRetry: _load,
+      );
     }
     if (_me == null) {
       // Onboarding normally guarantees a username; nudge to the Friends tab
       // (which carries the claim fallback) if somehow missing.
-      return _notice(Icons.alternate_email, l.claimUsernameTitle,
-          l.claimUsernameBody);
+      return _notice(
+        Icons.alternate_email,
+        l.claimUsernameTitle,
+        l.claimUsernameBody,
+      );
     }
     return RefreshIndicator(
       onRefresh: _load,
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(child: _header(l)),
-          if (_sharedGoals.isEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(28, 30, 28, 30),
-                child: Text(
-                  l.shareGoalsToShowOnProfile,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.mossGreen),
+      child: AppScrollbar(
+        builder: (controller) => CustomScrollView(
+          controller: controller,
+          slivers: [
+            SliverToBoxAdapter(child: _header(l)),
+            if (_sharedGoals.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 30, 28, 30),
+                  child: Text(
+                    l.shareGoalsToShowOnProfile,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.mossGreen),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.72,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (_, i) => GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                GoalDetailScreen(goal: _sharedGoals[i]),
+                          ),
+                        );
+                        // A goal may have been edited, unshared, or deleted.
+                        if (mounted) _load();
+                      },
+                      child: GoalSaplingCard(goal: _sharedGoals[i]),
+                    ),
+                    childCount: _sharedGoals.length,
+                  ),
                 ),
               ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-              sliver: SliverGrid(
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.72,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (_, i) => GoalSaplingCard(goal: _sharedGoals[i]),
-                  childCount: _sharedGoals.length,
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -242,10 +292,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: AppColors.forestGreen.withValues(alpha: 0.30),
                   shape: BoxShape.circle,
                   border: Border.all(
-                      color: AppColors.mossGreen.withValues(alpha: 0.4)),
+                    color: AppColors.mossGreen.withValues(alpha: 0.4),
+                  ),
                 ),
-                child: const Icon(Icons.person,
-                    color: AppColors.lightLeaf, size: 28),
+                child: const Icon(
+                  Icons.person,
+                  color: AppColors.lightLeaf,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -257,14 +311,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         _me!.displayName!,
                         style: const TextStyle(
-                            color: AppColors.stoneBeigeColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                          color: AppColors.stoneBeigeColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     Text(
                       '@${_me!.username}',
                       style: const TextStyle(
-                          color: AppColors.mossGreen, fontSize: 14),
+                        color: AppColors.mossGreen,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -283,7 +340,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: Colors.black.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: AppColors.mossGreen.withValues(alpha: 0.3)),
+                  color: AppColors.mossGreen.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,14 +355,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             : AppColors.mossGreen,
                         fontSize: 14,
                         height: 1.4,
-                        fontStyle:
-                            hasBio ? FontStyle.normal : FontStyle.italic,
+                        fontStyle: hasBio ? FontStyle.normal : FontStyle.italic,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.edit_outlined,
-                      color: AppColors.mossGreen, size: 18),
+                  const Icon(
+                    Icons.edit_outlined,
+                    color: AppColors.mossGreen,
+                    size: 18,
+                  ),
                 ],
               ),
             ),
@@ -313,45 +373,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             l.sharedGoals,
             style: const TextStyle(
-                color: AppColors.lightLeaf,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1),
+              color: AppColors.lightLeaf,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _notice(IconData icon, String title, String body,
-          {Future<void> Function()? onRetry}) =>
-      Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: AppColors.mossGreen, size: 48),
-              const SizedBox(height: 16),
-              Text(title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: AppColors.stoneBeigeColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(body,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.mossGreen)),
-              if (onRetry != null) ...[
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(AppLocalizations.of(context).retry),
-                ),
-              ],
-            ],
+  Widget _notice(
+    IconData icon,
+    String title,
+    String body, {
+    Future<void> Function()? onRetry,
+  }) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.mossGreen, size: 48),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.stoneBeigeColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      );
+          const SizedBox(height: 8),
+          Text(
+            body,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppColors.mossGreen),
+          ),
+          if (onRetry != null) ...[
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: Text(AppLocalizations.of(context).retry),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }

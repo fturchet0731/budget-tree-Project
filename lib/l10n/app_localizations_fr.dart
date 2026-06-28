@@ -1774,4 +1774,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get newTreeInForest => 'Un nouvel arbre pousse dans votre forêt !';
+
+  @override
+  String get deleteCategoryTitle => 'Supprimer le groupe ?';
+
+  @override
+  String deleteCategoryBody(String name) {
+    return 'Supprimer le groupe « $name » ? Les arbres et arbustes qui en font partie perdront simplement leur étiquette de couleur.';
+  }
+
+  @override
+  String get longPressToDeleteGroup =>
+      'Appuyez longuement sur un groupe pour le supprimer';
+
+  @override
+  String sharedByName(String name) {
+    return 'Partagé par $name';
+  }
 }

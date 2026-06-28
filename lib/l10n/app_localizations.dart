@@ -3081,6 +3081,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A new tree is growing in your forest!'**
   String get newTreeInForest;
+
+  /// No description provided for @deleteCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete group?'**
+  String get deleteCategoryTitle;
+
+  /// No description provided for @deleteCategoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the group \"{name}\"? Trees and saplings in it will simply lose their colour tag.'**
+  String deleteCategoryBody(String name);
+
+  /// No description provided for @longPressToDeleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Long press a group to delete it'**
+  String get longPressToDeleteGroup;
+
+  /// No description provided for @sharedByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by {name}'**
+  String sharedByName(String name);
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import '../services/friends_service.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_scrollbar.dart';
 import '../widgets/social_tab_bar.dart';
 import 'friend_garden_screen.dart';
 
@@ -129,9 +130,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
       return true;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_messageFor(e))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_messageFor(e))));
       }
       return false;
     }
@@ -146,7 +147,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
     setState(() => _searching = true);
     List<Profile> results = const [];
     final ok = await _guard(
-        () async => results = await ProfileService.instance.searchByUsername(q));
+      () async => results = await ProfileService.instance.searchByUsername(q),
+    );
     if (!mounted) return;
     setState(() {
       _results = ok ? results : const [];
@@ -155,16 +157,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   Future<void> _add(Profile p) async {
-    final ok =
-        await _guard(() => FriendsService.instance.sendRequest(p.id));
+    final ok = await _guard(() => FriendsService.instance.sendRequest(p.id));
     if (!ok) return;
     _search.clear();
     setState(() => _results = const []);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text(AppLocalizations.of(context).requestSentTo(p.username))),
+          content: Text(AppLocalizations.of(context).requestSentTo(p.username)),
+        ),
       );
     }
     await _load();
@@ -204,7 +205,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
       if (goalId == null) return; // cancelled / no shared goal
     }
     final ok = await _guard(
-        () => ProfileService.instance.setStatusMode(mode, goalId: goalId));
+      () => ProfileService.instance.setStatusMode(mode, goalId: goalId),
+    );
     if (ok) await _load();
   }
 
@@ -271,7 +273,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
     final l = AppLocalizations.of(context);
     if (_loading) {
       return const Center(
-          child: CircularProgressIndicator(color: AppColors.lightLeaf));
+        child: CircularProgressIndicator(color: AppColors.lightLeaf),
+      );
     }
     if (!ProfileService.instance.isAvailable) {
       return _notice(
@@ -293,27 +296,32 @@ class _FriendsScreenState extends State<FriendsScreen> {
     }
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: [
-          _statusCard(),
-          const SizedBox(height: 20),
-          _addCard(),
-          if (_incoming.isNotEmpty) ...[
+      child: AppScrollbar(
+        builder: (controller) => ListView(
+          controller: controller,
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            _statusCard(),
             const SizedBox(height: 20),
-            _sectionTitle(l.requests),
-            for (final p in _incoming) _requestTile(p),
+            _addCard(),
+            if (_incoming.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              _sectionTitle(l.requests),
+              for (final p in _incoming) _requestTile(p),
+            ],
+            const SizedBox(height: 20),
+            _sectionTitle(l.friends),
+            if (_friends.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  l.noFriendsYet,
+                  style: const TextStyle(color: AppColors.mossGreen),
+                ),
+              ),
+            for (final f in _friends) _friendTile(f),
           ],
-          const SizedBox(height: 20),
-          _sectionTitle(l.friends),
-          if (_friends.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(l.noFriendsYet,
-                  style: const TextStyle(color: AppColors.mossGreen)),
-            ),
-          for (final f in _friends) _friendTile(f),
-        ],
+        ),
       ),
     );
   }
@@ -327,14 +335,21 @@ class _FriendsScreenState extends State<FriendsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l.youAreUsername(_me!.username),
-                    style: const TextStyle(
-                        color: AppColors.stoneBeigeColor,
-                        fontWeight: FontWeight.bold)),
+                Text(
+                  l.youAreUsername(_me!.username),
+                  style: const TextStyle(
+                    color: AppColors.stoneBeigeColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(l.howFriendsSeeStatus,
-                    style: const TextStyle(
-                        color: AppColors.mossGreen, fontSize: 12)),
+                Text(
+                  l.howFriendsSeeStatus,
+                  style: const TextStyle(
+                    color: AppColors.mossGreen,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -346,8 +361,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             style: const TextStyle(color: AppColors.stoneBeigeColor),
             items: [
               for (final m in FriendStatusMode.values)
-                DropdownMenuItem(
-                    value: m, child: Text(_statusModeLabel(l, m))),
+                DropdownMenuItem(value: m, child: Text(_statusModeLabel(l, m))),
             ],
             onChanged: (m) {
               if (m != null) _changeStatusMode(m);
@@ -374,8 +388,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   decoration: InputDecoration(
                     hintText: l.searchByUsername,
                     hintStyle: const TextStyle(color: AppColors.mossGreen),
-                    prefixIcon: const Icon(Icons.alternate_email,
-                        color: AppColors.mossGreen),
+                    prefixIcon: const Icon(
+                      Icons.alternate_email,
+                      color: AppColors.mossGreen,
+                    ),
                   ),
                   textInputAction: TextInputAction.search,
                   onSubmitted: (_) => _runSearch(),
@@ -395,16 +411,24 @@ class _FriendsScreenState extends State<FriendsScreen> {
           for (final p in _results)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.person_outline,
-                  color: AppColors.mossGreen),
-              title: Text(p.label,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor)),
-              subtitle: Text('@${p.username}',
-                  style: const TextStyle(color: AppColors.mossGreen)),
+              leading: const Icon(
+                Icons.person_outline,
+                color: AppColors.mossGreen,
+              ),
+              title: Text(
+                p.label,
+                style: const TextStyle(color: AppColors.stoneBeigeColor),
+              ),
+              subtitle: Text(
+                '@${p.username}',
+                style: const TextStyle(color: AppColors.mossGreen),
+              ),
               trailing: TextButton(
                 onPressed: () => _add(p),
-                child: Text(l.add,
-                    style: const TextStyle(color: AppColors.lightLeaf)),
+                child: Text(
+                  l.add,
+                  style: const TextStyle(color: AppColors.lightLeaf),
+                ),
               ),
             ),
         ],
@@ -420,18 +444,24 @@ class _FriendsScreenState extends State<FriendsScreen> {
           const Icon(Icons.person_add_alt, color: AppColors.lightLeaf),
           const SizedBox(width: 12),
           Expanded(
-            child: Text('@${p.username}',
-                style: const TextStyle(color: AppColors.stoneBeigeColor)),
+            child: Text(
+              '@${p.username}',
+              style: const TextStyle(color: AppColors.stoneBeigeColor),
+            ),
           ),
           TextButton(
             onPressed: () => _accept(p),
-            child: Text(l.accept,
-                style: const TextStyle(color: AppColors.lightLeaf)),
+            child: Text(
+              l.accept,
+              style: const TextStyle(color: AppColors.lightLeaf),
+            ),
           ),
           TextButton(
             onPressed: () => _decline(p),
-            child: Text(l.decline,
-                style: const TextStyle(color: AppColors.dangerRed)),
+            child: Text(
+              l.decline,
+              style: const TextStyle(color: AppColors.dangerRed),
+            ),
           ),
         ],
       ),
@@ -443,10 +473,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         leading: Text(f.statusEmoji, style: const TextStyle(fontSize: 26)),
-        title: Text(f.profile.label,
-            style: const TextStyle(
-                color: AppColors.stoneBeigeColor,
-                fontWeight: FontWeight.bold)),
+        title: Text(
+          f.profile.label,
+          style: const TextStyle(
+            color: AppColors.stoneBeigeColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         subtitle: Text(
           '@${f.profile.username} · '
           '${AppLocalizations.of(context).sharedGoalsCount(f.sharedGoals.length)}',
@@ -461,58 +494,68 @@ class _FriendsScreenState extends State<FriendsScreen> {
   // ------------------------------------------------------------- small bits
 
   Widget _sectionTitle(String s) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(s,
-            style: const TextStyle(
-                color: AppColors.lightLeaf,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1)),
-      );
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      s,
+      style: const TextStyle(
+        color: AppColors.lightLeaf,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1,
+      ),
+    ),
+  );
 
   Widget _card({required Widget child}) => Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.18),
-          borderRadius: BorderRadius.circular(16),
-          border:
-              Border.all(color: AppColors.mossGreen.withValues(alpha: 0.3)),
-        ),
-        child: child,
-      );
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: Colors.black.withValues(alpha: 0.18),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: AppColors.mossGreen.withValues(alpha: 0.3)),
+    ),
+    child: child,
+  );
 
-  Widget _notice(IconData icon, String title, String body,
-          {Future<void> Function()? onRetry}) =>
-      Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: AppColors.mossGreen, size: 48),
-              const SizedBox(height: 16),
-              Text(title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: AppColors.stoneBeigeColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(body,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.mossGreen)),
-              if (onRetry != null) ...[
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(AppLocalizations.of(context).retry),
-                ),
-              ],
-            ],
+  Widget _notice(
+    IconData icon,
+    String title,
+    String body, {
+    Future<void> Function()? onRetry,
+  }) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.mossGreen, size: 48),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.stoneBeigeColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      );
+          const SizedBox(height: 8),
+          Text(
+            body,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppColors.mossGreen),
+          ),
+          if (onRetry != null) ...[
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: Text(AppLocalizations.of(context).retry),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 /// First-run inline form: a signed-in user with no profile claims a username.
@@ -571,18 +614,26 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.alternate_email,
-                color: AppColors.lightLeaf, size: 48),
+            const Icon(
+              Icons.alternate_email,
+              color: AppColors.lightLeaf,
+              size: 48,
+            ),
             const SizedBox(height: 16),
-            Text(l.claimUsernameTitle,
-                style: const TextStyle(
-                    color: AppColors.stoneBeigeColor,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              l.claimUsernameTitle,
+              style: const TextStyle(
+                color: AppColors.stoneBeigeColor,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(l.claimUsernameBody,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.mossGreen)),
+            Text(
+              l.claimUsernameBody,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.mossGreen),
+            ),
             const SizedBox(height: 20),
             TextField(
               controller: _controller,
@@ -594,8 +645,10 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
                 hintText: l.usernameHint,
                 hintStyle: const TextStyle(color: AppColors.mossGreen),
                 errorText: _error,
-                prefixIcon: const Icon(Icons.alternate_email,
-                    color: AppColors.mossGreen),
+                prefixIcon: const Icon(
+                  Icons.alternate_email,
+                  color: AppColors.mossGreen,
+                ),
               ),
               onSubmitted: (_) => _claim(),
             ),
@@ -607,7 +660,10 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
                       height: 18,
                       width: 18,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                   : Text(l.claimUsernameButton),
             ),
           ],

@@ -581,5 +581,11 @@
   "newCategoryBody": "Name your category. Trees and saplings in this category will be tinted with the chosen colour.",
   "colourUpper": "COLOUR",
   "homeSlogan": "Grow your Forest, Grow your Savings",
-  "newTreeInForest": "A new tree is growing in your forest!"
+  "newTreeInForest": "A new tree is growing in your forest!",
+  "deleteCategoryTitle": "Delete group?",
+  "deleteCategoryBody": "Delete the group \"{name}\"? Trees and saplings in it will simply lose their colour tag.",
+  "@deleteCategoryBody": { "placeholders": { "name": { "type": "String" } } },
+  "longPressToDeleteGroup": "Long press a group to delete it",
+  "sharedByName": "Shared by {name}",
+  "@sharedByName": { "placeholders": { "name": { "type": "String" } } }
 }

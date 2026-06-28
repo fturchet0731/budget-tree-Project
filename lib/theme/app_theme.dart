@@ -202,6 +202,13 @@ class AppTheme {
           secondary: AppColors.mossGreen,
           surface: AppColors.darkBark,
         ),
+        scrollbarTheme: ScrollbarThemeData(
+          thumbColor: WidgetStatePropertyAll(
+            AppColors.lightLeaf.withValues(alpha: 0.55),
+          ),
+          thickness: const WidgetStatePropertyAll(5),
+          radius: const Radius.circular(8),
+        ),
         textTheme: const TextTheme(
           headlineLarge: TextStyle(
             color: AppColors.stoneBeigeColor,

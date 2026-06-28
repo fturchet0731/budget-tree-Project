@@ -8,6 +8,7 @@ import '../models/budget_model.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
 import '../widgets/acorn_coach.dart';
+import '../widgets/app_scrollbar.dart';
 import '../widgets/bark_card.dart';
 import '../widgets/info_button.dart';
 import '../widgets/vine_step_indicator.dart';
@@ -84,8 +85,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     final amount = double.tryParse(_expAmountCtrl.text) ?? 0;
     if (name.isEmpty || amount <= 0) return;
     setState(() {
-      _expenses.add(ExpenseCategory(
-          name: name, allocated: amount, emoji: _selectedIconKey));
+      _expenses.add(
+        ExpenseCategory(name: name, allocated: amount, emoji: _selectedIconKey),
+      );
       _expNameCtrl.clear();
       _expAmountCtrl.clear();
     });
@@ -123,13 +125,13 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     final stepTitle = _step == 0
         ? l.stepIncomeTitle
         : _step == 1
-            ? l.stepExpensesTitle
-            : l.stepNamePayTitle;
+        ? l.stepExpensesTitle
+        : l.stepNamePayTitle;
     final stepSubtitle = _step == 0
         ? l.stepIncomeSub
         : _step == 1
-            ? l.stepExpensesSub
-            : l.stepNamePaySub;
+        ? l.stepExpensesSub
+        : l.stepNamePaySub;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -142,9 +144,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
               decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
             ),
           ),
-          Positioned.fill(
-            child: CustomPaint(painter: _NatureBgPainter()),
-          ),
+          Positioned.fill(child: CustomPaint(painter: _NatureBgPainter())),
           // ── Foreground content ───────────────────
           SafeArea(
             child: Column(
@@ -162,8 +162,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                   steps: [
                     VineStep(label: l.vineSeed, icon: Icons.eco),
                     VineStep(
-                        label: l.vineBranches,
-                        icon: Icons.account_tree_outlined),
+                      label: l.vineBranches,
+                      icon: Icons.account_tree_outlined,
+                    ),
                     VineStep(label: l.vineRoots, icon: Icons.park_outlined),
                   ],
                 ),
@@ -195,34 +196,35 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                                 setState(() => _incomeSources.removeAt(i)),
                           )
                         : _step == 1
-                            ? _ExpenseStep(
-                                key: const ValueKey(1),
-                                expenses: _expenses,
-                                nameCtrl: _expNameCtrl,
-                                amountCtrl: _expAmountCtrl,
-                                selectedIconKey: _selectedIconKey,
-                                totalIncome: _totalIncome,
-                                totalAllocated: _totalAllocated,
-                                presets: _presets,
-                                onAdd: _addExpense,
-                                onRemove: (i) =>
-                                    setState(() => _expenses.removeAt(i)),
-                                onPresetTap: (name, iconKey) => setState(() {
-                                  _expNameCtrl.text =
-                                      iconKey == 'other' ? '' : name;
-                                  _selectedIconKey = iconKey;
-                                }),
-                              )
-                            : _PersonalStep(
-                                key: const ValueKey(2),
-                                nameCtrl: _budgetNameCtrl,
-                                payFrequency: _payFrequency,
-                                firstPayDate: _firstPayDate,
-                                onFrequencyChanged: (f) =>
-                                    setState(() => _payFrequency = f),
-                                onFirstPayDateChanged: (d) =>
-                                    setState(() => _firstPayDate = d),
-                              ),
+                        ? _ExpenseStep(
+                            key: const ValueKey(1),
+                            expenses: _expenses,
+                            nameCtrl: _expNameCtrl,
+                            amountCtrl: _expAmountCtrl,
+                            selectedIconKey: _selectedIconKey,
+                            totalIncome: _totalIncome,
+                            totalAllocated: _totalAllocated,
+                            presets: _presets,
+                            onAdd: _addExpense,
+                            onRemove: (i) =>
+                                setState(() => _expenses.removeAt(i)),
+                            onPresetTap: (name, iconKey) => setState(() {
+                              _expNameCtrl.text = iconKey == 'other'
+                                  ? ''
+                                  : name;
+                              _selectedIconKey = iconKey;
+                            }),
+                          )
+                        : _PersonalStep(
+                            key: const ValueKey(2),
+                            nameCtrl: _budgetNameCtrl,
+                            payFrequency: _payFrequency,
+                            firstPayDate: _firstPayDate,
+                            onFrequencyChanged: (f) =>
+                                setState(() => _payFrequency = f),
+                            onFirstPayDateChanged: (d) =>
+                                setState(() => _firstPayDate = d),
+                          ),
                   ),
                 ),
                 _BottomBar(
@@ -230,8 +232,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                   canAdvance: _step == 0
                       ? _incomeSources.isNotEmpty
                       : _step == 1
-                          ? _expenses.isNotEmpty
-                          : true,
+                      ? _expenses.isNotEmpty
+                      : true,
                   onNext: () {
                     if (_step < 2) {
                       setState(() => _step++);
@@ -279,11 +281,15 @@ class _NatureBgPainter extends CustomPainter {
       Offset(w * 0.85, h * 0.08),
       120,
       Paint()
-        ..shader = RadialGradient(colors: [
-          AppPalettes.celestialGlow().withValues(alpha: 0.18),
-          Colors.transparent,
-        ]).createShader(
-            Rect.fromCircle(center: Offset(w * 0.85, h * 0.08), radius: 120)),
+        ..shader =
+            RadialGradient(
+              colors: [
+                AppPalettes.celestialGlow().withValues(alpha: 0.18),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromCircle(center: Offset(w * 0.85, h * 0.08), radius: 120),
+            ),
     );
 
     // Distant tree silhouettes near the bottom (fading into bg)
@@ -296,13 +302,18 @@ class _NatureBgPainter extends CustomPainter {
       final cR = 22.0 + ((i * 7) % 4) * 4;
       canvas.drawCircle(Offset(x, treeY - 6), cR, Paint()..color = silhouette);
       canvas.drawCircle(
-          Offset(x - 14, treeY + 6), cR * 0.8, Paint()..color = silhouette);
+        Offset(x - 14, treeY + 6),
+        cR * 0.8,
+        Paint()..color = silhouette,
+      );
       canvas.drawCircle(
-          Offset(x + 12, treeY + 6), cR * 0.7, Paint()..color = silhouette);
+        Offset(x + 12, treeY + 6),
+        cR * 0.7,
+        Paint()..color = silhouette,
+      );
       // Tiny trunk
       canvas.drawRect(
-        Rect.fromCenter(
-            center: Offset(x, treeY + 18), width: 5, height: 16),
+        Rect.fromCenter(center: Offset(x, treeY + 18), width: 5, height: 16),
         Paint()..color = silhouette,
       );
     }
@@ -354,7 +365,8 @@ class _CreateHeader extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: AppColors.mossGreen.withValues(alpha: 0.35)),
+                  color: AppColors.mossGreen.withValues(alpha: 0.35),
+                ),
               ),
               child: Icon(
                 step == 0 ? Icons.arrow_back : Icons.chevron_left,
@@ -371,8 +383,9 @@ class _CreateHeader extends StatelessWidget {
                 opacity: anim,
                 child: SlideTransition(
                   position: Tween<Offset>(
-                          begin: const Offset(0, 0.2), end: Offset.zero)
-                      .animate(anim),
+                    begin: const Offset(0, 0.2),
+                    end: Offset.zero,
+                  ).animate(anim),
                   child: child,
                 ),
               ),
@@ -388,9 +401,10 @@ class _CreateHeader extends StatelessWidget {
                       fontSize: 22,
                       shadows: const [
                         Shadow(
-                            color: Colors.black54,
-                            offset: Offset(0, 2),
-                            blurRadius: 6),
+                          color: Colors.black54,
+                          offset: Offset(0, 2),
+                          blurRadius: 6,
+                        ),
                       ],
                     ),
                   ),
@@ -414,10 +428,7 @@ class _CreateHeader extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF66BB6A),
-                  Color(0xFF2E7D32),
-                ],
+                colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -471,164 +482,196 @@ class _IncomeStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final total = sources.fold(0.0, (s, e) => s + e.amount);
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-      children: [
-        // Quick-picks card
-        BarkCard(
-          label: l.quickPick,
-          icon: Icons.bolt,
-          accent: AppColors.riverBlue,
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: suggestions
-                .map((s) => GestureDetector(
-                      onTap: () =>
-                          nameCtrl.text = incomeSuggestionLabel(l, s),
+    return AppScrollbar(
+      builder: (controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        children: [
+          // Quick-picks card
+          BarkCard(
+            label: l.quickPick,
+            icon: Icons.bolt,
+            accent: AppColors.riverBlue,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: suggestions
+                  .map(
+                    (s) => GestureDetector(
+                      onTap: () => nameCtrl.text = incomeSuggestionLabel(l, s),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 13, vertical: 8),
+                          horizontal: 13,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.riverBlue.withValues(alpha: 0.20),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: AppColors.riverBlue
-                                  .withValues(alpha: 0.65)),
+                            color: AppColors.riverBlue.withValues(alpha: 0.65),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.water_drop_outlined,
-                                size: 12, color: AppColors.skyBlue),
+                            const Icon(
+                              Icons.water_drop_outlined,
+                              size: 12,
+                              color: AppColors.skyBlue,
+                            ),
                             const SizedBox(width: 5),
-                            Text(incomeSuggestionLabel(l, s),
-                                style: GoogleFonts.nunito(
-                                    color: AppColors.stoneBeigeColor,
-                                    fontSize: 12)),
+                            Text(
+                              incomeSuggestionLabel(l, s),
+                              style: GoogleFonts.nunito(
+                                color: AppColors.stoneBeigeColor,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ))
-                .toList(),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
-        ),
-        const SizedBox(height: 14),
-        // Add a source card
-        BarkCard(
-          label: l.addASource,
-          icon: Icons.add_circle_outline,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: TextField(
-                  controller: nameCtrl,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  decoration: InputDecoration(
-                      labelText: l.sourceName, hintText: l.sourceNameHint),
-                  textCapitalization: TextCapitalization.words,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: amountCtrl,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
-                  ],
-                  decoration: InputDecoration(
-                      labelText: l.amountDollar, hintText: '0.00'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: _AddButton(onTap: onAdd),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        if (sources.isNotEmpty)
+          const SizedBox(height: 14),
+          // Add a source card
           BarkCard(
-            label: l.rootsFeedingTree,
-            icon: Icons.water_drop,
-            accent: AppColors.lightLeaf,
-            child: Column(
+            label: l.addASource,
+            icon: Icons.add_circle_outline,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...sources.asMap().entries.map((entry) {
-                  final i = entry.key;
-                  final s = entry.value;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: AppColors.riverBlue
-                                .withValues(alpha: 0.18),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.water_drop_outlined,
-                              color: AppColors.riverBlue, size: 14),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(s.name,
-                              style: GoogleFonts.nunito(
-                                  color: AppColors.stoneBeigeColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                        Text(
-                          '\$${s.amount.toStringAsFixed(2)}',
-                          style: GoogleFonts.nunito(
-                            color: AppColors.lightLeaf,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.close,
-                              size: 16,
-                              color: AppColors.stoneBeigeColor
-                                  .withValues(alpha: 0.45)),
-                          onPressed: () => onRemove(i),
-                        ),
-                      ],
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: nameCtrl,
+                    style: const TextStyle(color: AppColors.stoneBeigeColor),
+                    decoration: InputDecoration(
+                      labelText: l.sourceName,
+                      hintText: l.sourceNameHint,
                     ),
-                  );
-                }),
-                Divider(
-                    color: AppColors.mossGreen.withValues(alpha: 0.3),
-                    height: 22),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(l.totalMonthlyIncome,
-                        style: GoogleFonts.nunito(
-                            color: AppColors.mossGreen, fontSize: 12.5)),
-                    Text(
-                      '\$${total.toStringAsFixed(2)}',
-                      style: GoogleFonts.fredoka(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.lightLeaf,
-                        fontSize: 20,
-                      ),
+                    textCapitalization: TextCapitalization.words,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: amountCtrl,
+                    style: const TextStyle(color: AppColors.stoneBeigeColor),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
                     ),
-                  ],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: l.amountDollar,
+                      hintText: '0.00',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _AddButton(onTap: onAdd),
                 ),
               ],
             ),
           ),
-      ],
+          const SizedBox(height: 14),
+          if (sources.isNotEmpty)
+            BarkCard(
+              label: l.rootsFeedingTree,
+              icon: Icons.water_drop,
+              accent: AppColors.lightLeaf,
+              child: Column(
+                children: [
+                  ...sources.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final s = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: AppColors.riverBlue.withValues(
+                                alpha: 0.18,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.water_drop_outlined,
+                              color: AppColors.riverBlue,
+                              size: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              s.name,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.stoneBeigeColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '\$${s.amount.toStringAsFixed(2)}',
+                            style: GoogleFonts.nunito(
+                              color: AppColors.lightLeaf,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: AppColors.stoneBeigeColor.withValues(
+                                alpha: 0.45,
+                              ),
+                            ),
+                            onPressed: () => onRemove(i),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  Divider(
+                    color: AppColors.mossGreen.withValues(alpha: 0.3),
+                    height: 22,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l.totalMonthlyIncome,
+                        style: GoogleFonts.nunito(
+                          color: AppColors.mossGreen,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                      Text(
+                        '\$${total.toStringAsFixed(2)}',
+                        style: GoogleFonts.fredoka(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightLeaf,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -669,202 +712,232 @@ class _ExpenseStep extends StatelessWidget {
     final remaining = totalIncome - totalAllocated;
     final overBudget = remaining < 0;
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-      children: [
-        // Budget meter
-        BarkCard(
-          label: l.canopyMeter,
-          icon: Icons.donut_large,
-          accent: overBudget ? AppColors.dangerRed : AppColors.lightLeaf,
-          child: Column(
-            children: [
-              _BudgetBar(
-                  totalIncome: totalIncome, totalAllocated: totalAllocated),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(l.allocatedAmount('\$${totalAllocated.toStringAsFixed(2)}'),
+    return AppScrollbar(
+      builder: (controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        children: [
+          // Budget meter
+          BarkCard(
+            label: l.canopyMeter,
+            icon: Icons.donut_large,
+            accent: overBudget ? AppColors.dangerRed : AppColors.lightLeaf,
+            child: Column(
+              children: [
+                _BudgetBar(
+                  totalIncome: totalIncome,
+                  totalAllocated: totalAllocated,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l.allocatedAmount(
+                        '\$${totalAllocated.toStringAsFixed(2)}',
+                      ),
                       style: GoogleFonts.nunito(
-                          color: AppColors.stoneBeigeColor, fontSize: 12)),
-                  Text(
-                    overBudget
-                        ? l.overByAmount('\$${(-remaining).toStringAsFixed(2)}')
-                        : l.remainingAmount('\$${remaining.toStringAsFixed(2)}'),
-                    style: GoogleFonts.nunito(
-                      color: overBudget
-                          ? AppColors.dangerRed
-                          : AppColors.lightLeaf,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                        color: AppColors.stoneBeigeColor,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        // Presets card
-        BarkCard(
-          label: l.pickABranch,
-          icon: Icons.account_tree_outlined,
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: presets.map((p) {
-              final iconKey = p.$1;
-              final name = expensePresetLabel(l, iconKey);
-              final isSelected = selectedIconKey == iconKey;
-              return GestureDetector(
-                onTap: () => onPresetTap(name, iconKey),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.forestGreen.withValues(alpha: 0.45)
-                        : AppColors.soilMid,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.lightLeaf
-                          : AppColors.mossGreen.withValues(alpha: 0.4),
-                      width: isSelected ? 1.5 : 1,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: AppColors.lightLeaf
-                                  .withValues(alpha: 0.3),
-                              blurRadius: 8,
+                    Text(
+                      overBudget
+                          ? l.overByAmount(
+                              '\$${(-remaining).toStringAsFixed(2)}',
+                            )
+                          : l.remainingAmount(
+                              '\$${remaining.toStringAsFixed(2)}',
                             ),
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(CategoryIcons.forKey(iconKey),
+                      style: GoogleFonts.nunito(
+                        color: overBudget
+                            ? AppColors.dangerRed
+                            : AppColors.lightLeaf,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Presets card
+          BarkCard(
+            label: l.pickABranch,
+            icon: Icons.account_tree_outlined,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: presets.map((p) {
+                final iconKey = p.$1;
+                final name = expensePresetLabel(l, iconKey);
+                final isSelected = selectedIconKey == iconKey;
+                return GestureDetector(
+                  onTap: () => onPresetTap(name, iconKey),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.forestGreen.withValues(alpha: 0.45)
+                          : AppColors.soilMid,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.lightLeaf
+                            : AppColors.mossGreen.withValues(alpha: 0.4),
+                        width: isSelected ? 1.5 : 1,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: AppColors.lightLeaf.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 8,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CategoryIcons.forKey(iconKey),
                           size: 15,
                           color: isSelected
                               ? AppColors.lightLeaf
-                              : AppColors.mossGreen),
-                      const SizedBox(width: 6),
-                      Text(
-                        name,
-                        style: GoogleFonts.nunito(
-                          color: isSelected
-                              ? AppColors.lightLeaf
-                              : AppColors.stoneBeigeColor,
-                          fontSize: 12.5,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
+                              : AppColors.mossGreen,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-        const SizedBox(height: 14),
-        // Add a branch card
-        BarkCard(
-          label: l.addABranch,
-          icon: Icons.add_circle_outline,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: TextField(
-                  controller: nameCtrl,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  decoration:
-                      InputDecoration(labelText: l.categoryName),
-                  textCapitalization: TextCapitalization.words,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: amountCtrl,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
-                  ],
-                  decoration: InputDecoration(labelText: l.amountDollar),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: _AddButton(onTap: onAdd),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        if (expenses.isNotEmpty)
-          BarkCard(
-            label: l.branchesReachingOut,
-            icon: Icons.spa_outlined,
-            child: Column(
-              children: expenses.asMap().entries.map((entry) {
-                final i = entry.key;
-                final exp = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: AppColors.forestGreen
-                              .withValues(alpha: 0.20),
-                          shape: BoxShape.circle,
+                        const SizedBox(width: 6),
+                        Text(
+                          name,
+                          style: GoogleFonts.nunito(
+                            color: isSelected
+                                ? AppColors.lightLeaf
+                                : AppColors.stoneBeigeColor,
+                            fontSize: 12.5,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                          ),
                         ),
-                        child: Icon(CategoryIcons.forKey(exp.emoji),
-                            color: AppColors.lightLeaf, size: 16),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(exp.name,
-                            style: GoogleFonts.nunito(
-                              color: AppColors.stoneBeigeColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ),
-                      Text(
-                        '\$${exp.allocated.toStringAsFixed(2)}',
-                        style: GoogleFonts.nunito(
-                            color: AppColors.lightLeaf,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.close,
-                            size: 16,
-                            color: AppColors.stoneBeigeColor
-                                .withValues(alpha: 0.45)),
-                        onPressed: () => onRemove(i),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
             ),
           ),
-      ],
+          const SizedBox(height: 14),
+          // Add a branch card
+          BarkCard(
+            label: l.addABranch,
+            icon: Icons.add_circle_outline,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: nameCtrl,
+                    style: const TextStyle(color: AppColors.stoneBeigeColor),
+                    decoration: InputDecoration(labelText: l.categoryName),
+                    textCapitalization: TextCapitalization.words,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: amountCtrl,
+                    style: const TextStyle(color: AppColors.stoneBeigeColor),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
+                    decoration: InputDecoration(labelText: l.amountDollar),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _AddButton(onTap: onAdd),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (expenses.isNotEmpty)
+            BarkCard(
+              label: l.branchesReachingOut,
+              icon: Icons.spa_outlined,
+              child: Column(
+                children: expenses.asMap().entries.map((entry) {
+                  final i = entry.key;
+                  final exp = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: AppColors.forestGreen.withValues(
+                              alpha: 0.20,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            CategoryIcons.forKey(exp.emoji),
+                            color: AppColors.lightLeaf,
+                            size: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            exp.name,
+                            style: GoogleFonts.nunito(
+                              color: AppColors.stoneBeigeColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '\$${exp.allocated.toStringAsFixed(2)}',
+                          style: GoogleFonts.nunito(
+                            color: AppColors.lightLeaf,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            size: 16,
+                            color: AppColors.stoneBeigeColor.withValues(
+                              alpha: 0.45,
+                            ),
+                          ),
+                          onPressed: () => onRemove(i),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -872,8 +945,7 @@ class _ExpenseStep extends StatelessWidget {
 class _BudgetBar extends StatelessWidget {
   final double totalIncome;
   final double totalAllocated;
-  const _BudgetBar(
-      {required this.totalIncome, required this.totalAllocated});
+  const _BudgetBar({required this.totalIncome, required this.totalAllocated});
 
   @override
   Widget build(BuildContext context) {
@@ -891,8 +963,8 @@ class _BudgetBar extends StatelessWidget {
           overBudget
               ? AppColors.dangerRed
               : pct > 0.85
-                  ? AppColors.warningAmber
-                  : AppColors.forestGreen,
+              ? AppColors.warningAmber
+              : AppColors.forestGreen,
         ),
       ),
     );
@@ -922,147 +994,169 @@ class _PersonalStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-      children: [
-        // Name card
-        BarkCard(
-          label: l.nameYourTree,
-          icon: Icons.park,
-          child: TextField(
-            controller: nameCtrl,
-            style: const TextStyle(color: AppColors.stoneBeigeColor),
-            decoration: InputDecoration(
-              labelText: l.budgetName,
-              hintText: l.budgetNameHint,
-              prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
-            ),
-            textCapitalization: TextCapitalization.words,
-          ),
-        ),
-        const SizedBox(height: 14),
-        // Pay schedule card
-        BarkCard(
-          label: l.payScheduleLabel,
-          icon: Icons.event_repeat_outlined,
-          accent: AppColors.riverBlue,
-          child: Column(
-            children: [
-              DropdownButtonFormField<PayFrequency>(
-                initialValue: payFrequency,
-                isExpanded: true,
-                dropdownColor: AppColors.darkBark,
-                style: const TextStyle(color: AppColors.stoneBeigeColor),
-                decoration: InputDecoration(
-                  labelText: l.payFrequencyLabel,
-                  prefixIcon: const Icon(Icons.event_repeat_outlined,
-                      color: AppColors.mossGreen),
-                ),
-                items: PayFrequency.values
-                    .map((f) => DropdownMenuItem(
-                          value: f,
-                          child: Text(f.label,
-                              style: const TextStyle(
-                                  color: AppColors.stoneBeigeColor,
-                                  fontSize: 13)),
-                        ))
-                    .toList(),
-                onChanged: onFrequencyChanged,
+    return AppScrollbar(
+      builder: (controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        children: [
+          // Name card
+          BarkCard(
+            label: l.nameYourTree,
+            icon: Icons.park,
+            child: TextField(
+              controller: nameCtrl,
+              style: const TextStyle(color: AppColors.stoneBeigeColor),
+              decoration: InputDecoration(
+                labelText: l.budgetName,
+                hintText: l.budgetNameHint,
+                prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
               ),
-              const SizedBox(height: 14),
-              InkWell(
-                onTap: () async {
-                  final now = DateTime.now();
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: firstPayDate ?? now,
-                    firstDate: DateTime(now.year - 2),
-                    lastDate: DateTime(now.year + 2),
-                    builder: (ctx, child) => Theme(
-                      data: Theme.of(ctx).copyWith(
-                        colorScheme: const ColorScheme.dark(
-                          primary: AppColors.lightLeaf,
-                          onPrimary: Colors.white,
-                          surface: AppColors.darkBark,
-                          onSurface: AppColors.stoneBeigeColor,
-                        ),
-                        dialogTheme: const DialogThemeData(
-                            backgroundColor: AppColors.darkBark),
-                      ),
-                      child: child!,
+              textCapitalization: TextCapitalization.words,
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Pay schedule card
+          BarkCard(
+            label: l.payScheduleLabel,
+            icon: Icons.event_repeat_outlined,
+            accent: AppColors.riverBlue,
+            child: Column(
+              children: [
+                DropdownButtonFormField<PayFrequency>(
+                  initialValue: payFrequency,
+                  isExpanded: true,
+                  dropdownColor: AppColors.darkBark,
+                  style: const TextStyle(color: AppColors.stoneBeigeColor),
+                  decoration: InputDecoration(
+                    labelText: l.payFrequencyLabel,
+                    prefixIcon: const Icon(
+                      Icons.event_repeat_outlined,
+                      color: AppColors.mossGreen,
                     ),
-                  );
-                  if (picked != null) onFirstPayDateChanged(picked);
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.soilMid,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color:
-                            AppColors.mossGreen.withValues(alpha: 0.40)),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today_outlined,
-                          color: AppColors.mossGreen, size: 18),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          firstPayDate == null
-                              ? l.firstPayDate
-                              : l.firstPayOn(_formatDate(firstPayDate!, l)),
-                          style: TextStyle(
-                            color: firstPayDate == null
-                                ? AppColors.stoneBeigeColor
-                                    .withValues(alpha: 0.5)
-                                : AppColors.stoneBeigeColor,
-                            fontSize: 14,
+                  items: PayFrequency.values
+                      .map(
+                        (f) => DropdownMenuItem(
+                          value: f,
+                          child: Text(
+                            f.label,
+                            style: const TextStyle(
+                              color: AppColors.stoneBeigeColor,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
-                      ),
-                      if (firstPayDate != null)
-                        IconButton(
-                          onPressed: () => onFirstPayDateChanged(null),
-                          icon: Icon(Icons.close,
-                              size: 16,
-                              color: AppColors.mossGreen
-                                  .withValues(alpha: 0.6)),
+                      )
+                      .toList(),
+                  onChanged: onFrequencyChanged,
+                ),
+                const SizedBox(height: 14),
+                InkWell(
+                  onTap: () async {
+                    final now = DateTime.now();
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: firstPayDate ?? now,
+                      firstDate: DateTime(now.year - 2),
+                      lastDate: DateTime(now.year + 2),
+                      builder: (ctx, child) => Theme(
+                        data: Theme.of(ctx).copyWith(
+                          colorScheme: const ColorScheme.dark(
+                            primary: AppColors.lightLeaf,
+                            onPrimary: Colors.white,
+                            surface: AppColors.darkBark,
+                            onSurface: AppColors.stoneBeigeColor,
+                          ),
+                          dialogTheme: const DialogThemeData(
+                            backgroundColor: AppColors.darkBark,
+                          ),
                         ),
-                    ],
+                        child: child!,
+                      ),
+                    );
+                    if (picked != null) onFirstPayDateChanged(picked);
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.soilMid,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.mossGreen.withValues(alpha: 0.40),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          color: AppColors.mossGreen,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            firstPayDate == null
+                                ? l.firstPayDate
+                                : l.firstPayOn(_formatDate(firstPayDate!, l)),
+                            style: TextStyle(
+                              color: firstPayDate == null
+                                  ? AppColors.stoneBeigeColor.withValues(
+                                      alpha: 0.5,
+                                    )
+                                  : AppColors.stoneBeigeColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        if (firstPayDate != null)
+                          IconButton(
+                            onPressed: () => onFirstPayDateChanged(null),
+                            icon: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: AppColors.mossGreen.withValues(alpha: 0.6),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 14),
-        BarkCard(
-          accent: AppColors.riverBlue,
-          padding: const EdgeInsets.all(14),
-          showAccentStrip: false,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.info_outline,
-                  color: AppColors.riverBlue, size: 18),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  l.payScheduleInfo,
-                  style: GoogleFonts.nunito(
+          const SizedBox(height: 14),
+          BarkCard(
+            accent: AppColors.riverBlue,
+            padding: const EdgeInsets.all(14),
+            showAccentStrip: false,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.info_outline,
+                  color: AppColors.riverBlue,
+                  size: 18,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l.payScheduleInfo,
+                    style: GoogleFonts.nunito(
                       color: AppColors.stoneBeigeColor,
                       fontSize: 12,
-                      height: 1.5),
+                      height: 1.5,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1121,10 +1215,11 @@ class _BottomBar extends StatelessWidget {
   final bool canAdvance;
   final VoidCallback onNext;
 
-  const _BottomBar(
-      {required this.step,
-      required this.canAdvance,
-      required this.onNext});
+  const _BottomBar({
+    required this.step,
+    required this.canAdvance,
+    required this.onNext,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1203,8 +1298,7 @@ class _BottomBar extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: canAdvance
                             ? Colors.white
-                            : AppColors.stoneBeigeColor
-                                .withValues(alpha: 0.5),
+                            : AppColors.stoneBeigeColor.withValues(alpha: 0.5),
                         fontSize: 16,
                         letterSpacing: 0.5,
                       ),

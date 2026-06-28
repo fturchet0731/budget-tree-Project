@@ -24,17 +24,20 @@ class Contribution {
   bool get isDeposit => amount > 0;
 
   Map<String, dynamic> toJson() => {
-        'at': at.millisecondsSinceEpoch,
-        'amount': amount,
-        'source': source.index,
-      };
+    'at': at.millisecondsSinceEpoch,
+    'amount': amount,
+    'source': source.index,
+  };
 
   factory Contribution.fromJson(Map<String, dynamic> j) => Contribution(
-        at: DateTime.fromMillisecondsSinceEpoch(j['at'] as int),
-        amount: (j['amount'] as num).toDouble(),
-        source: ContributionSource.values[((j['source'] as int?) ?? 0)
-            .clamp(0, ContributionSource.values.length - 1)],
-      );
+    at: DateTime.fromMillisecondsSinceEpoch(j['at'] as int),
+    amount: (j['amount'] as num).toDouble(),
+    source:
+        ContributionSource.values[((j['source'] as int?) ?? 0).clamp(
+          0,
+          ContributionSource.values.length - 1,
+        )],
+  );
 }
 
 class Goal {
@@ -55,6 +58,13 @@ class Goal {
   /// policy reads (`data->>'sharedWithFriends'`). Budgets are never shared.
   bool sharedWithFriends;
 
+  /// Denormalised copy of the goal's category colour (the same int as
+  /// `TreeCategory.colorValue`). Categories themselves are never shared, so a
+  /// friend viewing a shared goal can't resolve [categoryId] to a colour — this
+  /// field travels with the goal in its `data` jsonb so the sapling renders in
+  /// the owner's chosen tree colour everywhere. Null falls back to forest green.
+  int? leafColorValue;
+
   /// Dated history of every deposit/withdrawal. Source of truth for
   /// [currentAmount] is still the running field (so legacy records load
   /// unchanged), but new money always also lands here.
@@ -72,17 +82,21 @@ class Goal {
     this.targetDate,
     this.categoryId,
     this.sharedWithFriends = false,
+    this.leafColorValue,
     List<Contribution>? contributions,
-  })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        createdAt = createdAt ?? DateTime.now(),
-        contributions = contributions ?? [];
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+       createdAt = createdAt ?? DateTime.now(),
+       contributions = contributions ?? [];
 
   /// Record a deposit (positive) or withdrawal (negative) and keep
   /// [currentAmount] in sync. Returns the actual amount applied after
   /// clamping the balance at zero. Always go through this so the ledger
   /// stays authoritative for streaks/comparisons.
-  double applyContribution(double amount,
-      {ContributionSource source = ContributionSource.manual, DateTime? at}) {
+  double applyContribution(
+    double amount, {
+    ContributionSource source = ContributionSource.manual,
+    DateTime? at,
+  }) {
     if (amount == 0) return 0;
     final before = currentAmount;
     currentAmount = (currentAmount + amount).clamp(0.0, double.infinity);
@@ -205,41 +219,42 @@ class Goal {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'description': description,
-        'targetAmount': targetAmount,
-        'currentAmount': currentAmount,
-        'iconKey': iconKey,
-        'createdAt': createdAt.millisecondsSinceEpoch,
-        'completedAt': completedAt?.millisecondsSinceEpoch,
-        'targetDate': targetDate?.millisecondsSinceEpoch,
-        'categoryId': categoryId,
-        'sharedWithFriends': sharedWithFriends,
-        'contributions': contributions.map((c) => c.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'description': description,
+    'targetAmount': targetAmount,
+    'currentAmount': currentAmount,
+    'iconKey': iconKey,
+    'createdAt': createdAt.millisecondsSinceEpoch,
+    'completedAt': completedAt?.millisecondsSinceEpoch,
+    'targetDate': targetDate?.millisecondsSinceEpoch,
+    'categoryId': categoryId,
+    'sharedWithFriends': sharedWithFriends,
+    'leafColorValue': leafColorValue,
+    'contributions': contributions.map((c) => c.toJson()).toList(),
+  };
 
   factory Goal.fromJson(Map<String, dynamic> j) => Goal(
-        id: j['id'] as String,
-        name: j['name'] as String,
-        description: (j['description'] as String?) ?? '',
-        targetAmount: (j['targetAmount'] as num).toDouble(),
-        currentAmount: (j['currentAmount'] as num).toDouble(),
-        iconKey: (j['iconKey'] as String?) ?? 'savings',
-        createdAt:
-            DateTime.fromMillisecondsSinceEpoch(j['createdAt'] as int),
-        completedAt: j['completedAt'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(j['completedAt'] as int)
-            : null,
-        targetDate: j['targetDate'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(j['targetDate'] as int)
-            : null,
-        categoryId: j['categoryId'] as String?,
-        sharedWithFriends: (j['sharedWithFriends'] as bool?) ?? false,
-        contributions: (j['contributions'] as List?)
-                ?.map((e) =>
-                    Contribution.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-      );
+    id: j['id'] as String,
+    name: j['name'] as String,
+    description: (j['description'] as String?) ?? '',
+    targetAmount: (j['targetAmount'] as num).toDouble(),
+    currentAmount: (j['currentAmount'] as num).toDouble(),
+    iconKey: (j['iconKey'] as String?) ?? 'savings',
+    createdAt: DateTime.fromMillisecondsSinceEpoch(j['createdAt'] as int),
+    completedAt: j['completedAt'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(j['completedAt'] as int)
+        : null,
+    targetDate: j['targetDate'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(j['targetDate'] as int)
+        : null,
+    categoryId: j['categoryId'] as String?,
+    sharedWithFriends: (j['sharedWithFriends'] as bool?) ?? false,
+    leafColorValue: (j['leafColorValue'] as num?)?.toInt(),
+    contributions:
+        (j['contributions'] as List?)
+            ?.map((e) => Contribution.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+  );
 }

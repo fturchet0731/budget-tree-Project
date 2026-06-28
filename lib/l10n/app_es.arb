@@ -522,5 +522,11 @@
   "newCategoryBody": "Nombra tu categoría. Los árboles y arbolitos de esta categoría se teñirán con el color elegido.",
   "colourUpper": "COLOR",
   "homeSlogan": "Haz crecer tu bosque, haz crecer tus ahorros",
-  "newTreeInForest": "¡Un nuevo árbol crece en tu bosque!"
+  "newTreeInForest": "¡Un nuevo árbol crece en tu bosque!",
+  "deleteCategoryTitle": "¿Eliminar grupo?",
+  "deleteCategoryBody": "¿Eliminar el grupo «{name}»? Los árboles y arbolitos que lo usan solo perderán su etiqueta de color.",
+  "@deleteCategoryBody": { "placeholders": { "name": { "type": "String" } } },
+  "longPressToDeleteGroup": "Mantén pulsado un grupo para eliminarlo",
+  "sharedByName": "Compartido por {name}",
+  "@sharedByName": { "placeholders": { "name": { "type": "String" } } }
 }

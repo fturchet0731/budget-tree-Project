@@ -8,6 +8,7 @@ import '../services/notification_scheduler.dart';
 import '../services/sync_engine.dart';
 import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_tour.dart';
+import '../widgets/app_scrollbar.dart';
 import '../widgets/info_button.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -46,26 +47,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(
           l.signOutQuestion,
           style: GoogleFonts.fredoka(
-              fontWeight: FontWeight.w600,
-              color: AppColors.stoneBeigeColor,
-              fontSize: 20),
+            fontWeight: FontWeight.w600,
+            color: AppColors.stoneBeigeColor,
+            fontSize: 20,
+          ),
         ),
         content: Text(
           l.signOutBody,
           style: GoogleFonts.nunito(
-              color: AppColors.mossGreen, fontSize: 14, height: 1.55),
+            color: AppColors.mossGreen,
+            fontSize: 14,
+            height: 1.55,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l.cancel,
-                style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(
+              l.cancel,
+              style: GoogleFonts.nunito(color: AppColors.mossGreen),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l.signOut,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              l.signOut,
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -84,39 +95,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded,
-                color: AppColors.dangerRed, size: 24),
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: AppColors.dangerRed,
+              size: 24,
+            ),
             const SizedBox(width: 10),
             Text(
               l.eraseAllTitle,
               style: GoogleFonts.fredoka(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 20),
+                fontWeight: FontWeight.w600,
+                color: AppColors.stoneBeigeColor,
+                fontSize: 20,
+              ),
             ),
           ],
         ),
         content: Text(
           l.eraseAllBody,
           style: GoogleFonts.nunito(
-              color: AppColors.mossGreen, fontSize: 14, height: 1.55),
+            color: AppColors.mossGreen,
+            fontSize: 14,
+            height: 1.55,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l.cancel,
-                style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(
+              l.cancel,
+              style: GoogleFonts.nunito(color: AppColors.mossGreen),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.dangerRed,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l.eraseEverything,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              l.eraseEverything,
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -133,31 +158,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(
           l.absolutelySure,
           style: GoogleFonts.fredoka(
-              fontWeight: FontWeight.w600,
-              color: AppColors.stoneBeigeColor,
-              fontSize: 19),
+            fontWeight: FontWeight.w600,
+            color: AppColors.stoneBeigeColor,
+            fontSize: 19,
+          ),
         ),
         content: Text(
           l.lastChanceBody,
           style: GoogleFonts.nunito(
-              color: AppColors.mossGreen, fontSize: 14, height: 1.55),
+            color: AppColors.mossGreen,
+            fontSize: 14,
+            height: 1.55,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l.keepMyData,
-                style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(
+              l.keepMyData,
+              style: GoogleFonts.nunito(color: AppColors.mossGreen),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.dangerRed,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l.yesErase,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              l.yesErase,
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -182,7 +218,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text(
               'All data erased.',
               style: GoogleFonts.nunito(
-                  color: AppColors.stoneBeigeColor, fontSize: 14),
+                color: AppColors.stoneBeigeColor,
+                fontSize: 14,
+              ),
             ),
           ],
         ),
@@ -198,195 +236,221 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: Container(
         decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
         child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                pinned: true,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: AppColors.stoneBeigeColor),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                title: Text(
-                  l.settingsTitle,
-                  style: GoogleFonts.fredoka(
+          child: AppScrollbar(
+            builder: (controller) => CustomScrollView(
+              controller: controller,
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  pinned: true,
+                  leading: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      color: AppColors.stoneBeigeColor,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  title: Text(
+                    l.settingsTitle,
+                    style: GoogleFonts.fredoka(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
-                      fontSize: 22),
-                ),
-                actions: const [
-                  Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: SectionInfoButton(section: TutorialSection.settings),
+                      fontSize: 22,
+                    ),
                   ),
-                ],
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 30),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _SectionHeader(
-                        icon: Icons.brush_outlined, label: l.appearanceUpper),
-                    _SettingsCard(
-                      children: [
-                        _TileLabel(text: l.textSize),
-                        const SizedBox(height: 10),
-                        _ChoiceRow<AppTextScale>(
-                          current: settings.textScale,
-                          options: [
-                            (AppTextScale.compact, l.scaleCompact),
-                            (AppTextScale.normal, l.scaleDefault),
-                            (AppTextScale.large, l.scaleLarge),
-                          ],
-                          onChanged: settings.setTextScale,
-                        ),
-                        const SizedBox(height: 18),
-                        _TileLabel(text: l.themePalette),
-                        const SizedBox(height: 10),
-                        _ChoiceRow<AppPalette>(
-                          current: settings.palette,
-                          options: [
-                            (AppPalette.forestDark, l.paletteForest),
-                            (AppPalette.midnight, l.paletteMidnight),
-                            (AppPalette.twilight, l.paletteTwilight),
-                          ],
-                          onChanged: settings.setPalette,
-                        ),
-                        const SizedBox(height: 18),
-                        _TileLabel(text: l.motion),
-                        const SizedBox(height: 6),
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          title: Text(
-                            l.fullAnimations,
-                            style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13),
-                          ),
-                          subtitle: Text(
-                            l.fullAnimationsSub,
-                            style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen.withValues(alpha: 0.7),
-                                fontSize: 11),
-                          ),
-                          value: settings.motionFull,
-                          activeThumbColor: AppColors.lightLeaf,
-                          onChanged: settings.setMotionFull,
-                        ),
-                        const SizedBox(height: 12),
-                        _TileLabel(text: l.soundHaptics),
-                        const SizedBox(height: 6),
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          title: Text(
-                            l.feedbackCues,
-                            style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13),
-                          ),
-                          subtitle: Text(
-                            l.feedbackCuesSub,
-                            style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen.withValues(alpha: 0.7),
-                                fontSize: 11),
-                          ),
-                          value: settings.soundEnabled,
-                          activeThumbColor: AppColors.lightLeaf,
-                          onChanged: settings.setSoundEnabled,
-                        ),
-                      ],
+                  actions: const [
+                    Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: SectionInfoButton(
+                        section: TutorialSection.settings,
+                      ),
                     ),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.language,
-                        label: l.settingsLanguageTitle.toUpperCase()),
-                    _SettingsCard(
-                      children: [
-                        _TileLabel(text: l.settingsLanguageSubtitle),
-                        const SizedBox(height: 8),
-                        _LanguagePicker(
-                          current: settings.languageSelection,
-                          systemLabel: l.systemDefault,
-                          onChanged: settings.setLocale,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.notifications_outlined,
-                        label: l.notificationsUpper),
-                    const _NotificationsCard(),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.menu_book_outlined, label: l.guideUpper),
-                    _SettingsCard(
-                      children: [
-                        _ActionTile(
-                          icon: Icons.school_outlined,
-                          iconColor: AppColors.lightLeaf,
-                          title: l.replayTutorial,
-                          subtitle: l.replayTutorialSub,
-                          onTap: () => GuidedTour.start(context),
-                        ),
-                      ],
-                    ),
-                    if (AuthService.instance.isSignedIn) ...[
-                      const SizedBox(height: 22),
+                  ],
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 30),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
                       _SectionHeader(
-                          icon: Icons.person_outline, label: l.accountUpper),
+                        icon: Icons.brush_outlined,
+                        label: l.appearanceUpper,
+                      ),
                       _SettingsCard(
                         children: [
-                          _InfoRow(
-                            label: l.signedInAs,
-                            value: AuthService.instance.currentUser?.email ??
-                                l.unknown,
+                          _TileLabel(text: l.textSize),
+                          const SizedBox(height: 10),
+                          _ChoiceRow<AppTextScale>(
+                            current: settings.textScale,
+                            options: [
+                              (AppTextScale.compact, l.scaleCompact),
+                              (AppTextScale.normal, l.scaleDefault),
+                              (AppTextScale.large, l.scaleLarge),
+                            ],
+                            onChanged: settings.setTextScale,
                           ),
+                          const SizedBox(height: 18),
+                          _TileLabel(text: l.themePalette),
+                          const SizedBox(height: 10),
+                          _ChoiceRow<AppPalette>(
+                            current: settings.palette,
+                            options: [
+                              (AppPalette.forestDark, l.paletteForest),
+                              (AppPalette.midnight, l.paletteMidnight),
+                              (AppPalette.twilight, l.paletteTwilight),
+                            ],
+                            onChanged: settings.setPalette,
+                          ),
+                          const SizedBox(height: 18),
+                          _TileLabel(text: l.motion),
                           const SizedBox(height: 6),
-                          _ActionTile(
-                            icon: Icons.logout,
-                            iconColor: AppColors.warningAmber,
-                            title: l.signOut,
-                            subtitle: l.signOutSub,
-                            onTap: _signOut,
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: Text(
+                              l.fullAnimations,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.stoneBeigeColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                            subtitle: Text(
+                              l.fullAnimationsSub,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontSize: 11,
+                              ),
+                            ),
+                            value: settings.motionFull,
+                            activeThumbColor: AppColors.lightLeaf,
+                            onChanged: settings.setMotionFull,
+                          ),
+                          const SizedBox(height: 12),
+                          _TileLabel(text: l.soundHaptics),
+                          const SizedBox(height: 6),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: Text(
+                              l.feedbackCues,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.stoneBeigeColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                            subtitle: Text(
+                              l.feedbackCuesSub,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontSize: 11,
+                              ),
+                            ),
+                            value: settings.soundEnabled,
+                            activeThumbColor: AppColors.lightLeaf,
+                            onChanged: settings.setSoundEnabled,
                           ),
                         ],
                       ),
-                    ],
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.storage_outlined, label: l.dataUpper),
-                    _SettingsCard(
-                      children: [
-                        _ActionTile(
-                          icon: Icons.delete_forever_outlined,
-                          iconColor: AppColors.dangerRed,
-                          title: l.eraseAllData,
-                          subtitle: l.eraseAllDataSub,
-                          onTap: _confirmEraseAllData,
-                          danger: true,
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.language,
+                        label: l.settingsLanguageTitle.toUpperCase(),
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _TileLabel(text: l.settingsLanguageSubtitle),
+                          const SizedBox(height: 8),
+                          _LanguagePicker(
+                            current: settings.languageSelection,
+                            systemLabel: l.systemDefault,
+                            onChanged: settings.setLocale,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.notifications_outlined,
+                        label: l.notificationsUpper,
+                      ),
+                      const _NotificationsCard(),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.menu_book_outlined,
+                        label: l.guideUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _ActionTile(
+                            icon: Icons.school_outlined,
+                            iconColor: AppColors.lightLeaf,
+                            title: l.replayTutorial,
+                            subtitle: l.replayTutorialSub,
+                            onTap: () => GuidedTour.start(context),
+                          ),
+                        ],
+                      ),
+                      if (AuthService.instance.isSignedIn) ...[
+                        const SizedBox(height: 22),
+                        _SectionHeader(
+                          icon: Icons.person_outline,
+                          label: l.accountUpper,
+                        ),
+                        _SettingsCard(
+                          children: [
+                            _InfoRow(
+                              label: l.signedInAs,
+                              value:
+                                  AuthService.instance.currentUser?.email ??
+                                  l.unknown,
+                            ),
+                            const SizedBox(height: 6),
+                            _ActionTile(
+                              icon: Icons.logout,
+                              iconColor: AppColors.warningAmber,
+                              title: l.signOut,
+                              subtitle: l.signOutSub,
+                              onTap: _signOut,
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.info_outline, label: l.aboutUpper),
-                    _SettingsCard(
-                      children: [
-                        _InfoRow(
-                            label: 'Budget Tree',
-                            value: 'v1.0.0'),
-                        _InfoRow(
-                            label: l.builtWith, value: 'Flutter / Dart'),
-                      ],
-                    ),
-                  ]),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.storage_outlined,
+                        label: l.dataUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _ActionTile(
+                            icon: Icons.delete_forever_outlined,
+                            iconColor: AppColors.dangerRed,
+                            title: l.eraseAllData,
+                            subtitle: l.eraseAllDataSub,
+                            onTap: _confirmEraseAllData,
+                            danger: true,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.info_outline,
+                        label: l.aboutUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _InfoRow(label: 'Budget Tree', value: 'v1.0.0'),
+                          _InfoRow(label: l.builtWith, value: 'Flutter / Dart'),
+                        ],
+                      ),
+                    ]),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -409,9 +473,11 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
       child: Row(
         children: [
-          Icon(icon,
-              size: 14,
-              color: AppColors.mossGreen.withValues(alpha: 0.75)),
+          Icon(
+            icon,
+            size: 14,
+            color: AppColors.mossGreen.withValues(alpha: 0.75),
+          ),
           const SizedBox(width: 8),
           Text(
             label,
@@ -446,7 +512,8 @@ class _SettingsCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color: AppColors.forestGreen.withValues(alpha: 0.25)),
+          color: AppColors.forestGreen.withValues(alpha: 0.25),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.30),
@@ -471,9 +538,10 @@ class _TileLabel extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.nunito(
-          color: AppColors.stoneBeigeColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 13.5),
+        color: AppColors.stoneBeigeColor,
+        fontWeight: FontWeight.bold,
+        fontSize: 13.5,
+      ),
     );
   }
 }
@@ -508,8 +576,7 @@ class _LanguagePicker extends StatelessWidget {
             onTap: () => onChanged(locale),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
               decoration: BoxDecoration(
                 color: selected
                     ? AppColors.forestGreen.withValues(alpha: 0.45)
@@ -532,14 +599,18 @@ class _LanguagePicker extends StatelessWidget {
                             ? AppColors.lightLeaf
                             : AppColors.stoneBeigeColor,
                         fontSize: 14,
-                        fontWeight:
-                            selected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight: selected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
                   if (selected)
-                    const Icon(Icons.check_circle,
-                        color: AppColors.lightLeaf, size: 18),
+                    const Icon(
+                      Icons.check_circle,
+                      color: AppColors.lightLeaf,
+                      size: 18,
+                    ),
                 ],
               ),
             ),
@@ -593,8 +664,7 @@ class _ChoiceRow<T> extends StatelessWidget {
                       ? AppColors.lightLeaf
                       : AppColors.stoneBeigeColor,
                   fontSize: 12.5,
-                  fontWeight:
-                      selected ? FontWeight.bold : FontWeight.w500,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
             ),
@@ -657,13 +727,17 @@ class _ActionTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: GoogleFonts.nunito(
-                        color: AppColors.mossGreen, fontSize: 11.5),
+                      color: AppColors.mossGreen,
+                      fontSize: 11.5,
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right,
-                color: AppColors.mossGreen.withValues(alpha: 0.6)),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.mossGreen.withValues(alpha: 0.6),
+            ),
           ],
         ),
       ),
@@ -682,14 +756,18 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: AppColors.mossGreen, fontSize: 13)),
-          Text(value,
-              style: GoogleFonts.nunito(
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: GoogleFonts.nunito(color: AppColors.mossGreen, fontSize: 13),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              color: AppColors.stoneBeigeColor,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -704,9 +782,14 @@ class _NotificationsCard extends StatelessWidget {
   const _NotificationsCard();
 
   static List<String> _weekdayNames(AppLocalizations l) => [
-        l.weekdayMon, l.weekdayTue, l.weekdayWed, l.weekdayThu,
-        l.weekdayFri, l.weekdaySat, l.weekdaySun,
-      ];
+    l.weekdayMon,
+    l.weekdayTue,
+    l.weekdayWed,
+    l.weekdayThu,
+    l.weekdayFri,
+    l.weekdaySat,
+    l.weekdaySun,
+  ];
 
   Future<void> _apply(Future<void> Function() change) async {
     await change();
@@ -736,13 +819,17 @@ class _NotificationsCard extends StatelessWidget {
         if (s.notifStreakReminders)
           _TapRow(
             label: l.remindMeAt,
-            value: TimeOfDay(hour: s.streakHour, minute: s.streakMinute)
-                .format(context),
+            value: TimeOfDay(
+              hour: s.streakHour,
+              minute: s.streakMinute,
+            ).format(context),
             onTap: () async {
               final picked = await showTimePicker(
                 context: context,
-                initialTime:
-                    TimeOfDay(hour: s.streakHour, minute: s.streakMinute),
+                initialTime: TimeOfDay(
+                  hour: s.streakHour,
+                  minute: s.streakMinute,
+                ),
               );
               if (picked != null) {
                 await _apply(() => s.setStreakTime(picked.hour, picked.minute));
@@ -773,11 +860,15 @@ class _NotificationsCard extends StatelessWidget {
                         title: Text(
                           weekdayNames[i],
                           style: GoogleFonts.nunito(
-                              color: AppColors.stoneBeigeColor),
+                            color: AppColors.stoneBeigeColor,
+                          ),
                         ),
                         trailing: s.weeklyWeekday == weekday
-                            ? const Icon(Icons.check,
-                                color: AppColors.lightLeaf, size: 18)
+                            ? const Icon(
+                                Icons.check,
+                                color: AppColors.lightLeaf,
+                                size: 18,
+                              )
                             : null,
                         onTap: () => Navigator.pop(ctx, weekday),
                       );
@@ -800,7 +891,8 @@ class _NotificationsCard extends StatelessWidget {
               );
               if (picked != null) {
                 await _apply(
-                    () => s.setWeeklySchedule(s.weeklyWeekday, picked.hour));
+                  () => s.setWeeklySchedule(s.weeklyWeekday, picked.hour),
+                );
               }
             },
           ),
@@ -830,12 +922,16 @@ class _NotifSwitch extends StatelessWidget {
       title: Text(
         title,
         style: GoogleFonts.nunito(
-            color: AppColors.stoneBeigeColor, fontSize: 13),
+          color: AppColors.stoneBeigeColor,
+          fontSize: 13,
+        ),
       ),
       subtitle: Text(
         subtitle,
         style: GoogleFonts.nunito(
-            color: AppColors.mossGreen.withValues(alpha: 0.7), fontSize: 11),
+          color: AppColors.mossGreen.withValues(alpha: 0.7),
+          fontSize: 11,
+        ),
       ),
       value: value,
       activeThumbColor: AppColors.lightLeaf,
@@ -848,8 +944,11 @@ class _TapRow extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback onTap;
-  const _TapRow(
-      {required this.label, required this.value, required this.onTap});
+  const _TapRow({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -863,17 +962,19 @@ class _TapRow extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.nunito(
-                  color: AppColors.mossGreen, fontSize: 12.5),
+                color: AppColors.mossGreen,
+                fontSize: 12.5,
+              ),
             ),
             const Spacer(),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.forestGreen.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                    color: AppColors.lightLeaf.withValues(alpha: 0.4)),
+                  color: AppColors.lightLeaf.withValues(alpha: 0.4),
+                ),
               ),
               child: Text(
                 value,
@@ -885,8 +986,11 @@ class _TapRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.chevron_right,
-                color: AppColors.mossGreen, size: 18),
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.mossGreen,
+              size: 18,
+            ),
           ],
         ),
       ),

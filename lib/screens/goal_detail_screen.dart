@@ -70,11 +70,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
     for (final b in budgets) {
       for (final cat in b.expenses) {
         if (cat.linkedGoalIds.contains(_goal.id)) {
-          hits.add(_LinkedBranchInfo(
-            budgetName: b.budgetName,
-            category: cat,
-            monthlyAllocated: cat.allocated,
-          ));
+          hits.add(
+            _LinkedBranchInfo(
+              budgetName: b.budgetName,
+              category: cat,
+              monthlyAllocated: cat.allocated,
+            ),
+          );
         }
       }
     }
@@ -83,9 +85,9 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
     if (_goal.categoryId != null) {
       final all = await CategoryRepository.loadAll();
       cat = all.cast<TreeCategory?>().firstWhere(
-            (c) => c?.id == _goal.categoryId,
-            orElse: () => null,
-          );
+        (c) => c?.id == _goal.categoryId,
+        orElse: () => null,
+      );
     }
     if (mounted) {
       setState(() {
@@ -123,8 +125,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
     _growCtrl
       ..stop()
       ..reset();
-    _growAnim = Tween<double>(begin: from, end: target.clamp(0.0, 1.0))
-        .animate(CurvedAnimation(parent: _growCtrl, curve: Curves.easeOutCubic));
+    _growAnim = Tween<double>(
+      begin: from,
+      end: target.clamp(0.0, 1.0),
+    ).animate(CurvedAnimation(parent: _growCtrl, curve: Curves.easeOutCubic));
     _growAnim.addListener(_onGrowTick);
     if (!mounted) return;
     await _growCtrl.forward();
@@ -150,8 +154,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-            bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           decoration: const BoxDecoration(
             color: Color(0xFF0D2010),
@@ -170,37 +173,45 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 ),
               ),
               const SizedBox(height: 18),
-              Text(l.waterTheSapling,
-                  style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.stoneBeigeColor,
-                      fontSize: 20)),
+              Text(
+                l.waterTheSapling,
+                style: GoogleFonts.fredoka(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.stoneBeigeColor,
+                  fontSize: 20,
+                ),
+              ),
               const SizedBox(height: 4),
               Text(
                 l.depositToward(_goal.name),
                 style: GoogleFonts.nunito(
-                    color: AppColors.mossGreen, fontSize: 13),
+                  color: AppColors.mossGreen,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 18),
               TextField(
                 controller: ctrl,
                 autofocus: true,
                 style: const TextStyle(
-                    color: AppColors.lightLeaf,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                  color: AppColors.lightLeaf,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
                 keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true),
+                  decimal: true,
+                ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                 ],
                 textAlign: TextAlign.center,
                 decoration: const InputDecoration(
                   prefixText: '\$ ',
                   prefixStyle: TextStyle(
-                      color: AppColors.mossGreen,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
+                    color: AppColors.mossGreen,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                   hintText: '0.00',
                 ),
               ),
@@ -216,9 +227,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     },
                     backgroundColor: AppColors.darkBark,
                     side: BorderSide(
-                        color: AppColors.mossGreen.withValues(alpha: 0.4)),
-                    labelStyle:
-                        const TextStyle(color: AppColors.stoneBeigeColor),
+                      color: AppColors.mossGreen.withValues(alpha: 0.4),
+                    ),
+                    labelStyle: const TextStyle(
+                      color: AppColors.stoneBeigeColor,
+                    ),
                   );
                 }).toList(),
               ),
@@ -234,8 +247,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     final prevStage = _goal.stage;
                     final prevTier = _goal.tier;
                     setState(() {
-                      _goal.applyContribution(amount,
-                          source: ContributionSource.manual);
+                      _goal.applyContribution(
+                        amount,
+                        source: ContributionSource.manual,
+                      );
                       _goal.stampCompletionIfReached();
                     });
                     SoundService.fundsAllocated();
@@ -244,16 +259,20 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     await _celebrateProgress(wasComplete, prevStage, prevTier);
                   },
                   icon: const Icon(Icons.water_drop, color: Colors.white),
-                  label: Text(l.deposit,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15)),
+                  label: Text(
+                    l.deposit,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.forestGreen,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -266,26 +285,32 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     if (amount <= 0) return;
                     Navigator.pop(ctx);
                     setState(() {
-                      _goal.applyContribution(-amount,
-                          source: ContributionSource.adjustment);
+                      _goal.applyContribution(
+                        -amount,
+                        source: ContributionSource.adjustment,
+                      );
                       // Completion is a permanent trophy — withdrawing below
                       // the target does not undo it.
                     });
                     await _persist();
                     await _animateTo(_goal.progress);
                   },
-                  icon: const Icon(Icons.remove,
-                      color: AppColors.warningAmber),
-                  label: Text(l.withdraw,
-                      style: GoogleFonts.nunito(
-                          color: AppColors.warningAmber,
-                          fontWeight: FontWeight.bold)),
+                  icon: const Icon(Icons.remove, color: AppColors.warningAmber),
+                  label: Text(
+                    l.withdraw,
+                    style: GoogleFonts.nunito(
+                      color: AppColors.warningAmber,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                        color: AppColors.warningAmber.withValues(alpha: 0.6)),
+                      color: AppColors.warningAmber.withValues(alpha: 0.6),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -300,7 +325,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   /// wins over a tier/stage milestone, and either way re-check badges. Only
   /// the first crossing of each threshold celebrates.
   Future<void> _celebrateProgress(
-      bool wasComplete, int prevStage, int prevTier) async {
+    bool wasComplete,
+    int prevStage,
+    int prevTier,
+  ) async {
     if (!mounted) return;
     final earned = await AchievementService.evaluateAndUnlock();
 
@@ -319,7 +347,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       await showCelebration(
         context,
         title: l.newGrowthTitle,
-        message: l.newGrowthMsg(_goal.name, _goal.tier, _goal.localizedTierName(l)),
+        message: l.newGrowthMsg(
+          _goal.name,
+          _goal.tier,
+          _goal.localizedTierName(l),
+        ),
         icon: Icons.nature,
         color: AppColors.lightLeaf,
         buttonLabel: l.keepGrowing,
@@ -332,7 +364,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
         context,
         title: l.milestoneTitle,
         message: l.milestoneMsg(
-            _goal.name, _goal.localizedStageName(l), (_goal.progress * 100).round()),
+          _goal.name,
+          _goal.localizedStageName(l),
+          (_goal.progress * 100).round(),
+        ),
         icon: Icons.local_florist,
         color: AppColors.lightLeaf,
         buttonLabel: l.nice,
@@ -354,31 +389,42 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
         title: Text(
           l.removeSaplingTitle,
           style: GoogleFonts.fredoka(
-              fontWeight: FontWeight.w600,
-              color: AppColors.stoneBeigeColor,
-              fontSize: 20),
+            fontWeight: FontWeight.w600,
+            color: AppColors.stoneBeigeColor,
+            fontSize: 20,
+          ),
         ),
         content: Text(
           l.removeSaplingBody(_goal.name),
           style: GoogleFonts.nunito(
-              color: AppColors.mossGreen, fontSize: 14, height: 1.5),
+            color: AppColors.mossGreen,
+            fontSize: 14,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l.cancel,
-                style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(
+              l.cancel,
+              style: GoogleFonts.nunito(color: AppColors.mossGreen),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.dangerRed,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l.delete,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(
+              l.delete,
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -394,9 +440,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
     final l = AppLocalizations.of(context);
     final nameCtrl = TextEditingController(text: _goal.name);
     final targetCtrl = TextEditingController(
-        text: _goal.targetAmount > 0
-            ? _goal.targetAmount.toStringAsFixed(2)
-            : '');
+      text: _goal.targetAmount > 0 ? _goal.targetAmount.toStringAsFixed(2) : '',
+    );
     String? editCategoryId = _goal.categoryId;
     bool uncapped = _goal.isUncapped;
     showDialog(
@@ -404,12 +449,17 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       builder: (ctx) => StatefulBuilder(
         builder: (sbCtx, setSBState) => AlertDialog(
           backgroundColor: const Color(0xFF122B0F),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text(l.editGoal,
-              style: GoogleFonts.fredoka(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            l.editGoal,
+            style: GoogleFonts.fredoka(
+              fontWeight: FontWeight.w600,
+              color: AppColors.stoneBeigeColor,
+              fontSize: 20,
+            ),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -429,13 +479,16 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     controller: targetCtrl,
                     enabled: !uncapped,
                     style: const TextStyle(color: AppColors.stoneBeigeColor),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                     ],
                     decoration: InputDecoration(
-                        labelText: l.target, prefixText: '\$ '),
+                      labelText: l.target,
+                      prefixText: '\$ ',
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -490,24 +543,38 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(l.cancel,
-                  style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+              child: Text(
+                l.cancel,
+                style: GoogleFonts.nunito(color: AppColors.mossGreen),
+              ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.forestGreen),
+                backgroundColor: AppColors.forestGreen,
+              ),
               onPressed: () async {
                 final n = nameCtrl.text.trim();
                 if (n.isEmpty) return;
                 final t = uncapped
                     ? 0.0
-                    : (double.tryParse(targetCtrl.text) ??
-                        _goal.targetAmount);
+                    : (double.tryParse(targetCtrl.text) ?? _goal.targetAmount);
                 if (!uncapped && t <= 0) return;
+                // Resolve the chosen category's colour so the goal carries its
+                // tree tint with it (friends can't see the owner's categories).
+                TreeCategory? newCat;
+                if (editCategoryId != null) {
+                  final all = await CategoryRepository.loadAll();
+                  newCat = all.cast<TreeCategory?>().firstWhere(
+                    (c) => c?.id == editCategoryId,
+                    orElse: () => null,
+                  );
+                }
                 setState(() {
                   _goal.name = n;
                   _goal.targetAmount = t;
                   _goal.categoryId = editCategoryId;
+                  _goal.leafColorValue = newCat?.colorValue;
+                  _category = newCat;
                   // Raising the target above the balance doesn't un-complete a
                   // goal that was already reached — completion is permanent.
                   _goal.stampCompletionIfReached();
@@ -516,9 +583,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 await _animateTo(_goal.progress);
                 if (ctx.mounted) Navigator.pop(ctx);
               },
-              child: Text(l.save,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text(
+                l.save,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -539,9 +610,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       child: Scaffold(
         body: Stack(
           children: [
-            Container(
-              decoration: BoxDecoration(gradient: AppPalettes.sky()),
-            ),
+            Container(decoration: BoxDecoration(gradient: AppPalettes.sky())),
             // Sapling stage — uncapped goals scale up per tier so a Tier 6
             // tree looks substantially larger than a Tier 1.
             Positioned.fill(
@@ -569,13 +638,15 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     color: complete
                         ? const Color(0xFFFFD54F)
                         : (_category != null
-                            ? Color(_category!.colorValue)
-                            : AppColors.lightLeaf),
+                              ? Color(_category!.colorValue)
+                              : AppColors.lightLeaf),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.28),
                       borderRadius: BorderRadius.circular(10),
@@ -596,7 +667,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
             ),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -607,8 +681,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                           color: Colors.white.withValues(alpha: 0.25),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -638,9 +715,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                               fontSize: 20,
                               shadows: const [
                                 Shadow(
-                                    color: Colors.black54,
-                                    offset: Offset(1, 2),
-                                    blurRadius: 5)
+                                  color: Colors.black54,
+                                  offset: Offset(1, 2),
+                                  blurRadius: 5,
+                                ),
                               ],
                             ),
                             maxLines: 1,
@@ -649,21 +727,28 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                           Text(
                             _goal.localizedStageName(l),
                             style: GoogleFonts.nunito(
-                                color: Colors.white.withValues(alpha: 0.85),
-                                fontSize: 12),
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
                       onPressed: _showEditDialog,
-                      icon: const Icon(Icons.edit_outlined,
-                          color: Colors.white, size: 22),
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
                     IconButton(
                       onPressed: _confirmDelete,
-                      icon: const Icon(Icons.delete_outline,
-                          color: Colors.white, size: 22),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
                   ],
                 ),
@@ -699,14 +784,17 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(l.savedUpper,
-                                style: GoogleFonts.nunito(
-                                  color: AppColors.mossGreen
-                                      .withValues(alpha: 0.7),
-                                  fontSize: 10,
-                                  letterSpacing: 1.2,
-                                  fontWeight: FontWeight.w700,
-                                )),
+                            Text(
+                              l.savedUpper,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontSize: 10,
+                                letterSpacing: 1.2,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                             const SizedBox(height: 2),
                             Text(
                               '\$${_goal.currentAmount.toStringAsFixed(2)}',
@@ -723,14 +811,17 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(_goal.isUncapped ? l.tierUpper : l.targetUpper,
-                                style: GoogleFonts.nunito(
-                                  color: AppColors.mossGreen
-                                      .withValues(alpha: 0.7),
-                                  fontSize: 10,
-                                  letterSpacing: 1.2,
-                                  fontWeight: FontWeight.w700,
-                                )),
+                            Text(
+                              _goal.isUncapped ? l.tierUpper : l.targetUpper,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontSize: 10,
+                                letterSpacing: 1.2,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                             const SizedBox(height: 2),
                             Text(
                               _goal.isUncapped
@@ -768,25 +859,30 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                           _goal.isUncapped
                               ? _goal.localizedTierName(l)
                               : l.percentGrown(
-                                  (_displayedProgress * 100).round()),
+                                  (_displayedProgress * 100).round(),
+                                ),
                           style: GoogleFonts.nunito(
-                              color: AppColors.mossGreen, fontSize: 11),
+                            color: AppColors.mossGreen,
+                            fontSize: 11,
+                          ),
                         ),
                         Text(
                           _goal.isUncapped
                               ? l.noCapKeepsGrowing
                               : complete
-                                  ? l.goalReachedShort
-                                  : l.amountToGo(
-                                      '\$${_goal.remaining.toStringAsFixed(2)}'),
+                              ? l.goalReachedShort
+                              : l.amountToGo(
+                                  '\$${_goal.remaining.toStringAsFixed(2)}',
+                                ),
                           style: GoogleFonts.nunito(
-                              color: complete
-                                  ? const Color(0xFFFFD54F)
-                                  : AppColors.mossGreen,
-                              fontSize: 11,
-                              fontWeight: complete
-                                  ? FontWeight.bold
-                                  : FontWeight.normal),
+                            color: complete
+                                ? const Color(0xFFFFD54F)
+                                : AppColors.mossGreen,
+                            fontSize: 11,
+                            fontWeight: complete
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                         ),
                       ],
                     ),
@@ -810,8 +906,9 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                                   ? l.visibleToFriends
                                   : l.privateOnlyYou,
                               style: GoogleFonts.nunito(
-                                  color: AppColors.stoneBeigeColor,
-                                  fontSize: 13),
+                                color: AppColors.stoneBeigeColor,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                           Switch(
@@ -826,10 +923,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(Icons.link,
-                              size: 13,
-                              color:
-                                  AppColors.mossGreen.withValues(alpha: 0.8)),
+                          Icon(
+                            Icons.link,
+                            size: 13,
+                            color: AppColors.mossGreen.withValues(alpha: 0.8),
+                          ),
                           const SizedBox(width: 5),
                           Text(
                             l.fundedByUpper,
@@ -849,23 +947,28 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         children: _linkedBranches.map((info) {
                           return Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6),
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.forestGreen
-                                  .withValues(alpha: 0.28),
+                              color: AppColors.forestGreen.withValues(
+                                alpha: 0.28,
+                              ),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                  color: AppColors.lightLeaf
-                                      .withValues(alpha: 0.45)),
+                                color: AppColors.lightLeaf.withValues(
+                                  alpha: 0.45,
+                                ),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                    CategoryIcons.forKey(
-                                        info.category.emoji),
-                                    color: AppColors.lightLeaf,
-                                    size: 13),
+                                  CategoryIcons.forKey(info.category.emoji),
+                                  color: AppColors.lightLeaf,
+                                  size: 13,
+                                ),
                                 const SizedBox(width: 6),
                                 Text(
                                   '${info.category.name} · ${info.budgetName}',
@@ -895,20 +998,21 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: _showDeposit,
-                        icon: const Icon(Icons.water_drop,
-                            color: Colors.white),
+                        icon: const Icon(Icons.water_drop, color: Colors.white),
                         label: Text(
                           complete ? l.adjust : l.waterTheSapling,
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.forestGreen,
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(13)),
+                            borderRadius: BorderRadius.circular(13),
+                          ),
                           elevation: 4,
                         ),
                       ),
@@ -952,8 +1056,8 @@ class _MilestoneRow extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: reached
                     ? (stops[i] >= 1.0
-                        ? const Color(0xFFFFD54F)
-                        : AppColors.lightLeaf)
+                          ? const Color(0xFFFFD54F)
+                          : AppColors.lightLeaf)
                     : AppColors.soilMid,
                 border: Border.all(
                   color: reached
