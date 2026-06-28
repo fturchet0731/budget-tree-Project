@@ -108,12 +108,12 @@ class ProfileService {
     }).eq('id', _uid!);
   }
 
-  /// Pin (or clear, with null) the completed goal the user shows off on their
-  /// profile. Friends see it highlighted at the front of the user's garden.
-  Future<void> setFeaturedGoal(String? goalId) async {
+  /// Update the user's profile bio (pass null/blank to clear it).
+  Future<void> setBio(String? bio) async {
     if (!isAvailable) return;
+    final trimmed = bio?.trim();
     await SupabaseConfig.client.from(_table).update({
-      'featured_goal_id': goalId,
+      'bio': (trimmed == null || trimmed.isEmpty) ? null : trimmed,
       'updated_at': DateTime.now().toIso8601String(),
     }).eq('id', _uid!);
   }

@@ -8,6 +8,7 @@ import '../services/friends_service.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/social_tab_bar.dart';
 import 'friend_garden_screen.dart';
 
 /// The social hub: claim a username (first time), set how your status emoji is
@@ -18,9 +19,13 @@ class FriendsScreen extends StatefulWidget {
   /// When hosted in the dashboard's swipe-in sidebar, [onClose] closes the
   /// drawer (and replaces the AppBar's automatic back button with an X). Null
   /// when shown as a standalone screen.
-  const FriendsScreen({super.key, this.onClose});
+  const FriendsScreen({super.key, this.onClose, this.onSelectTab});
 
   final VoidCallback? onClose;
+
+  /// When hosted in the social sidebar, switches to another tab (e.g. Profile).
+  /// Null when shown standalone, in which case the app bar shows a plain title.
+  final ValueChanged<SocialTab>? onSelectTab;
 
   @override
   State<FriendsScreen> createState() => _FriendsScreenState();
@@ -245,7 +250,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 icon: const Icon(Icons.close),
                 onPressed: widget.onClose,
               ),
-        title: Text(AppLocalizations.of(context).friends),
+        centerTitle: widget.onSelectTab != null,
+        title: widget.onSelectTab == null
+            ? Text(AppLocalizations.of(context).friends)
+            : SocialTabBar(
+                active: SocialTab.friends,
+                onSelect: widget.onSelectTab!,
+              ),
         foregroundColor: AppColors.stoneBeigeColor,
       ),
       extendBodyBehindAppBar: true,

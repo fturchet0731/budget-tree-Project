@@ -48,22 +48,21 @@ class Profile {
   final String id; // == auth.users.id
   final String username;
   final String? displayName;
+
+  /// Free-text "about me" shown on the user's profile (the social sidebar and
+  /// to friends viewing the profile). Null/blank when the user hasn't set one.
+  final String? bio;
+
   final FriendStatusMode statusMode;
   final String? statusGoalId;
-
-  /// A completed goal the user pins to show off on their profile. Friends see
-  /// it highlighted (golden "Featured") at the front of the user's garden. Null
-  /// when nothing is featured. Only meaningful for goals the user has also
-  /// shared, since friends can only read shared goals.
-  final String? featuredGoalId;
 
   const Profile({
     required this.id,
     required this.username,
     this.displayName,
+    this.bio,
     this.statusMode = FriendStatusMode.best,
     this.statusGoalId,
-    this.featuredGoalId,
   });
 
   /// Name to show in the UI — the display name if set, else the @username.
@@ -76,9 +75,9 @@ class Profile {
         id: r['id'] as String,
         username: r['username'] as String,
         displayName: r['display_name'] as String?,
+        bio: r['bio'] as String?,
         statusMode: FriendStatusModeWire.fromWire(r['status_mode'] as String?),
         statusGoalId: r['status_goal_id'] as String?,
-        featuredGoalId: r['featured_goal_id'] as String?,
       );
 
   /// Columns to insert/update. `id` is set by the service from `auth.uid()`.
@@ -86,10 +85,10 @@ class Profile {
         'id': id,
         'username': username,
         'display_name': displayName,
+        'bio': bio,
         'status_mode': statusMode.wire,
         'status_goal_id': statusMode == FriendStatusMode.goal
             ? statusGoalId
             : null,
-        'featured_goal_id': featuredGoalId,
       };
 }

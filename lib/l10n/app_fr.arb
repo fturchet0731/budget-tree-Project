@@ -7,6 +7,12 @@
   "close": "Fermer",
   "next": "Suivant",
   "friends": "Amis",
+  "profile": "Profil",
+  "bio": "Bio",
+  "bioHint": "Parlez un peu de vous à vos amis",
+  "addABio": "Ajoutez une bio",
+  "sharedGoals": "Objectifs partagés",
+  "shareGoalsToShowOnProfile": "Les objectifs que vous partagez apparaîtront ici pour vos amis.",
 
   "settingsLanguageTitle": "Langue",
   "settingsLanguageSubtitle": "Choisissez votre langue",

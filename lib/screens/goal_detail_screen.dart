@@ -50,17 +50,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   List<_LinkedBranchInfo> _linkedBranches = [];
   TreeCategory? _category;
 
-  /// The id of the goal this user currently features on their profile (loaded
-  /// from their profile when the social layer is available). Used to show the
-  /// "Featured on profile" toggle as on/off for this goal.
-  String? _featuredGoalId;
-  bool _featuring = false;
-
   @override
   void initState() {
     super.initState();
     _goal = widget.goal;
-    _loadFeatured();
     _growCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),
@@ -147,49 +140,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   Future<void> _toggleShared(bool v) async {
     setState(() => _goal.sharedWithFriends = v);
     await _persist();
-  }
-
-  Future<void> _loadFeatured() async {
-    if (!ProfileService.instance.isAvailable) return;
-    try {
-      final me = await ProfileService.instance.myProfile();
-      if (mounted) setState(() => _featuredGoalId = me?.featuredGoalId);
-    } catch (_) {
-      // Offline / table missing — just leave featuring unavailable.
-    }
-  }
-
-  /// Pin or unpin this (completed) goal as the one shown off on the user's
-  /// profile. Featuring also shares the goal so friends can actually see it.
-  Future<void> _toggleFeatured(bool feature) async {
-    setState(() => _featuring = true);
-    try {
-      if (feature && !_goal.sharedWithFriends) {
-        setState(() => _goal.sharedWithFriends = true);
-        await _persist();
-      }
-      await ProfileService.instance.setFeaturedGoal(feature ? _goal.id : null);
-      if (mounted) {
-        setState(() => _featuredGoalId = feature ? _goal.id : null);
-        final l = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                feature ? l.featuredOnProfileSnack : l.removedFromProfile),
-          ),
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text(AppLocalizations.of(context).couldntUpdateProfile)),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _featuring = false);
-    }
   }
 
   void _showDeposit() {
@@ -871,42 +821,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                           ),
                         ],
                       ),
-                      // Completed goals can be pinned as the profile's
-                      // showcase — friends see it highlighted first.
-                      if (_goal.isCompleted) ...[
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            const Icon(Icons.emoji_events,
-                                size: 16, color: Color(0xFFFFD54F)),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _featuredGoalId == _goal.id
-                                    ? l.featuredOnYourProfile
-                                    : l.featureOnYourProfile,
-                                style: GoogleFonts.nunito(
-                                    color: AppColors.stoneBeigeColor,
-                                    fontSize: 13),
-                              ),
-                            ),
-                            if (_featuring)
-                              const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Color(0xFFFFD54F)),
-                              )
-                            else
-                              Switch(
-                                value: _featuredGoalId == _goal.id,
-                                activeThumbColor: const Color(0xFFFFD54F),
-                                onChanged: _toggleFeatured,
-                              ),
-                          ],
-                        ),
-                      ],
                     ],
                     if (_linkedBranches.isNotEmpty) ...[
                       const SizedBox(height: 16),

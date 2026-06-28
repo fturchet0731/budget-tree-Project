@@ -27,6 +27,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String get friends => 'Amigos';
 
   @override
+  String get profile => 'Perfil';
+
+  @override
+  String get bio => 'Biografía';
+
+  @override
+  String get bioHint => 'Cuéntales algo sobre ti a tus amigos';
+
+  @override
+  String get addABio => 'Añade una biografía';
+
+  @override
+  String get sharedGoals => 'Objetivos compartidos';
+
+  @override
+  String get shareGoalsToShowOnProfile =>
+      'Los objetivos que compartas aparecerán aquí para que los vean tus amigos.';
+
+  @override
   String get settingsLanguageTitle => 'Idioma';
 
   @override

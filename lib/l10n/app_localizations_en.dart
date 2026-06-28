@@ -27,6 +27,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get friends => 'Friends';
 
   @override
+  String get profile => 'Profile';
+
+  @override
+  String get bio => 'Bio';
+
+  @override
+  String get bioHint => 'Tell friends a bit about yourself';
+
+  @override
+  String get addABio => 'Add a bio';
+
+  @override
+  String get sharedGoals => 'Shared goals';
+
+  @override
+  String get shareGoalsToShowOnProfile =>
+      'Goals you share will appear here for friends to see.';
+
+  @override
   String get settingsLanguageTitle => 'Language';
 
   @override

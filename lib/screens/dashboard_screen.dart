@@ -7,9 +7,9 @@ import '../theme/app_theme.dart';
 import '../tutorial/tutorial_tour.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
-import 'friends_screen.dart';
 import 'goals_screen.dart';
 import 'settings_screen.dart';
+import 'social_drawer.dart';
 
 class DashboardScreen extends StatefulWidget {
   /// First launch only: play the guided tour once this menu appears, so Acorn
@@ -109,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       endDrawer: Drawer(
         backgroundColor: Colors.transparent,
         width: MediaQuery.of(context).size.width * 0.86,
-        child: FriendsScreen(
+        child: SocialDrawer(
           onClose: () => _scaffoldKey.currentState?.closeEndDrawer(),
         ),
       ),

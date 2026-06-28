@@ -136,6 +136,42 @@ abstract class AppLocalizations {
   /// **'Friends'**
   String get friends;
 
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @bio.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get bio;
+
+  /// No description provided for @bioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell friends a bit about yourself'**
+  String get bioHint;
+
+  /// No description provided for @addABio.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a bio'**
+  String get addABio;
+
+  /// No description provided for @sharedGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared goals'**
+  String get sharedGoals;
+
+  /// No description provided for @shareGoalsToShowOnProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals you share will appear here for friends to see.'**
+  String get shareGoalsToShowOnProfile;
+
   /// No description provided for @settingsLanguageTitle.
   ///
   /// In en, this message translates to:
