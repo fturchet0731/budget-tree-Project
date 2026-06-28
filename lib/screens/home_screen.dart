@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
@@ -187,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen>
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.darkBark,
-        content: Text('Signed out 🌱',
+        content: Text(AppLocalizations.of(context).signedOut,
             style: GoogleFonts.nunito(color: Colors.white)),
         duration: const Duration(seconds: 2),
       ),
@@ -204,12 +205,13 @@ class _HomeScreenState extends State<HomeScreen>
     return AnimatedBuilder(
       animation: auth,
       builder: (context, _) {
+        final l = AppLocalizations.of(context);
         if (auth.isSignedIn) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                auth.currentUser?.email ?? 'Signed in',
+                auth.currentUser?.email ?? '',
                 style: GoogleFonts.nunito(
                   color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 13,
@@ -217,16 +219,16 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
               const SizedBox(height: 10),
-              _ghostButton('Sign Out', onTap: _signOut),
+              _ghostButton(l.signOut, onTap: _signOut),
             ],
           );
         }
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _ghostButton('Sign In', onTap: () => _openLogin()),
+            _ghostButton(l.signIn, onTap: () => _openLogin()),
             const SizedBox(width: 12),
-            _solidButton('Register', onTap: () => _openLogin(signUp: true)),
+            _solidButton(l.register, onTap: () => _openLogin(signUp: true)),
           ],
         );
       },
@@ -536,7 +538,7 @@ class _HomeScreenState extends State<HomeScreen>
                       children: [
                         ScaleTransition(
                           scale: _pulseAnim,
-                          child: _startButton(theme),
+                          child: _startButton(context, theme),
                         ),
                         const SizedBox(height: 14),
                         _accountControls(),
@@ -570,7 +572,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _startButton(_LaunchTheme theme) {
+  Widget _startButton(BuildContext context, _LaunchTheme theme) {
     return GestureDetector(
       onTap: _start,
       child: Container(
@@ -598,7 +600,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(width: 12),
             Text(
-              'Start',
+              AppLocalizations.of(context).startButton,
               style: GoogleFonts.nunito(
                 fontWeight: FontWeight.w800,
                 color: Colors.white,

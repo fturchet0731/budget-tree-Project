@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
 import '../services/category_repository.dart';
 import '../theme/app_theme.dart';
@@ -197,6 +198,7 @@ class _PickerChip extends StatelessWidget {
 /// Opens a dialog to create a new category. Returns the saved category
 /// on success, or null on cancel.
 Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
+  final l = AppLocalizations.of(context);
   final nameCtrl = TextEditingController();
   Color selectedColor = categoryColorChoices.first;
 
@@ -212,7 +214,7 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
                 color: AppColors.lightLeaf, size: 22),
             const SizedBox(width: 10),
             Text(
-              'New Category',
+              l.newCategoryTitle,
               style: GoogleFonts.fredoka(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
@@ -225,7 +227,7 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Name your category. Trees and saplings in this category will be tinted with the chosen colour.',
+              l.newCategoryBody,
               style: GoogleFonts.nunito(
                   color: AppColors.mossGreen, fontSize: 12.5, height: 1.45),
             ),
@@ -235,14 +237,14 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
               autofocus: true,
               style: const TextStyle(color: AppColors.stoneBeigeColor),
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Category name',
-                hintText: 'e.g. Trips',
+              decoration: InputDecoration(
+                labelText: l.categoryName,
+                hintText: l.categoryNameTripsHint,
               ),
             ),
             const SizedBox(height: 18),
             Text(
-              'COLOUR',
+              l.colourUpper,
               style: GoogleFonts.nunito(
                 color: AppColors.mossGreen.withValues(alpha: 0.75),
                 fontSize: 10.5,
@@ -292,7 +294,7 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
+            child: Text(l.cancel,
                 style: GoogleFonts.nunito(color: AppColors.mossGreen)),
           ),
           ElevatedButton(
@@ -311,7 +313,7 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
               await CategoryRepository.saveNew(created);
               if (ctx.mounted) Navigator.pop(ctx, created);
             },
-            child: Text('Create',
+            child: Text(l.createButton,
                 style: GoogleFonts.nunito(
                     color: Colors.white, fontWeight: FontWeight.bold)),
           ),

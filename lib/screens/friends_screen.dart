@@ -495,7 +495,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 ElevatedButton.icon(
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
+                  label: Text(AppLocalizations.of(context).retry),
                 ),
               ],
             ],
@@ -525,9 +525,10 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
   }
 
   Future<void> _claim() async {
+    final l = AppLocalizations.of(context);
     final name = _controller.text.trim();
     if (!ProfileService.usernamePattern.hasMatch(name)) {
-      setState(() => _error = '3-20 letters, numbers or underscore');
+      setState(() => _error = l.usernameRule);
       return;
     }
     setState(() {
@@ -536,15 +537,15 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
     });
     try {
       if (!await ProfileService.instance.isUsernameAvailable(name)) {
-        setState(() => _error = 'That username is taken.');
+        setState(() => _error = l.usernameTakenShort);
         return;
       }
       await ProfileService.instance.claimUsername(name);
       await widget.onClaimed();
     } on UsernameTakenException {
-      if (mounted) setState(() => _error = 'That username is taken.');
+      if (mounted) setState(() => _error = l.usernameTakenShort);
     } catch (_) {
-      if (mounted) setState(() => _error = 'Something went wrong.');
+      if (mounted) setState(() => _error = l.somethingWentWrong);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -552,6 +553,7 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
@@ -561,15 +563,15 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
             const Icon(Icons.alternate_email,
                 color: AppColors.lightLeaf, size: 48),
             const SizedBox(height: 16),
-            const Text('Pick a username',
-                style: TextStyle(
+            Text(l.claimUsernameTitle,
+                style: const TextStyle(
                     color: AppColors.stoneBeigeColor,
                     fontSize: 20,
                     fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('This is how friends find and add you.',
+            Text(l.claimUsernameBody,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.mossGreen)),
+                style: const TextStyle(color: AppColors.mossGreen)),
             const SizedBox(height: 20),
             TextField(
               controller: _controller,
@@ -578,7 +580,7 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
               enableSuggestions: false,
               style: const TextStyle(color: AppColors.stoneBeigeColor),
               decoration: InputDecoration(
-                hintText: 'username',
+                hintText: l.usernameHint,
                 hintStyle: const TextStyle(color: AppColors.mossGreen),
                 errorText: _error,
                 prefixIcon: const Icon(Icons.alternate_email,
@@ -595,7 +597,7 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
                       width: 18,
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white))
-                  : const Text('Claim username'),
+                  : Text(l.claimUsernameButton),
             ),
           ],
         ),

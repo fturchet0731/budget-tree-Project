@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../services/app_settings.dart';
@@ -166,7 +167,7 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
                         color: Colors.white, size: 13),
                     const SizedBox(width: 6),
                     Text(
-                      'Swipe to walk · tap a tree for details',
+                      AppLocalizations.of(context).swipeToWalk,
                       style: GoogleFonts.nunito(
                           color: Colors.white, fontSize: 11),
                     ),
@@ -322,7 +323,7 @@ class _TreeStage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Tap for details',
+                      AppLocalizations.of(context).tapForDetails,
                       style: GoogleFonts.nunito(
                         color: AppColors.mossGreen.withValues(alpha: 0.7),
                         fontSize: 10.5,
@@ -475,7 +476,7 @@ class _BudgetInfoSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text('EXPENSE BREAKDOWN',
+            Text(AppLocalizations.of(context).expenseBreakdownUpper,
                 style: GoogleFonts.nunito(
                   color: AppColors.mossGreen.withValues(alpha: 0.75),
                   fontSize: 10.5,
@@ -545,7 +546,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                   elevation: 3,
                 ),
                 icon: const Icon(Icons.park, color: Colors.white),
-                label: Text('View Full Tree',
+                label: Text(AppLocalizations.of(context).viewFullTree,
                     style: GoogleFonts.nunito(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -559,7 +560,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onEdit,
                     icon: const Icon(Icons.edit_outlined, size: 15),
-                    label: Text('Edit',
+                    label: Text(AppLocalizations.of(context).edit,
                         style: GoogleFonts.nunito(
                             fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(
@@ -579,7 +580,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onDelete,
                     icon: const Icon(Icons.delete_outline, size: 15),
-                    label: Text('Delete',
+                    label: Text(AppLocalizations.of(context).delete,
                         style: GoogleFonts.nunito(
                             fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(

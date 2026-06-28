@@ -553,5 +553,24 @@
   "notifWeeklyChange": "This week you saved {amount} ({arrow} {pct}% vs last week). Keep your goals growing!",
   "@notifWeeklyChange": { "placeholders": { "amount": { "type": "String" }, "arrow": { "type": "String" }, "pct": { "type": "int" } } },
   "notifWeeklyPlain": "This week you saved {amount}. Keep your goals growing!",
-  "@notifWeeklyPlain": { "placeholders": { "amount": { "type": "String" } } }
+  "@notifWeeklyPlain": { "placeholders": { "amount": { "type": "String" } } },
+
+  "gateErrorTitle": "Couldn't finish setup",
+  "gateErrorBody": "We couldn't reach the server to set up your account. Check your connection and try again.",
+  "claimUsernameTitle": "Pick a username",
+  "claimUsernameBody": "This is how friends find and add you.",
+  "usernameHint": "username",
+  "claimUsernameButton": "Claim username",
+  "usernameTakenShort": "That username is taken.",
+  "signedOut": "Signed out 🌱",
+  "expenseBreakdownUpper": "EXPENSE BREAKDOWN",
+  "categoryNameTripsHint": "e.g. Trips",
+  "createButton": "Create",
+  "register": "Register",
+  "startButton": "Start",
+  "swipeToWalk": "Swipe to walk · tap a tree for details",
+  "tapForDetails": "Tap for details",
+  "newCategoryTitle": "New Category",
+  "newCategoryBody": "Name your category. Trees and saplings in this category will be tinted with the chosen colour.",
+  "colourUpper": "COLOUR"
 }

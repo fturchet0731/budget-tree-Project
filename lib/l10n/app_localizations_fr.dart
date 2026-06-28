@@ -1687,4 +1687,62 @@ class AppLocalizationsFr extends AppLocalizations {
   String notifWeeklyPlain(String amount) {
     return 'Cette semaine vous avez épargné $amount. Continuez à faire grandir vos objectifs !';
   }
+
+  @override
+  String get gateErrorTitle => 'Impossible de terminer la configuration';
+
+  @override
+  String get gateErrorBody =>
+      'Nous n\'avons pas pu joindre le serveur pour configurer votre compte. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get claimUsernameTitle => 'Choisissez un nom d\'utilisateur';
+
+  @override
+  String get claimUsernameBody =>
+      'C\'est ainsi que vos amis vous trouvent et vous ajoutent.';
+
+  @override
+  String get usernameHint => 'nom d\'utilisateur';
+
+  @override
+  String get claimUsernameButton => 'Réserver le nom';
+
+  @override
+  String get usernameTakenShort => 'Ce nom d\'utilisateur est déjà pris.';
+
+  @override
+  String get signedOut => 'Déconnecté 🌱';
+
+  @override
+  String get expenseBreakdownUpper => 'RÉPARTITION DES DÉPENSES';
+
+  @override
+  String get categoryNameTripsHint => 'ex. Voyages';
+
+  @override
+  String get createButton => 'Créer';
+
+  @override
+  String get register => 'S\'inscrire';
+
+  @override
+  String get startButton => 'Commencer';
+
+  @override
+  String get swipeToWalk =>
+      'Glissez pour vous promener · touchez un arbre pour les détails';
+
+  @override
+  String get tapForDetails => 'Touchez pour les détails';
+
+  @override
+  String get newCategoryTitle => 'Nouvelle catégorie';
+
+  @override
+  String get newCategoryBody =>
+      'Nommez votre catégorie. Les arbres et objectifs de cette catégorie seront teintés avec la couleur choisie.';
+
+  @override
+  String get colourUpper => 'COULEUR';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/onboarding_screen.dart';
@@ -120,6 +121,7 @@ class _GateError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
@@ -133,26 +135,25 @@ class _GateError extends StatelessWidget {
                   const Icon(Icons.wifi_off,
                       color: AppColors.mossGreen, size: 48),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Couldn\'t finish setup',
+                  Text(
+                    l.gateErrorTitle,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: AppColors.stoneBeigeColor,
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'We couldn\'t reach the server to set up your account. '
-                    'Check your connection and try again.',
+                  Text(
+                    l.gateErrorBody,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.mossGreen),
+                    style: const TextStyle(color: AppColors.mossGreen),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: onRetry,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(l.retry),
                   ),
                 ],
               ),

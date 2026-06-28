@@ -2919,6 +2919,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This week you saved {amount}. Keep your goals growing!'**
   String notifWeeklyPlain(String amount);
+
+  /// No description provided for @gateErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t finish setup'**
+  String get gateErrorTitle;
+
+  /// No description provided for @gateErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t reach the server to set up your account. Check your connection and try again.'**
+  String get gateErrorBody;
+
+  /// No description provided for @claimUsernameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a username'**
+  String get claimUsernameTitle;
+
+  /// No description provided for @claimUsernameBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how friends find and add you.'**
+  String get claimUsernameBody;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'username'**
+  String get usernameHint;
+
+  /// No description provided for @claimUsernameButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim username'**
+  String get claimUsernameButton;
+
+  /// No description provided for @usernameTakenShort.
+  ///
+  /// In en, this message translates to:
+  /// **'That username is taken.'**
+  String get usernameTakenShort;
+
+  /// No description provided for @signedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out 🌱'**
+  String get signedOut;
+
+  /// No description provided for @expenseBreakdownUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'EXPENSE BREAKDOWN'**
+  String get expenseBreakdownUpper;
+
+  /// No description provided for @categoryNameTripsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Trips'**
+  String get categoryNameTripsHint;
+
+  /// No description provided for @createButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get createButton;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// No description provided for @startButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get startButton;
+
+  /// No description provided for @swipeToWalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to walk · tap a tree for details'**
+  String get swipeToWalk;
+
+  /// No description provided for @tapForDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap for details'**
+  String get tapForDetails;
+
+  /// No description provided for @newCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Category'**
+  String get newCategoryTitle;
+
+  /// No description provided for @newCategoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your category. Trees and saplings in this category will be tinted with the chosen colour.'**
+  String get newCategoryBody;
+
+  /// No description provided for @colourUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'COLOUR'**
+  String get colourUpper;
 }
 
 class _AppLocalizationsDelegate

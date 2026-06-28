@@ -1671,4 +1671,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String notifWeeklyPlain(String amount) {
     return 'This week you saved $amount. Keep your goals growing!';
   }
+
+  @override
+  String get gateErrorTitle => 'Couldn\'t finish setup';
+
+  @override
+  String get gateErrorBody =>
+      'We couldn\'t reach the server to set up your account. Check your connection and try again.';
+
+  @override
+  String get claimUsernameTitle => 'Pick a username';
+
+  @override
+  String get claimUsernameBody => 'This is how friends find and add you.';
+
+  @override
+  String get usernameHint => 'username';
+
+  @override
+  String get claimUsernameButton => 'Claim username';
+
+  @override
+  String get usernameTakenShort => 'That username is taken.';
+
+  @override
+  String get signedOut => 'Signed out 🌱';
+
+  @override
+  String get expenseBreakdownUpper => 'EXPENSE BREAKDOWN';
+
+  @override
+  String get categoryNameTripsHint => 'e.g. Trips';
+
+  @override
+  String get createButton => 'Create';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get startButton => 'Start';
+
+  @override
+  String get swipeToWalk => 'Swipe to walk · tap a tree for details';
+
+  @override
+  String get tapForDetails => 'Tap for details';
+
+  @override
+  String get newCategoryTitle => 'New Category';
+
+  @override
+  String get newCategoryBody =>
+      'Name your category. Trees and saplings in this category will be tinted with the chosen colour.';
+
+  @override
+  String get colourUpper => 'COLOUR';
 }

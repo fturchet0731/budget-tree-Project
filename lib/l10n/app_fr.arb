@@ -494,5 +494,24 @@
   "notifWeeklyTitle": "📊 Votre semaine dans le bosquet",
   "notifWeeklyNone": "Aucun dépôt cette semaine pour l'instant. Un petit montant garde vos arbres en croissance, et votre série en vie.",
   "notifWeeklyChange": "Cette semaine vous avez épargné {amount} ({arrow} {pct} % vs la semaine dernière). Continuez à faire grandir vos objectifs !",
-  "notifWeeklyPlain": "Cette semaine vous avez épargné {amount}. Continuez à faire grandir vos objectifs !"
+  "notifWeeklyPlain": "Cette semaine vous avez épargné {amount}. Continuez à faire grandir vos objectifs !",
+
+  "gateErrorTitle": "Impossible de terminer la configuration",
+  "gateErrorBody": "Nous n'avons pas pu joindre le serveur pour configurer votre compte. Vérifiez votre connexion et réessayez.",
+  "claimUsernameTitle": "Choisissez un nom d'utilisateur",
+  "claimUsernameBody": "C'est ainsi que vos amis vous trouvent et vous ajoutent.",
+  "usernameHint": "nom d'utilisateur",
+  "claimUsernameButton": "Réserver le nom",
+  "usernameTakenShort": "Ce nom d'utilisateur est déjà pris.",
+  "signedOut": "Déconnecté 🌱",
+  "expenseBreakdownUpper": "RÉPARTITION DES DÉPENSES",
+  "categoryNameTripsHint": "ex. Voyages",
+  "createButton": "Créer",
+  "register": "S'inscrire",
+  "startButton": "Commencer",
+  "swipeToWalk": "Glissez pour vous promener · touchez un arbre pour les détails",
+  "tapForDetails": "Touchez pour les détails",
+  "newCategoryTitle": "Nouvelle catégorie",
+  "newCategoryBody": "Nommez votre catégorie. Les arbres et objectifs de cette catégorie seront teintés avec la couleur choisie.",
+  "colourUpper": "COULEUR"
 }

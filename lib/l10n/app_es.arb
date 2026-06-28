@@ -494,5 +494,24 @@
   "notifWeeklyTitle": "📊 Tu semana en la arboleda",
   "notifWeeklyNone": "Aún no hay depósitos esta semana. Una pequeña cantidad mantiene tus arbolitos creciendo, y tu racha viva.",
   "notifWeeklyChange": "Esta semana ahorraste {amount} ({arrow} {pct}% vs la semana pasada). ¡Sigue haciendo crecer tus metas!",
-  "notifWeeklyPlain": "Esta semana ahorraste {amount}. ¡Sigue haciendo crecer tus metas!"
+  "notifWeeklyPlain": "Esta semana ahorraste {amount}. ¡Sigue haciendo crecer tus metas!",
+
+  "gateErrorTitle": "No se pudo completar la configuración",
+  "gateErrorBody": "No pudimos conectar con el servidor para configurar tu cuenta. Comprueba tu conexión e inténtalo de nuevo.",
+  "claimUsernameTitle": "Elige un nombre de usuario",
+  "claimUsernameBody": "Así te encuentran y te añaden tus amigos.",
+  "usernameHint": "nombre de usuario",
+  "claimUsernameButton": "Reservar nombre",
+  "usernameTakenShort": "Ese nombre de usuario ya está en uso.",
+  "signedOut": "Sesión cerrada 🌱",
+  "expenseBreakdownUpper": "DESGLOSE DE GASTOS",
+  "categoryNameTripsHint": "p. ej. Viajes",
+  "createButton": "Crear",
+  "register": "Registrarse",
+  "startButton": "Empezar",
+  "swipeToWalk": "Desliza para pasear · toca un árbol para ver detalles",
+  "tapForDetails": "Toca para ver detalles",
+  "newCategoryTitle": "Nueva categoría",
+  "newCategoryBody": "Nombra tu categoría. Los árboles y arbolitos de esta categoría se teñirán con el color elegido.",
+  "colourUpper": "COLOR"
 }
