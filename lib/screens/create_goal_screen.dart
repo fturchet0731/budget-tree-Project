@@ -3,10 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/preset_labels.dart';
+import '../models/ai_plan.dart';
+import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../services/achievement_service.dart';
+import '../services/ai_coach_service.dart';
+import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
+import '../services/goal_plan_math.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
 import '../services/sound_service.dart';
@@ -34,6 +39,13 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   TreeCategory? _pickedCategory;
   bool _uncapped = false;
   bool _saving = false;
+
+  // Target date + AI contribution plan.
+  DateTime? _targetDate;
+  bool _planLoading = false;
+  String? _planError;
+  GoalPlanResult? _planResult;
+  double? _fallbackMonthly; // offline simple math
 
   @override
   void dispose() {
@@ -105,11 +117,135 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       sharedWithFriends: share,
       leafColorValue: _pickedCategory?.colorValue,
     );
+    goal.targetDate = _targetDate;
     await GoalRepository.saveNew(goal);
     SoundService.goalSet();
     await AchievementService.evaluateAndUnlock();
     if (!mounted) return;
+    // Offer to fund the goal from a budget branch so the recommended monthly
+    // contribution flows in automatically each pay cycle.
+    await _offerLink(goal);
+    if (!mounted) return;
     Navigator.pop(context, true);
+  }
+
+  /// Recommended monthly contribution to surface in the plan UI: the AI's first
+  /// option when available, else the simple offline figure.
+  double? get _recommendedMonthly => _planResult?.plans.isNotEmpty == true
+      ? _planResult!.plans.first.monthly
+      : _fallbackMonthly;
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _targetDate ?? DateTime(now.year, now.month + 6, now.day),
+      firstDate: now,
+      lastDate: DateTime(now.year + 30),
+    );
+    if (picked == null) return;
+    setState(() {
+      _targetDate = picked;
+      _planResult = null;
+      _planError = null;
+      _fallbackMonthly = null;
+    });
+  }
+
+  /// Build a transient goal and ask the AI for contribution plans + alternative
+  /// dates. Falls back to simple math (still useful offline).
+  Future<void> _generatePlan() async {
+    final date = _targetDate;
+    final target = double.tryParse(_targetCtrl.text) ?? 0;
+    if (date == null || target <= 0) return;
+    final transient = Goal(name: _nameCtrl.text.trim(), targetAmount: target);
+
+    if (!AiCoachService.instance.isAvailable) {
+      setState(
+        () => _fallbackMonthly = GoalPlanMath.monthlyToReach(transient, date),
+      );
+      return;
+    }
+    setState(() {
+      _planLoading = true;
+      _planError = null;
+    });
+    try {
+      final free = await GoalPlanMath.freeMonthlyIncome();
+      final result = await AiCoachService.instance.goalPlans(
+        goal: transient,
+        targetDate: date,
+        freeMonthly: free,
+      );
+      if (!mounted) return;
+      setState(() {
+        _planResult = result;
+        _planLoading = false;
+      });
+    } on AiUnavailable catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _planLoading = false;
+        _planError = e.message;
+        _fallbackMonthly = GoalPlanMath.monthlyToReach(transient, date);
+      });
+    }
+  }
+
+  /// After saving, let the user pick a budget branch to fund this goal.
+  Future<void> _offerLink(Goal goal) async {
+    final budgets = await BudgetRepository.loadAll();
+    final branches = <(BudgetModel, ExpenseCategory)>[];
+    for (final b in budgets) {
+      for (final c in b.expenses) {
+        branches.add((b, c));
+      }
+    }
+    if (!mounted || branches.isEmpty) return;
+    final l = AppLocalizations.of(context);
+    final picked = await showDialog<(BudgetModel, ExpenseCategory)?>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        backgroundColor: const Color(0xFF122B0F),
+        title: Text(
+          l.fundFromBranchTitle,
+          style: const TextStyle(color: AppColors.stoneBeigeColor),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+            child: Text(
+              l.fundFromBranchBody,
+              style: const TextStyle(
+                color: AppColors.mossGreen,
+                fontSize: 12.5,
+              ),
+            ),
+          ),
+          for (final pair in branches)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, pair),
+              child: Text(
+                '${pair.$2.name}  ·  ${pair.$1.budgetName}',
+                style: const TextStyle(color: AppColors.stoneBeigeColor),
+              ),
+            ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: Text(
+              l.notNow,
+              style: const TextStyle(color: AppColors.mossGreen),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (picked == null) return;
+    final (budget, branch) = picked;
+    if (!branch.linkedGoalIds.contains(goal.id)) {
+      branch.linkedGoalIds.add(goal.id);
+      await BudgetRepository.update(budget);
+    }
   }
 
   Future<void> _resolveCategory(String? id) async {
@@ -343,6 +479,31 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
+
+                        // ── When + AI plan (capped goals only) ──
+                        if (!_uncapped) ...[
+                          BarkCard(
+                            label: l.targetDateLabel,
+                            icon: Icons.event_outlined,
+                            accent: AppColors.riverBlue,
+                            child: _PlanSection(
+                              targetDate: _targetDate,
+                              loading: _planLoading,
+                              error: _planError,
+                              result: _planResult,
+                              fallbackMonthly: _fallbackMonthly,
+                              recommendedMonthly: _recommendedMonthly,
+                              canPlan:
+                                  (double.tryParse(_targetCtrl.text) ?? 0) > 0,
+                              aiAvailable: AiCoachService.instance.isAvailable,
+                              onPickDate: _pickDate,
+                              onGenerate: _generatePlan,
+                              onApplyDate: (d) =>
+                                  setState(() => _targetDate = d),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
 
                         // ── Icon ───────────────────────
                         BarkCard(
@@ -876,4 +1037,193 @@ class _GoalSkyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GoalSkyPainter old) => false;
+}
+
+// ──────────────────────────────────────────────
+// Target-date + AI contribution plan section
+// ──────────────────────────────────────────────
+
+class _PlanSection extends StatelessWidget {
+  final DateTime? targetDate;
+  final bool loading;
+  final String? error;
+  final GoalPlanResult? result;
+  final double? fallbackMonthly;
+  final double? recommendedMonthly;
+  final bool canPlan;
+  final bool aiAvailable;
+  final VoidCallback onPickDate;
+  final VoidCallback onGenerate;
+  final ValueChanged<DateTime> onApplyDate;
+
+  const _PlanSection({
+    required this.targetDate,
+    required this.loading,
+    required this.error,
+    required this.result,
+    required this.fallbackMonthly,
+    required this.recommendedMonthly,
+    required this.canPlan,
+    required this.aiAvailable,
+    required this.onPickDate,
+    required this.onGenerate,
+    required this.onApplyDate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final mat = MaterialLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Date row
+        InkWell(
+          onTap: onPickDate,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  color: AppColors.mossGreen,
+                  size: 16,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    targetDate == null
+                        ? l.pickATargetDate
+                        : mat.formatFullDate(targetDate!),
+                    style: GoogleFonts.nunito(
+                      color: targetDate == null
+                          ? AppColors.mossGreen
+                          : AppColors.stoneBeigeColor,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.edit_calendar_outlined,
+                  color: AppColors.mossGreen,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (targetDate != null && canPlan) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: loading ? null : onGenerate,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.forestGreen,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: loading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Icon(
+                      aiAvailable ? Icons.auto_awesome : Icons.calculate,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+              label: Text(
+                aiAvailable ? l.planWithAi : l.calculateMonthly,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+        if (recommendedMonthly != null && recommendedMonthly! > 0) ...[
+          const SizedBox(height: 12),
+          Text(
+            l.recommendedMonthly('\$${recommendedMonthly!.toStringAsFixed(0)}'),
+            style: GoogleFonts.fredoka(
+              fontWeight: FontWeight.w600,
+              color: AppColors.lightLeaf,
+              fontSize: 15,
+            ),
+          ),
+        ],
+        // AI plan options
+        if (result != null) ...[
+          for (final p in result!.plans)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                l.planMonthsLine(
+                  '\$${p.monthly.toStringAsFixed(0)}',
+                  p.monthsToTarget,
+                ),
+                style: GoogleFonts.nunito(
+                  color: AppColors.stoneBeigeColor,
+                  fontSize: 12.5,
+                ),
+              ),
+            ),
+          if (result!.alternativeDates.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              l.alternativeDates,
+              style: GoogleFonts.nunito(
+                color: AppColors.mossGreen.withValues(alpha: 0.8),
+                fontSize: 10.5,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final a in result!.alternativeDates)
+                  ActionChip(
+                    backgroundColor: AppColors.darkBark,
+                    side: BorderSide(
+                      color: AppColors.mossGreen.withValues(alpha: 0.4),
+                    ),
+                    label: Text(
+                      '${mat.formatShortDate(a.date)}  ·  \$${a.monthly.toStringAsFixed(0)}/mo',
+                      style: const TextStyle(
+                        color: AppColors.stoneBeigeColor,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                    onPressed: () => onApplyDate(a.date),
+                  ),
+              ],
+            ),
+          ],
+        ],
+        if (error != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            l.aiUnavailableSimple,
+            style: GoogleFonts.nunito(
+              color: AppColors.warningAmber,
+              fontSize: 11.5,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }

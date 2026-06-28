@@ -36,16 +36,16 @@ class TutorialStep {
 
 /// Acorn's brief self-introduction on the title screen, before the tour.
 List<TutorialStep> introSteps(AppLocalizations l) => [
-      TutorialStep(l.tutIntro1, expression: AcornExpression.happy),
-      TutorialStep(l.tutIntro2),
-      TutorialStep(l.tutIntro3, expression: AcornExpression.happy),
-    ];
+  TutorialStep(l.tutIntro1, expression: AcornExpression.happy),
+  TutorialStep(l.tutIntro2),
+  TutorialStep(l.tutIntro3, expression: AcornExpression.happy),
+];
 
 /// Acorn's friendly sign-off once the tour has visited every section.
 List<TutorialStep> closingSteps(AppLocalizations l) => [
-      TutorialStep(l.tutClosing1),
-      TutorialStep(l.tutClosing2, expression: AcornExpression.happy),
-    ];
+  TutorialStep(l.tutClosing1),
+  TutorialStep(l.tutClosing2, expression: AcornExpression.happy),
+];
 
 /// Just the lines for one section — used by the per-section info buttons as
 /// a quick recap while the user is already on that screen.
@@ -167,15 +167,9 @@ List<TutorialStep> successSteps(TutorialSection section, AppLocalizations l) {
 List<TutorialStep> retrySteps(TutorialSection section, AppLocalizations l) {
   switch (section) {
     case TutorialSection.create:
-      return [
-        TutorialStep(l.tutRetryCreate1),
-        TutorialStep(l.tutRetryCreate2),
-      ];
+      return [TutorialStep(l.tutRetryCreate1), TutorialStep(l.tutRetryCreate2)];
     case TutorialSection.goals:
-      return [
-        TutorialStep(l.tutRetryGoals1),
-        TutorialStep(l.tutRetryGoals2),
-      ];
+      return [TutorialStep(l.tutRetryGoals1), TutorialStep(l.tutRetryGoals2)];
     default:
       return const [];
   }
@@ -214,6 +208,12 @@ List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
         TutorialStep(l.tutStep1c),
       ];
     case 2:
+      return [
+        TutorialStep(l.tutStepPlanA, expression: AcornExpression.happy),
+        TutorialStep(l.tutStepPlanB),
+        TutorialStep(l.tutStepPlanC),
+      ];
+    case 3:
     default:
       return [
         TutorialStep(l.tutStep2a),
@@ -225,6 +225,6 @@ List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
 
 /// Shown on the grown-tree screen, nudging the user to save it for good.
 List<TutorialStep> saveTreeSteps(AppLocalizations l) => [
-      TutorialStep(l.tutSaveTree1, expression: AcornExpression.happy),
-      TutorialStep(l.tutSaveTree2),
-    ];
+  TutorialStep(l.tutSaveTree1, expression: AcornExpression.happy),
+  TutorialStep(l.tutSaveTree2),
+];

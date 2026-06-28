@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
 import '../services/notification_scheduler.dart';
+import '../services/supabase_config.dart';
 import '../services/sync_engine.dart';
 import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_tour.dart';
@@ -369,6 +370,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             systemLabel: l.systemDefault,
                             onChanged: settings.setLocale,
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.auto_awesome,
+                        label: l.aiCoachUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: Text(
+                              l.aiCoach,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.stoneBeigeColor,
+                                fontSize: 13,
+                              ),
+                            ),
+                            subtitle: Text(
+                              l.aiCoachSub,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontSize: 11,
+                              ),
+                            ),
+                            value: settings.aiCoachEnabled,
+                            activeThumbColor: AppColors.lightLeaf,
+                            onChanged: settings.setAiCoachEnabled,
+                          ),
+                          if (settings.aiCoachEnabled &&
+                              !(SupabaseConfig.isConfigured &&
+                                  AuthService.instance.isSignedIn))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                l.aiCoachNeedsOnline,
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.warningAmber,
+                                  fontSize: 11,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 22),

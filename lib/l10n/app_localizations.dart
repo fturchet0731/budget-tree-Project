@@ -3105,6 +3105,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shared by {name}'**
   String sharedByName(String name);
+
+  /// No description provided for @savingsAndGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings and goals'**
+  String get savingsAndGoals;
+
+  /// No description provided for @stepPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Plan'**
+  String get stepPlanTitle;
+
+  /// No description provided for @stepPlanSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Let the coach split your income'**
+  String get stepPlanSub;
+
+  /// No description provided for @vinePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get vinePlan;
+
+  /// No description provided for @rankImportance.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank by Importance'**
+  String get rankImportance;
+
+  /// No description provided for @rankImportanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to order your branches from most to least important. The coach funds the important ones first.'**
+  String get rankImportanceHint;
+
+  /// No description provided for @pickAPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a plan'**
+  String get pickAPlan;
+
+  /// No description provided for @regeneratePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate plans'**
+  String get regeneratePlans;
+
+  /// No description provided for @setAmountsMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'Set amounts myself'**
+  String get setAmountsMyself;
+
+  /// No description provided for @setAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Amounts'**
+  String get setAmounts;
+
+  /// No description provided for @aiUnavailableManual.
+  ///
+  /// In en, this message translates to:
+  /// **'The coach is not reachable right now, so set your amounts here instead.'**
+  String get aiUnavailableManual;
+
+  /// No description provided for @useTheseAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Use these amounts'**
+  String get useTheseAmounts;
+
+  /// No description provided for @useAiPlansInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Use AI plans instead'**
+  String get useAiPlansInstead;
+
+  /// No description provided for @allocationsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocations ready'**
+  String get allocationsReady;
+
+  /// No description provided for @thinkingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking up plans...'**
+  String get thinkingUp;
+
+  /// No description provided for @generatePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate plans with AI'**
+  String get generatePlans;
+
+  /// No description provided for @tutStepPlanA.
+  ///
+  /// In en, this message translates to:
+  /// **'Now the fun part. Tell me which branches matter most.'**
+  String get tutStepPlanA;
+
+  /// No description provided for @tutStepPlanB.
+  ///
+  /// In en, this message translates to:
+  /// **'I will suggest a few ways to split your income.'**
+  String get tutStepPlanB;
+
+  /// No description provided for @tutStepPlanC.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the one you like, or tweak the amounts yourself.'**
+  String get tutStepPlanC;
+
+  /// No description provided for @fundFromBranchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fund this goal?'**
+  String get fundFromBranchTitle;
+
+  /// No description provided for @fundFromBranchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Link a budget branch so this goal is watered automatically each pay cycle.'**
+  String get fundFromBranchBody;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @targetDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Date'**
+  String get targetDateLabel;
+
+  /// No description provided for @pickATargetDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a target date'**
+  String get pickATargetDate;
+
+  /// No description provided for @planWithAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan with AI'**
+  String get planWithAi;
+
+  /// No description provided for @calculateMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate monthly'**
+  String get calculateMonthly;
+
+  /// No description provided for @recommendedMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {amount} per month to reach it'**
+  String recommendedMonthly(String amount);
+
+  /// No description provided for @planMonthsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} per month finishes in about {months} months'**
+  String planMonthsLine(String amount, int months);
+
+  /// No description provided for @alternativeDates.
+  ///
+  /// In en, this message translates to:
+  /// **'ALTERNATIVE DATES'**
+  String get alternativeDates;
+
+  /// No description provided for @aiUnavailableSimple.
+  ///
+  /// In en, this message translates to:
+  /// **'The coach is not reachable, so here is the simple monthly figure.'**
+  String get aiUnavailableSimple;
+
+  /// No description provided for @reflectionWeeklyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your week in the forest'**
+  String get reflectionWeeklyTitle;
+
+  /// No description provided for @reflectionMonthlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your month in the forest'**
+  String get reflectionMonthlyTitle;
+
+  /// No description provided for @notifReflectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reflection is ready'**
+  String get notifReflectionTitle;
+
+  /// No description provided for @aiCoachUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'AI COACH'**
+  String get aiCoachUpper;
+
+  /// No description provided for @aiCoach.
+  ///
+  /// In en, this message translates to:
+  /// **'AI coach'**
+  String get aiCoach;
+
+  /// No description provided for @aiCoachSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart budget and goal plans, plus weekly reflections'**
+  String get aiCoachSub;
+
+  /// No description provided for @aiCoachNeedsOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in and connect to use the AI coach.'**
+  String get aiCoachNeedsOnline;
 }
 
 class _AppLocalizationsDelegate

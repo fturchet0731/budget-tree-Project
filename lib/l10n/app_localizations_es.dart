@@ -1780,4 +1780,128 @@ class AppLocalizationsEs extends AppLocalizations {
   String sharedByName(String name) {
     return 'Compartido por $name';
   }
+
+  @override
+  String get savingsAndGoals => 'Ahorros y objetivos';
+
+  @override
+  String get stepPlanTitle => 'Plan inteligente';
+
+  @override
+  String get stepPlanSub => 'Deja que el coach reparta tus ingresos';
+
+  @override
+  String get vinePlan => 'Plan';
+
+  @override
+  String get rankImportance => 'Ordenar por importancia';
+
+  @override
+  String get rankImportanceHint =>
+      'Arrastra para ordenar tus ramas de la más a la menos importante. El coach financia primero las importantes.';
+
+  @override
+  String get pickAPlan => 'Elige un plan';
+
+  @override
+  String get regeneratePlans => 'Regenerar planes';
+
+  @override
+  String get setAmountsMyself => 'Definir los montos yo mismo';
+
+  @override
+  String get setAmounts => 'Definir montos';
+
+  @override
+  String get aiUnavailableManual =>
+      'El coach no está disponible ahora, así que define tus montos aquí.';
+
+  @override
+  String get useTheseAmounts => 'Usar estos montos';
+
+  @override
+  String get useAiPlansInstead => 'Usar planes de IA en su lugar';
+
+  @override
+  String get allocationsReady => 'Asignación lista';
+
+  @override
+  String get thinkingUp => 'Preparando planes...';
+
+  @override
+  String get generatePlans => 'Generar planes con IA';
+
+  @override
+  String get tutStepPlanA =>
+      'Ahora la parte divertida. Dime qué ramas importan más.';
+
+  @override
+  String get tutStepPlanB =>
+      'Sugeriré algunas formas de repartir tus ingresos.';
+
+  @override
+  String get tutStepPlanC =>
+      'Elige la que te guste, o ajusta los montos tú mismo.';
+
+  @override
+  String get fundFromBranchTitle => '¿Financiar este objetivo?';
+
+  @override
+  String get fundFromBranchBody =>
+      'Vincula una rama del presupuesto para regar este objetivo automáticamente en cada pago.';
+
+  @override
+  String get notNow => 'Ahora no';
+
+  @override
+  String get targetDateLabel => 'Fecha objetivo';
+
+  @override
+  String get pickATargetDate => 'Elige una fecha objetivo';
+
+  @override
+  String get planWithAi => 'Planificar con IA';
+
+  @override
+  String get calculateMonthly => 'Calcular mensual';
+
+  @override
+  String recommendedMonthly(String amount) {
+    return 'Ahorra $amount al mes para lograrlo';
+  }
+
+  @override
+  String planMonthsLine(String amount, int months) {
+    return '$amount al mes termina en unos $months meses';
+  }
+
+  @override
+  String get alternativeDates => 'FECHAS ALTERNATIVAS';
+
+  @override
+  String get aiUnavailableSimple =>
+      'El coach no está disponible, aquí tienes la cifra mensual simple.';
+
+  @override
+  String get reflectionWeeklyTitle => 'Tu semana en el bosque';
+
+  @override
+  String get reflectionMonthlyTitle => 'Tu mes en el bosque';
+
+  @override
+  String get notifReflectionTitle => 'Tu reflexión está lista';
+
+  @override
+  String get aiCoachUpper => 'COACH IA';
+
+  @override
+  String get aiCoach => 'Coach IA';
+
+  @override
+  String get aiCoachSub =>
+      'Planes inteligentes de presupuesto y objetivos, más reflexiones semanales';
+
+  @override
+  String get aiCoachNeedsOnline =>
+      'Inicia sesión y conéctate para usar el coach IA.';
 }

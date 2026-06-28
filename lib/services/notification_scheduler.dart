@@ -5,6 +5,7 @@ import 'app_settings.dart';
 import 'goal_repository.dart';
 import 'notification_content.dart';
 import 'notification_service.dart';
+import 'reflection_service.dart';
 import 'streak_service.dart';
 
 /// Decides *what* notifications exist and keeps them in sync with the user's
@@ -47,12 +48,18 @@ class NotificationScheduler {
 
     // ── Weekly summary ──
     if (settings.notifWeeklySummary) {
+      // Prefer the latest AI reflection text (richer, personalised) when one is
+      // cached; otherwise fall back to the rule-based summary.
+      final reflection = await ReflectionService.instance.latest();
+      final body = reflection != null && reflection.period == 'weekly'
+          ? reflection.text
+          : NotificationContent.weeklySummary(goals, l);
       await NotificationService.scheduleWeekly(
         id: NotificationService.idWeekly,
         weekday: settings.weeklyWeekday,
         hour: settings.weeklyHour,
         title: NotificationContent.weeklySummaryTitle(l),
-        body: NotificationContent.weeklySummary(goals, l),
+        body: body,
       );
     } else {
       await NotificationService.cancel(NotificationService.idWeekly);
@@ -64,7 +71,10 @@ class NotificationScheduler {
   /// gets each alert once rather than on every save.
   static Future<void> checkBudget(BudgetModel budget) async {
     if (!AppSettings.instance.notifBudgetWarnings) return;
-    final warning = NotificationContent.budgetWarning(budget, appLocalizations());
+    final warning = NotificationContent.budgetWarning(
+      budget,
+      appLocalizations(),
+    );
 
     final prefs = await SharedPreferences.getInstance();
     final levels = _readLevels(prefs);
@@ -99,7 +109,9 @@ class NotificationScheduler {
   }
 
   static Future<void> _writeLevels(
-      SharedPreferences prefs, Map<String, int> levels) async {
+    SharedPreferences prefs,
+    Map<String, int> levels,
+  ) async {
     final raw = levels.entries.map((e) => '${e.key}:${e.value}').toList();
     await prefs.setStringList(_kBudgetLevels, raw);
   }

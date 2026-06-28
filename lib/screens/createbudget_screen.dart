@@ -4,10 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../data/pay_frequency.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/preset_labels.dart';
+import '../models/ai_plan.dart';
 import '../models/budget_model.dart';
+import '../services/ai_coach_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
 import '../widgets/acorn_coach.dart';
+import '../widgets/allocation_plan_card.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/bark_card.dart';
 import '../widgets/info_button.dart';
@@ -26,6 +29,11 @@ class CreateBudgetScreen extends StatefulWidget {
 
 class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   int _step = 0;
+
+  // True once the user has settled allocations on the Plan step (by picking an
+  // AI plan or entering amounts manually). Gates leaving the Plan step. Reset
+  // whenever the expense set changes so stale allocations aren't carried over.
+  bool _planSettled = false;
 
   // Step 1 – Income
   final List<IncomeSource> _incomeSources = [];
@@ -82,16 +90,52 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
   void _addExpense() {
     final name = _expNameCtrl.text.trim();
+    // Amount is optional now: the user declares the expense here and the AI plan
+    // step (or manual entry there) decides how much to allocate.
     final amount = double.tryParse(_expAmountCtrl.text) ?? 0;
-    if (name.isEmpty || amount <= 0) return;
+    if (name.isEmpty) return;
     setState(() {
       _expenses.add(
-        ExpenseCategory(name: name, allocated: amount, emoji: _selectedIconKey),
+        ExpenseCategory(
+          name: name,
+          allocated: amount < 0 ? 0 : amount,
+          emoji: _selectedIconKey,
+        ),
       );
       _expNameCtrl.clear();
       _expAmountCtrl.clear();
+      _planSettled = false; // expense set changed; re-settle on the Plan step
     });
   }
+
+  void _removeExpense(int i) => setState(() {
+    _expenses.removeAt(i);
+    _planSettled = false;
+  });
+
+  /// Reorder the declared expenses on the Plan step. The list order *is* the
+  /// importance ranking handed to the AI (top = most important). [newIndex] is
+  /// already adjusted by `onReorderItem`, so no off-by-one correction is needed.
+  void _reorderExpense(int oldIndex, int newIndex) => setState(() {
+    final item = _expenses.removeAt(oldIndex);
+    _expenses.insert(newIndex, item);
+  });
+
+  /// Apply a chosen AI plan: write each plan item's amount onto the matching
+  /// expense (by name), leaving any leftover unallocated as savings headroom.
+  void _applyPlan(AllocationPlan plan) => setState(() {
+    for (final cat in _expenses) {
+      final match = plan.items.cast<PlanItem?>().firstWhere(
+        (it) => it!.name.toLowerCase().trim() == cat.name.toLowerCase().trim(),
+        orElse: () => null,
+      );
+      if (match != null) cat.allocated = match.amount;
+    }
+    _planSettled = true;
+  });
+
+  /// Mark allocations settled after the user edits amounts manually.
+  void _settleManual() => setState(() => _planSettled = true);
 
   Future<void> _plantTree() async {
     final model = BudgetModel(
@@ -122,16 +166,20 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final stepTitle = _step == 0
-        ? l.stepIncomeTitle
-        : _step == 1
-        ? l.stepExpensesTitle
-        : l.stepNamePayTitle;
-    final stepSubtitle = _step == 0
-        ? l.stepIncomeSub
-        : _step == 1
-        ? l.stepExpensesSub
-        : l.stepNamePaySub;
+    final titles = [
+      l.stepIncomeTitle,
+      l.stepExpensesTitle,
+      l.stepPlanTitle,
+      l.stepNamePayTitle,
+    ];
+    final subtitles = [
+      l.stepIncomeSub,
+      l.stepExpensesSub,
+      l.stepPlanSub,
+      l.stepNamePaySub,
+    ];
+    final stepTitle = titles[_step];
+    final stepSubtitle = subtitles[_step];
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -165,6 +213,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                       label: l.vineBranches,
                       icon: Icons.account_tree_outlined,
                     ),
+                    VineStep(label: l.vinePlan, icon: Icons.auto_awesome),
                     VineStep(label: l.vineRoots, icon: Icons.park_outlined),
                   ],
                 ),
@@ -206,8 +255,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             totalAllocated: _totalAllocated,
                             presets: _presets,
                             onAdd: _addExpense,
-                            onRemove: (i) =>
-                                setState(() => _expenses.removeAt(i)),
+                            onRemove: _removeExpense,
                             onPresetTap: (name, iconKey) => setState(() {
                               _expNameCtrl.text = iconKey == 'other'
                                   ? ''
@@ -215,8 +263,18 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                               _selectedIconKey = iconKey;
                             }),
                           )
-                        : _PersonalStep(
+                        : _step == 2
+                        ? _PlanStep(
                             key: const ValueKey(2),
+                            income: _totalIncome,
+                            expenses: _expenses,
+                            settled: _planSettled,
+                            onReorder: _reorderExpense,
+                            onApplyPlan: _applyPlan,
+                            onSettleManual: _settleManual,
+                          )
+                        : _PersonalStep(
+                            key: const ValueKey(3),
                             nameCtrl: _budgetNameCtrl,
                             payFrequency: _payFrequency,
                             firstPayDate: _firstPayDate,
@@ -229,13 +287,16 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 ),
                 _BottomBar(
                   step: _step,
+                  lastStep: 3,
                   canAdvance: _step == 0
                       ? _incomeSources.isNotEmpty
                       : _step == 1
                       ? _expenses.isNotEmpty
+                      : _step == 2
+                      ? _planSettled
                       : true,
                   onNext: () {
-                    if (_step < 2) {
+                    if (_step < 3) {
                       setState(() => _step++);
                     } else {
                       _plantTree();
@@ -942,6 +1003,388 @@ class _ExpenseStep extends StatelessWidget {
   }
 }
 
+// ──────────────────────────────────────────────
+// Step 3 – AI allocation plan (rank importance, get plans, pick or do manual)
+// ──────────────────────────────────────────────
+
+class _PlanStep extends StatefulWidget {
+  final double income;
+  final List<ExpenseCategory> expenses;
+  final bool settled;
+  final void Function(int oldIndex, int newIndex) onReorder;
+  final void Function(AllocationPlan) onApplyPlan;
+  final VoidCallback onSettleManual;
+
+  const _PlanStep({
+    super.key,
+    required this.income,
+    required this.expenses,
+    required this.settled,
+    required this.onReorder,
+    required this.onApplyPlan,
+    required this.onSettleManual,
+  });
+
+  @override
+  State<_PlanStep> createState() => _PlanStepState();
+}
+
+class _PlanStepState extends State<_PlanStep> {
+  bool _loading = false;
+  String? _error;
+  List<AllocationPlan>? _plans;
+  int? _selected;
+  bool _manual = false;
+
+  final Map<ExpenseCategory, TextEditingController> _amountCtrls = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // With no AI available there's nothing to generate, so start in manual mode.
+    _manual = !AiCoachService.instance.isAvailable;
+  }
+
+  @override
+  void dispose() {
+    for (final c in _amountCtrls.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  TextEditingController _ctrlFor(ExpenseCategory cat) =>
+      _amountCtrls.putIfAbsent(
+        cat,
+        () => TextEditingController(
+          text: cat.allocated > 0 ? cat.allocated.toStringAsFixed(0) : '',
+        ),
+      );
+
+  Future<void> _generate() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final ranked = [
+        for (var i = 0; i < widget.expenses.length; i++)
+          RankedExpense(name: widget.expenses[i].name, rank: i + 1),
+      ];
+      final plans = await AiCoachService.instance.budgetPlans(
+        income: widget.income,
+        expenses: ranked,
+      );
+      if (!mounted) return;
+      setState(() {
+        _plans = plans;
+        _loading = false;
+      });
+    } on AiUnavailable catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e.message;
+        _manual = true; // fall back to manual entry
+      });
+    }
+  }
+
+  void _applyManual() {
+    for (final cat in widget.expenses) {
+      cat.allocated = double.tryParse(_ctrlFor(cat).text) ?? 0;
+    }
+    widget.onSettleManual();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final aiAvailable = AiCoachService.instance.isAvailable;
+    return AppScrollbar(
+      builder: (controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        children: [
+          // Importance ranking
+          BarkCard(
+            label: l.rankImportance,
+            icon: Icons.low_priority,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.rankImportanceHint,
+                  style: GoogleFonts.nunito(
+                    color: AppColors.mossGreen.withValues(alpha: 0.85),
+                    fontSize: 11.5,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ReorderableListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  buildDefaultDragHandles: false,
+                  onReorderItem: (o, n) {
+                    widget.onReorder(o, n);
+                    setState(() {}); // refresh rank numbers
+                  },
+                  children: [
+                    for (var i = 0; i < widget.expenses.length; i++)
+                      Padding(
+                        key: ValueKey(widget.expenses[i]),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 22,
+                              height: 22,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: AppColors.forestGreen.withValues(
+                                  alpha: 0.4,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '${i + 1}',
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.lightLeaf,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Icon(
+                              CategoryIcons.forKey(widget.expenses[i].emoji),
+                              color: AppColors.mossGreen,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                widget.expenses[i].name,
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.stoneBeigeColor,
+                                  fontSize: 13.5,
+                                ),
+                              ),
+                            ),
+                            ReorderableDragStartListener(
+                              index: i,
+                              child: const Icon(
+                                Icons.drag_handle,
+                                color: AppColors.mossGreen,
+                                size: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (!_manual) ...[
+            if (_plans == null)
+              _GenerateButton(loading: _loading, onTap: _generate)
+            else ...[
+              Text(
+                l.pickAPlan,
+                style: GoogleFonts.fredoka(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.stoneBeigeColor,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 10),
+              for (var i = 0; i < _plans!.length; i++)
+                AllocationPlanCard(
+                  plan: _plans![i],
+                  selected: _selected == i,
+                  onSelect: () {
+                    setState(() => _selected = i);
+                    widget.onApplyPlan(_plans![i]);
+                  },
+                ),
+              const SizedBox(height: 4),
+              Center(
+                child: TextButton.icon(
+                  onPressed: _loading ? null : _generate,
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: Text(l.regeneratePlans),
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton(
+                onPressed: () => setState(() => _manual = true),
+                child: Text(l.setAmountsMyself),
+              ),
+            ),
+          ] else ...[
+            BarkCard(
+              label: l.setAmounts,
+              icon: Icons.tune,
+              child: Column(
+                children: [
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(
+                        l.aiUnavailableManual,
+                        style: GoogleFonts.nunito(
+                          color: AppColors.warningAmber,
+                          fontSize: 11.5,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  for (final cat in widget.expenses)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(
+                            CategoryIcons.forKey(cat.emoji),
+                            color: AppColors.mossGreen,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              cat.name,
+                              style: GoogleFonts.nunito(
+                                color: AppColors.stoneBeigeColor,
+                                fontSize: 13.5,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 90,
+                            child: TextField(
+                              controller: _ctrlFor(cat),
+                              style: const TextStyle(
+                                color: AppColors.stoneBeigeColor,
+                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9.]'),
+                                ),
+                              ],
+                              decoration: InputDecoration(
+                                prefixText: '\$ ',
+                                isDense: true,
+                                labelText: l.amountDollar,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _applyManual,
+                      icon: const Icon(Icons.check),
+                      label: Text(l.useTheseAmounts),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (aiAvailable) ...[
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => setState(() => _manual = false),
+                  icon: const Icon(Icons.auto_awesome, size: 16),
+                  label: Text(l.useAiPlansInstead),
+                ),
+              ),
+            ],
+          ],
+          if (widget.settled)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    color: AppColors.lightLeaf,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    l.allocationsReady,
+                    style: GoogleFonts.nunito(
+                      color: AppColors.lightLeaf,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GenerateButton extends StatelessWidget {
+  final bool loading;
+  final VoidCallback onTap;
+  const _GenerateButton({required this.loading, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: loading ? null : onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.forestGreen,
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        icon: loading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Icon(Icons.auto_awesome, color: Colors.white),
+        label: Text(
+          loading ? l.thinkingUp : l.generatePlans,
+          style: GoogleFonts.fredoka(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            fontSize: 15,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _BudgetBar extends StatelessWidget {
   final double totalIncome;
   final double totalAllocated;
@@ -1212,11 +1655,13 @@ class _AddButton extends StatelessWidget {
 
 class _BottomBar extends StatelessWidget {
   final int step;
+  final int lastStep;
   final bool canAdvance;
   final VoidCallback onNext;
 
   const _BottomBar({
     required this.step,
+    required this.lastStep,
     required this.canAdvance,
     required this.onNext,
   });
@@ -1224,7 +1669,7 @@ class _BottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final isLast = step == 2;
+    final isLast = step == lastStep;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
       child: AnimatedContainer(

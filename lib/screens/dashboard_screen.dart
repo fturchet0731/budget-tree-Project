@@ -5,6 +5,7 @@ import '../services/app_settings.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import '../tutorial/tutorial_tour.dart';
+import '../widgets/reflection_card.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
 import 'goals_screen.dart';
@@ -59,10 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _navigate(BuildContext context, Widget screen) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
   /// Opens the Create flow. When a tree is actually planted the flow pops back
@@ -80,7 +78,8 @@ class _DashboardScreenState extends State<DashboardScreen>
           backgroundColor: const Color(0xFF122B0F),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+            borderRadius: BorderRadius.circular(12),
+          ),
           content: Row(
             children: [
               const Icon(Icons.park, color: AppColors.lightLeaf, size: 20),
@@ -89,7 +88,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 child: Text(
                   AppLocalizations.of(context).newTreeInForest,
                   style: const TextStyle(
-                      color: AppColors.stoneBeigeColor, fontSize: 14),
+                    color: AppColors.stoneBeigeColor,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],
@@ -132,9 +133,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 Text(
                   'Budget Tree',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontSize: 28,
-                        letterSpacing: 3,
-                      ),
+                    fontSize: 28,
+                    letterSpacing: 3,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -146,6 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     letterSpacing: 1.2,
                   ),
                 ),
+                const ReflectionBanner(),
                 Expanded(
                   child: ScaleTransition(
                     scale: _entryAnimation,
@@ -167,12 +169,17 @@ class _DashboardScreenState extends State<DashboardScreen>
                   padding: const EdgeInsets.only(bottom: 24),
                   child: TextButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_downward,
-                        color: AppColors.mossGreen, size: 16),
+                    icon: const Icon(
+                      Icons.arrow_downward,
+                      color: AppColors.mossGreen,
+                      size: 16,
+                    ),
                     label: Text(
                       AppLocalizations.of(context).dashboardBackToGround,
                       style: const TextStyle(
-                          color: AppColors.mossGreen, letterSpacing: 1),
+                        color: AppColors.mossGreen,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
                 ),
@@ -211,8 +218,9 @@ class _SocialHandle extends StatelessWidget {
         height: 116,
         decoration: BoxDecoration(
           color: AppColors.forestGreen,
-          borderRadius:
-              const BorderRadius.horizontal(left: Radius.circular(16)),
+          borderRadius: const BorderRadius.horizontal(
+            left: Radius.circular(16),
+          ),
           boxShadow: [
             BoxShadow(
               color: AppColors.forestGreen.withValues(alpha: 0.55),
@@ -226,8 +234,7 @@ class _SocialHandle extends StatelessWidget {
           children: [
             const Icon(Icons.chevron_left, color: Colors.white, size: 20),
             const SizedBox(height: 4),
-            const Icon(Icons.people_alt_rounded,
-                color: Colors.white, size: 16),
+            const Icon(Icons.people_alt_rounded, color: Colors.white, size: 16),
             const SizedBox(height: 6),
             RotatedBox(
               quarterTurns: 1,
@@ -282,72 +289,74 @@ class _LeafGrid extends StatelessWidget {
                 child: CustomPaint(painter: _BranchTrellisPainter()),
               ),
               // Leaves positioned around a central trunk
-              LayoutBuilder(builder: (ctx, c) {
-                final w = c.maxWidth;
-                final h = c.maxHeight;
-                const leafW = 0.42; // % of parent width
-                const leafH = 0.30;
-                return Stack(
-                  children: [
-                    _placeLeaf(
-                      left: w * 0.04,
-                      top: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: l.dashboardCreate,
-                        sublabel: l.dashboardCreateSub,
-                        icon: Icons.park,
-                        color: AppColors.forestGreen,
-                        rotation: -0.18,
-                        onTap: onTapCreate,
+              LayoutBuilder(
+                builder: (ctx, c) {
+                  final w = c.maxWidth;
+                  final h = c.maxHeight;
+                  const leafW = 0.42; // % of parent width
+                  const leafH = 0.30;
+                  return Stack(
+                    children: [
+                      _placeLeaf(
+                        left: w * 0.04,
+                        top: h * 0.04,
+                        width: w * leafW,
+                        height: h * leafH,
+                        child: _LeafButton(
+                          label: l.dashboardCreate,
+                          sublabel: l.dashboardCreateSub,
+                          icon: Icons.park,
+                          color: AppColors.forestGreen,
+                          rotation: -0.18,
+                          onTap: onTapCreate,
+                        ),
                       ),
-                    ),
-                    _placeLeaf(
-                      right: w * 0.04,
-                      top: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: l.dashboardModify,
-                        sublabel: l.dashboardModifySub,
-                        icon: Icons.forest,
-                        color: AppColors.mossGreen,
-                        rotation: 0.18,
-                        onTap: onTapModify,
+                      _placeLeaf(
+                        right: w * 0.04,
+                        top: h * 0.04,
+                        width: w * leafW,
+                        height: h * leafH,
+                        child: _LeafButton(
+                          label: l.dashboardModify,
+                          sublabel: l.dashboardModifySub,
+                          icon: Icons.forest,
+                          color: AppColors.mossGreen,
+                          rotation: 0.18,
+                          onTap: onTapModify,
+                        ),
                       ),
-                    ),
-                    _placeLeaf(
-                      left: w * 0.04,
-                      bottom: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: l.dashboardGoals,
-                        sublabel: l.dashboardGoalsSub,
-                        icon: Icons.flag_outlined,
-                        color: AppColors.riverBlue,
-                        rotation: -0.18,
-                        onTap: onTapGoals,
+                      _placeLeaf(
+                        left: w * 0.04,
+                        bottom: h * 0.04,
+                        width: w * leafW,
+                        height: h * leafH,
+                        child: _LeafButton(
+                          label: l.dashboardGoals,
+                          sublabel: l.dashboardGoalsSub,
+                          icon: Icons.flag_outlined,
+                          color: AppColors.riverBlue,
+                          rotation: -0.18,
+                          onTap: onTapGoals,
+                        ),
                       ),
-                    ),
-                    _placeLeaf(
-                      right: w * 0.04,
-                      bottom: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: l.dashboardSettings,
-                        sublabel: l.dashboardSettingsSub,
-                        icon: Icons.tune,
-                        color: AppColors.barkBrown,
-                        rotation: 0.18,
-                        onTap: onTapSettings,
+                      _placeLeaf(
+                        right: w * 0.04,
+                        bottom: h * 0.04,
+                        width: w * leafW,
+                        height: h * leafH,
+                        child: _LeafButton(
+                          label: l.dashboardSettings,
+                          sublabel: l.dashboardSettingsSub,
+                          icon: Icons.tune,
+                          color: AppColors.barkBrown,
+                          rotation: 0.18,
+                          onTap: onTapSettings,
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              }),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -399,18 +408,21 @@ class _BranchTrellisPainter extends CustomPainter {
     canvas.drawPath(
       trunkPath,
       Paint()
-        ..shader = const LinearGradient(
-          colors: [
-            Color(0xFF1A0C06),
-            Color(0xFF5D4037),
-            Color(0xFF8D6E63),
-            Color(0xFF5D4037),
-            Color(0xFF1A0C06),
-          ],
-          stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ).createShader(Rect.fromLTWH(cx - 14, trunkTopY, 28, groundY - trunkTopY)),
+        ..shader =
+            const LinearGradient(
+              colors: [
+                Color(0xFF1A0C06),
+                Color(0xFF5D4037),
+                Color(0xFF8D6E63),
+                Color(0xFF5D4037),
+                Color(0xFF1A0C06),
+              ],
+              stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ).createShader(
+              Rect.fromLTWH(cx - 14, trunkTopY, 28, groundY - trunkTopY),
+            ),
     );
 
     // Horizontal bark wrinkles
@@ -427,8 +439,7 @@ class _BranchTrellisPainter extends CustomPainter {
 
     // Root flare
     canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx, groundY + 3), width: 60, height: 12),
+      Rect.fromCenter(center: Offset(cx, groundY + 3), width: 60, height: 12),
       Paint()..color = const Color(0xFF3E2723),
     );
 
@@ -477,20 +488,22 @@ class _BranchTrellisPainter extends CustomPainter {
     for (int i = 0; i <= steps; i++) {
       final t = i / steps;
       // quadratic bezier
-      final x = (1 - t) * (1 - t) * start.dx +
+      final x =
+          (1 - t) * (1 - t) * start.dx +
           2 * (1 - t) * t * ctrl.dx +
           t * t * end.dx;
-      final y = (1 - t) * (1 - t) * start.dy +
+      final y =
+          (1 - t) * (1 - t) * start.dy +
           2 * (1 - t) * t * ctrl.dy +
           t * t * end.dy;
       final pt = Offset(x, y);
       final thick = w0 + (w1 - w0) * t;
 
       // Normal direction (derivative of bezier)
-      final dx = 2 * (1 - t) * (ctrl.dx - start.dx) +
-          2 * t * (end.dx - ctrl.dx);
-      final dy = 2 * (1 - t) * (ctrl.dy - start.dy) +
-          2 * t * (end.dy - ctrl.dy);
+      final dx =
+          2 * (1 - t) * (ctrl.dx - start.dx) + 2 * t * (end.dx - ctrl.dx);
+      final dy =
+          2 * (1 - t) * (ctrl.dy - start.dy) + 2 * t * (end.dy - ctrl.dy);
       final len = math.sqrt(dx * dx + dy * dy);
       if (len == 0) continue;
       final nx = -dy / len;
@@ -583,70 +596,72 @@ class _LeafButtonState extends State<_LeafButton> {
               shadows: AppShadows.card,
             ),
             child: ClipPath(
-            clipper: _LeafClipper(),
-            child: Container(
-              height: 145,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    widget.color.withValues(alpha: 0.9),
-                    widget.color,
-                    widget.color.withValues(alpha: 0.75),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
-              child: Stack(
-                children: [
-                  CustomPaint(
-                    size: const Size(double.infinity, 145),
-                    painter: _LeafVeinPainter(widget.color),
+              clipper: _LeafClipper(),
+              child: Container(
+                height: 145,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      widget.color.withValues(alpha: 0.9),
+                      widget.color,
+                      widget.color.withValues(alpha: 0.75),
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
-                  Center(
-                    child: Padding(
-                      // Keep longer translations (FR/ES) off the leaf's curved
-                      // edges so nothing looks crammed against the clip.
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(widget.icon,
+                ),
+                child: Stack(
+                  children: [
+                    CustomPaint(
+                      size: const Size(double.infinity, 145),
+                      painter: _LeafVeinPainter(widget.color),
+                    ),
+                    Center(
+                      child: Padding(
+                        // Keep longer translations (FR/ES) off the leaf's curved
+                        // edges so nothing looks crammed against the clip.
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              widget.icon,
                               color: Colors.white.withValues(alpha: 0.92),
-                              size: 30),
-                          const SizedBox(height: 8),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              widget.label,
-                              maxLines: 1,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
+                              size: 30,
+                            ),
+                            const SizedBox(height: 8),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                widget.label,
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            widget.sublabel,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 11,
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.sublabel,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 11,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
             ),
           ),
         ),

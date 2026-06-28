@@ -196,63 +196,61 @@ class AppPalettes {
 
 class AppTheme {
   static ThemeData get theme => ThemeData(
-        scaffoldBackgroundColor: AppColors.soilDark,
-        colorScheme: const ColorScheme.dark(
-          primary: AppColors.forestGreen,
-          secondary: AppColors.mossGreen,
-          surface: AppColors.darkBark,
+    scaffoldBackgroundColor: AppColors.soilDark,
+    colorScheme: const ColorScheme.dark(
+      primary: AppColors.forestGreen,
+      secondary: AppColors.mossGreen,
+      surface: AppColors.darkBark,
+    ),
+    scrollbarTheme: ScrollbarThemeData(
+      thumbColor: WidgetStatePropertyAll(
+        AppColors.lightLeaf.withValues(alpha: 0.55),
+      ),
+      thickness: const WidgetStatePropertyAll(5),
+      radius: const Radius.circular(8),
+    ),
+    textTheme: const TextTheme(
+      headlineLarge: TextStyle(
+        color: AppColors.stoneBeigeColor,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.2,
+      ),
+      headlineMedium: TextStyle(color: AppColors.stoneBeigeColor),
+      bodyLarge: TextStyle(color: AppColors.stoneBeigeColor),
+      bodyMedium: TextStyle(color: Color(0xFFAA9980)),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.darkBark,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.mossGreen),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: AppColors.mossGreen.withValues(alpha: 0.4),
         ),
-        scrollbarTheme: ScrollbarThemeData(
-          thumbColor: WidgetStatePropertyAll(
-            AppColors.lightLeaf.withValues(alpha: 0.55),
-          ),
-          thickness: const WidgetStatePropertyAll(5),
-          radius: const Radius.circular(8),
-        ),
-        textTheme: const TextTheme(
-          headlineLarge: TextStyle(
-            color: AppColors.stoneBeigeColor,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-          headlineMedium: TextStyle(color: AppColors.stoneBeigeColor),
-          bodyLarge: TextStyle(color: AppColors.stoneBeigeColor),
-          bodyMedium: TextStyle(color: Color(0xFFAA9980)),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: AppColors.darkBark,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.mossGreen),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide:
-                BorderSide(color: AppColors.mossGreen.withValues(alpha: 0.4)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide:
-                const BorderSide(color: AppColors.forestGreen, width: 2),
-          ),
-          labelStyle: const TextStyle(color: AppColors.stoneBeigeColor),
-          hintStyle: const TextStyle(color: Color(0xFF7A6A55)),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.forestGreen,
-            foregroundColor: Colors.white,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
-          ),
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.darkBark,
-          foregroundColor: AppColors.stoneBeigeColor,
-          elevation: 0,
-        ),
-      );
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.forestGreen, width: 2),
+      ),
+      labelStyle: const TextStyle(color: AppColors.stoneBeigeColor),
+      hintStyle: const TextStyle(color: Color(0xFF7A6A55)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.forestGreen,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.darkBark,
+      foregroundColor: AppColors.stoneBeigeColor,
+      elevation: 0,
+    ),
+  );
 }

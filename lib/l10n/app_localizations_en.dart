@@ -1771,4 +1771,126 @@ class AppLocalizationsEn extends AppLocalizations {
   String sharedByName(String name) {
     return 'Shared by $name';
   }
+
+  @override
+  String get savingsAndGoals => 'Savings and goals';
+
+  @override
+  String get stepPlanTitle => 'Smart Plan';
+
+  @override
+  String get stepPlanSub => 'Let the coach split your income';
+
+  @override
+  String get vinePlan => 'Plan';
+
+  @override
+  String get rankImportance => 'Rank by Importance';
+
+  @override
+  String get rankImportanceHint =>
+      'Drag to order your branches from most to least important. The coach funds the important ones first.';
+
+  @override
+  String get pickAPlan => 'Pick a plan';
+
+  @override
+  String get regeneratePlans => 'Regenerate plans';
+
+  @override
+  String get setAmountsMyself => 'Set amounts myself';
+
+  @override
+  String get setAmounts => 'Set Amounts';
+
+  @override
+  String get aiUnavailableManual =>
+      'The coach is not reachable right now, so set your amounts here instead.';
+
+  @override
+  String get useTheseAmounts => 'Use these amounts';
+
+  @override
+  String get useAiPlansInstead => 'Use AI plans instead';
+
+  @override
+  String get allocationsReady => 'Allocations ready';
+
+  @override
+  String get thinkingUp => 'Thinking up plans...';
+
+  @override
+  String get generatePlans => 'Generate plans with AI';
+
+  @override
+  String get tutStepPlanA =>
+      'Now the fun part. Tell me which branches matter most.';
+
+  @override
+  String get tutStepPlanB => 'I will suggest a few ways to split your income.';
+
+  @override
+  String get tutStepPlanC =>
+      'Pick the one you like, or tweak the amounts yourself.';
+
+  @override
+  String get fundFromBranchTitle => 'Fund this goal?';
+
+  @override
+  String get fundFromBranchBody =>
+      'Link a budget branch so this goal is watered automatically each pay cycle.';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get targetDateLabel => 'Target Date';
+
+  @override
+  String get pickATargetDate => 'Pick a target date';
+
+  @override
+  String get planWithAi => 'Plan with AI';
+
+  @override
+  String get calculateMonthly => 'Calculate monthly';
+
+  @override
+  String recommendedMonthly(String amount) {
+    return 'Save $amount per month to reach it';
+  }
+
+  @override
+  String planMonthsLine(String amount, int months) {
+    return '$amount per month finishes in about $months months';
+  }
+
+  @override
+  String get alternativeDates => 'ALTERNATIVE DATES';
+
+  @override
+  String get aiUnavailableSimple =>
+      'The coach is not reachable, so here is the simple monthly figure.';
+
+  @override
+  String get reflectionWeeklyTitle => 'Your week in the forest';
+
+  @override
+  String get reflectionMonthlyTitle => 'Your month in the forest';
+
+  @override
+  String get notifReflectionTitle => 'Your reflection is ready';
+
+  @override
+  String get aiCoachUpper => 'AI COACH';
+
+  @override
+  String get aiCoach => 'AI coach';
+
+  @override
+  String get aiCoachSub =>
+      'Smart budget and goal plans, plus weekly reflections';
+
+  @override
+  String get aiCoachNeedsOnline => 'Sign in and connect to use the AI coach.';
 }

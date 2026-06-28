@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppPalette { forestDark, midnight, twilight }
+
 enum AppTextScale { compact, normal, large }
 
 class AppSettings extends ChangeNotifier {
@@ -19,6 +20,7 @@ class AppSettings extends ChangeNotifier {
   static const _kWeeklyWeekday = 'settings_weekly_weekday_v1';
   static const _kWeeklyHour = 'settings_weekly_hour_v1';
   static const _kLocale = 'settings_locale_v1';
+  static const _kAiCoach = 'settings_ai_coach_v1';
 
   /// Languages the app ships translations for. `null` locale = follow device.
   static const supportedLanguageCodes = ['en', 'fr', 'es'];
@@ -40,6 +42,11 @@ class AppSettings extends ChangeNotifier {
   bool _notifWeeklySummary = true;
   int _weeklyWeekday = DateTime.sunday; // 1=Mon … 7=Sun
   int _weeklyHour = 18; // Sunday evening recap
+
+  // Master switch for the Claude-powered coach (smart budget/goal plans and
+  // weekly reflections). On by default; the features still only run when
+  // Supabase is configured and the user is signed in.
+  bool _aiCoachEnabled = true;
 
   AppPalette get palette => _palette;
   AppTextScale get textScale => _scale;
@@ -64,6 +71,9 @@ class AppSettings extends ChangeNotifier {
   /// Day the weekly summary fires, 1=Mon … 7=Sun (matches [DateTime.weekday]).
   int get weeklyWeekday => _weeklyWeekday;
   int get weeklyHour => _weeklyHour;
+
+  /// Whether the AI coach (smart plans + reflections) is allowed to run.
+  bool get aiCoachEnabled => _aiCoachEnabled;
 
   /// True when at least one notification type is on (used to decide whether to
   /// bother requesting OS permission).
@@ -91,11 +101,9 @@ class AppSettings extends ChangeNotifier {
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final pi = prefs.getInt(_kPalette) ?? 0;
-    _palette =
-        AppPalette.values[pi.clamp(0, AppPalette.values.length - 1)];
+    _palette = AppPalette.values[pi.clamp(0, AppPalette.values.length - 1)];
     final si = prefs.getInt(_kScale) ?? 1;
-    _scale =
-        AppTextScale.values[si.clamp(0, AppTextScale.values.length - 1)];
+    _scale = AppTextScale.values[si.clamp(0, AppTextScale.values.length - 1)];
     _motionFull = prefs.getBool(_kMotion) ?? true;
     _soundEnabled = prefs.getBool(_kSound) ?? true;
     _tutorialSeen = prefs.getBool(_kTutorialSeen) ?? false;
@@ -106,6 +114,7 @@ class AppSettings extends ChangeNotifier {
     _notifWeeklySummary = prefs.getBool(_kNotifWeekly) ?? true;
     _weeklyWeekday = prefs.getInt(_kWeeklyWeekday) ?? DateTime.sunday;
     _weeklyHour = prefs.getInt(_kWeeklyHour) ?? 18;
+    _aiCoachEnabled = prefs.getBool(_kAiCoach) ?? true;
     final lc = prefs.getString(_kLocale);
     _locale = (lc != null && supportedLanguageCodes.contains(lc))
         ? Locale(lc)
@@ -168,6 +177,14 @@ class AppSettings extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_kWeeklyWeekday, weekday);
     await prefs.setInt(_kWeeklyHour, hour);
+  }
+
+  Future<void> setAiCoachEnabled(bool v) async {
+    if (_aiCoachEnabled == v) return;
+    _aiCoachEnabled = v;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kAiCoach, v);
   }
 
   Future<void> setSoundEnabled(bool v) async {

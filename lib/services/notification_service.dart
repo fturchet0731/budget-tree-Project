@@ -25,6 +25,7 @@ class NotificationService {
   /// Stable notification ids — reusing an id replaces the prior schedule.
   static const int idStreak = 1001;
   static const int idWeekly = 1002;
+  static const int idReflection = 1003;
   static const int budgetIdBase = 2000; // + hash of budget id
 
   static Future<void> init() async {
@@ -45,8 +46,7 @@ class NotificationService {
         requestBadgePermission: false,
         requestSoundPermission: false,
       );
-      const linux =
-          LinuxInitializationSettings(defaultActionName: 'Open');
+      const linux = LinuxInitializationSettings(defaultActionName: 'Open');
       const settings = InitializationSettings(
         android: android,
         iOS: darwin,
@@ -68,15 +68,18 @@ class NotificationService {
     try {
       await _plugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
       await _plugin
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
       await _plugin
           .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>()
+            MacOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
     } catch (e) {
       debugPrint('NotificationService.requestPermissions failed: $e');
@@ -84,7 +87,10 @@ class NotificationService {
   }
 
   static NotificationDetails _details(
-      String channelId, String channelName, String channelDesc) {
+    String channelId,
+    String channelName,
+    String channelDesc,
+  ) {
     final android = AndroidNotificationDetails(
       channelId,
       channelName,
@@ -93,8 +99,7 @@ class NotificationService {
       priority: Priority.high,
     );
     const darwin = DarwinNotificationDetails();
-    return NotificationDetails(
-        android: android, iOS: darwin, macOS: darwin);
+    return NotificationDetails(android: android, iOS: darwin, macOS: darwin);
   }
 
   /// Fire an immediate notification (used for event-driven budget warnings).
@@ -109,11 +114,38 @@ class NotificationService {
         id: id,
         title: title,
         body: body,
-        notificationDetails: _details(_budgetChannel, 'Budget warnings',
-            'Alerts when a budget nears or exceeds your income'),
+        notificationDetails: _details(
+          _budgetChannel,
+          'Budget warnings',
+          'Alerts when a budget nears or exceeds your income',
+        ),
       );
     } catch (e) {
       debugPrint('NotificationService.showNow failed: $e');
+    }
+  }
+
+  /// Fire an immediate notification on the weekly-summary channel (used for the
+  /// freshly generated AI reflection).
+  static Future<void> showReflectionNow({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: _details(
+          _weeklyChannel,
+          'Weekly summary',
+          'Your weekly reflection on how your forest is growing',
+        ),
+      );
+    } catch (e) {
+      debugPrint('NotificationService.showReflectionNow failed: $e');
     }
   }
 
@@ -196,7 +228,13 @@ class NotificationService {
   static tz.TZDateTime _nextDailyInstance(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
     var next = tz.TZDateTime(
-        tz.local, now.year, now.month, now.day, hour, minute);
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     if (!next.isAfter(now)) next = next.add(const Duration(days: 1));
     return next;
   }

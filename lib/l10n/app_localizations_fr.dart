@@ -1791,4 +1791,127 @@ class AppLocalizationsFr extends AppLocalizations {
   String sharedByName(String name) {
     return 'Partagé par $name';
   }
+
+  @override
+  String get savingsAndGoals => 'Épargne et objectifs';
+
+  @override
+  String get stepPlanTitle => 'Plan intelligent';
+
+  @override
+  String get stepPlanSub => 'Laissez le coach répartir vos revenus';
+
+  @override
+  String get vinePlan => 'Plan';
+
+  @override
+  String get rankImportance => 'Classer par importance';
+
+  @override
+  String get rankImportanceHint =>
+      'Faites glisser pour classer vos branches de la plus importante à la moins importante. Le coach finance d\'abord les plus importantes.';
+
+  @override
+  String get pickAPlan => 'Choisissez un plan';
+
+  @override
+  String get regeneratePlans => 'Régénérer les plans';
+
+  @override
+  String get setAmountsMyself => 'Définir les montants moi-même';
+
+  @override
+  String get setAmounts => 'Définir les montants';
+
+  @override
+  String get aiUnavailableManual =>
+      'Le coach n\'est pas joignable pour le moment, définissez donc vos montants ici.';
+
+  @override
+  String get useTheseAmounts => 'Utiliser ces montants';
+
+  @override
+  String get useAiPlansInstead => 'Utiliser plutôt les plans IA';
+
+  @override
+  String get allocationsReady => 'Répartition prête';
+
+  @override
+  String get thinkingUp => 'Préparation des plans...';
+
+  @override
+  String get generatePlans => 'Générer des plans avec l\'IA';
+
+  @override
+  String get tutStepPlanA =>
+      'Voici la partie amusante. Dites-moi quelles branches comptent le plus.';
+
+  @override
+  String get tutStepPlanB =>
+      'Je vais proposer quelques façons de répartir vos revenus.';
+
+  @override
+  String get tutStepPlanC =>
+      'Choisissez celle que vous préférez, ou ajustez les montants vous-même.';
+
+  @override
+  String get fundFromBranchTitle => 'Financer cet objectif ?';
+
+  @override
+  String get fundFromBranchBody =>
+      'Reliez une branche du budget pour arroser cet objectif automatiquement à chaque paie.';
+
+  @override
+  String get notNow => 'Pas maintenant';
+
+  @override
+  String get targetDateLabel => 'Date cible';
+
+  @override
+  String get pickATargetDate => 'Choisir une date cible';
+
+  @override
+  String get planWithAi => 'Planifier avec l\'IA';
+
+  @override
+  String get calculateMonthly => 'Calculer le mensuel';
+
+  @override
+  String recommendedMonthly(String amount) {
+    return 'Épargnez $amount par mois pour y arriver';
+  }
+
+  @override
+  String planMonthsLine(String amount, int months) {
+    return '$amount par mois termine en environ $months mois';
+  }
+
+  @override
+  String get alternativeDates => 'AUTRES DATES';
+
+  @override
+  String get aiUnavailableSimple =>
+      'Le coach n\'est pas joignable, voici donc le montant mensuel simple.';
+
+  @override
+  String get reflectionWeeklyTitle => 'Votre semaine dans la forêt';
+
+  @override
+  String get reflectionMonthlyTitle => 'Votre mois dans la forêt';
+
+  @override
+  String get notifReflectionTitle => 'Votre bilan est prêt';
+
+  @override
+  String get aiCoachUpper => 'COACH IA';
+
+  @override
+  String get aiCoach => 'Coach IA';
+
+  @override
+  String get aiCoachSub =>
+      'Plans intelligents de budget et d\'objectifs, plus des bilans hebdomadaires';
+
+  @override
+  String get aiCoachNeedsOnline => 'Connectez-vous pour utiliser le coach IA.';
 }
