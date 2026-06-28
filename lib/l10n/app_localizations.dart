@@ -2451,6 +2451,402 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{expenses, plural, =1{1 expense} other{{expenses} expenses}} · {sources, plural, =1{1 source} other{{sources} sources}}'**
   String budgetCardCounts(int expenses, int sources);
+
+  /// No description provided for @tutIntro1.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi there! I\'m Acorn, your little guide here at Budget Tree!'**
+  String get tutIntro1;
+
+  /// No description provided for @tutIntro2.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of just telling you how things work, we\'ll do them together. You\'ll try each part yourself as we go.'**
+  String get tutIntro2;
+
+  /// No description provided for @tutIntro3.
+  ///
+  /// In en, this message translates to:
+  /// **'Take your time; I\'ll wait at every step. Ready? First stop, the Budget patch!'**
+  String get tutIntro3;
+
+  /// No description provided for @tutClosing1.
+  ///
+  /// In en, this message translates to:
+  /// **'And that\'s the whole forest! Tap the info button on any screen and I\'ll explain that part again.'**
+  String get tutClosing1;
+
+  /// No description provided for @tutClosing2.
+  ///
+  /// In en, this message translates to:
+  /// **'Now let\'s grow something wonderful together. See you out there!'**
+  String get tutClosing2;
+
+  /// No description provided for @tutCreate1.
+  ///
+  /// In en, this message translates to:
+  /// **'Here we are. This is the Create screen, where you plant a brand new budget tree.'**
+  String get tutCreate1;
+
+  /// No description provided for @tutCreate2.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll add what you earn, then where it goes, and a few personal details. The steps run along the vine up top.'**
+  String get tutCreate2;
+
+  /// No description provided for @tutCreate3.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your pay schedule and watch your budget sprout into a tree!'**
+  String get tutCreate3;
+
+  /// No description provided for @tutForest1.
+  ///
+  /// In en, this message translates to:
+  /// **'This is Your Forest, where every budget you\'ve planted grows together.'**
+  String get tutForest1;
+
+  /// No description provided for @tutForest2.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch between a leafy tree view and a tidy grid up top, and filter them by category.'**
+  String get tutForest2;
+
+  /// No description provided for @tutForest3.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any tree to tend it: review the breakdown, edit it, or clear it away.'**
+  String get tutForest3;
+
+  /// No description provided for @tutGoals1.
+  ///
+  /// In en, this message translates to:
+  /// **'Now we\'re in The Grove, where your savings goals sprout as little saplings.'**
+  String get tutGoals1;
+
+  /// No description provided for @tutGoals2.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a target amount, then water it with deposits over time.'**
+  String get tutGoals2;
+
+  /// No description provided for @tutGoals3.
+  ///
+  /// In en, this message translates to:
+  /// **'Each contribution helps your sapling stretch a little closer to full bloom!'**
+  String get tutGoals3;
+
+  /// No description provided for @tutSettings1.
+  ///
+  /// In en, this message translates to:
+  /// **'Last stop: Settings, where you make the app your own.'**
+  String get tutSettings1;
+
+  /// No description provided for @tutSettings2.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the theme between Forest, Midnight and Twilight, adjust the text size, or ease the motion.'**
+  String get tutSettings2;
+
+  /// No description provided for @tutSettings3.
+  ///
+  /// In en, this message translates to:
+  /// **'And you can replay this whole tour from here anytime you like.'**
+  String get tutSettings3;
+
+  /// No description provided for @tutOpenCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Create →'**
+  String get tutOpenCreate;
+
+  /// No description provided for @tutOpenForest.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Forest →'**
+  String get tutOpenForest;
+
+  /// No description provided for @tutOpenGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Grove →'**
+  String get tutOpenGoals;
+
+  /// No description provided for @tutOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings →'**
+  String get tutOpenSettings;
+
+  /// No description provided for @tutTaskCreate1.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s plant your very first budget tree, together!'**
+  String get tutTaskCreate1;
+
+  /// No description provided for @tutTaskCreate2.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll open the Create screen and stay right beside you, guiding each phase: the Seed, the Branches, and the Roots.'**
+  String get tutTaskCreate2;
+
+  /// No description provided for @tutTaskCreate3.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap below and we\'ll get our hands dirty!'**
+  String get tutTaskCreate3;
+
+  /// No description provided for @tutTaskForest1.
+  ///
+  /// In en, this message translates to:
+  /// **'Now let\'s wander into Your Forest, where your budgets grow.'**
+  String get tutTaskForest1;
+
+  /// No description provided for @tutTaskForest2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap your tree to peek inside, and try the tree and grid toggle up top.'**
+  String get tutTaskForest2;
+
+  /// No description provided for @tutTaskForest3.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a good look around, then tap the back arrow to come find me.'**
+  String get tutTaskForest3;
+
+  /// No description provided for @tutTaskGoals1.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for a savings goal! This is The Grove.'**
+  String get tutTaskGoals1;
+
+  /// No description provided for @tutTaskGoals2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + to plant a sapling, give it a name and a target, and save it.'**
+  String get tutTaskGoals2;
+
+  /// No description provided for @tutTaskGoals3.
+  ///
+  /// In en, this message translates to:
+  /// **'Then head back to me with the arrow. Off you go!'**
+  String get tutTaskGoals3;
+
+  /// No description provided for @tutTaskSettings1.
+  ///
+  /// In en, this message translates to:
+  /// **'Last stop. Let\'s make the app yours, in Settings.'**
+  String get tutTaskSettings1;
+
+  /// No description provided for @tutTaskSettings2.
+  ///
+  /// In en, this message translates to:
+  /// **'Try tapping a different theme and watch the whole forest change colour.'**
+  String get tutTaskSettings2;
+
+  /// No description provided for @tutTaskSettings3.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back whenever you\'re happy with the look.'**
+  String get tutTaskSettings3;
+
+  /// No description provided for @tutSuccessCreate1.
+  ///
+  /// In en, this message translates to:
+  /// **'Look at that! Your very first tree is planted! 🌳'**
+  String get tutSuccessCreate1;
+
+  /// No description provided for @tutSuccessCreate2.
+  ///
+  /// In en, this message translates to:
+  /// **'Wonderfully done. That budget now lives in your forest.'**
+  String get tutSuccessCreate2;
+
+  /// No description provided for @tutSuccessForest1.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s your forest taking shape. Every budget you make plants another tree here.'**
+  String get tutSuccessForest1;
+
+  /// No description provided for @tutSuccessGoals1.
+  ///
+  /// In en, this message translates to:
+  /// **'Marvellous! Your first sapling is reaching for the sky! 🌱'**
+  String get tutSuccessGoals1;
+
+  /// No description provided for @tutSuccessGoals2.
+  ///
+  /// In en, this message translates to:
+  /// **'Feed it with deposits and it\'ll grow toward your target.'**
+  String get tutSuccessGoals2;
+
+  /// No description provided for @tutSuccessSettings1.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking good! You can fine tune all of that anytime.'**
+  String get tutSuccessSettings1;
+
+  /// No description provided for @tutRetryCreate1.
+  ///
+  /// In en, this message translates to:
+  /// **'Hmm, I don\'t see a new tree yet! Want to give it another go?'**
+  String get tutRetryCreate1;
+
+  /// No description provided for @tutRetryCreate2.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an income and an expense, then Plant and Save your tree. Or skip this step for now.'**
+  String get tutRetryCreate2;
+
+  /// No description provided for @tutRetryGoals1.
+  ///
+  /// In en, this message translates to:
+  /// **'No sapling planted yet. Shall we try once more?'**
+  String get tutRetryGoals1;
+
+  /// No description provided for @tutRetryGoals2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + and save a goal, or skip this step and come back later.'**
+  String get tutRetryGoals2;
+
+  /// No description provided for @tutSkipCreate1.
+  ///
+  /// In en, this message translates to:
+  /// **'No worries! You can plant a budget anytime from the Create leaf.'**
+  String get tutSkipCreate1;
+
+  /// No description provided for @tutSkipGoals1.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s okay! Plant a goal whenever you\'re ready from the Goals leaf.'**
+  String get tutSkipGoals1;
+
+  /// No description provided for @tutStep0a.
+  ///
+  /// In en, this message translates to:
+  /// **'🌱 The Seed phase. Every tree starts with what feeds it: your income.'**
+  String get tutStep0a;
+
+  /// No description provided for @tutStep0b.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a source like \"Salary\", enter the amount, and tap the + to add it.'**
+  String get tutStep0b;
+
+  /// No description provided for @tutStep0c.
+  ///
+  /// In en, this message translates to:
+  /// **'Add each way you earn. When you\'re ready, tap Next down below.'**
+  String get tutStep0c;
+
+  /// No description provided for @tutStep1a.
+  ///
+  /// In en, this message translates to:
+  /// **'🌿 The Branches. This is where your money reaches out: your expenses.'**
+  String get tutStep1a;
+
+  /// No description provided for @tutStep1b.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category, name it, set an amount, and add it. Watch how much is left to allocate up top.'**
+  String get tutStep1b;
+
+  /// No description provided for @tutStep1c.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your main costs, then tap Next to set your roots.'**
+  String get tutStep1c;
+
+  /// No description provided for @tutStep2a.
+  ///
+  /// In en, this message translates to:
+  /// **'🪵 The Roots: the details that ground your tree.'**
+  String get tutStep2a;
+
+  /// No description provided for @tutStep2b.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your budget and choose your pay schedule, which is how often money flows into your goals.'**
+  String get tutStep2b;
+
+  /// No description provided for @tutStep2c.
+  ///
+  /// In en, this message translates to:
+  /// **'All filled in? Tap \"Plant My Budget Tree\" below to grow it!'**
+  String get tutStep2c;
+
+  /// No description provided for @tutSaveTree1.
+  ///
+  /// In en, this message translates to:
+  /// **'Look at it grow, that\'s your budget as a living tree! 🌳'**
+  String get tutSaveTree1;
+
+  /// No description provided for @tutSaveTree2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Save My Tree\" at the bottom right to plant it in your forest for keeps.'**
+  String get tutSaveTree2;
+
+  /// No description provided for @tourLetsGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s go!'**
+  String get tourLetsGo;
+
+  /// No description provided for @tourSkipTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip tour'**
+  String get tourSkipTour;
+
+  /// No description provided for @tourLetsGrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s grow!'**
+  String get tourLetsGrow;
+
+  /// No description provided for @tourClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get tourClose;
+
+  /// No description provided for @tourTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tourTryAgain;
+
+  /// No description provided for @tourSkipStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip step'**
+  String get tourSkipStep;
+
+  /// No description provided for @tourNextStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next stop →'**
+  String get tourNextStop;
+
+  /// No description provided for @tourTapContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to continue'**
+  String get tourTapContinue;
+
+  /// No description provided for @tourSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tourSkip;
+
+  /// No description provided for @tourTapFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to finish'**
+  String get tourTapFinish;
 }
 
 class _AppLocalizationsDelegate

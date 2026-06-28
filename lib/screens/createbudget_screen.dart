@@ -246,7 +246,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
               child: SafeArea(
                 child: AcornCoach(
                   lessonKey: _step,
-                  lines: createStepSteps(_step),
+                  lines: createStepSteps(_step, l),
                 ),
               ),
             ),

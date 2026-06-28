@@ -1378,4 +1378,250 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0 · $_temp1';
   }
+
+  @override
+  String get tutIntro1 =>
+      '¡Hola! Soy Acorn, tu pequeño guía aquí en Budget Tree.';
+
+  @override
+  String get tutIntro2 =>
+      'En vez de solo contarte cómo funciona, lo haremos juntos. Probarás cada parte tú mismo mientras avanzamos.';
+
+  @override
+  String get tutIntro3 =>
+      'Tómate tu tiempo; te espero en cada paso. ¿Listo? Primera parada, ¡el huerto del Presupuesto!';
+
+  @override
+  String get tutClosing1 =>
+      '¡Y ese es todo el bosque! Toca el botón de info en cualquier pantalla y te explicaré esa parte otra vez.';
+
+  @override
+  String get tutClosing2 =>
+      'Ahora hagamos crecer algo maravilloso juntos. ¡Nos vemos por ahí!';
+
+  @override
+  String get tutCreate1 =>
+      'Aquí estamos. Esta es la pantalla Crear, donde plantas un árbol de presupuesto nuevecito.';
+
+  @override
+  String get tutCreate2 =>
+      'Añadirás lo que ganas, luego a dónde va, y algunos detalles personales. Los pasos siguen la enredadera de arriba.';
+
+  @override
+  String get tutCreate3 =>
+      '¡Define tu calendario de pago y mira cómo tu presupuesto se convierte en un árbol!';
+
+  @override
+  String get tutForest1 =>
+      'Este es Tu bosque, donde cada presupuesto que has plantado crece junto.';
+
+  @override
+  String get tutForest2 =>
+      'Cambia entre una vista de árbol frondosa y una cuadrícula ordenada arriba, y fíltralos por categoría.';
+
+  @override
+  String get tutForest3 =>
+      'Toca cualquier árbol para cuidarlo: revisa el desglose, edítalo o quítalo.';
+
+  @override
+  String get tutGoals1 =>
+      'Ahora estamos en La Arboleda, donde tus metas de ahorro brotan como pequeños arbolitos.';
+
+  @override
+  String get tutGoals2 =>
+      'Fija una cantidad objetivo y luego riégala con depósitos a lo largo del tiempo.';
+
+  @override
+  String get tutGoals3 =>
+      '¡Cada aporte ayuda a tu arbolito a acercarse un poco más a su plena floración!';
+
+  @override
+  String get tutSettings1 =>
+      'Última parada: Ajustes, donde haces la app a tu gusto.';
+
+  @override
+  String get tutSettings2 =>
+      'Cambia el tema entre Bosque, Medianoche y Crepúsculo, ajusta el tamaño del texto o reduce las animaciones.';
+
+  @override
+  String get tutSettings3 =>
+      'Y puedes repetir todo este recorrido desde aquí cuando quieras.';
+
+  @override
+  String get tutOpenCreate => 'Abrir Crear →';
+
+  @override
+  String get tutOpenForest => 'Abrir el Bosque →';
+
+  @override
+  String get tutOpenGoals => 'Abrir la Arboleda →';
+
+  @override
+  String get tutOpenSettings => 'Abrir Ajustes →';
+
+  @override
+  String get tutTaskCreate1 =>
+      '¡Plantemos tu primer árbol de presupuesto, juntos!';
+
+  @override
+  String get tutTaskCreate2 =>
+      'Abriré la pantalla Crear y me quedaré junto a ti, guiando cada fase: la Semilla, las Ramas y las Raíces.';
+
+  @override
+  String get tutTaskCreate3 => '¡Toca abajo y pongamos manos a la obra!';
+
+  @override
+  String get tutTaskForest1 =>
+      'Ahora paseemos por Tu bosque, donde crecen tus presupuestos.';
+
+  @override
+  String get tutTaskForest2 =>
+      'Toca tu árbol para mirar dentro, y prueba el botón de árbol y cuadrícula de arriba.';
+
+  @override
+  String get tutTaskForest3 =>
+      'Mira bien a tu alrededor y luego toca la flecha de atrás para volver conmigo.';
+
+  @override
+  String get tutTaskGoals1 =>
+      '¡Hora de una meta de ahorro! Esta es La Arboleda.';
+
+  @override
+  String get tutTaskGoals2 =>
+      'Toca el + para plantar un arbolito, ponle un nombre y un objetivo, y guárdalo.';
+
+  @override
+  String get tutTaskGoals3 => 'Luego vuelve a mí con la flecha. ¡Adelante!';
+
+  @override
+  String get tutTaskSettings1 =>
+      'Última parada. Hagamos la app tuya, en Ajustes.';
+
+  @override
+  String get tutTaskSettings2 =>
+      'Prueba a tocar un tema diferente y mira cómo todo el bosque cambia de color.';
+
+  @override
+  String get tutTaskSettings3 => 'Vuelve cuando estés contento con el aspecto.';
+
+  @override
+  String get tutSuccessCreate1 =>
+      '¡Mira eso! ¡Tu primer árbol está plantado! 🌳';
+
+  @override
+  String get tutSuccessCreate2 =>
+      'Maravillosamente hecho. Ese presupuesto ahora vive en tu bosque.';
+
+  @override
+  String get tutSuccessForest1 =>
+      'Tu bosque va tomando forma. Cada presupuesto que creas planta otro árbol aquí.';
+
+  @override
+  String get tutSuccessGoals1 =>
+      '¡Maravilloso! ¡Tu primer arbolito se eleva hacia el cielo! 🌱';
+
+  @override
+  String get tutSuccessGoals2 =>
+      'Aliméntalo con depósitos y crecerá hacia tu objetivo.';
+
+  @override
+  String get tutSuccessSettings1 =>
+      '¡Se ve genial! Puedes afinar todo eso en cualquier momento.';
+
+  @override
+  String get tutRetryCreate1 =>
+      'Mmm, ¡aún no veo un árbol nuevo! ¿Quieres intentarlo otra vez?';
+
+  @override
+  String get tutRetryCreate2 =>
+      'Añade un ingreso y un gasto, luego planta y guarda tu árbol. O salta este paso por ahora.';
+
+  @override
+  String get tutRetryGoals1 =>
+      'Aún no hay ningún arbolito plantado. ¿Lo intentamos otra vez?';
+
+  @override
+  String get tutRetryGoals2 =>
+      'Toca el + y guarda una meta, o salta este paso y vuelve más tarde.';
+
+  @override
+  String get tutSkipCreate1 =>
+      '¡No pasa nada! Puedes plantar un presupuesto cuando quieras desde la hoja Crear.';
+
+  @override
+  String get tutSkipGoals1 =>
+      '¡Está bien! Planta una meta cuando estés listo desde la hoja Metas.';
+
+  @override
+  String get tutStep0a =>
+      '🌱 La fase de la Semilla. Cada árbol empieza por lo que lo alimenta: tus ingresos.';
+
+  @override
+  String get tutStep0b =>
+      'Escribe una fuente como «Salario», introduce la cantidad y toca el + para añadirla.';
+
+  @override
+  String get tutStep0c =>
+      'Añade cada forma en que ganas dinero. Cuando estés listo, toca Siguiente abajo.';
+
+  @override
+  String get tutStep1a =>
+      '🌿 Las Ramas. Aquí es donde tu dinero se extiende: tus gastos.';
+
+  @override
+  String get tutStep1b =>
+      'Elige una categoría, ponle nombre, fija una cantidad y añádela. Mira cuánto queda por asignar arriba.';
+
+  @override
+  String get tutStep1c =>
+      'Añade tus gastos principales y luego toca Siguiente para fijar tus raíces.';
+
+  @override
+  String get tutStep2a => '🪵 Las Raíces: los detalles que afianzan tu árbol.';
+
+  @override
+  String get tutStep2b =>
+      'Nombra tu presupuesto y elige tu calendario de pago, que es con qué frecuencia el dinero fluye a tus metas.';
+
+  @override
+  String get tutStep2c =>
+      '¿Todo listo? ¡Toca «Plantar mi árbol de presupuesto» abajo para hacerlo crecer!';
+
+  @override
+  String get tutSaveTree1 =>
+      'Mira cómo crece, ¡es tu presupuesto como un árbol vivo! 🌳';
+
+  @override
+  String get tutSaveTree2 =>
+      'Toca «Guardar mi árbol» abajo a la derecha para plantarlo en tu bosque para siempre.';
+
+  @override
+  String get tourLetsGo => '¡Vamos!';
+
+  @override
+  String get tourSkipTour => 'Saltar recorrido';
+
+  @override
+  String get tourLetsGrow => '¡A crecer!';
+
+  @override
+  String get tourClose => 'Cerrar';
+
+  @override
+  String get tourTryAgain => 'Reintentar';
+
+  @override
+  String get tourSkipStep => 'Saltar paso';
+
+  @override
+  String get tourNextStop => 'Siguiente parada →';
+
+  @override
+  String get tourTapContinue => 'Toca para continuar';
+
+  @override
+  String get tourSkip => 'Saltar';
+
+  @override
+  String get tourTapFinish => 'Toca para terminar';
 }

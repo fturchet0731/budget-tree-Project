@@ -689,7 +689,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                   builder: (ctx, _) => _growAnimation.value > 0.85
                       ? AcornCoach(
                           lessonKey: 'save',
-                          lines: saveTreeSteps(),
+                          lines: saveTreeSteps(l),
                           initialAlignment: const Alignment(0, -0.8),
                         )
                       : const SizedBox.shrink(),

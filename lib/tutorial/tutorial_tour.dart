@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../screens/createbudget_screen.dart';
 import '../screens/forest_screen.dart';
 import '../screens/goals_screen.dart';
@@ -21,29 +22,34 @@ class GuidedTour {
   GuidedTour._();
 
   static Future<void> start(BuildContext context) async {
+    final l = AppLocalizations.of(context);
     // 1. Brief self-introduction.
-    if (await _say(context, introSteps(), hint: "Let's go!", skip: 'Skip tour')) {
+    if (await _say(context, introSteps(l),
+        hint: l.tourLetsGo, skip: l.tourSkipTour)) {
       return;
     }
 
     // 2. Walk through each section, hands-on.
     for (final section in tourOrder) {
       if (!context.mounted) return;
-      final keepGoing = await _runSection(context, section);
+      final keepGoing = await _runSection(context, section, l);
       if (!keepGoing) return; // user skipped the whole tour
     }
 
     // 3. Friendly sign-off.
     if (!context.mounted) return;
-    await _say(context, closingSteps(), hint: "Let's grow!", skip: 'Close');
+    await _say(context, closingSteps(l),
+        hint: l.tourLetsGrow, skip: l.tourClose);
   }
 
   /// Runs one section. Returns false if the user skipped the entire tour.
   static Future<bool> _runSection(
-      BuildContext context, TutorialSection section) async {
+      BuildContext context, TutorialSection section, AppLocalizations l) async {
     // Set up the task.
-    if (await _say(context, taskSteps(section),
-        title: section.label, hint: openHint(section), skip: 'Skip tour')) {
+    if (await _say(context, taskSteps(section, l),
+        title: section.label(l),
+        hint: openHint(section, l),
+        skip: l.tourSkipTour)) {
       return false;
     }
 
@@ -62,17 +68,17 @@ class GuidedTour {
         }
         // Not done — offer a retry, or let them skip just this step.
         if (!context.mounted) return false;
-        final skipStep = await _say(context, retrySteps(section),
-            title: section.label, hint: 'Try again', skip: 'Skip step');
+        final skipStep = await _say(context, retrySteps(section, l),
+            title: section.label(l), hint: l.tourTryAgain, skip: l.tourSkipStep);
         if (skipStep) break;
       }
       if (!context.mounted) return false;
       final skipped = await _say(
         context,
-        completed ? successSteps(section) : skippedSteps(section),
-        title: section.label,
-        hint: 'Next stop →',
-        skip: 'Skip tour',
+        completed ? successSteps(section, l) : skippedSteps(section, l),
+        title: section.label(l),
+        hint: l.tourNextStop,
+        skip: l.tourSkipTour,
       );
       return !skipped;
     }
@@ -81,8 +87,8 @@ class GuidedTour {
     if (!context.mounted) return false;
     await _open(context, section);
     if (!context.mounted) return false;
-    final skipped = await _say(context, successSteps(section),
-        title: section.label, hint: 'Next stop →', skip: 'Skip tour');
+    final skipped = await _say(context, successSteps(section, l),
+        title: section.label(l), hint: l.tourNextStop, skip: l.tourSkipTour);
     return !skipped;
   }
 

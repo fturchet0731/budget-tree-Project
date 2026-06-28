@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/acorn_mascot.dart';
@@ -12,11 +13,13 @@ class TutorialPlayer {
 
   static Future<void> playSection(
       BuildContext context, TutorialSection section) {
+    final l = AppLocalizations.of(context);
     return showTutorialDialog(
       context,
-      steps: sectionSteps(section),
-      sectionTitle: section.label,
-      lastStepHint: 'Tap to finish',
+      steps: sectionSteps(section, l),
+      sectionTitle: section.label(l),
+      lastStepHint: l.tourTapFinish,
+      skipLabel: l.tourSkip,
     );
   }
 }
