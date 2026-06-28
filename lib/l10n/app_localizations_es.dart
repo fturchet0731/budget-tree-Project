@@ -1624,4 +1624,58 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tourTapFinish => 'Toca para terminar';
+
+  @override
+  String notifOverBudgetTitle(String name) {
+    return '🌳 «$name» supera el presupuesto';
+  }
+
+  @override
+  String notifOverBudgetMsg(String allocated, String income, String over) {
+    return 'Has asignado $allocated de tus $income de ingresos, $over de más. Recorta una rama para volver al equilibrio.';
+  }
+
+  @override
+  String notifFillingTitle(String name) {
+    return '⚠️ «$name» se está llenando';
+  }
+
+  @override
+  String notifFillingMsg(String allocated, String income, String remaining) {
+    return 'Has asignado $allocated de $income. Solo quedan $remaining por presupuestar este ciclo.';
+  }
+
+  @override
+  String notifStreakTitleActive(int count) {
+    return '🔥 racha de $count semanas';
+  }
+
+  @override
+  String get notifStreakTitleNone => '🌱 Empieza una racha';
+
+  @override
+  String notifStreakActive(int count) {
+    return '¡Llevas una racha de ahorro de $count semanas! Añade a una meta hoy para mantenerla creciendo.';
+  }
+
+  @override
+  String get notifStreakNone =>
+      'Riega una meta hoy, aunque sea poco, para empezar una racha de ahorro.';
+
+  @override
+  String get notifWeeklyTitle => '📊 Tu semana en la arboleda';
+
+  @override
+  String get notifWeeklyNone =>
+      'Aún no hay depósitos esta semana. Una pequeña cantidad mantiene tus arbolitos creciendo, y tu racha viva.';
+
+  @override
+  String notifWeeklyChange(String amount, String arrow, int pct) {
+    return 'Esta semana ahorraste $amount ($arrow $pct% vs la semana pasada). ¡Sigue haciendo crecer tus metas!';
+  }
+
+  @override
+  String notifWeeklyPlain(String amount) {
+    return 'Esta semana ahorraste $amount. ¡Sigue haciendo crecer tus metas!';
+  }
 }

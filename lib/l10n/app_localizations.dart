@@ -2847,6 +2847,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to finish'**
   String get tourTapFinish;
+
+  /// No description provided for @notifOverBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🌳 \"{name}\" is over budget'**
+  String notifOverBudgetTitle(String name);
+
+  /// No description provided for @notifOverBudgetMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve assigned {allocated} of your {income} income, {over} too much. Trim a branch to get back in balance.'**
+  String notifOverBudgetMsg(String allocated, String income, String over);
+
+  /// No description provided for @notifFillingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ \"{name}\" is filling up'**
+  String notifFillingTitle(String name);
+
+  /// No description provided for @notifFillingMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve assigned {allocated} of {income}. Only {remaining} left to budget this cycle.'**
+  String notifFillingMsg(String allocated, String income, String remaining);
+
+  /// No description provided for @notifStreakTitleActive.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {count} week streak'**
+  String notifStreakTitleActive(int count);
+
+  /// No description provided for @notifStreakTitleNone.
+  ///
+  /// In en, this message translates to:
+  /// **'🌱 Grow a streak'**
+  String get notifStreakTitleNone;
+
+  /// No description provided for @notifStreakActive.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on a {count} week saving streak! Add to a goal today to keep it growing.'**
+  String notifStreakActive(int count);
+
+  /// No description provided for @notifStreakNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Water a goal today, even a little, to start a saving streak.'**
+  String get notifStreakNone;
+
+  /// No description provided for @notifWeeklyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Your week in the grove'**
+  String get notifWeeklyTitle;
+
+  /// No description provided for @notifWeeklyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No deposits this week yet. A small amount keeps your saplings growing, and your streak alive.'**
+  String get notifWeeklyNone;
+
+  /// No description provided for @notifWeeklyChange.
+  ///
+  /// In en, this message translates to:
+  /// **'This week you saved {amount} ({arrow} {pct}% vs last week). Keep your goals growing!'**
+  String notifWeeklyChange(String amount, String arrow, int pct);
+
+  /// No description provided for @notifWeeklyPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'This week you saved {amount}. Keep your goals growing!'**
+  String notifWeeklyPlain(String amount);
 }
 
 class _AppLocalizationsDelegate

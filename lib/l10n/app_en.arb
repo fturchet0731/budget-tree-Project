@@ -532,5 +532,26 @@
   "tourNextStop": "Next stop →",
   "tourTapContinue": "Tap to continue",
   "tourSkip": "Skip",
-  "tourTapFinish": "Tap to finish"
+  "tourTapFinish": "Tap to finish",
+
+  "notifOverBudgetTitle": "🌳 \"{name}\" is over budget",
+  "@notifOverBudgetTitle": { "placeholders": { "name": { "type": "String" } } },
+  "notifOverBudgetMsg": "You've assigned {allocated} of your {income} income, {over} too much. Trim a branch to get back in balance.",
+  "@notifOverBudgetMsg": { "placeholders": { "allocated": { "type": "String" }, "income": { "type": "String" }, "over": { "type": "String" } } },
+  "notifFillingTitle": "⚠️ \"{name}\" is filling up",
+  "@notifFillingTitle": { "placeholders": { "name": { "type": "String" } } },
+  "notifFillingMsg": "You've assigned {allocated} of {income}. Only {remaining} left to budget this cycle.",
+  "@notifFillingMsg": { "placeholders": { "allocated": { "type": "String" }, "income": { "type": "String" }, "remaining": { "type": "String" } } },
+  "notifStreakTitleActive": "🔥 {count} week streak",
+  "@notifStreakTitleActive": { "placeholders": { "count": { "type": "int" } } },
+  "notifStreakTitleNone": "🌱 Grow a streak",
+  "notifStreakActive": "You're on a {count} week saving streak! Add to a goal today to keep it growing.",
+  "@notifStreakActive": { "placeholders": { "count": { "type": "int" } } },
+  "notifStreakNone": "Water a goal today, even a little, to start a saving streak.",
+  "notifWeeklyTitle": "📊 Your week in the grove",
+  "notifWeeklyNone": "No deposits this week yet. A small amount keeps your saplings growing, and your streak alive.",
+  "notifWeeklyChange": "This week you saved {amount} ({arrow} {pct}% vs last week). Keep your goals growing!",
+  "@notifWeeklyChange": { "placeholders": { "amount": { "type": "String" }, "arrow": { "type": "String" }, "pct": { "type": "int" } } },
+  "notifWeeklyPlain": "This week you saved {amount}. Keep your goals growing!",
+  "@notifWeeklyPlain": { "placeholders": { "amount": { "type": "String" } } }
 }

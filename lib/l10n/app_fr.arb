@@ -481,5 +481,18 @@
   "tourNextStop": "Étape suivante →",
   "tourTapContinue": "Touchez pour continuer",
   "tourSkip": "Passer",
-  "tourTapFinish": "Touchez pour terminer"
+  "tourTapFinish": "Touchez pour terminer",
+
+  "notifOverBudgetTitle": "🌳 « {name} » dépasse le budget",
+  "notifOverBudgetMsg": "Vous avez attribué {allocated} de vos {income} de revenu, soit {over} de trop. Coupez une branche pour rétablir l'équilibre.",
+  "notifFillingTitle": "⚠️ « {name} » se remplit",
+  "notifFillingMsg": "Vous avez attribué {allocated} sur {income}. Il ne reste que {remaining} à budgéter ce cycle.",
+  "notifStreakTitleActive": "🔥 série de {count} semaines",
+  "notifStreakTitleNone": "🌱 Lancez une série",
+  "notifStreakActive": "Vous êtes sur une série d'épargne de {count} semaines ! Ajoutez à un objectif aujourd'hui pour la faire durer.",
+  "notifStreakNone": "Arrosez un objectif aujourd'hui, même un peu, pour démarrer une série d'épargne.",
+  "notifWeeklyTitle": "📊 Votre semaine dans le bosquet",
+  "notifWeeklyNone": "Aucun dépôt cette semaine pour l'instant. Un petit montant garde vos arbres en croissance, et votre série en vie.",
+  "notifWeeklyChange": "Cette semaine vous avez épargné {amount} ({arrow} {pct} % vs la semaine dernière). Continuez à faire grandir vos objectifs !",
+  "notifWeeklyPlain": "Cette semaine vous avez épargné {amount}. Continuez à faire grandir vos objectifs !"
 }

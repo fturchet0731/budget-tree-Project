@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations_resolver.dart';
 import '../models/budget_model.dart';
 import 'app_settings.dart';
 import 'goal_repository.dart';
@@ -28,6 +29,7 @@ class NotificationScheduler {
     }
 
     final goals = await GoalRepository.loadAll();
+    final l = appLocalizations();
 
     // ── Daily streak reminder ──
     if (settings.notifStreakReminders) {
@@ -36,8 +38,8 @@ class NotificationScheduler {
         id: NotificationService.idStreak,
         hour: settings.streakHour,
         minute: settings.streakMinute,
-        title: NotificationContent.streakTitle(streak),
-        body: NotificationContent.streakReminder(streak),
+        title: NotificationContent.streakTitle(streak, l),
+        body: NotificationContent.streakReminder(streak, l),
       );
     } else {
       await NotificationService.cancel(NotificationService.idStreak);
@@ -49,8 +51,8 @@ class NotificationScheduler {
         id: NotificationService.idWeekly,
         weekday: settings.weeklyWeekday,
         hour: settings.weeklyHour,
-        title: NotificationContent.weeklySummaryTitle,
-        body: NotificationContent.weeklySummary(goals),
+        title: NotificationContent.weeklySummaryTitle(l),
+        body: NotificationContent.weeklySummary(goals, l),
       );
     } else {
       await NotificationService.cancel(NotificationService.idWeekly);
@@ -62,7 +64,7 @@ class NotificationScheduler {
   /// gets each alert once rather than on every save.
   static Future<void> checkBudget(BudgetModel budget) async {
     if (!AppSettings.instance.notifBudgetWarnings) return;
-    final warning = NotificationContent.budgetWarning(budget);
+    final warning = NotificationContent.budgetWarning(budget, appLocalizations());
 
     final prefs = await SharedPreferences.getInstance();
     final levels = _readLevels(prefs);

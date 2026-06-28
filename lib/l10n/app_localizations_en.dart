@@ -1617,4 +1617,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tourTapFinish => 'Tap to finish';
+
+  @override
+  String notifOverBudgetTitle(String name) {
+    return '🌳 \"$name\" is over budget';
+  }
+
+  @override
+  String notifOverBudgetMsg(String allocated, String income, String over) {
+    return 'You\'ve assigned $allocated of your $income income, $over too much. Trim a branch to get back in balance.';
+  }
+
+  @override
+  String notifFillingTitle(String name) {
+    return '⚠️ \"$name\" is filling up';
+  }
+
+  @override
+  String notifFillingMsg(String allocated, String income, String remaining) {
+    return 'You\'ve assigned $allocated of $income. Only $remaining left to budget this cycle.';
+  }
+
+  @override
+  String notifStreakTitleActive(int count) {
+    return '🔥 $count week streak';
+  }
+
+  @override
+  String get notifStreakTitleNone => '🌱 Grow a streak';
+
+  @override
+  String notifStreakActive(int count) {
+    return 'You\'re on a $count week saving streak! Add to a goal today to keep it growing.';
+  }
+
+  @override
+  String get notifStreakNone =>
+      'Water a goal today, even a little, to start a saving streak.';
+
+  @override
+  String get notifWeeklyTitle => '📊 Your week in the grove';
+
+  @override
+  String get notifWeeklyNone =>
+      'No deposits this week yet. A small amount keeps your saplings growing, and your streak alive.';
+
+  @override
+  String notifWeeklyChange(String amount, String arrow, int pct) {
+    return 'This week you saved $amount ($arrow $pct% vs last week). Keep your goals growing!';
+  }
+
+  @override
+  String notifWeeklyPlain(String amount) {
+    return 'This week you saved $amount. Keep your goals growing!';
+  }
 }

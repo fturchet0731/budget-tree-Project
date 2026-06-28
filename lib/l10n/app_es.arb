@@ -481,5 +481,18 @@
   "tourNextStop": "Siguiente parada →",
   "tourTapContinue": "Toca para continuar",
   "tourSkip": "Saltar",
-  "tourTapFinish": "Toca para terminar"
+  "tourTapFinish": "Toca para terminar",
+
+  "notifOverBudgetTitle": "🌳 «{name}» supera el presupuesto",
+  "notifOverBudgetMsg": "Has asignado {allocated} de tus {income} de ingresos, {over} de más. Recorta una rama para volver al equilibrio.",
+  "notifFillingTitle": "⚠️ «{name}» se está llenando",
+  "notifFillingMsg": "Has asignado {allocated} de {income}. Solo quedan {remaining} por presupuestar este ciclo.",
+  "notifStreakTitleActive": "🔥 racha de {count} semanas",
+  "notifStreakTitleNone": "🌱 Empieza una racha",
+  "notifStreakActive": "¡Llevas una racha de ahorro de {count} semanas! Añade a una meta hoy para mantenerla creciendo.",
+  "notifStreakNone": "Riega una meta hoy, aunque sea poco, para empezar una racha de ahorro.",
+  "notifWeeklyTitle": "📊 Tu semana en la arboleda",
+  "notifWeeklyNone": "Aún no hay depósitos esta semana. Una pequeña cantidad mantiene tus arbolitos creciendo, y tu racha viva.",
+  "notifWeeklyChange": "Esta semana ahorraste {amount} ({arrow} {pct}% vs la semana pasada). ¡Sigue haciendo crecer tus metas!",
+  "notifWeeklyPlain": "Esta semana ahorraste {amount}. ¡Sigue haciendo crecer tus metas!"
 }

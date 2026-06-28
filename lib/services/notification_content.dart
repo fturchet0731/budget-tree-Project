@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
 import '../models/goal_model.dart';
 import 'comparison_service.dart';
@@ -35,7 +36,7 @@ class NotificationContent {
 
   static const double nearLimitRatio = 0.8;
 
-  static BudgetWarning budgetWarning(BudgetModel budget) {
+  static BudgetWarning budgetWarning(BudgetModel budget, AppLocalizations l) {
     final income = budget.totalIncome;
     if (income <= 0) return BudgetWarning.none;
     final allocated = budget.totalAllocated;
@@ -43,57 +44,52 @@ class NotificationContent {
     if (budget.remaining < -0.01) {
       return BudgetWarning(
         level: 2,
-        title: '🌳 "${budget.budgetName}" is over budget',
-        message:
-            'You\'ve assigned \$${allocated.toStringAsFixed(0)} of your '
-            '\$${income.toStringAsFixed(0)} income — '
-            '\$${(-budget.remaining).toStringAsFixed(0)} too much. '
-            'Trim a branch to get back in balance.',
+        title: l.notifOverBudgetTitle(budget.budgetName),
+        message: l.notifOverBudgetMsg(
+          '\$${allocated.toStringAsFixed(0)}',
+          '\$${income.toStringAsFixed(0)}',
+          '\$${(-budget.remaining).toStringAsFixed(0)}',
+        ),
       );
     }
 
     if (allocated / income >= nearLimitRatio) {
       return BudgetWarning(
         level: 1,
-        title: '⚠️ "${budget.budgetName}" is filling up',
-        message:
-            'You\'ve assigned \$${allocated.toStringAsFixed(0)} of '
-            '\$${income.toStringAsFixed(0)}. '
-            'Only \$${budget.remaining.toStringAsFixed(0)} left to budget '
-            'this cycle.',
+        title: l.notifFillingTitle(budget.budgetName),
+        message: l.notifFillingMsg(
+          '\$${allocated.toStringAsFixed(0)}',
+          '\$${income.toStringAsFixed(0)}',
+          '\$${budget.remaining.toStringAsFixed(0)}',
+        ),
       );
     }
 
     return BudgetWarning.none;
   }
 
-  static String streakTitle(StreakInfo s) =>
-      s.currentWeeks > 0 ? '🔥 ${s.currentWeeks}-week streak' : '🌱 Grow a streak';
+  static String streakTitle(StreakInfo s, AppLocalizations l) =>
+      s.currentWeeks > 0
+          ? l.notifStreakTitleActive(s.currentWeeks)
+          : l.notifStreakTitleNone;
 
-  static String streakReminder(StreakInfo s) {
-    if (s.currentWeeks > 0) {
-      return 'You\'re on a ${s.currentWeeks}-week saving streak! Add to a goal '
-          'today to keep it growing.';
-    }
-    return 'Water a goal today, even a little, to start a saving streak.';
+  static String streakReminder(StreakInfo s, AppLocalizations l) {
+    if (s.currentWeeks > 0) return l.notifStreakActive(s.currentWeeks);
+    return l.notifStreakNone;
   }
 
-  static const String weeklySummaryTitle = '📊 Your week in the grove';
+  static String weeklySummaryTitle(AppLocalizations l) => l.notifWeeklyTitle;
 
-  static String weeklySummary(List<Goal> goals, {DateTime? now}) {
+  static String weeklySummary(List<Goal> goals, AppLocalizations l,
+      {DateTime? now}) {
     final week = ComparisonService.weekOverWeek(goals, now: now);
-    if (!week.hasActivity) {
-      return 'No deposits this week yet. A small amount keeps your saplings '
-          'growing — and your streak alive.';
-    }
-    final buf = StringBuffer(
-        'This week you saved \$${week.current.toStringAsFixed(0)}');
+    if (!week.hasActivity) return l.notifWeeklyNone;
+    final amount = '\$${week.current.toStringAsFixed(0)}';
     final pct = week.percentChange;
     if (pct != null) {
       final arrow = pct >= 0 ? '↑' : '↓';
-      buf.write(' ($arrow ${pct.abs().round()}% vs last week)');
+      return l.notifWeeklyChange(amount, arrow, pct.abs().round());
     }
-    buf.write('. Keep your goals growing!');
-    return buf.toString();
+    return l.notifWeeklyPlain(amount);
   }
 }

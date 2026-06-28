@@ -1633,4 +1633,58 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tourTapFinish => 'Touchez pour terminer';
+
+  @override
+  String notifOverBudgetTitle(String name) {
+    return '🌳 « $name » dépasse le budget';
+  }
+
+  @override
+  String notifOverBudgetMsg(String allocated, String income, String over) {
+    return 'Vous avez attribué $allocated de vos $income de revenu, soit $over de trop. Coupez une branche pour rétablir l\'équilibre.';
+  }
+
+  @override
+  String notifFillingTitle(String name) {
+    return '⚠️ « $name » se remplit';
+  }
+
+  @override
+  String notifFillingMsg(String allocated, String income, String remaining) {
+    return 'Vous avez attribué $allocated sur $income. Il ne reste que $remaining à budgéter ce cycle.';
+  }
+
+  @override
+  String notifStreakTitleActive(int count) {
+    return '🔥 série de $count semaines';
+  }
+
+  @override
+  String get notifStreakTitleNone => '🌱 Lancez une série';
+
+  @override
+  String notifStreakActive(int count) {
+    return 'Vous êtes sur une série d\'épargne de $count semaines ! Ajoutez à un objectif aujourd\'hui pour la faire durer.';
+  }
+
+  @override
+  String get notifStreakNone =>
+      'Arrosez un objectif aujourd\'hui, même un peu, pour démarrer une série d\'épargne.';
+
+  @override
+  String get notifWeeklyTitle => '📊 Votre semaine dans le bosquet';
+
+  @override
+  String get notifWeeklyNone =>
+      'Aucun dépôt cette semaine pour l\'instant. Un petit montant garde vos arbres en croissance, et votre série en vie.';
+
+  @override
+  String notifWeeklyChange(String amount, String arrow, int pct) {
+    return 'Cette semaine vous avez épargné $amount ($arrow $pct % vs la semaine dernière). Continuez à faire grandir vos objectifs !';
+  }
+
+  @override
+  String notifWeeklyPlain(String amount) {
+    return 'Cette semaine vous avez épargné $amount. Continuez à faire grandir vos objectifs !';
+  }
 }
