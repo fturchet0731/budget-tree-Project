@@ -910,4 +910,148 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get weekdaySun => 'Dimanche';
+
+  @override
+  String get done => 'Terminé';
+
+  @override
+  String get saveBudgetTreeQuestion => 'Enregistrer l\'arbre budgétaire ?';
+
+  @override
+  String saveBudgetTreeBody(String name) {
+    return 'Enregistrez « $name » dans votre forêt. Vous pouvez le consulter et le modifier à tout moment depuis la feuille Modifier.';
+  }
+
+  @override
+  String get groupOptionalUpper => 'GROUPE (FACULTATIF)';
+
+  @override
+  String get autoLinkBranches =>
+      'Lier automatiquement les branches aux objectifs';
+
+  @override
+  String get autoLinkBranchesDesc =>
+      'Associe les noms de dépenses aux noms d\'objectifs existants. Les branches liées alimentent ces objectifs pendant les cycles de paie.';
+
+  @override
+  String autoLinkedSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count branches liées',
+      one: '1 branche liée',
+    );
+    return '$_temp0 automatiquement aux objectifs correspondants.';
+  }
+
+  @override
+  String get treePlantedSnack => 'Arbre planté dans votre forêt !';
+
+  @override
+  String get processPay => 'Traiter la paie';
+
+  @override
+  String get saveMyTree => 'Enregistrer mon arbre';
+
+  @override
+  String get updateTree => 'Mettre à jour l\'arbre';
+
+  @override
+  String get gardenersTips => 'Conseils du jardinier';
+
+  @override
+  String get gardenersTipsSub => 'Comment mieux répartir votre argent';
+
+  @override
+  String get tapALeaf => 'Touchez une feuille pour voir son budget';
+
+  @override
+  String payProcessed(int periods, String amount, int goals, String when) {
+    return '$periods période(s) de paie traitée(s) · $amount → $goals objectif(s). Prochaine paie $when.';
+  }
+
+  @override
+  String noPayPeriods(String when) {
+    return 'Aucune période de paie écoulée pour l\'instant. Prochaine paie $when.';
+  }
+
+  @override
+  String get linkBranchToGoals => 'Lier cette branche aux objectifs';
+
+  @override
+  String selectGoalsBranch(String name) {
+    return 'Sélectionnez les objectifs que cette branche « $name » soutient.';
+  }
+
+  @override
+  String get noGoalsPlanted => 'Aucun objectif planté pour l\'instant';
+
+  @override
+  String get createGoalComeBack =>
+      'Créez un objectif dans le Bosquet, puis revenez le lier.';
+
+  @override
+  String percentOfIncome(String pct) {
+    return '$pct % de votre revenu';
+  }
+
+  @override
+  String get allocated => 'Alloué';
+
+  @override
+  String ofIncome(String amount) {
+    return 'sur $amount de revenu';
+  }
+
+  @override
+  String get linkedGoalsUpper => 'OBJECTIFS LIÉS';
+
+  @override
+  String get linkEllipsis => 'Lier…';
+
+  @override
+  String get notFundingGoals =>
+      'Cette branche ne finance encore aucun objectif. Touchez « Lier… » pour la connecter à des arbres du Bosquet.';
+
+  @override
+  String get totalIncome => 'Revenu total';
+
+  @override
+  String overBudgetAmount(String amount) {
+    return 'Dépassement : $amount';
+  }
+
+  @override
+  String unallocatedAmount(String amount) {
+    return 'Non alloué : $amount';
+  }
+
+  @override
+  String get timeNow => 'maintenant';
+
+  @override
+  String timeToday(String time) {
+    return 'aujourd\'hui $time';
+  }
+
+  @override
+  String get timeTomorrow => 'demain';
+
+  @override
+  String timeInDays(int count) {
+    return 'dans $count jours';
+  }
+
+  @override
+  String nextPayLine(String when) {
+    return 'prochaine paie $when';
+  }
+
+  @override
+  String get todayShort => 'aujourd\'hui';
+
+  @override
+  String onDate(String date) {
+    return 'le $date';
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
@@ -112,6 +113,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   Future<void> _runPayCycle() async {
     final result = await PayScheduler.runUpdate(widget.budget);
     if (!mounted) return;
+    final l = AppLocalizations.of(context);
     final nextWhen = _formatNextPay(result.nextPayDate);
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
@@ -132,10 +134,12 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
             Expanded(
               child: Text(
                 result.hadActivity
-                    ? 'Processed ${result.periodsProcessed} pay period(s) · '
-                        '\$${result.totalDeposited.toStringAsFixed(2)} → '
-                        '${result.updatedGoals.length} goal(s). Next pay $nextWhen.'
-                    : 'No pay periods elapsed yet. Next pay $nextWhen.',
+                    ? l.payProcessed(
+                        result.periodsProcessed,
+                        '\$${result.totalDeposited.toStringAsFixed(2)}',
+                        result.updatedGoals.length,
+                        nextWhen)
+                    : l.noPayPeriods(nextWhen),
                 style: GoogleFonts.nunito(
                     color: AppColors.stoneBeigeColor, fontSize: 12.5),
               ),
@@ -156,17 +160,19 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   }
 
   String _formatNextPay(DateTime dt) {
+    final l = AppLocalizations.of(context);
     final now = DateTime.now();
     final diff = dt.difference(now);
-    if (diff.isNegative) return 'today';
-    if (diff.inDays == 0) return 'today';
-    if (diff.inDays == 1) return 'tomorrow';
-    if (diff.inDays < 7) return 'in ${diff.inDays} days';
-    return 'on ${dt.month}/${dt.day}';
+    if (diff.isNegative) return l.todayShort;
+    if (diff.inDays == 0) return l.todayShort;
+    if (diff.inDays == 1) return l.timeTomorrow;
+    if (diff.inDays < 7) return l.timeInDays(diff.inDays);
+    return l.onDate('${dt.month}/${dt.day}');
   }
 
   // ── Save budget dialog ────────────────────────
   void _showSaveDialog() {
+    final l = AppLocalizations.of(context);
     String? chosenCategoryId = widget.budget.categoryId;
     bool autoLink = true;
     showDialog(
@@ -180,7 +186,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               const Icon(Icons.park, color: AppColors.lightLeaf, size: 22),
               const SizedBox(width: 10),
               Text(
-                'Save Budget Tree?',
+                l.saveBudgetTreeQuestion,
                 style: GoogleFonts.fredoka(
                     fontWeight: FontWeight.w600,
                     color: AppColors.stoneBeigeColor,
@@ -194,7 +200,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Save "${widget.budget.budgetName}" to your forest. You can view and edit it anytime from the Modify leaf.',
+                  l.saveBudgetTreeBody(widget.budget.budgetName),
                   style: GoogleFonts.nunito(
                       color: AppColors.mossGreen,
                       fontSize: 14,
@@ -202,7 +208,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'GROUP (OPTIONAL)',
+                  l.groupOptionalUpper,
                   style: GoogleFonts.nunito(
                     color: AppColors.mossGreen.withValues(alpha: 0.75),
                     fontSize: 10.5,
@@ -261,7 +267,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                                 CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Auto-link branches to goals',
+                                l.autoLinkBranches,
                                 style: GoogleFonts.nunito(
                                   color: AppColors.stoneBeigeColor,
                                   fontSize: 13,
@@ -270,7 +276,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Matches expense names to existing goal names. Linked branches feed those goals during pay cycles.',
+                                l.autoLinkBranchesDesc,
                                 style: GoogleFonts.nunito(
                                     color: AppColors.mossGreen,
                                     fontSize: 11,
@@ -289,7 +295,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel',
+              child: Text(l.cancel,
                   style: GoogleFonts.nunito(color: AppColors.mossGreen)),
             ),
             ElevatedButton(
@@ -319,7 +325,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       content: Text(
-                        'Auto-linked $autoLinkedCount branch(es) to matching goals.',
+                        l.autoLinkedSnack(autoLinkedCount),
                         style: GoogleFonts.nunito(
                             color: AppColors.stoneBeigeColor,
                             fontSize: 13),
@@ -340,7 +346,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                             color: AppColors.lightLeaf, size: 20),
                         const SizedBox(width: 10),
                         Text(
-                          'Tree planted in your forest!',
+                          l.treePlantedSnack,
                           style: GoogleFonts.nunito(
                               color: AppColors.stoneBeigeColor,
                               fontSize: 14),
@@ -354,7 +360,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                   if (mounted) Navigator.popUntil(context, (r) => r.isFirst);
                 });
               },
-              child: Text('Save',
+              child: Text(l.save,
                   style: GoogleFonts.nunito(
                       color: Colors.white, fontWeight: FontWeight.bold)),
             ),
@@ -367,6 +373,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   /// Opens the allocation-advice sheet: explained suggestions for adding,
   /// pruning, or trimming branches based on the current budget.
   void _showSuggestions() {
+    final l = AppLocalizations.of(context);
     final suggestions = SuggestionService.forBudget(widget.budget);
     showModalBottomSheet(
       context: context,
@@ -398,7 +405,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 const Icon(Icons.lightbulb,
                     color: Color(0xFFFFD54F), size: 20),
                 const SizedBox(width: 8),
-                Text('Gardener\'s Tips',
+                Text(l.gardenersTips,
                     style: GoogleFonts.fredoka(
                         fontWeight: FontWeight.w600,
                         color: AppColors.stoneBeigeColor,
@@ -406,7 +413,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               ],
             ),
             const SizedBox(height: 4),
-            Text('How to allocate your money better',
+            Text(l.gardenersTipsSub,
                 style: GoogleFonts.nunito(
                     color: AppColors.mossGreen, fontSize: 12.5)),
             const SizedBox(height: 16),
@@ -428,6 +435,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final l = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: AnimatedBuilder(
         animation: _growAnimation,
@@ -454,7 +462,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                             icon: const Icon(Icons.event_available,
                                 color: Colors.white),
                             label: Text(
-                              'Process Pay',
+                              l.processPay,
                               style: GoogleFonts.nunito(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
@@ -471,8 +479,8 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                         icon: const Icon(Icons.save_alt, color: Colors.white),
                         label: Text(
                           widget.budget.savedAt == null
-                              ? 'Save My Tree'
-                              : 'Update Tree',
+                              ? l.saveMyTree
+                              : l.updateTree,
                           style: GoogleFonts.nunito(
                               color: Colors.white,
                               fontWeight: FontWeight.bold),
@@ -511,6 +519,12 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     progress: _growAnimation.value,
                     leafHits: _leafHits,
                     leafPalette: _leafPalette,
+                    totalIncomeLabel: l.totalIncome,
+                    rootLabel: widget.budget.remaining < 0
+                        ? l.overBudgetAmount(
+                            '\$${(-widget.budget.remaining).toStringAsFixed(2)}')
+                        : l.unallocatedAmount(
+                            '\$${widget.budget.remaining.toStringAsFixed(2)}'),
                   ),
                 ),
               );
@@ -654,7 +668,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                         const Icon(Icons.eco, color: Colors.white, size: 14),
                         const SizedBox(width: 6),
                         Text(
-                          'Tap a leaf to see its budget',
+                          l.tapALeaf,
                           style: GoogleFonts.nunito(
                               color: Colors.white, fontSize: 13),
                         ),
@@ -946,12 +960,16 @@ class _GrowingTreePainter extends CustomPainter {
   final double progress;
   final List<_LeafHit> leafHits;
   final LeafPalette leafPalette;
+  final String totalIncomeLabel;
+  final String rootLabel;
 
   const _GrowingTreePainter({
     required this.budget,
     required this.progress,
     required this.leafHits,
     required this.leafPalette,
+    required this.totalIncomeLabel,
+    required this.rootLabel,
   });
 
   double get trunkProg => (progress / 0.30).clamp(0.0, 1.0);
@@ -1072,7 +1090,7 @@ class _GrowingTreePainter extends CustomPainter {
 
       final labelTp = TextPainter(
         text: TextSpan(
-          text: 'Total Income',
+          text: totalIncomeLabel,
           style: TextStyle(
             color: Colors.white.withValues(alpha: textAlpha * 0.78),
             fontSize: 10,
@@ -1372,9 +1390,7 @@ class _GrowingTreePainter extends CustomPainter {
     if (alpha <= 0) return;
 
     final isOver = budget.remaining < 0;
-    final text = isOver
-        ? 'Over budget: \$${(-budget.remaining).toStringAsFixed(2)}'
-        : 'Unallocated: \$${budget.remaining.toStringAsFixed(2)}';
+    final text = rootLabel;
     final labelIcon = isOver ? Icons.warning : Icons.eco;
     final labelColor =
         (isOver ? AppColors.dangerRed : AppColors.leafYellow).withValues(alpha: alpha);
@@ -1428,7 +1444,10 @@ class _GrowingTreePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_GrowingTreePainter old) => old.progress != progress;
+  bool shouldRepaint(_GrowingTreePainter old) =>
+      old.progress != progress ||
+      old.totalIncomeLabel != totalIncomeLabel ||
+      old.rootLabel != rootLabel;
 }
 
 // ──────────────────────────────────────────────
@@ -1481,6 +1500,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
   }
 
   void _openLinkPicker() {
+    final l = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1509,14 +1529,14 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  Text('Link this branch to goals',
+                  Text(l.linkBranchToGoals,
                       style: GoogleFonts.fredoka(
                           fontWeight: FontWeight.w600,
                           color: AppColors.stoneBeigeColor,
                           fontSize: 20)),
                   const SizedBox(height: 4),
                   Text(
-                    'Select goals that this "${widget.category.name}" branch supports.',
+                    l.selectGoalsBranch(widget.category.name),
                     style: GoogleFonts.nunito(
                         color: AppColors.mossGreen,
                         fontSize: 12.5,
@@ -1538,14 +1558,14 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                           const Icon(Icons.spa_outlined,
                               color: AppColors.lightLeaf, size: 36),
                           const SizedBox(height: 10),
-                          Text('No goals planted yet',
+                          Text(l.noGoalsPlanted,
                               style: GoogleFonts.nunito(
                                   color: AppColors.stoneBeigeColor,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
                           Text(
-                            'Create a goal sapling in the Grove and come back to link it.',
+                            l.createGoalComeBack,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.nunito(
                                 color: AppColors.mossGreen,
@@ -1585,7 +1605,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                             borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Navigator.pop(ctx),
-                      child: Text('Done',
+                      child: Text(l.done,
                           style: GoogleFonts.nunito(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -1603,6 +1623,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cat = widget.category;
     final pct = (widget.budget.percentageFor(cat) * 100).toStringAsFixed(1);
     final linkedGoals = _allGoals
@@ -1667,7 +1688,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                         ),
                       ),
                       Text(
-                        '$pct% of your income',
+                        l.percentOfIncome(pct),
                         style: GoogleFonts.nunito(
                           color: AppColors.mossGreen,
                           fontSize: 13,
@@ -1693,7 +1714,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Allocated',
+                      Text(l.allocated,
                           style: GoogleFonts.nunito(
                               color: AppColors.mossGreen, fontSize: 14)),
                       Text(
@@ -1724,7 +1745,8 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                           style: GoogleFonts.nunito(
                               color: AppColors.mossGreen, fontSize: 11)),
                       Text(
-                        'of \$${widget.budget.totalIncome.toStringAsFixed(2)} income',
+                        l.ofIncome(
+                            '\$${widget.budget.totalIncome.toStringAsFixed(2)}'),
                         style: GoogleFonts.nunito(
                             color: AppColors.mossGreen, fontSize: 11),
                       ),
@@ -1745,7 +1767,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                         color: AppColors.mossGreen.withValues(alpha: 0.85)),
                     const SizedBox(width: 6),
                     Text(
-                      'LINKED GOALS',
+                      l.linkedGoalsUpper,
                       style: GoogleFonts.nunito(
                         color: AppColors.mossGreen.withValues(alpha: 0.85),
                         fontSize: 11,
@@ -1759,7 +1781,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   onPressed: _loaded ? _openLinkPicker : null,
                   icon: const Icon(Icons.add,
                       color: AppColors.lightLeaf, size: 16),
-                  label: Text('Link…',
+                  label: Text(l.linkEllipsis,
                       style: GoogleFonts.nunito(
                           color: AppColors.lightLeaf,
                           fontWeight: FontWeight.bold)),
@@ -1785,7 +1807,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       color: AppColors.mossGreen.withValues(alpha: 0.2)),
                 ),
                 child: Text(
-                  'This branch isn\'t funding any goals yet. Tap "Link…" to connect it to saplings in the Grove.',
+                  l.notFundingGoals,
                   style: GoogleFonts.nunito(
                       color: AppColors.mossGreen,
                       fontSize: 12,
@@ -1985,28 +2007,23 @@ class _ClockAndNextPayState extends State<_ClockAndNextPay> {
     return '${_two(h)}:${_two(m)} · $zone';
   }
 
-  String? get _nextPayLabel {
+  String? _nextPayLabel(AppLocalizations l) {
     final next = PayScheduler.nextPayDate(widget.budget, _now);
     if (next == null) return null;
     final diff = next.difference(_now);
-    String when;
-    if (diff.isNegative) {
-      when = 'now';
-    } else if (diff.inDays == 0) {
-      when = 'today ${_two(next.hour)}:${_two(next.minute)}';
-    } else if (diff.inDays == 1) {
-      when = 'tomorrow';
-    } else if (diff.inDays < 7) {
-      when = 'in ${diff.inDays} days';
-    } else {
-      when = '${next.month}/${next.day}/${next.year}';
+    if (diff.isNegative) return l.timeNow;
+    if (diff.inDays == 0) {
+      return l.timeToday('${_two(next.hour)}:${_two(next.minute)}');
     }
-    return when;
+    if (diff.inDays == 1) return l.timeTomorrow;
+    if (diff.inDays < 7) return l.timeInDays(diff.inDays);
+    return '${next.month}/${next.day}/${next.year}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final nextPay = _nextPayLabel;
+    final l = AppLocalizations.of(context);
+    final nextPay = _nextPayLabel(l);
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Row(
@@ -2028,7 +2045,7 @@ class _ClockAndNextPayState extends State<_ClockAndNextPay> {
             const SizedBox(width: 4),
             Flexible(
               child: Text(
-                'next pay $nextPay',
+                l.nextPayLine(nextPay),
                 style: GoogleFonts.nunito(
                   color: Colors.white.withValues(alpha: 0.78),
                   fontSize: 11,

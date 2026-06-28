@@ -899,4 +899,147 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weekdaySun => 'Sunday';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get saveBudgetTreeQuestion => 'Save Budget Tree?';
+
+  @override
+  String saveBudgetTreeBody(String name) {
+    return 'Save \"$name\" to your forest. You can view and edit it anytime from the Modify leaf.';
+  }
+
+  @override
+  String get groupOptionalUpper => 'GROUP (OPTIONAL)';
+
+  @override
+  String get autoLinkBranches => 'Auto-link branches to goals';
+
+  @override
+  String get autoLinkBranchesDesc =>
+      'Matches expense names to existing goal names. Linked branches feed those goals during pay cycles.';
+
+  @override
+  String autoLinkedSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count branches',
+      one: '1 branch',
+    );
+    return 'Auto-linked $_temp0 to matching goals.';
+  }
+
+  @override
+  String get treePlantedSnack => 'Tree planted in your forest!';
+
+  @override
+  String get processPay => 'Process Pay';
+
+  @override
+  String get saveMyTree => 'Save My Tree';
+
+  @override
+  String get updateTree => 'Update Tree';
+
+  @override
+  String get gardenersTips => 'Gardener\'s Tips';
+
+  @override
+  String get gardenersTipsSub => 'How to allocate your money better';
+
+  @override
+  String get tapALeaf => 'Tap a leaf to see its budget';
+
+  @override
+  String payProcessed(int periods, String amount, int goals, String when) {
+    return 'Processed $periods pay period(s) · $amount → $goals goal(s). Next pay $when.';
+  }
+
+  @override
+  String noPayPeriods(String when) {
+    return 'No pay periods elapsed yet. Next pay $when.';
+  }
+
+  @override
+  String get linkBranchToGoals => 'Link this branch to goals';
+
+  @override
+  String selectGoalsBranch(String name) {
+    return 'Select goals that this \"$name\" branch supports.';
+  }
+
+  @override
+  String get noGoalsPlanted => 'No goals planted yet';
+
+  @override
+  String get createGoalComeBack =>
+      'Create a goal sapling in the Grove and come back to link it.';
+
+  @override
+  String percentOfIncome(String pct) {
+    return '$pct% of your income';
+  }
+
+  @override
+  String get allocated => 'Allocated';
+
+  @override
+  String ofIncome(String amount) {
+    return 'of $amount income';
+  }
+
+  @override
+  String get linkedGoalsUpper => 'LINKED GOALS';
+
+  @override
+  String get linkEllipsis => 'Link…';
+
+  @override
+  String get notFundingGoals =>
+      'This branch isn\'t funding any goals yet. Tap \"Link…\" to connect it to saplings in the Grove.';
+
+  @override
+  String get totalIncome => 'Total Income';
+
+  @override
+  String overBudgetAmount(String amount) {
+    return 'Over budget: $amount';
+  }
+
+  @override
+  String unallocatedAmount(String amount) {
+    return 'Unallocated: $amount';
+  }
+
+  @override
+  String get timeNow => 'now';
+
+  @override
+  String timeToday(String time) {
+    return 'today $time';
+  }
+
+  @override
+  String get timeTomorrow => 'tomorrow';
+
+  @override
+  String timeInDays(int count) {
+    return 'in $count days';
+  }
+
+  @override
+  String nextPayLine(String when) {
+    return 'next pay $when';
+  }
+
+  @override
+  String get todayShort => 'today';
+
+  @override
+  String onDate(String date) {
+    return 'on $date';
+  }
 }

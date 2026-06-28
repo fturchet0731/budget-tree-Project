@@ -1659,6 +1659,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sunday'**
   String get weekdaySun;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @saveBudgetTreeQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Budget Tree?'**
+  String get saveBudgetTreeQuestion;
+
+  /// No description provided for @saveBudgetTreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save \"{name}\" to your forest. You can view and edit it anytime from the Modify leaf.'**
+  String saveBudgetTreeBody(String name);
+
+  /// No description provided for @groupOptionalUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'GROUP (OPTIONAL)'**
+  String get groupOptionalUpper;
+
+  /// No description provided for @autoLinkBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-link branches to goals'**
+  String get autoLinkBranches;
+
+  /// No description provided for @autoLinkBranchesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches expense names to existing goal names. Linked branches feed those goals during pay cycles.'**
+  String get autoLinkBranchesDesc;
+
+  /// No description provided for @autoLinkedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-linked {count, plural, =1{1 branch} other{{count} branches}} to matching goals.'**
+  String autoLinkedSnack(int count);
+
+  /// No description provided for @treePlantedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Tree planted in your forest!'**
+  String get treePlantedSnack;
+
+  /// No description provided for @processPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Process Pay'**
+  String get processPay;
+
+  /// No description provided for @saveMyTree.
+  ///
+  /// In en, this message translates to:
+  /// **'Save My Tree'**
+  String get saveMyTree;
+
+  /// No description provided for @updateTree.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Tree'**
+  String get updateTree;
+
+  /// No description provided for @gardenersTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Gardener\'s Tips'**
+  String get gardenersTips;
+
+  /// No description provided for @gardenersTipsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How to allocate your money better'**
+  String get gardenersTipsSub;
+
+  /// No description provided for @tapALeaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a leaf to see its budget'**
+  String get tapALeaf;
+
+  /// No description provided for @payProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Processed {periods} pay period(s) · {amount} → {goals} goal(s). Next pay {when}.'**
+  String payProcessed(int periods, String amount, int goals, String when);
+
+  /// No description provided for @noPayPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'No pay periods elapsed yet. Next pay {when}.'**
+  String noPayPeriods(String when);
+
+  /// No description provided for @linkBranchToGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Link this branch to goals'**
+  String get linkBranchToGoals;
+
+  /// No description provided for @selectGoalsBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Select goals that this \"{name}\" branch supports.'**
+  String selectGoalsBranch(String name);
+
+  /// No description provided for @noGoalsPlanted.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals planted yet'**
+  String get noGoalsPlanted;
+
+  /// No description provided for @createGoalComeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a goal sapling in the Grove and come back to link it.'**
+  String get createGoalComeBack;
+
+  /// No description provided for @percentOfIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of your income'**
+  String percentOfIncome(String pct);
+
+  /// No description provided for @allocated.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated'**
+  String get allocated;
+
+  /// No description provided for @ofIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'of {amount} income'**
+  String ofIncome(String amount);
+
+  /// No description provided for @linkedGoalsUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'LINKED GOALS'**
+  String get linkedGoalsUpper;
+
+  /// No description provided for @linkEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Link…'**
+  String get linkEllipsis;
+
+  /// No description provided for @notFundingGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'This branch isn\'t funding any goals yet. Tap \"Link…\" to connect it to saplings in the Grove.'**
+  String get notFundingGoals;
+
+  /// No description provided for @totalIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Income'**
+  String get totalIncome;
+
+  /// No description provided for @overBudgetAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget: {amount}'**
+  String overBudgetAmount(String amount);
+
+  /// No description provided for @unallocatedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Unallocated: {amount}'**
+  String unallocatedAmount(String amount);
+
+  /// No description provided for @timeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get timeNow;
+
+  /// No description provided for @timeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today {time}'**
+  String timeToday(String time);
+
+  /// No description provided for @timeTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'tomorrow'**
+  String get timeTomorrow;
+
+  /// No description provided for @timeInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'in {count} days'**
+  String timeInDays(int count);
+
+  /// No description provided for @nextPayLine.
+  ///
+  /// In en, this message translates to:
+  /// **'next pay {when}'**
+  String nextPayLine(String when);
+
+  /// No description provided for @todayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get todayShort;
+
+  /// No description provided for @onDate.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String onDate(String date);
 }
 
 class _AppLocalizationsDelegate

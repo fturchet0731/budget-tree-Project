@@ -908,4 +908,147 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get weekdaySun => 'Domingo';
+
+  @override
+  String get done => 'Listo';
+
+  @override
+  String get saveBudgetTreeQuestion => '¿Guardar el árbol de presupuesto?';
+
+  @override
+  String saveBudgetTreeBody(String name) {
+    return 'Guarda «$name» en tu bosque. Puedes verlo y editarlo cuando quieras desde la hoja Modificar.';
+  }
+
+  @override
+  String get groupOptionalUpper => 'GRUPO (OPCIONAL)';
+
+  @override
+  String get autoLinkBranches => 'Vincular ramas a metas automáticamente';
+
+  @override
+  String get autoLinkBranchesDesc =>
+      'Asocia los nombres de gastos con los nombres de metas existentes. Las ramas vinculadas alimentan esas metas durante los ciclos de pago.';
+
+  @override
+  String autoLinkedSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ramas vinculadas',
+      one: '1 rama vinculada',
+    );
+    return '$_temp0 automáticamente a las metas coincidentes.';
+  }
+
+  @override
+  String get treePlantedSnack => '¡Árbol plantado en tu bosque!';
+
+  @override
+  String get processPay => 'Procesar pago';
+
+  @override
+  String get saveMyTree => 'Guardar mi árbol';
+
+  @override
+  String get updateTree => 'Actualizar árbol';
+
+  @override
+  String get gardenersTips => 'Consejos del jardinero';
+
+  @override
+  String get gardenersTipsSub => 'Cómo asignar mejor tu dinero';
+
+  @override
+  String get tapALeaf => 'Toca una hoja para ver su presupuesto';
+
+  @override
+  String payProcessed(int periods, String amount, int goals, String when) {
+    return '$periods período(s) de pago procesado(s) · $amount → $goals meta(s). Próximo pago $when.';
+  }
+
+  @override
+  String noPayPeriods(String when) {
+    return 'Aún no ha pasado ningún período de pago. Próximo pago $when.';
+  }
+
+  @override
+  String get linkBranchToGoals => 'Vincular esta rama a metas';
+
+  @override
+  String selectGoalsBranch(String name) {
+    return 'Selecciona las metas que apoya esta rama «$name».';
+  }
+
+  @override
+  String get noGoalsPlanted => 'Aún no hay metas plantadas';
+
+  @override
+  String get createGoalComeBack =>
+      'Crea una meta en la Arboleda y vuelve para vincularla.';
+
+  @override
+  String percentOfIncome(String pct) {
+    return '$pct% de tus ingresos';
+  }
+
+  @override
+  String get allocated => 'Asignado';
+
+  @override
+  String ofIncome(String amount) {
+    return 'de $amount de ingresos';
+  }
+
+  @override
+  String get linkedGoalsUpper => 'METAS VINCULADAS';
+
+  @override
+  String get linkEllipsis => 'Vincular…';
+
+  @override
+  String get notFundingGoals =>
+      'Esta rama aún no financia ninguna meta. Toca «Vincular…» para conectarla con arbolitos de la Arboleda.';
+
+  @override
+  String get totalIncome => 'Ingresos totales';
+
+  @override
+  String overBudgetAmount(String amount) {
+    return 'Excedido: $amount';
+  }
+
+  @override
+  String unallocatedAmount(String amount) {
+    return 'Sin asignar: $amount';
+  }
+
+  @override
+  String get timeNow => 'ahora';
+
+  @override
+  String timeToday(String time) {
+    return 'hoy $time';
+  }
+
+  @override
+  String get timeTomorrow => 'mañana';
+
+  @override
+  String timeInDays(int count) {
+    return 'en $count días';
+  }
+
+  @override
+  String nextPayLine(String when) {
+    return 'próximo pago $when';
+  }
+
+  @override
+  String get todayShort => 'hoy';
+
+  @override
+  String onDate(String date) {
+    return 'el $date';
+  }
 }
