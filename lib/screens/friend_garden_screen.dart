@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/goal_labels.dart';
 import '../models/goal_model.dart';
 import '../models/profile_model.dart';
 import '../theme/app_theme.dart';
@@ -153,7 +154,7 @@ class _FriendGoalCard extends StatelessWidget {
             completed
                 ? l.completedCheck
                 : goal.isUncapped
-                    ? goal.tierName
+                    ? goal.localizedTierName(l)
                     : l.percentThere(pct),
             style: TextStyle(
                 color: completed ? _gold : AppColors.mossGreen, fontSize: 12),

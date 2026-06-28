@@ -352,5 +352,18 @@
   "@nextPayLine": { "placeholders": { "when": { "type": "String" } } },
   "todayShort": "today",
   "onDate": "on {date}",
-  "@onDate": { "placeholders": { "date": { "type": "String" } } }
+  "@onDate": { "placeholders": { "date": { "type": "String" } } },
+
+  "stageSeed": "Seed",
+  "stageSprout": "Sprout",
+  "stageYoungSapling": "Young Sapling",
+  "stageSapling": "Sapling",
+  "stageGrowingTree": "Growing Tree",
+  "stageMature": "Mature",
+  "tierSeedling": "Seedling",
+  "tierSapling": "Sapling",
+  "tierYoungOak": "Young Oak",
+  "tierMatureOak": "Mature Oak",
+  "tierToweringOak": "Towering Oak",
+  "tierAncientOak": "Ancient Oak"
 }

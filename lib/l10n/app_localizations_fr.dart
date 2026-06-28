@@ -1054,4 +1054,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String onDate(String date) {
     return 'le $date';
   }
+
+  @override
+  String get stageSeed => 'Graine';
+
+  @override
+  String get stageSprout => 'Pousse';
+
+  @override
+  String get stageYoungSapling => 'Jeune arbre';
+
+  @override
+  String get stageSapling => 'Arbre';
+
+  @override
+  String get stageGrowingTree => 'Arbre en croissance';
+
+  @override
+  String get stageMature => 'Adulte';
+
+  @override
+  String get tierSeedling => 'Jeune pousse';
+
+  @override
+  String get tierSapling => 'Arbre';
+
+  @override
+  String get tierYoungOak => 'Jeune chêne';
+
+  @override
+  String get tierMatureOak => 'Chêne adulte';
+
+  @override
+  String get tierToweringOak => 'Chêne imposant';
+
+  @override
+  String get tierAncientOak => 'Chêne ancien';
 }

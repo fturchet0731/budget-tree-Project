@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/goal_labels.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../services/category_repository.dart';
@@ -649,8 +650,9 @@ class _GoalCardState extends State<_GoalCard> {
                                   ? AppLocalizations.of(context).goalReached
                                   : AppLocalizations.of(context).completedCheck)
                               : goal.isUncapped
-                                  ? goal.tierName
-                                  : '${(goal.progress * 100).toStringAsFixed(0)}% · ${goal.stageName}',
+                                  ? goal.localizedTierName(
+                                      AppLocalizations.of(context))
+                                  : '${(goal.progress * 100).toStringAsFixed(0)}% · ${goal.localizedStageName(AppLocalizations.of(context))}',
                           style: GoogleFonts.nunito(
                             color: complete
                                 ? const Color(0xFFFFD54F)

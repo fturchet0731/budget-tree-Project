@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/goal_labels.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
@@ -368,7 +369,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       await showCelebration(
         context,
         title: l.newGrowthTitle,
-        message: l.newGrowthMsg(_goal.name, _goal.tier, _goal.tierName),
+        message: l.newGrowthMsg(_goal.name, _goal.tier, _goal.localizedTierName(l)),
         icon: Icons.nature,
         color: AppColors.lightLeaf,
         buttonLabel: l.keepGrowing,
@@ -381,7 +382,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
         context,
         title: l.milestoneTitle,
         message: l.milestoneMsg(
-            _goal.name, _goal.stageName, (_goal.progress * 100).round()),
+            _goal.name, _goal.localizedStageName(l), (_goal.progress * 100).round()),
         icon: Icons.local_florist,
         color: AppColors.lightLeaf,
         buttonLabel: l.nice,
@@ -696,7 +697,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            _goal.stageName,
+                            _goal.localizedStageName(l),
                             style: GoogleFonts.nunito(
                                 color: Colors.white.withValues(alpha: 0.85),
                                 fontSize: 12),
@@ -783,7 +784,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                             const SizedBox(height: 2),
                             Text(
                               _goal.isUncapped
-                                  ? '${_goal.tier} · ${_goal.tierName}'
+                                  ? '${_goal.tier} · ${_goal.localizedTierName(l)}'
                                   : '\$${_goal.targetAmount.toStringAsFixed(0)}',
                               style: GoogleFonts.nunito(
                                 color: Colors.white.withValues(alpha: 0.85),
@@ -815,7 +816,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                       children: [
                         Text(
                           _goal.isUncapped
-                              ? _goal.tierName
+                              ? _goal.localizedTierName(l)
                               : l.percentGrown(
                                   (_displayedProgress * 100).round()),
                           style: GoogleFonts.nunito(

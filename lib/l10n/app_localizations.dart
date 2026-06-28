@@ -1875,6 +1875,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'on {date}'**
   String onDate(String date);
+
+  /// No description provided for @stageSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get stageSeed;
+
+  /// No description provided for @stageSprout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sprout'**
+  String get stageSprout;
+
+  /// No description provided for @stageYoungSapling.
+  ///
+  /// In en, this message translates to:
+  /// **'Young Sapling'**
+  String get stageYoungSapling;
+
+  /// No description provided for @stageSapling.
+  ///
+  /// In en, this message translates to:
+  /// **'Sapling'**
+  String get stageSapling;
+
+  /// No description provided for @stageGrowingTree.
+  ///
+  /// In en, this message translates to:
+  /// **'Growing Tree'**
+  String get stageGrowingTree;
+
+  /// No description provided for @stageMature.
+  ///
+  /// In en, this message translates to:
+  /// **'Mature'**
+  String get stageMature;
+
+  /// No description provided for @tierSeedling.
+  ///
+  /// In en, this message translates to:
+  /// **'Seedling'**
+  String get tierSeedling;
+
+  /// No description provided for @tierSapling.
+  ///
+  /// In en, this message translates to:
+  /// **'Sapling'**
+  String get tierSapling;
+
+  /// No description provided for @tierYoungOak.
+  ///
+  /// In en, this message translates to:
+  /// **'Young Oak'**
+  String get tierYoungOak;
+
+  /// No description provided for @tierMatureOak.
+  ///
+  /// In en, this message translates to:
+  /// **'Mature Oak'**
+  String get tierMatureOak;
+
+  /// No description provided for @tierToweringOak.
+  ///
+  /// In en, this message translates to:
+  /// **'Towering Oak'**
+  String get tierToweringOak;
+
+  /// No description provided for @tierAncientOak.
+  ///
+  /// In en, this message translates to:
+  /// **'Ancient Oak'**
+  String get tierAncientOak;
 }
 
 class _AppLocalizationsDelegate

@@ -310,5 +310,18 @@
   "timeInDays": "en {count} días",
   "nextPayLine": "próximo pago {when}",
   "todayShort": "hoy",
-  "onDate": "el {date}"
+  "onDate": "el {date}",
+
+  "stageSeed": "Semilla",
+  "stageSprout": "Brote",
+  "stageYoungSapling": "Arbolito joven",
+  "stageSapling": "Arbolito",
+  "stageGrowingTree": "Árbol en crecimiento",
+  "stageMature": "Maduro",
+  "tierSeedling": "Plántula",
+  "tierSapling": "Arbolito",
+  "tierYoungOak": "Roble joven",
+  "tierMatureOak": "Roble maduro",
+  "tierToweringOak": "Roble imponente",
+  "tierAncientOak": "Roble antiguo"
 }

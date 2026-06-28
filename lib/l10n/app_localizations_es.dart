@@ -1050,4 +1050,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String onDate(String date) {
     return 'el $date';
   }
+
+  @override
+  String get stageSeed => 'Semilla';
+
+  @override
+  String get stageSprout => 'Brote';
+
+  @override
+  String get stageYoungSapling => 'Arbolito joven';
+
+  @override
+  String get stageSapling => 'Arbolito';
+
+  @override
+  String get stageGrowingTree => 'Árbol en crecimiento';
+
+  @override
+  String get stageMature => 'Maduro';
+
+  @override
+  String get tierSeedling => 'Plántula';
+
+  @override
+  String get tierSapling => 'Arbolito';
+
+  @override
+  String get tierYoungOak => 'Roble joven';
+
+  @override
+  String get tierMatureOak => 'Roble maduro';
+
+  @override
+  String get tierToweringOak => 'Roble imponente';
+
+  @override
+  String get tierAncientOak => 'Roble antiguo';
 }

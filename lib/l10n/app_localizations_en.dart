@@ -1042,4 +1042,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String onDate(String date) {
     return 'on $date';
   }
+
+  @override
+  String get stageSeed => 'Seed';
+
+  @override
+  String get stageSprout => 'Sprout';
+
+  @override
+  String get stageYoungSapling => 'Young Sapling';
+
+  @override
+  String get stageSapling => 'Sapling';
+
+  @override
+  String get stageGrowingTree => 'Growing Tree';
+
+  @override
+  String get stageMature => 'Mature';
+
+  @override
+  String get tierSeedling => 'Seedling';
+
+  @override
+  String get tierSapling => 'Sapling';
+
+  @override
+  String get tierYoungOak => 'Young Oak';
+
+  @override
+  String get tierMatureOak => 'Mature Oak';
+
+  @override
+  String get tierToweringOak => 'Towering Oak';
+
+  @override
+  String get tierAncientOak => 'Ancient Oak';
 }

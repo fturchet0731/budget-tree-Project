@@ -310,5 +310,18 @@
   "timeInDays": "dans {count} jours",
   "nextPayLine": "prochaine paie {when}",
   "todayShort": "aujourd'hui",
-  "onDate": "le {date}"
+  "onDate": "le {date}",
+
+  "stageSeed": "Graine",
+  "stageSprout": "Pousse",
+  "stageYoungSapling": "Jeune arbre",
+  "stageSapling": "Arbre",
+  "stageGrowingTree": "Arbre en croissance",
+  "stageMature": "Adulte",
+  "tierSeedling": "Jeune pousse",
+  "tierSapling": "Arbre",
+  "tierYoungOak": "Jeune chêne",
+  "tierMatureOak": "Chêne adulte",
+  "tierToweringOak": "Chêne imposant",
+  "tierAncientOak": "Chêne ancien"
 }
