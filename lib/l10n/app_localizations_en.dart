@@ -1785,11 +1785,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vinePlan => 'Plan';
 
   @override
-  String get rankImportance => 'Rank by Importance';
+  String get yourExpenses => 'Your Expenses';
 
   @override
-  String get rankImportanceHint =>
-      'Drag to order your branches from most to least important. The coach funds the important ones first.';
+  String get describeYourBudget => 'Describe Your Budget';
+
+  @override
+  String get describeYourBudgetHint =>
+      'Tell the coach how you want your money to work. For example, save hard for a trip, keep some fun money, or cover the essentials first.';
+
+  @override
+  String get budgetIdeaSaveHard => 'Save as much as possible';
+
+  @override
+  String get budgetIdeaBalanced => 'Balanced lifestyle';
+
+  @override
+  String get budgetIdeaEssentials => 'Cover the essentials first';
+
+  @override
+  String get budgetIdeaDebt => 'Pay off debt fast';
+
+  @override
+  String get amountOptionalLabel => 'Amount (optional)';
+
+  @override
+  String get amountOptionalHint =>
+      'Not sure how much? Leave it blank and let the coach decide.';
 
   @override
   String get pickAPlan => 'Pick a plan';
@@ -1824,10 +1846,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tutStepPlanA =>
-      'Now the fun part. Tell me which branches matter most.';
+      'Now the fun part. Tell me what you want your budget to feel like.';
 
   @override
-  String get tutStepPlanB => 'I will suggest a few ways to split your income.';
+  String get tutStepPlanB =>
+      'I will suggest a few ways to split your income that fit what you said.';
 
   @override
   String get tutStepPlanC =>
@@ -1893,4 +1916,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiCoachNeedsOnline => 'Sign in and connect to use the AI coach.';
+
+  @override
+  String get goalStepName => 'Name';
+
+  @override
+  String get goalStepAmount => 'Amount';
+
+  @override
+  String get aiPlanPromptTitle => 'Want help planning?';
+
+  @override
+  String get aiPlanPromptBody =>
+      'The coach can suggest how much to save each month and dates that fit your income. Or set it up yourself.';
+
+  @override
+  String get setItUpMyself => 'I will set it up myself';
 }

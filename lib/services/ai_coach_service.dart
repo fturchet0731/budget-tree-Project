@@ -60,10 +60,13 @@ class AiCoachService {
     }
   }
 
-  /// Ask for 2-3 allocation plans for [income] across the ranked [expenses].
+  /// Ask for 2-3 allocation plans for [income] across [expenses], shaped by the
+  /// user's free-text [synopsis] of how they want their budget to feel. Any
+  /// expense with a fixed amount is kept; the rest are chosen by the coach.
   Future<List<AllocationPlan>> budgetPlans({
     required double income,
-    required List<RankedExpense> expenses,
+    required List<BudgetExpenseInput> expenses,
+    String synopsis = '',
     String currency = '\$',
   }) async {
     final data = await _invoke({
@@ -71,6 +74,7 @@ class AiCoachService {
       'income': income,
       'currency': currency,
       'locale': _locale,
+      'synopsis': synopsis,
       'expenses': expenses.map((e) => e.toJson()).toList(),
     });
     final plans = AllocationPlan.listFrom(data);

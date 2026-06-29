@@ -22,6 +22,7 @@ import '../widgets/app_scrollbar.dart';
 import '../widgets/bark_card.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/sapling_view.dart';
+import '../widgets/vine_step_indicator.dart';
 
 class CreateGoalScreen extends StatefulWidget {
   const CreateGoalScreen({super.key});
@@ -40,6 +41,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   bool _uncapped = false;
   bool _saving = false;
 
+  // Wizard step: 0 Name, 1 Amount, 2 Plan & details.
+  int _gStep = 0;
+
+  // Whether to plan this goal with the coach. null = the user hasn't been asked
+  // yet (we show the prompt before computing anything). Defaults straight to
+  // manual when the AI coach isn't available so we don't dangle a dead option.
+  bool? _useAi;
+
   // Target date + AI contribution plan.
   DateTime? _targetDate;
   bool _planLoading = false;
@@ -48,11 +57,29 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   double? _fallbackMonthly; // offline simple math
 
   @override
+  void initState() {
+    super.initState();
+    if (!AiCoachService.instance.isAvailable) _useAi = false;
+  }
+
+  @override
   void dispose() {
     _nameCtrl.dispose();
     _targetCtrl.dispose();
     _descCtrl.dispose();
     super.dispose();
+  }
+
+  /// Whether the current wizard step is complete enough to move forward.
+  bool get _canAdvance {
+    switch (_gStep) {
+      case 0:
+        return _nameCtrl.text.trim().isNotEmpty;
+      case 1:
+        return _uncapped || (double.tryParse(_targetCtrl.text) ?? 0) > 0;
+      default:
+        return true;
+    }
   }
 
   bool get _canSave {
@@ -160,7 +187,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     if (date == null || target <= 0) return;
     final transient = Goal(name: _nameCtrl.text.trim(), targetAmount: target);
 
-    if (!AiCoachService.instance.isAvailable) {
+    // Honour the user's choice: manual (or no AI available) just does the
+    // simple offline math; only AI mode hits the coach.
+    if (_useAi != true || !AiCoachService.instance.isAvailable) {
       setState(
         () => _fallbackMonthly = GoalPlanMath.monthlyToReach(transient, date),
       );
@@ -282,7 +311,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           SafeArea(
             child: Column(
               children: [
-                _Header(onBack: () => Navigator.pop(context)),
+                _Header(
+                  onBack: _gStep == 0
+                      ? () => Navigator.pop(context)
+                      : () => setState(() => _gStep--),
+                ),
                 // Live sapling preview
                 _SaplingPreviewBanner(
                   progress: _previewProgress,
@@ -291,326 +324,364 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                   goalName: hasName ? _nameCtrl.text.trim() : l.newSapling,
                   category: _pickedCategory,
                 ),
+                VineStepIndicator(
+                  currentStep: _gStep,
+                  steps: [
+                    VineStep(label: l.goalStepName, icon: Icons.spa),
+                    VineStep(
+                      label: l.goalStepAmount,
+                      icon: Icons.flag_outlined,
+                    ),
+                    VineStep(label: l.vinePlan, icon: Icons.auto_awesome),
+                  ],
+                ),
                 Expanded(
                   child: AppScrollbar(
                     builder: (controller) => ListView(
                       controller: controller,
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                       children: [
-                        // ── About this goal ──────────
-                        BarkCard(
-                          label: l.aboutThisGoal,
-                          icon: Icons.spa,
-                          child: Column(
-                            children: [
-                              TextField(
-                                controller: _nameCtrl,
-                                style: const TextStyle(
-                                  color: AppColors.stoneBeigeColor,
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: l.goalName,
-                                  hintText: l.goalNameHint,
-                                  prefixIcon: const Icon(
-                                    Icons.spa,
-                                    color: AppColors.mossGreen,
-                                  ),
-                                ),
-                                textCapitalization: TextCapitalization.words,
-                                onChanged: (_) => setState(() {}),
-                              ),
-                              const SizedBox(height: 14),
-                              TextField(
-                                controller: _descCtrl,
-                                style: const TextStyle(
-                                  color: AppColors.stoneBeigeColor,
-                                ),
-                                maxLines: 2,
-                                decoration: InputDecoration(
-                                  labelText: l.notesOptional,
-                                  hintText: l.notesHint,
-                                  prefixIcon: const Icon(
-                                    Icons.notes_outlined,
-                                    color: AppColors.mossGreen,
-                                  ),
-                                ),
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-
-                        // ── Target ─────────────────────
-                        BarkCard(
-                          label: l.howMuch,
-                          icon: Icons.flag_outlined,
-                          accent: AppColors.leafYellow,
-                          child: Column(
-                            children: [
-                              AnimatedOpacity(
-                                duration: const Duration(milliseconds: 200),
-                                opacity: _uncapped ? 0.4 : 1.0,
-                                child: TextField(
-                                  controller: _targetCtrl,
-                                  enabled: !_uncapped,
+                        if (_gStep == 0) ...[
+                          // ── About this goal ──────────
+                          BarkCard(
+                            label: l.aboutThisGoal,
+                            icon: Icons.spa,
+                            child: Column(
+                              children: [
+                                TextField(
+                                  controller: _nameCtrl,
                                   style: const TextStyle(
                                     color: AppColors.stoneBeigeColor,
                                   ),
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'[0-9.]'),
-                                    ),
-                                  ],
                                   decoration: InputDecoration(
-                                    labelText: l.targetAmount,
-                                    hintText: l.targetHint,
+                                    labelText: l.goalName,
+                                    hintText: l.goalNameHint,
                                     prefixIcon: const Icon(
-                                      Icons.flag_outlined,
+                                      Icons.spa,
                                       color: AppColors.mossGreen,
                                     ),
-                                    prefixText: '\$ ',
                                   ),
+                                  textCapitalization: TextCapitalization.words,
                                   onChanged: (_) => setState(() {}),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              // Grow-forever toggle styled as a leafy switch
-                              InkWell(
-                                onTap: () =>
-                                    setState(() => _uncapped = !_uncapped),
-                                borderRadius: BorderRadius.circular(12),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 220),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
+                                const SizedBox(height: 14),
+                                TextField(
+                                  controller: _descCtrl,
+                                  style: const TextStyle(
+                                    color: AppColors.stoneBeigeColor,
                                   ),
-                                  decoration: BoxDecoration(
-                                    gradient: _uncapped
-                                        ? LinearGradient(
-                                            colors: [
-                                              AppColors.forestGreen.withValues(
-                                                alpha: 0.50,
-                                              ),
-                                              AppColors.darkBark,
-                                            ],
-                                          )
-                                        : null,
-                                    color: _uncapped ? null : AppColors.soilMid,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: _uncapped
-                                          ? AppColors.lightLeaf.withValues(
-                                              alpha: 0.8,
-                                            )
-                                          : AppColors.mossGreen.withValues(
-                                              alpha: 0.35,
-                                            ),
-                                      width: _uncapped ? 1.5 : 1,
+                                  maxLines: 2,
+                                  decoration: InputDecoration(
+                                    labelText: l.notesOptional,
+                                    hintText: l.notesHint,
+                                    prefixIcon: const Icon(
+                                      Icons.notes_outlined,
+                                      color: AppColors.mossGreen,
                                     ),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 220,
-                                        ),
-                                        width: 24,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: _uncapped
-                                              ? AppColors.lightLeaf
-                                              : Colors.transparent,
-                                          border: Border.all(
-                                            color: _uncapped
-                                                ? AppColors.lightLeaf
-                                                : AppColors.mossGreen
-                                                      .withValues(alpha: 0.6),
-                                            width: 1.6,
-                                          ),
-                                        ),
-                                        child: _uncapped
-                                            ? const Icon(
-                                                Icons.all_inclusive,
-                                                color: Colors.white,
-                                                size: 14,
-                                              )
-                                            : null,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              l.growForever,
-                                              style: GoogleFonts.nunito(
-                                                color:
-                                                    AppColors.stoneBeigeColor,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              l.growForeverDesc,
-                                              style: GoogleFonts.nunito(
-                                                color: AppColors.mossGreen,
-                                                fontSize: 11,
-                                                height: 1.45,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-
-                        // ── When + AI plan (capped goals only) ──
-                        if (!_uncapped) ...[
-                          BarkCard(
-                            label: l.targetDateLabel,
-                            icon: Icons.event_outlined,
-                            accent: AppColors.riverBlue,
-                            child: _PlanSection(
-                              targetDate: _targetDate,
-                              loading: _planLoading,
-                              error: _planError,
-                              result: _planResult,
-                              fallbackMonthly: _fallbackMonthly,
-                              recommendedMonthly: _recommendedMonthly,
-                              canPlan:
-                                  (double.tryParse(_targetCtrl.text) ?? 0) > 0,
-                              aiAvailable: AiCoachService.instance.isAvailable,
-                              onPickDate: _pickDate,
-                              onGenerate: _generatePlan,
-                              onApplyDate: (d) =>
-                                  setState(() => _targetDate = d),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 14),
                         ],
 
-                        // ── Icon ───────────────────────
-                        BarkCard(
-                          label: l.iconLabel,
-                          icon: Icons.local_florist_outlined,
-                          child: Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: GoalIcons.presets.map((p) {
-                              final (key, _, icon) = p;
-                              final selected = _iconKey == key;
-                              return GestureDetector(
-                                onTap: () => setState(() => _iconKey = key),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 160),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: selected
-                                        ? AppColors.forestGreen.withValues(
-                                            alpha: 0.45,
-                                          )
-                                        : AppColors.soilMid,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: selected
-                                          ? AppColors.lightLeaf
-                                          : AppColors.mossGreen.withValues(
-                                              alpha: 0.4,
-                                            ),
-                                      width: selected ? 1.5 : 1,
+                        // ── Target ─────────────────────
+                        if (_gStep == 1) ...[
+                          BarkCard(
+                            label: l.howMuch,
+                            icon: Icons.flag_outlined,
+                            accent: AppColors.leafYellow,
+                            child: Column(
+                              children: [
+                                AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 200),
+                                  opacity: _uncapped ? 0.4 : 1.0,
+                                  child: TextField(
+                                    controller: _targetCtrl,
+                                    enabled: !_uncapped,
+                                    style: const TextStyle(
+                                      color: AppColors.stoneBeigeColor,
                                     ),
-                                    boxShadow: selected
-                                        ? [
-                                            BoxShadow(
-                                              color: AppColors.lightLeaf
-                                                  .withValues(alpha: 0.30),
-                                              blurRadius: 8,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        icon,
-                                        size: 15,
-                                        color: selected
-                                            ? AppColors.lightLeaf
-                                            : AppColors.mossGreen,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        goalIconLabel(l, key),
-                                        style: GoogleFonts.nunito(
-                                          color: selected
-                                              ? AppColors.lightLeaf
-                                              : AppColors.stoneBeigeColor,
-                                          fontSize: 12.5,
-                                          fontWeight: selected
-                                              ? FontWeight.bold
-                                              : FontWeight.w500,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
                                         ),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9.]'),
                                       ),
                                     ],
+                                    decoration: InputDecoration(
+                                      labelText: l.targetAmount,
+                                      hintText: l.targetHint,
+                                      prefixIcon: const Icon(
+                                        Icons.flag_outlined,
+                                        color: AppColors.mossGreen,
+                                      ),
+                                      prefixText: '\$ ',
+                                    ),
+                                    onChanged: (_) => setState(() {}),
                                   ),
                                 ),
-                              );
-                            }).toList(),
+                                const SizedBox(height: 12),
+                                // Grow-forever toggle styled as a leafy switch
+                                InkWell(
+                                  onTap: () =>
+                                      setState(() => _uncapped = !_uncapped),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 220),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: _uncapped
+                                          ? LinearGradient(
+                                              colors: [
+                                                AppColors.forestGreen
+                                                    .withValues(alpha: 0.50),
+                                                AppColors.darkBark,
+                                              ],
+                                            )
+                                          : null,
+                                      color: _uncapped
+                                          ? null
+                                          : AppColors.soilMid,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: _uncapped
+                                            ? AppColors.lightLeaf.withValues(
+                                                alpha: 0.8,
+                                              )
+                                            : AppColors.mossGreen.withValues(
+                                                alpha: 0.35,
+                                              ),
+                                        width: _uncapped ? 1.5 : 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        AnimatedContainer(
+                                          duration: const Duration(
+                                            milliseconds: 220,
+                                          ),
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: _uncapped
+                                                ? AppColors.lightLeaf
+                                                : Colors.transparent,
+                                            border: Border.all(
+                                              color: _uncapped
+                                                  ? AppColors.lightLeaf
+                                                  : AppColors.mossGreen
+                                                        .withValues(alpha: 0.6),
+                                              width: 1.6,
+                                            ),
+                                          ),
+                                          child: _uncapped
+                                              ? const Icon(
+                                                  Icons.all_inclusive,
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                )
+                                              : null,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                l.growForever,
+                                                style: GoogleFonts.nunito(
+                                                  color:
+                                                      AppColors.stoneBeigeColor,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                l.growForeverDesc,
+                                                style: GoogleFonts.nunito(
+                                                  color: AppColors.mossGreen,
+                                                  fontSize: 11,
+                                                  height: 1.45,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 14),
+                          const SizedBox(height: 14),
+                        ],
+
+                        // ── Plan: ask to use AI, then date + plan ──
+                        if (_gStep == 2 && !_uncapped) ...[
+                          if (_useAi == null)
+                            _AiPrompt(
+                              onAi: () => setState(() => _useAi = true),
+                              onManual: () => setState(() => _useAi = false),
+                            )
+                          else
+                            BarkCard(
+                              label: l.targetDateLabel,
+                              icon: Icons.event_outlined,
+                              accent: AppColors.riverBlue,
+                              child: _PlanSection(
+                                targetDate: _targetDate,
+                                loading: _planLoading,
+                                error: _planError,
+                                result: _planResult,
+                                fallbackMonthly: _fallbackMonthly,
+                                recommendedMonthly: _recommendedMonthly,
+                                canPlan:
+                                    (double.tryParse(_targetCtrl.text) ?? 0) >
+                                    0,
+                                aiAvailable:
+                                    AiCoachService.instance.isAvailable &&
+                                    _useAi == true,
+                                onPickDate: _pickDate,
+                                onGenerate: _generatePlan,
+                                onApplyDate: (d) =>
+                                    setState(() => _targetDate = d),
+                              ),
+                            ),
+                          const SizedBox(height: 14),
+                        ],
+
+                        // ── Icon ───────────────────────
+                        if (_gStep == 0) ...[
+                          BarkCard(
+                            label: l.iconLabel,
+                            icon: Icons.local_florist_outlined,
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: GoalIcons.presets.map((p) {
+                                final (key, _, icon) = p;
+                                final selected = _iconKey == key;
+                                return GestureDetector(
+                                  onTap: () => setState(() => _iconKey = key),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 160),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? AppColors.forestGreen.withValues(
+                                              alpha: 0.45,
+                                            )
+                                          : AppColors.soilMid,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: selected
+                                            ? AppColors.lightLeaf
+                                            : AppColors.mossGreen.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                        width: selected ? 1.5 : 1,
+                                      ),
+                                      boxShadow: selected
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.lightLeaf
+                                                    .withValues(alpha: 0.30),
+                                                blurRadius: 8,
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          icon,
+                                          size: 15,
+                                          color: selected
+                                              ? AppColors.lightLeaf
+                                              : AppColors.mossGreen,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          goalIconLabel(l, key),
+                                          style: GoogleFonts.nunito(
+                                            color: selected
+                                                ? AppColors.lightLeaf
+                                                : AppColors.stoneBeigeColor,
+                                            fontSize: 12.5,
+                                            fontWeight: selected
+                                                ? FontWeight.bold
+                                                : FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
 
                         // ── Group ──────────────────────
-                        BarkCard(
-                          label: l.groupOptional,
-                          icon: Icons.label_outline,
-                          accent: AppColors.riverBlue,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l.groupNote,
-                                style: GoogleFonts.nunito(
-                                  color: AppColors.mossGreen.withValues(
-                                    alpha: 0.85,
+                        if (_gStep == 2) ...[
+                          BarkCard(
+                            label: l.groupOptional,
+                            icon: Icons.label_outline,
+                            accent: AppColors.riverBlue,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l.groupNote,
+                                  style: GoogleFonts.nunito(
+                                    color: AppColors.mossGreen.withValues(
+                                      alpha: 0.85,
+                                    ),
+                                    fontSize: 11.5,
+                                    height: 1.4,
                                   ),
-                                  fontSize: 11.5,
-                                  height: 1.4,
                                 ),
-                              ),
-                              const SizedBox(height: 10),
-                              CategoryPicker(
-                                selectedCategoryId: _categoryId,
-                                onChanged: _resolveCategory,
-                              ),
-                            ],
+                                const SizedBox(height: 10),
+                                CategoryPicker(
+                                  selectedCategoryId: _categoryId,
+                                  onChanged: _resolveCategory,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
                 ),
-                _PlantButton(canSave: _canSave, saving: _saving, onTap: _save),
+                _gStep < 2
+                    ? _NextButton(
+                        enabled: _canAdvance,
+                        onTap: () => setState(() => _gStep++),
+                      )
+                    : _PlantButton(
+                        canSave: _canSave,
+                        saving: _saving,
+                        onTap: _save,
+                      ),
               ],
             ),
           ),
@@ -1224,6 +1295,110 @@ class _PlanSection extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// AI opt-in prompt — shown before anything is calculated
+// ──────────────────────────────────────────────
+
+class _AiPrompt extends StatelessWidget {
+  final VoidCallback onAi;
+  final VoidCallback onManual;
+  const _AiPrompt({required this.onAi, required this.onManual});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return BarkCard(
+      label: l.aiPlanPromptTitle,
+      icon: Icons.auto_awesome,
+      accent: AppColors.leafYellow,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.aiPlanPromptBody,
+            style: GoogleFonts.nunito(
+              color: AppColors.mossGreen.withValues(alpha: 0.9),
+              fontSize: 12.5,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onAi,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.forestGreen,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.auto_awesome, color: Colors.white),
+              label: Text(
+                l.planWithAi,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: TextButton(
+              onPressed: onManual,
+              child: Text(l.setItUpMyself),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Wizard "Next" button (mirrors the plant button styling, lighter)
+// ──────────────────────────────────────────────
+
+class _NextButton extends StatelessWidget {
+  final bool enabled;
+  final VoidCallback onTap;
+  const _NextButton({required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: enabled ? onTap : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.forestGreen,
+            disabledBackgroundColor: AppColors.darkBark,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          icon: const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+          label: Text(
+            l.next,
+            style: GoogleFonts.fredoka(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              fontSize: 16,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -82,17 +82,20 @@ async function budgetPlans(body: Record<string, unknown>) {
   const income = Number(body.income) || 0;
   const currency = String(body.currency ?? "$");
   const locale = String(body.locale ?? "en");
-  const expenses = (body.expenses as Array<{ name: string; rank: number }>) ??
-    [];
+  const synopsis = String(body.synopsis ?? "").trim();
+  // Each expense may carry a fixed amount the user already decided, or 0/absent
+  // meaning the coach should choose it.
+  const expenses =
+    (body.expenses as Array<{ name: string; amount?: number }>) ?? [];
 
   const system =
-    `You are a friendly personal budgeting coach. Given a monthly income and a ranked list of expense categories (rank 1 is most important), produce 2 or 3 distinct allocation plans. ${
+    `You are a friendly personal budgeting coach. The user gives a monthly income, a list of expense categories (each with an amount they already decided, or 0 meaning you choose it), and a short description of how they want their budget to feel. Produce 2 or 3 distinct allocation plans that honour that description. ${
       LOCALE_NOTE(locale)
     } Respond with ONLY a JSON object, no prose, of the shape:
 {"plans":[{"name":string,"items":[{"name":string,"amount":number}],"leftover":number,"rationale":string}]}
-Rules: every input expense MUST appear in every plan's items. amount values are whole numbers in ${currency}. For each plan, the sum of all item amounts plus leftover MUST equal exactly ${income}. leftover represents money left for savings or goals. Higher ranked expenses get funded more dependably. Give the plans clear distinct names (for example a balanced plan, an aggressive savings plan, and an essentials-first plan). Keep each rationale to one sentence.`;
+Rules: every input expense MUST appear in every plan's items. If an expense has an amount greater than 0, treat it as fixed and use exactly that amount in every plan; only choose amounts for the expenses left at 0. amount values are whole numbers in ${currency}. For each plan, the sum of all item amounts plus leftover MUST equal exactly ${income}. leftover represents money left for savings or goals. Let the user's description drive how you weight categories and savings, and give each plan a clear distinct name that reflects a different reading of what they asked for. Keep each rationale to one sentence that ties back to their description.`;
 
-  const user = JSON.stringify({ income, currency, expenses });
+  const user = JSON.stringify({ income, currency, synopsis, expenses });
   const { text } = await callClaude(system, user, 1024);
   const parsed = extractJson<{ plans: unknown[] }>(text);
   if (!Array.isArray(parsed.plans) || parsed.plans.length === 0) {

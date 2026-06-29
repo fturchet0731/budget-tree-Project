@@ -2,14 +2,15 @@
 // returns strict JSON; these parse it defensively so a malformed field never
 // crashes the UI (callers degrade to the manual flow on a thrown error).
 
-/// An expense the user declared, with a 1-based importance rank (1 = most
-/// important). Sent to the `budget_plans` action.
-class RankedExpense {
+/// An expense the user declared, with an optional fixed amount. Amount 0 means
+/// "the user hasn't decided, let the coach choose"; a positive amount is a fixed
+/// value the coach must keep. Sent to the `budget_plans` action.
+class BudgetExpenseInput {
   final String name;
-  final int rank;
-  const RankedExpense({required this.name, required this.rank});
+  final double amount;
+  const BudgetExpenseInput({required this.name, this.amount = 0});
 
-  Map<String, dynamic> toJson() => {'name': name, 'rank': rank};
+  Map<String, dynamic> toJson() => {'name': name, 'amount': amount};
 }
 
 /// One line of an allocation plan: a category and the dollars assigned to it.

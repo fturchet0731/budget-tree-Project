@@ -293,13 +293,13 @@ class _LeafGrid extends StatelessWidget {
                 builder: (ctx, c) {
                   final w = c.maxWidth;
                   final h = c.maxHeight;
-                  const leafW = 0.42; // % of parent width
-                  const leafH = 0.30;
+                  const leafW = 0.44; // % of parent width
+                  const leafH = 0.33;
                   return Stack(
                     children: [
                       _placeLeaf(
                         left: w * 0.04,
-                        top: h * 0.04,
+                        top: h * 0.11,
                         width: w * leafW,
                         height: h * leafH,
                         child: _LeafButton(
@@ -313,7 +313,7 @@ class _LeafGrid extends StatelessWidget {
                       ),
                       _placeLeaf(
                         right: w * 0.04,
-                        top: h * 0.04,
+                        top: h * 0.11,
                         width: w * leafW,
                         height: h * leafH,
                         child: _LeafButton(
@@ -327,7 +327,7 @@ class _LeafGrid extends StatelessWidget {
                       ),
                       _placeLeaf(
                         left: w * 0.04,
-                        bottom: h * 0.04,
+                        bottom: h * 0.11,
                         width: w * leafW,
                         height: h * leafH,
                         child: _LeafButton(
@@ -341,7 +341,7 @@ class _LeafGrid extends StatelessWidget {
                       ),
                       _placeLeaf(
                         right: w * 0.04,
-                        bottom: h * 0.04,
+                        bottom: h * 0.11,
                         width: w * leafW,
                         height: h * leafH,
                         child: _LeafButton(

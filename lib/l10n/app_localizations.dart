@@ -3130,17 +3130,59 @@ abstract class AppLocalizations {
   /// **'Plan'**
   String get vinePlan;
 
-  /// No description provided for @rankImportance.
+  /// No description provided for @yourExpenses.
   ///
   /// In en, this message translates to:
-  /// **'Rank by Importance'**
-  String get rankImportance;
+  /// **'Your Expenses'**
+  String get yourExpenses;
 
-  /// No description provided for @rankImportanceHint.
+  /// No description provided for @describeYourBudget.
   ///
   /// In en, this message translates to:
-  /// **'Drag to order your branches from most to least important. The coach funds the important ones first.'**
-  String get rankImportanceHint;
+  /// **'Describe Your Budget'**
+  String get describeYourBudget;
+
+  /// No description provided for @describeYourBudgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the coach how you want your money to work. For example, save hard for a trip, keep some fun money, or cover the essentials first.'**
+  String get describeYourBudgetHint;
+
+  /// No description provided for @budgetIdeaSaveHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as much as possible'**
+  String get budgetIdeaSaveHard;
+
+  /// No description provided for @budgetIdeaBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced lifestyle'**
+  String get budgetIdeaBalanced;
+
+  /// No description provided for @budgetIdeaEssentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover the essentials first'**
+  String get budgetIdeaEssentials;
+
+  /// No description provided for @budgetIdeaDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay off debt fast'**
+  String get budgetIdeaDebt;
+
+  /// No description provided for @amountOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (optional)'**
+  String get amountOptionalLabel;
+
+  /// No description provided for @amountOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure how much? Leave it blank and let the coach decide.'**
+  String get amountOptionalHint;
 
   /// No description provided for @pickAPlan.
   ///
@@ -3205,13 +3247,13 @@ abstract class AppLocalizations {
   /// No description provided for @tutStepPlanA.
   ///
   /// In en, this message translates to:
-  /// **'Now the fun part. Tell me which branches matter most.'**
+  /// **'Now the fun part. Tell me what you want your budget to feel like.'**
   String get tutStepPlanA;
 
   /// No description provided for @tutStepPlanB.
   ///
   /// In en, this message translates to:
-  /// **'I will suggest a few ways to split your income.'**
+  /// **'I will suggest a few ways to split your income that fit what you said.'**
   String get tutStepPlanB;
 
   /// No description provided for @tutStepPlanC.
@@ -3327,6 +3369,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in and connect to use the AI coach.'**
   String get aiCoachNeedsOnline;
+
+  /// No description provided for @goalStepName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get goalStepName;
+
+  /// No description provided for @goalStepAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get goalStepAmount;
+
+  /// No description provided for @aiPlanPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want help planning?'**
+  String get aiPlanPromptTitle;
+
+  /// No description provided for @aiPlanPromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The coach can suggest how much to save each month and dates that fit your income. Or set it up yourself.'**
+  String get aiPlanPromptBody;
+
+  /// No description provided for @setItUpMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'I will set it up myself'**
+  String get setItUpMyself;
 }
 
 class _AppLocalizationsDelegate

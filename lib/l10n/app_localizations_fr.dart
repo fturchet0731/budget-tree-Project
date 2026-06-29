@@ -1805,11 +1805,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vinePlan => 'Plan';
 
   @override
-  String get rankImportance => 'Classer par importance';
+  String get yourExpenses => 'Vos dépenses';
 
   @override
-  String get rankImportanceHint =>
-      'Faites glisser pour classer vos branches de la plus importante à la moins importante. Le coach finance d\'abord les plus importantes.';
+  String get describeYourBudget => 'Décrivez votre budget';
+
+  @override
+  String get describeYourBudgetHint =>
+      'Dites au coach comment vous voulez gérer votre argent. Par exemple, épargner fort pour un voyage, garder de l\'argent pour les loisirs, ou couvrir d\'abord l\'essentiel.';
+
+  @override
+  String get budgetIdeaSaveHard => 'Épargner le plus possible';
+
+  @override
+  String get budgetIdeaBalanced => 'Mode de vie équilibré';
+
+  @override
+  String get budgetIdeaEssentials => 'Couvrir d\'abord l\'essentiel';
+
+  @override
+  String get budgetIdeaDebt => 'Rembourser vite mes dettes';
+
+  @override
+  String get amountOptionalLabel => 'Montant (facultatif)';
+
+  @override
+  String get amountOptionalHint =>
+      'Vous ne savez pas combien ? Laissez vide et le coach décidera.';
 
   @override
   String get pickAPlan => 'Choisissez un plan';
@@ -1844,11 +1866,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tutStepPlanA =>
-      'Voici la partie amusante. Dites-moi quelles branches comptent le plus.';
+      'Voici la partie amusante. Dites-moi à quoi vous voulez que votre budget ressemble.';
 
   @override
   String get tutStepPlanB =>
-      'Je vais proposer quelques façons de répartir vos revenus.';
+      'Je vais proposer quelques façons de répartir vos revenus selon ce que vous avez dit.';
 
   @override
   String get tutStepPlanC =>
@@ -1914,4 +1936,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get aiCoachNeedsOnline => 'Connectez-vous pour utiliser le coach IA.';
+
+  @override
+  String get goalStepName => 'Nom';
+
+  @override
+  String get goalStepAmount => 'Montant';
+
+  @override
+  String get aiPlanPromptTitle => 'Besoin d\'aide pour planifier ?';
+
+  @override
+  String get aiPlanPromptBody =>
+      'Le coach peut suggérer combien épargner chaque mois et des dates adaptées à vos revenus. Ou faites-le vous-même.';
+
+  @override
+  String get setItUpMyself => 'Je vais le configurer moi-même';
 }

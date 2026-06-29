@@ -113,14 +113,6 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     _planSettled = false;
   });
 
-  /// Reorder the declared expenses on the Plan step. The list order *is* the
-  /// importance ranking handed to the AI (top = most important). [newIndex] is
-  /// already adjusted by `onReorderItem`, so no off-by-one correction is needed.
-  void _reorderExpense(int oldIndex, int newIndex) => setState(() {
-    final item = _expenses.removeAt(oldIndex);
-    _expenses.insert(newIndex, item);
-  });
-
   /// Apply a chosen AI plan: write each plan item's amount onto the matching
   /// expense (by name), leaving any leftover unallocated as savings headroom.
   void _applyPlan(AllocationPlan plan) => setState(() {
@@ -269,7 +261,6 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             income: _totalIncome,
                             expenses: _expenses,
                             settled: _planSettled,
-                            onReorder: _reorderExpense,
                             onApplyPlan: _applyPlan,
                             onSettleManual: _settleManual,
                           )
@@ -900,37 +891,58 @@ class _ExpenseStep extends StatelessWidget {
           BarkCard(
             label: l.addABranch,
             icon: Icons.add_circle_outline,
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: nameCtrl,
-                    style: const TextStyle(color: AppColors.stoneBeigeColor),
-                    decoration: InputDecoration(labelText: l.categoryName),
-                    textCapitalization: TextCapitalization.words,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: amountCtrl,
-                    style: const TextStyle(color: AppColors.stoneBeigeColor),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        controller: nameCtrl,
+                        style: const TextStyle(
+                          color: AppColors.stoneBeigeColor,
+                        ),
+                        decoration: InputDecoration(labelText: l.categoryName),
+                        textCapitalization: TextCapitalization.words,
+                      ),
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                    ],
-                    decoration: InputDecoration(labelText: l.amountDollar),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: amountCtrl,
+                        style: const TextStyle(
+                          color: AppColors.stoneBeigeColor,
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                        ],
+                        decoration: InputDecoration(
+                          labelText: l.amountOptionalLabel,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: _AddButton(onTap: onAdd),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: _AddButton(onTap: onAdd),
+                const SizedBox(height: 8),
+                Text(
+                  l.amountOptionalHint,
+                  style: GoogleFonts.nunito(
+                    color: AppColors.mossGreen.withValues(alpha: 0.8),
+                    fontSize: 11,
+                    height: 1.4,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ],
             ),
@@ -1011,7 +1023,6 @@ class _PlanStep extends StatefulWidget {
   final double income;
   final List<ExpenseCategory> expenses;
   final bool settled;
-  final void Function(int oldIndex, int newIndex) onReorder;
   final void Function(AllocationPlan) onApplyPlan;
   final VoidCallback onSettleManual;
 
@@ -1020,7 +1031,6 @@ class _PlanStep extends StatefulWidget {
     required this.income,
     required this.expenses,
     required this.settled,
-    required this.onReorder,
     required this.onApplyPlan,
     required this.onSettleManual,
   });
@@ -1036,6 +1046,7 @@ class _PlanStepState extends State<_PlanStep> {
   int? _selected;
   bool _manual = false;
 
+  final _synopsisCtrl = TextEditingController();
   final Map<ExpenseCategory, TextEditingController> _amountCtrls = {};
 
   @override
@@ -1047,6 +1058,7 @@ class _PlanStepState extends State<_PlanStep> {
 
   @override
   void dispose() {
+    _synopsisCtrl.dispose();
     for (final c in _amountCtrls.values) {
       c.dispose();
     }
@@ -1067,13 +1079,14 @@ class _PlanStepState extends State<_PlanStep> {
       _error = null;
     });
     try {
-      final ranked = [
-        for (var i = 0; i < widget.expenses.length; i++)
-          RankedExpense(name: widget.expenses[i].name, rank: i + 1),
+      final inputs = [
+        for (final cat in widget.expenses)
+          BudgetExpenseInput(name: cat.name, amount: cat.allocated),
       ];
       final plans = await AiCoachService.instance.budgetPlans(
         income: widget.income,
-        expenses: ranked,
+        expenses: inputs,
+        synopsis: _synopsisCtrl.text.trim(),
       );
       if (!mounted) return;
       setState(() {
@@ -1106,90 +1119,108 @@ class _PlanStepState extends State<_PlanStep> {
         controller: controller,
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
         children: [
-          // Importance ranking
+          // The expenses the user declared (read-only here). A "$X" tag means
+          // they fixed that amount; the rest are left for the coach to choose.
           BarkCard(
-            label: l.rankImportance,
-            icon: Icons.low_priority,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            label: l.yourExpenses,
+            icon: Icons.account_tree_outlined,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Text(
-                  l.rankImportanceHint,
-                  style: GoogleFonts.nunito(
-                    color: AppColors.mossGreen.withValues(alpha: 0.85),
-                    fontSize: 11.5,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ReorderableListView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  buildDefaultDragHandles: false,
-                  onReorderItem: (o, n) {
-                    widget.onReorder(o, n);
-                    setState(() {}); // refresh rank numbers
-                  },
-                  children: [
-                    for (var i = 0; i < widget.expenses.length; i++)
-                      Padding(
-                        key: ValueKey(widget.expenses[i]),
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 22,
-                              height: 22,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppColors.forestGreen.withValues(
-                                  alpha: 0.4,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                '${i + 1}',
-                                style: GoogleFonts.nunito(
-                                  color: AppColors.lightLeaf,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Icon(
-                              CategoryIcons.forKey(widget.expenses[i].emoji),
-                              color: AppColors.mossGreen,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                widget.expenses[i].name,
-                                style: GoogleFonts.nunito(
-                                  color: AppColors.stoneBeigeColor,
-                                  fontSize: 13.5,
-                                ),
-                              ),
-                            ),
-                            ReorderableDragStartListener(
-                              index: i,
-                              child: const Icon(
-                                Icons.drag_handle,
-                                color: AppColors.mossGreen,
-                                size: 20,
-                              ),
-                            ),
-                          ],
-                        ),
+                for (final cat in widget.expenses)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.soilMid,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.mossGreen.withValues(alpha: 0.4),
                       ),
-                  ],
-                ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CategoryIcons.forKey(cat.emoji),
+                          color: AppColors.mossGreen,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          cat.allocated > 0
+                              ? '${cat.name}  \$${cat.allocated.toStringAsFixed(0)}'
+                              : cat.name,
+                          style: GoogleFonts.nunito(
+                            color: AppColors.stoneBeigeColor,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
           const SizedBox(height: 14),
           if (!_manual) ...[
+            // Free-text synopsis: the user describes how they want their budget
+            // to feel, and the coach builds plans around it.
+            BarkCard(
+              label: l.describeYourBudget,
+              icon: Icons.chat_bubble_outline,
+              accent: AppColors.leafYellow,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _synopsisCtrl,
+                    maxLines: 3,
+                    style: const TextStyle(color: AppColors.stoneBeigeColor),
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: l.describeYourBudgetHint,
+                      hintStyle: GoogleFonts.nunito(
+                        color: AppColors.mossGreen.withValues(alpha: 0.7),
+                        fontSize: 12.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final example in [
+                        l.budgetIdeaSaveHard,
+                        l.budgetIdeaBalanced,
+                        l.budgetIdeaEssentials,
+                        l.budgetIdeaDebt,
+                      ])
+                        ActionChip(
+                          label: Text(example),
+                          backgroundColor: AppColors.darkBark,
+                          side: BorderSide(
+                            color: AppColors.mossGreen.withValues(alpha: 0.4),
+                          ),
+                          labelStyle: GoogleFonts.nunito(
+                            color: AppColors.stoneBeigeColor,
+                            fontSize: 11.5,
+                          ),
+                          onPressed: () => setState(() {
+                            _synopsisCtrl.text = example;
+                          }),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
             if (_plans == null)
               _GenerateButton(loading: _loading, onTap: _generate)
             else ...[
