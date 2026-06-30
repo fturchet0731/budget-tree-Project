@@ -24,6 +24,10 @@ class AuthService extends ChangeNotifier {
   String? get userId => currentUser?.id;
   bool get isSignedIn => currentUser != null;
 
+  /// Whether the signed-in user has confirmed their email address. With email
+  /// confirmation enabled a verified user always has [User.emailConfirmedAt].
+  bool get isEmailVerified => currentUser?.emailConfirmedAt != null;
+
   /// Begin listening to auth changes. Call once at boot, after
   /// [SupabaseConfig.init]. On every signed-in event we kick off a background
   /// sync; on sign-out we drop the local caches so the next user starts clean.
@@ -59,10 +63,32 @@ class AuthService extends ChangeNotifier {
     return res.session != null;
   }
 
-  /// Sign in with email + password. Throws [AuthException] on bad credentials.
+  /// Sign in with email + password. Throws [AuthException] on bad credentials
+  /// (including `email_not_confirmed` when the user hasn't verified yet, which
+  /// the login screen catches to route them to the verification screen).
   Future<void> signIn(String email, String password) async {
     await SupabaseConfig.client.auth
         .signInWithPassword(email: email.trim(), password: password);
+  }
+
+  /// Verify the 6-digit code emailed after sign-up. On success Supabase creates
+  /// a session and the auth listener advances the gate. Throws [AuthException]
+  /// on a wrong or expired code.
+  Future<void> verifyEmailOtp(String email, String token) async {
+    await SupabaseConfig.client.auth.verifyOTP(
+      type: OtpType.signup,
+      email: email.trim(),
+      token: token.trim(),
+    );
+  }
+
+  /// Resend the sign-up confirmation code to [email]. Throws [AuthException]
+  /// (e.g. rate limited) so the caller can surface the message.
+  Future<void> resendSignupOtp(String email) async {
+    await SupabaseConfig.client.auth.resend(
+      type: OtpType.signup,
+      email: email.trim(),
+    );
   }
 
   Future<void> signOut() async {

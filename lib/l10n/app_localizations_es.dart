@@ -2155,4 +2155,31 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tutStepSurveyC =>
       'Responde lo que quieras, luego construiremos tus planes.';
+
+  @override
+  String get verifyTitle => 'Revisa tu correo';
+
+  @override
+  String verifyBody(String email) {
+    return 'Enviamos un código de 6 dígitos a $email. Escríbelo abajo para confirmar tu cuenta.';
+  }
+
+  @override
+  String get verifyCodeLabel => 'Código de verificación';
+
+  @override
+  String get enterCode => 'Escribe el código de 6 dígitos';
+
+  @override
+  String get verifyButton => 'Verificar correo';
+
+  @override
+  String get resendCode => 'Reenviar código';
+
+  @override
+  String get codeResent => 'Te enviamos un código nuevo.';
+
+  @override
+  String get verifyBadCode =>
+      'Ese código es incorrecto o caducó. Inténtalo de nuevo o reenvíalo.';
 }

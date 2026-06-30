@@ -644,5 +644,14 @@
   "surveyDebtLots": "Beaucoup",
   "tutStepSurveyA": "Maintenant quelques questions rapides sur votre vie.",
   "tutStepSurveyB": "Vos réponses m'aident à estimer les dépenses dont vous n'étiez pas sûr.",
-  "tutStepSurveyC": "Répondez à votre guise, puis nous construirons vos plans."
+  "tutStepSurveyC": "Répondez à votre guise, puis nous construirons vos plans.",
+
+  "verifyTitle": "Vérifiez votre boîte mail",
+  "verifyBody": "Nous avons envoyé un code à 6 chiffres à {email}. Saisissez-le ci-dessous pour confirmer votre compte.",
+  "verifyCodeLabel": "Code de vérification",
+  "enterCode": "Saisissez le code à 6 chiffres",
+  "verifyButton": "Vérifier l'e-mail",
+  "resendCode": "Renvoyer le code",
+  "codeResent": "Nous vous avons envoyé un nouveau code.",
+  "verifyBadCode": "Ce code est incorrect ou expiré. Réessayez ou renvoyez-le."
 }

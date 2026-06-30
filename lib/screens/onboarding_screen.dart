@@ -99,10 +99,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      AcornMascot(
-                        size: 104,
-                        speaking: !_busy,
-                        expression: _acornFace,
+                      // Center so the Column's stretch alignment doesn't
+                      // squish the mascot's fixed-size CustomPaint to full width.
+                      Center(
+                        child: AcornMascot(
+                          size: 104,
+                          speaking: !_busy,
+                          expression: _acornFace,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _AcornBubble(text: _acornLine(l)),

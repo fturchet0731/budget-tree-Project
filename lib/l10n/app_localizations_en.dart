@@ -2145,4 +2145,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tutStepSurveyC =>
       'Answer what you like, then we will build your plans.';
+
+  @override
+  String get verifyTitle => 'Check your email';
+
+  @override
+  String verifyBody(String email) {
+    return 'We sent a 6 digit code to $email. Enter it below to confirm your account.';
+  }
+
+  @override
+  String get verifyCodeLabel => 'Verification code';
+
+  @override
+  String get enterCode => 'Enter the 6 digit code';
+
+  @override
+  String get verifyButton => 'Verify email';
+
+  @override
+  String get resendCode => 'Resend code';
+
+  @override
+  String get codeResent => 'We sent you a new code.';
+
+  @override
+  String get verifyBadCode =>
+      'That code is wrong or expired. Try again or resend.';
 }

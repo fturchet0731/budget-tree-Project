@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import 'verify_email_screen.dart';
 
 /// Email + password sign-in / sign-up, themed to match the forest aesthetic.
 /// On success the [AuthGate] swaps this out for the app automatically (it
@@ -36,6 +37,14 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _openVerify() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => VerifyEmailScreen(email: _email.text.trim()),
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
@@ -50,14 +59,12 @@ class _LoginScreenState extends State<LoginScreen> {
         // Username/profile setup happens after sign-in, in the OnboardingGate —
         // so signing up is just email + password here.
         hasSession = await auth.signUp(_email.text, _password.text);
-        // If email confirmation is on, signUp succeeds but creates no session,
-        // so AuthGate won't advance — tell the user to confirm their email
-        // instead of leaving them on a screen that appears to do nothing.
+        // If email confirmation is on, signUp succeeds but creates no session.
+        // Send the user to enter the code we just emailed them; verifying it
+        // creates the session and the AuthGate advances.
         if (!hasSession && mounted) {
-          setState(() {
-            _isSignUp = false;
-            _notice = AppLocalizations.of(context).accountCreatedConfirm;
-          });
+          _openVerify();
+          return;
         }
       } else {
         await auth.signIn(_email.text, _password.text);
@@ -69,6 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(context).pop();
       }
     } on AuthException catch (e) {
+      // An unverified account can't sign in — route them to verification
+      // instead of dead-ending on the error.
+      if (e.code == 'email_not_confirmed' && mounted) {
+        _openVerify();
+        return;
+      }
       if (mounted) setState(() => _error = e.message);
     } catch (e) {
       if (mounted) {

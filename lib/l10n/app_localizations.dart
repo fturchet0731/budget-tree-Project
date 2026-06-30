@@ -3783,6 +3783,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Answer what you like, then we will build your plans.'**
   String get tutStepSurveyC;
+
+  /// No description provided for @verifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get verifyTitle;
+
+  /// No description provided for @verifyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6 digit code to {email}. Enter it below to confirm your account.'**
+  String verifyBody(String email);
+
+  /// No description provided for @verifyCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get verifyCodeLabel;
+
+  /// No description provided for @enterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6 digit code'**
+  String get enterCode;
+
+  /// No description provided for @verifyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get verifyButton;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get resendCode;
+
+  /// No description provided for @codeResent.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent you a new code.'**
+  String get codeResent;
+
+  /// No description provided for @verifyBadCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is wrong or expired. Try again or resend.'**
+  String get verifyBadCode;
 }
 
 class _AppLocalizationsDelegate

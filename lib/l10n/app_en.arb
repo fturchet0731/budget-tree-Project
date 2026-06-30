@@ -709,5 +709,15 @@
   "surveyDebtLots": "A lot",
   "tutStepSurveyA": "Now a few quick questions about your life.",
   "tutStepSurveyB": "Your answers help me size the expenses you were not sure about.",
-  "tutStepSurveyC": "Answer what you like, then we will build your plans."
+  "tutStepSurveyC": "Answer what you like, then we will build your plans.",
+
+  "verifyTitle": "Check your email",
+  "verifyBody": "We sent a 6 digit code to {email}. Enter it below to confirm your account.",
+  "@verifyBody": { "placeholders": { "email": { "type": "String" } } },
+  "verifyCodeLabel": "Verification code",
+  "enterCode": "Enter the 6 digit code",
+  "verifyButton": "Verify email",
+  "resendCode": "Resend code",
+  "codeResent": "We sent you a new code.",
+  "verifyBadCode": "That code is wrong or expired. Try again or resend."
 }
