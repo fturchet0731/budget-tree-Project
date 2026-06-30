@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../data/water_cadence.dart';
 import '../models/goal_model.dart';
 import 'budget_repository.dart';
 
@@ -29,6 +30,35 @@ class GoalPlanMath {
     if (remaining <= 0) return 0;
     final months = monthsBetween(now ?? DateTime.now(), targetDate);
     return remaining / months;
+  }
+
+  /// Per-watering contribution needed to reach [goal] by [targetDate] at the
+  /// given [cadence]. Derived from the monthly figure so the offline fallback
+  /// and the custom plan share one source of truth.
+  static double perWateringToReach(
+    Goal goal,
+    DateTime targetDate,
+    WaterCadence cadence, {
+    DateTime? now,
+  }) {
+    final monthly = monthlyToReach(goal, targetDate, now: now);
+    if (monthly <= 0) return 0;
+    return monthly / cadence.perMonth;
+  }
+
+  /// Whole months to reach [goal] by contributing [perWatering] every
+  /// [cadence]. At least 1 when there is anything left to save.
+  static int monthsForPerWatering(
+    Goal goal,
+    double perWatering,
+    WaterCadence cadence,
+  ) {
+    if (goal.isUncapped || perWatering <= 0) return 0;
+    final remaining = goal.targetAmount - goal.currentAmount;
+    if (remaining <= 0) return 0;
+    final perMonth = perWatering * cadence.perMonth;
+    if (perMonth <= 0) return 0;
+    return math.max(1, (remaining / perMonth).ceil());
   }
 
   /// The completion date implied by saving [monthly] toward [goal] from now.

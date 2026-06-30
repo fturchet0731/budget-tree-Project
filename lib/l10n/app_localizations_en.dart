@@ -1932,4 +1932,217 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setItUpMyself => 'I will set it up myself';
+
+  @override
+  String get goalStepWhen => 'Timeframe';
+
+  @override
+  String get timeframeNote =>
+      'When would you like to reach this goal? We will shape a watering plan around it.';
+
+  @override
+  String get timeframeUncappedNote =>
+      'Grow forever goals have no deadline. Pick a date if you want a target, or skip ahead.';
+
+  @override
+  String get wateringPlanTitle => 'Watering plan';
+
+  @override
+  String get wateringPlanIntro =>
+      'Choose how often and how much to water this goal. We will remind you so you stay on schedule.';
+
+  @override
+  String get remindToWaterTitle => 'Remind me to water';
+
+  @override
+  String get remindToWaterSub =>
+      'Get a heads up before each watering is due, and a nudge on the day.';
+
+  @override
+  String planAboutMonths(int months) {
+    return 'About $months months to reach it';
+  }
+
+  @override
+  String get customWaterTitle => 'Set your own';
+
+  @override
+  String get amountPerWatering => 'Amount per watering';
+
+  @override
+  String get cadenceWeekly => 'Weekly';
+
+  @override
+  String get cadenceBiweekly => 'Biweekly';
+
+  @override
+  String get cadenceMonthly => 'Monthly';
+
+  @override
+  String get cadenceEveryWeekly => 'every week';
+
+  @override
+  String get cadenceEveryBiweekly => 'every 2 weeks';
+
+  @override
+  String get cadenceEveryMonthly => 'every month';
+
+  @override
+  String get wateringReminders => 'Watering reminders';
+
+  @override
+  String get wateringRemindersSub =>
+      'Reminders to water your goals on schedule';
+
+  @override
+  String notifWaterDueTitle(String name) {
+    return '💧 Time to water $name';
+  }
+
+  @override
+  String notifWaterDueMsg(String name, String amount) {
+    return 'Your $name sapling is due for $amount. Water it to stay on track.';
+  }
+
+  @override
+  String notifWaterSoonTitle(String name) {
+    return '🌱 $name watering coming up';
+  }
+
+  @override
+  String notifWaterSoonMsg(String name, String amount) {
+    return 'Heads up: $name is due for $amount in 2 days.';
+  }
+
+  @override
+  String get stepSurveyTitle => 'A few quick questions';
+
+  @override
+  String get stepSurveySub => 'Help the coach size your budget';
+
+  @override
+  String get vineSurvey => 'Survey';
+
+  @override
+  String get surveyIntroTitle => 'Tell us about you';
+
+  @override
+  String get surveyIntroBody =>
+      'Answer a few quick questions and the coach will estimate amounts for any expense you left blank. Every question is optional.';
+
+  @override
+  String get budgetNoteTitle => 'Anything else? (optional)';
+
+  @override
+  String get budgetNoteHint =>
+      'For example: I want to save hard for a house, or keep some fun money.';
+
+  @override
+  String get leftoverGoalTitle => 'Grow a goal with your leftover';
+
+  @override
+  String leftoverGoalBody(String amount) {
+    return 'You have $amount left over. Send it to a goal and it becomes a branch that funds the goal each pay cycle.';
+  }
+
+  @override
+  String get growAGoalWithIt => 'Grow a goal with it';
+
+  @override
+  String get leftoverPickGoalTitle => 'Send leftover to';
+
+  @override
+  String get leftoverNewGoal => 'Create a new goal';
+
+  @override
+  String get leftoverNewGoalTitle => 'Name your goal';
+
+  @override
+  String get surveyHousehold => 'How many people are in your household?';
+
+  @override
+  String get surveyHouseholdJustMe => 'Just me';
+
+  @override
+  String get surveyHouseholdTwo => 'Two';
+
+  @override
+  String get surveyHouseholdThreeFour => '3 to 4';
+
+  @override
+  String get surveyHouseholdFivePlus => '5 or more';
+
+  @override
+  String get surveyDining => 'How often do you eat out?';
+
+  @override
+  String get surveyDiningRarely => 'Rarely';
+
+  @override
+  String get surveyDiningSometimes => 'Sometimes';
+
+  @override
+  String get surveyDiningOften => 'Often';
+
+  @override
+  String get surveyHousing => 'What is your housing like?';
+
+  @override
+  String get surveyHousingRent => 'I rent';
+
+  @override
+  String get surveyHousingOwn => 'I own';
+
+  @override
+  String get surveyHousingFamily => 'With family';
+
+  @override
+  String get surveyCommute => 'How do you get around?';
+
+  @override
+  String get surveyCommuteCar => 'Car';
+
+  @override
+  String get surveyCommuteTransit => 'Transit';
+
+  @override
+  String get surveyCommuteActive => 'Bike or walk';
+
+  @override
+  String get surveyCommuteRemote => 'I work from home';
+
+  @override
+  String get surveyPriority => 'What matters most right now?';
+
+  @override
+  String get surveyPrioritySave => 'Saving hard';
+
+  @override
+  String get surveyPriorityBalanced => 'A balance';
+
+  @override
+  String get surveyPriorityEnjoy => 'Enjoying now';
+
+  @override
+  String get surveyDebt => 'Any debt payments?';
+
+  @override
+  String get surveyDebtNone => 'None';
+
+  @override
+  String get surveyDebtSome => 'Some';
+
+  @override
+  String get surveyDebtLots => 'A lot';
+
+  @override
+  String get tutStepSurveyA => 'Now a few quick questions about your life.';
+
+  @override
+  String get tutStepSurveyB =>
+      'Your answers help me size the expenses you were not sure about.';
+
+  @override
+  String get tutStepSurveyC =>
+      'Answer what you like, then we will build your plans.';
 }

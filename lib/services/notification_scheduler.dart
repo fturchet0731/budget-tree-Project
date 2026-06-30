@@ -64,6 +64,48 @@ class NotificationScheduler {
     } else {
       await NotificationService.cancel(NotificationService.idWeekly);
     }
+
+    // ── Per-goal watering reminders ──
+    // For each goal with a watering schedule, seed two one-shot reminders: a
+    // heads-up 2 days before the due date and a nudge on the due date itself
+    // (both at the user's watering hour). rescheduleAll runs on boot/resume and
+    // after deposits, so the next occurrence is always re-seeded.
+    for (final goal in goals) {
+      final dueId =
+          NotificationService.waterIdBase + (goal.id.hashCode & 0xfff);
+      final soonId =
+          NotificationService.waterSoonIdBase + (goal.id.hashCode & 0xfff);
+      if (!settings.notifGoalWatering ||
+          !goal.waterRemindersEnabled ||
+          goal.nextWaterDate == null ||
+          goal.isCompleted) {
+        await NotificationService.cancel(dueId);
+        await NotificationService.cancel(soonId);
+        continue;
+      }
+      // Roll the due date forward past any missed waterings.
+      goal.advanceWatering();
+      final due = goal.nextWaterDate!;
+      final dueAt = DateTime(
+        due.year,
+        due.month,
+        due.day,
+        settings.waterHour,
+      );
+      final soonAt = dueAt.subtract(const Duration(days: 2));
+      await NotificationService.scheduleGoalWateringOnce(
+        id: dueId,
+        when: dueAt,
+        title: NotificationContent.wateringDueTitle(goal, l),
+        body: NotificationContent.wateringDueBody(goal, l),
+      );
+      await NotificationService.scheduleGoalWateringOnce(
+        id: soonId,
+        when: soonAt,
+        title: NotificationContent.wateringSoonTitle(goal, l),
+        body: NotificationContent.wateringSoonBody(goal, l),
+      );
+    }
   }
 
   /// Event-driven budget warning. Fires only when a budget *crosses up* into a

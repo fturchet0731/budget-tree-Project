@@ -21,12 +21,15 @@ class NotificationService {
   static const _budgetChannel = 'budget_warnings';
   static const _streakChannel = 'streak_reminders';
   static const _weeklyChannel = 'weekly_summary';
+  static const _wateringChannel = 'goal_watering';
 
   /// Stable notification ids — reusing an id replaces the prior schedule.
   static const int idStreak = 1001;
   static const int idWeekly = 1002;
   static const int idReflection = 1003;
   static const int budgetIdBase = 2000; // + hash of budget id
+  static const int waterIdBase = 3000; // + hash of goal id (due today)
+  static const int waterSoonIdBase = 4000; // + hash of goal id (due in 2 days)
 
   static Future<void> init() async {
     if (_ready) return;
@@ -146,6 +149,37 @@ class NotificationService {
       );
     } catch (e) {
       debugPrint('NotificationService.showReflectionNow failed: $e');
+    }
+  }
+
+  /// Schedule a one-shot watering reminder at the exact moment [when]. No
+  /// `matchDateTimeComponents`, so it fires once; the [NotificationScheduler]
+  /// re-seeds the next occurrence on boot/resume/after deposits. A [when] in the
+  /// past is ignored.
+  static Future<void> scheduleGoalWateringOnce({
+    required int id,
+    required DateTime when,
+    required String title,
+    required String body,
+  }) async {
+    if (!_ready) return;
+    final scheduled = tz.TZDateTime.from(when, tz.local);
+    if (!scheduled.isAfter(tz.TZDateTime.now(tz.local))) return;
+    try {
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduled,
+        notificationDetails: _details(
+          _wateringChannel,
+          'Goal watering',
+          'Reminders to water your savings goals on schedule',
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (e) {
+      debugPrint('NotificationService.scheduleGoalWatering($id) failed: $e');
     }
   }
 

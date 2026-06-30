@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../data/water_cadence.dart';
+
 /// Where a contribution came from. [manual] = the user tapped Deposit,
 /// [auto] = credited by the [PayScheduler] pay cycle, [adjustment] =
 /// a withdrawal or correction.
@@ -65,6 +67,16 @@ class Goal {
   /// the owner's chosen tree colour everywhere. Null falls back to forest green.
   int? leafColorValue;
 
+  /// Watering schedule: the per-watering amount the user plans to contribute,
+  /// the cadence it repeats on ([waterCadenceIndex] is a [WaterCadence] index),
+  /// and the date the next watering is due. Drives the goal watering reminders
+  /// (notifications only — the user still deposits manually). All null/false
+  /// when the user skipped scheduling a plan.
+  double? waterAmount;
+  int? waterCadenceIndex;
+  DateTime? nextWaterDate;
+  bool waterRemindersEnabled;
+
   /// Dated history of every deposit/withdrawal. Source of truth for
   /// [currentAmount] is still the running field (so legacy records load
   /// unchanged), but new money always also lands here.
@@ -83,10 +95,38 @@ class Goal {
     this.categoryId,
     this.sharedWithFriends = false,
     this.leafColorValue,
+    this.waterAmount,
+    this.waterCadenceIndex,
+    this.nextWaterDate,
+    this.waterRemindersEnabled = false,
     List<Contribution>? contributions,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        createdAt = createdAt ?? DateTime.now(),
        contributions = contributions ?? [];
+
+  /// The cadence the watering schedule repeats on, or null when unscheduled.
+  WaterCadence? get waterCadence => waterCadenceFromIndex(waterCadenceIndex);
+
+  /// True when this goal has a complete watering schedule the reminders can use.
+  bool get hasWateringSchedule =>
+      waterAmount != null &&
+      waterAmount! > 0 &&
+      waterCadence != null &&
+      nextWaterDate != null;
+
+  /// Roll [nextWaterDate] forward by whole cadence steps until it is in the
+  /// future (relative to [from]). Idempotent and safe to call after every
+  /// deposit / on app boot so a missed watering doesn't strand the reminder.
+  void advanceWatering({DateTime? from}) {
+    final cadence = waterCadence;
+    if (cadence == null || nextWaterDate == null) return;
+    final now = from ?? DateTime.now();
+    var next = nextWaterDate!;
+    while (!next.isAfter(now)) {
+      next = next.add(Duration(days: cadence.days));
+    }
+    nextWaterDate = next;
+  }
 
   /// Record a deposit (positive) or withdrawal (negative) and keep
   /// [currentAmount] in sync. Returns the actual amount applied after
@@ -231,6 +271,10 @@ class Goal {
     'categoryId': categoryId,
     'sharedWithFriends': sharedWithFriends,
     'leafColorValue': leafColorValue,
+    'waterAmount': waterAmount,
+    'waterCadenceIndex': waterCadenceIndex,
+    'nextWaterDate': nextWaterDate?.millisecondsSinceEpoch,
+    'waterRemindersEnabled': waterRemindersEnabled,
     'contributions': contributions.map((c) => c.toJson()).toList(),
   };
 
@@ -251,6 +295,12 @@ class Goal {
     categoryId: j['categoryId'] as String?,
     sharedWithFriends: (j['sharedWithFriends'] as bool?) ?? false,
     leafColorValue: (j['leafColorValue'] as num?)?.toInt(),
+    waterAmount: (j['waterAmount'] as num?)?.toDouble(),
+    waterCadenceIndex: (j['waterCadenceIndex'] as num?)?.toInt(),
+    nextWaterDate: j['nextWaterDate'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(j['nextWaterDate'] as int)
+        : null,
+    waterRemindersEnabled: (j['waterRemindersEnabled'] as bool?) ?? false,
     contributions:
         (j['contributions'] as List?)
             ?.map((e) => Contribution.fromJson(e as Map<String, dynamic>))

@@ -944,6 +944,27 @@ class _NotificationsCard extends StatelessWidget {
             },
           ),
         ],
+        const SizedBox(height: 6),
+        _NotifSwitch(
+          title: l.wateringReminders,
+          subtitle: l.wateringRemindersSub,
+          value: s.notifGoalWatering,
+          onChanged: (v) => _apply(() => s.setNotifGoalWatering(v)),
+        ),
+        if (s.notifGoalWatering)
+          _TapRow(
+            label: l.remindMeAt,
+            value: TimeOfDay(hour: s.waterHour, minute: 0).format(context),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay(hour: s.waterHour, minute: 0),
+              );
+              if (picked != null) {
+                await _apply(() => s.setWaterHour(picked.hour));
+              }
+            },
+          ),
       ],
     );
   }

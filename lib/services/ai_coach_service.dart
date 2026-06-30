@@ -67,6 +67,7 @@ class AiCoachService {
     required double income,
     required List<BudgetExpenseInput> expenses,
     String synopsis = '',
+    Map<String, String> survey = const {},
     String currency = '\$',
   }) async {
     final data = await _invoke({
@@ -75,6 +76,7 @@ class AiCoachService {
       'currency': currency,
       'locale': _locale,
       'synopsis': synopsis,
+      'survey': survey,
       'expenses': expenses.map((e) => e.toJson()).toList(),
     });
     final plans = AllocationPlan.listFrom(data);

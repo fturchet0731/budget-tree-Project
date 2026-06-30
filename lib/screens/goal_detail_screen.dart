@@ -9,7 +9,9 @@ import '../models/goal_model.dart';
 import '../services/achievement_service.dart';
 import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
+import '../data/water_cadence.dart';
 import '../services/goal_repository.dart';
+import '../services/notification_scheduler.dart';
 import '../services/profile_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
@@ -252,9 +254,18 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         source: ContributionSource.manual,
                       );
                       _goal.stampCompletionIfReached();
+                      // Watered: move the next watering one cadence out so the
+                      // reminders track the user's actual rhythm.
+                      final cadence = _goal.waterCadence;
+                      if (_goal.waterRemindersEnabled && cadence != null) {
+                        _goal.nextWaterDate = DateTime.now().add(
+                          Duration(days: cadence.days),
+                        );
+                      }
                     });
                     SoundService.fundsAllocated();
                     await _persist();
+                    await NotificationScheduler.rescheduleAll();
                     await _animateTo(_goal.progress);
                     await _celebrateProgress(wasComplete, prevStage, prevTier);
                   },

@@ -19,6 +19,8 @@ class AppSettings extends ChangeNotifier {
   static const _kNotifWeekly = 'settings_notif_weekly_v1';
   static const _kWeeklyWeekday = 'settings_weekly_weekday_v1';
   static const _kWeeklyHour = 'settings_weekly_hour_v1';
+  static const _kNotifWatering = 'settings_notif_watering_v1';
+  static const _kWaterHour = 'settings_water_hour_v1';
   static const _kLocale = 'settings_locale_v1';
   static const _kAiCoach = 'settings_ai_coach_v1';
 
@@ -42,6 +44,9 @@ class AppSettings extends ChangeNotifier {
   bool _notifWeeklySummary = true;
   int _weeklyWeekday = DateTime.sunday; // 1=Mon … 7=Sun
   int _weeklyHour = 18; // Sunday evening recap
+  // Per-goal watering reminders ("water due in 2 days" / "water due today").
+  bool _notifGoalWatering = true;
+  int _waterHour = 9; // morning nudge to water due goals
 
   // Master switch for the Claude-powered coach (smart budget/goal plans and
   // weekly reflections). On by default; the features still only run when
@@ -72,13 +77,20 @@ class AppSettings extends ChangeNotifier {
   int get weeklyWeekday => _weeklyWeekday;
   int get weeklyHour => _weeklyHour;
 
+  /// Whether per-goal watering reminders fire, and the hour of day they do.
+  bool get notifGoalWatering => _notifGoalWatering;
+  int get waterHour => _waterHour;
+
   /// Whether the AI coach (smart plans + reflections) is allowed to run.
   bool get aiCoachEnabled => _aiCoachEnabled;
 
   /// True when at least one notification type is on (used to decide whether to
   /// bother requesting OS permission).
   bool get anyNotificationsEnabled =>
-      _notifBudgetWarnings || _notifStreakReminders || _notifWeeklySummary;
+      _notifBudgetWarnings ||
+      _notifStreakReminders ||
+      _notifWeeklySummary ||
+      _notifGoalWatering;
 
   /// Whether the first-run acorn walkthrough has already played.
   bool get tutorialSeen => _tutorialSeen;
@@ -114,6 +126,8 @@ class AppSettings extends ChangeNotifier {
     _notifWeeklySummary = prefs.getBool(_kNotifWeekly) ?? true;
     _weeklyWeekday = prefs.getInt(_kWeeklyWeekday) ?? DateTime.sunday;
     _weeklyHour = prefs.getInt(_kWeeklyHour) ?? 18;
+    _notifGoalWatering = prefs.getBool(_kNotifWatering) ?? true;
+    _waterHour = prefs.getInt(_kWaterHour) ?? 9;
     _aiCoachEnabled = prefs.getBool(_kAiCoach) ?? true;
     final lc = prefs.getString(_kLocale);
     _locale = (lc != null && supportedLanguageCodes.contains(lc))
@@ -177,6 +191,22 @@ class AppSettings extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_kWeeklyWeekday, weekday);
     await prefs.setInt(_kWeeklyHour, hour);
+  }
+
+  Future<void> setNotifGoalWatering(bool v) async {
+    if (_notifGoalWatering == v) return;
+    _notifGoalWatering = v;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kNotifWatering, v);
+  }
+
+  Future<void> setWaterHour(int hour) async {
+    if (_waterHour == hour) return;
+    _waterHour = hour;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kWaterHour, hour);
   }
 
   Future<void> setAiCoachEnabled(bool v) async {

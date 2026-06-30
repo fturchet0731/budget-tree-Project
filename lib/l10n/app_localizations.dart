@@ -3399,6 +3399,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I will set it up myself'**
   String get setItUpMyself;
+
+  /// No description provided for @goalStepWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeframe'**
+  String get goalStepWhen;
+
+  /// No description provided for @timeframeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When would you like to reach this goal? We will shape a watering plan around it.'**
+  String get timeframeNote;
+
+  /// No description provided for @timeframeUncappedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow forever goals have no deadline. Pick a date if you want a target, or skip ahead.'**
+  String get timeframeUncappedNote;
+
+  /// No description provided for @wateringPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering plan'**
+  String get wateringPlanTitle;
+
+  /// No description provided for @wateringPlanIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how often and how much to water this goal. We will remind you so you stay on schedule.'**
+  String get wateringPlanIntro;
+
+  /// No description provided for @remindToWaterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me to water'**
+  String get remindToWaterTitle;
+
+  /// No description provided for @remindToWaterSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a heads up before each watering is due, and a nudge on the day.'**
+  String get remindToWaterSub;
+
+  /// No description provided for @planAboutMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'About {months} months to reach it'**
+  String planAboutMonths(int months);
+
+  /// No description provided for @customWaterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your own'**
+  String get customWaterTitle;
+
+  /// No description provided for @amountPerWatering.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount per watering'**
+  String get amountPerWatering;
+
+  /// No description provided for @cadenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get cadenceWeekly;
+
+  /// No description provided for @cadenceBiweekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Biweekly'**
+  String get cadenceBiweekly;
+
+  /// No description provided for @cadenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get cadenceMonthly;
+
+  /// No description provided for @cadenceEveryWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'every week'**
+  String get cadenceEveryWeekly;
+
+  /// No description provided for @cadenceEveryBiweekly.
+  ///
+  /// In en, this message translates to:
+  /// **'every 2 weeks'**
+  String get cadenceEveryBiweekly;
+
+  /// No description provided for @cadenceEveryMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'every month'**
+  String get cadenceEveryMonthly;
+
+  /// No description provided for @wateringReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering reminders'**
+  String get wateringReminders;
+
+  /// No description provided for @wateringRemindersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders to water your goals on schedule'**
+  String get wateringRemindersSub;
+
+  /// No description provided for @notifWaterDueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'💧 Time to water {name}'**
+  String notifWaterDueTitle(String name);
+
+  /// No description provided for @notifWaterDueMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {name} sapling is due for {amount}. Water it to stay on track.'**
+  String notifWaterDueMsg(String name, String amount);
+
+  /// No description provided for @notifWaterSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🌱 {name} watering coming up'**
+  String notifWaterSoonTitle(String name);
+
+  /// No description provided for @notifWaterSoonMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Heads up: {name} is due for {amount} in 2 days.'**
+  String notifWaterSoonMsg(String name, String amount);
+
+  /// No description provided for @stepSurveyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A few quick questions'**
+  String get stepSurveyTitle;
+
+  /// No description provided for @stepSurveySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Help the coach size your budget'**
+  String get stepSurveySub;
+
+  /// No description provided for @vineSurvey.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey'**
+  String get vineSurvey;
+
+  /// No description provided for @surveyIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about you'**
+  String get surveyIntroTitle;
+
+  /// No description provided for @surveyIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer a few quick questions and the coach will estimate amounts for any expense you left blank. Every question is optional.'**
+  String get surveyIntroBody;
+
+  /// No description provided for @budgetNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything else? (optional)'**
+  String get budgetNoteTitle;
+
+  /// No description provided for @budgetNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: I want to save hard for a house, or keep some fun money.'**
+  String get budgetNoteHint;
+
+  /// No description provided for @leftoverGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow a goal with your leftover'**
+  String get leftoverGoalTitle;
+
+  /// No description provided for @leftoverGoalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {amount} left over. Send it to a goal and it becomes a branch that funds the goal each pay cycle.'**
+  String leftoverGoalBody(String amount);
+
+  /// No description provided for @growAGoalWithIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Grow a goal with it'**
+  String get growAGoalWithIt;
+
+  /// No description provided for @leftoverPickGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send leftover to'**
+  String get leftoverPickGoalTitle;
+
+  /// No description provided for @leftoverNewGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new goal'**
+  String get leftoverNewGoal;
+
+  /// No description provided for @leftoverNewGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your goal'**
+  String get leftoverNewGoalTitle;
+
+  /// No description provided for @surveyHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'How many people are in your household?'**
+  String get surveyHousehold;
+
+  /// No description provided for @surveyHouseholdJustMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Just me'**
+  String get surveyHouseholdJustMe;
+
+  /// No description provided for @surveyHouseholdTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Two'**
+  String get surveyHouseholdTwo;
+
+  /// No description provided for @surveyHouseholdThreeFour.
+  ///
+  /// In en, this message translates to:
+  /// **'3 to 4'**
+  String get surveyHouseholdThreeFour;
+
+  /// No description provided for @surveyHouseholdFivePlus.
+  ///
+  /// In en, this message translates to:
+  /// **'5 or more'**
+  String get surveyHouseholdFivePlus;
+
+  /// No description provided for @surveyDining.
+  ///
+  /// In en, this message translates to:
+  /// **'How often do you eat out?'**
+  String get surveyDining;
+
+  /// No description provided for @surveyDiningRarely.
+  ///
+  /// In en, this message translates to:
+  /// **'Rarely'**
+  String get surveyDiningRarely;
+
+  /// No description provided for @surveyDiningSometimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Sometimes'**
+  String get surveyDiningSometimes;
+
+  /// No description provided for @surveyDiningOften.
+  ///
+  /// In en, this message translates to:
+  /// **'Often'**
+  String get surveyDiningOften;
+
+  /// No description provided for @surveyHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'What is your housing like?'**
+  String get surveyHousing;
+
+  /// No description provided for @surveyHousingRent.
+  ///
+  /// In en, this message translates to:
+  /// **'I rent'**
+  String get surveyHousingRent;
+
+  /// No description provided for @surveyHousingOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'I own'**
+  String get surveyHousingOwn;
+
+  /// No description provided for @surveyHousingFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'With family'**
+  String get surveyHousingFamily;
+
+  /// No description provided for @surveyCommute.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you get around?'**
+  String get surveyCommute;
+
+  /// No description provided for @surveyCommuteCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get surveyCommuteCar;
+
+  /// No description provided for @surveyCommuteTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'Transit'**
+  String get surveyCommuteTransit;
+
+  /// No description provided for @surveyCommuteActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike or walk'**
+  String get surveyCommuteActive;
+
+  /// No description provided for @surveyCommuteRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'I work from home'**
+  String get surveyCommuteRemote;
+
+  /// No description provided for @surveyPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'What matters most right now?'**
+  String get surveyPriority;
+
+  /// No description provided for @surveyPrioritySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving hard'**
+  String get surveyPrioritySave;
+
+  /// No description provided for @surveyPriorityBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'A balance'**
+  String get surveyPriorityBalanced;
+
+  /// No description provided for @surveyPriorityEnjoy.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoying now'**
+  String get surveyPriorityEnjoy;
+
+  /// No description provided for @surveyDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Any debt payments?'**
+  String get surveyDebt;
+
+  /// No description provided for @surveyDebtNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get surveyDebtNone;
+
+  /// No description provided for @surveyDebtSome.
+  ///
+  /// In en, this message translates to:
+  /// **'Some'**
+  String get surveyDebtSome;
+
+  /// No description provided for @surveyDebtLots.
+  ///
+  /// In en, this message translates to:
+  /// **'A lot'**
+  String get surveyDebtLots;
+
+  /// No description provided for @tutStepSurveyA.
+  ///
+  /// In en, this message translates to:
+  /// **'Now a few quick questions about your life.'**
+  String get tutStepSurveyA;
+
+  /// No description provided for @tutStepSurveyB.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answers help me size the expenses you were not sure about.'**
+  String get tutStepSurveyB;
+
+  /// No description provided for @tutStepSurveyC.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer what you like, then we will build your plans.'**
+  String get tutStepSurveyC;
 }
 
 class _AppLocalizationsDelegate

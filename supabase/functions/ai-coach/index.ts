@@ -83,19 +83,22 @@ async function budgetPlans(body: Record<string, unknown>) {
   const currency = String(body.currency ?? "$");
   const locale = String(body.locale ?? "en");
   const synopsis = String(body.synopsis ?? "").trim();
+  // A small lifestyle questionnaire (question -> chosen answer) the user filled
+  // in so the coach can estimate the amounts of expenses left blank.
+  const survey = (body.survey as Record<string, string>) ?? {};
   // Each expense may carry a fixed amount the user already decided, or 0/absent
   // meaning the coach should choose it.
   const expenses =
     (body.expenses as Array<{ name: string; amount?: number }>) ?? [];
 
   const system =
-    `You are a friendly personal budgeting coach. The user gives a monthly income, a list of expense categories (each with an amount they already decided, or 0 meaning you choose it), and a short description of how they want their budget to feel. Produce 2 or 3 distinct allocation plans that honour that description. ${
+    `You are a friendly personal budgeting coach. The user gives a monthly income, a list of expense categories (each with an amount they already decided, or 0 meaning you choose it), answers to a short lifestyle questionnaire, and an optional note on how they want their budget to feel. Produce 2 or 3 distinct allocation plans. ${
       LOCALE_NOTE(locale)
     } Respond with ONLY a JSON object, no prose, of the shape:
 {"plans":[{"name":string,"items":[{"name":string,"amount":number}],"leftover":number,"rationale":string}]}
-Rules: every input expense MUST appear in every plan's items. If an expense has an amount greater than 0, treat it as fixed and use exactly that amount in every plan; only choose amounts for the expenses left at 0. amount values are whole numbers in ${currency}. For each plan, the sum of all item amounts plus leftover MUST equal exactly ${income}. leftover represents money left for savings or goals. Let the user's description drive how you weight categories and savings, and give each plan a clear distinct name that reflects a different reading of what they asked for. Keep each rationale to one sentence that ties back to their description.`;
+Rules: every input expense MUST appear in every plan's items. If an expense has an amount greater than 0, treat it as fixed and use exactly that amount in every plan; only choose amounts for the expenses left at 0. Use the questionnaire answers to make realistic estimates for those blank expenses (for example household size and dining habits shape a food budget). amount values are whole numbers in ${currency}. For each plan, the sum of all item amounts plus leftover MUST equal exactly ${income}. leftover represents money left for savings or goals. Let the questionnaire answers and the note drive how you weight categories and savings, and give each plan a clear distinct name that reflects a different reading of what they asked for. Keep each rationale to one sentence that ties back to their situation.`;
 
-  const user = JSON.stringify({ income, currency, synopsis, expenses });
+  const user = JSON.stringify({ income, currency, synopsis, survey, expenses });
   const { text } = await callClaude(system, user, 1024);
   const parsed = extractJson<{ plans: unknown[] }>(text);
   if (!Array.isArray(parsed.plans) || parsed.plans.length === 0) {
@@ -118,11 +121,11 @@ async function goalPlans(body: Record<string, unknown>) {
   const locale = String(body.locale ?? "en");
 
   const system =
-    `You are a savings coach. Given a goal (target amount, amount already saved, desired completion date) and the user's estimated free monthly income, produce a small set of monthly contribution plans to reach the goal by the target date, plus 1 to 3 alternative completion dates that fit comfortably within the free monthly income. ${
+    `You are a savings coach for an app where users "water" a goal by contributing on a repeating cadence. Given a goal (target amount, amount already saved, desired completion date) and the user's estimated free monthly income, produce 2 or 3 distinct watering plans to reach the goal by the target date, plus 1 to 3 alternative completion dates that fit comfortably within the free monthly income. ${
       LOCALE_NOTE(locale)
     } Respond with ONLY a JSON object of the shape:
-{"plans":[{"monthly":number,"monthsToTarget":number,"rationale":string}],"alternativeDates":[{"isoDate":"YYYY-MM-DD","monthly":number,"note":string}]}
-Rules: monthly values are whole numbers. If a required monthly contribution exceeds the free monthly income, say so in the rationale and lean on the alternative dates. Keep each rationale and note to one sentence.`;
+{"plans":[{"cadence":"weekly|biweekly|monthly","perWatering":number,"monthsToTarget":number,"rationale":string}],"alternativeDates":[{"isoDate":"YYYY-MM-DD","cadence":"weekly|biweekly|monthly","perWatering":number,"note":string}]}
+Rules: cadence is exactly one of "weekly", "biweekly", or "monthly". perWatering is the whole-number amount contributed each time at that cadence. Offer a range of cadences across the plans so the user can pick what fits their rhythm. If the contribution needed to hit the target date exceeds the free monthly income, say so in the rationale and lean on the alternative dates. Keep each rationale and note to one sentence.`;
 
   const user = JSON.stringify({ goal, targetDate, freeMonthly });
   const { text } = await callClaude(system, user, 768);

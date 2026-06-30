@@ -78,6 +78,24 @@ class NotificationContent {
     return l.notifStreakNone;
   }
 
+  /// Copy for the "watering due today" reminder.
+  static String wateringDueTitle(Goal goal, AppLocalizations l) =>
+      l.notifWaterDueTitle(goal.name);
+  static String wateringDueBody(Goal goal, AppLocalizations l) =>
+      l.notifWaterDueMsg(
+        goal.name,
+        '\$${(goal.waterAmount ?? 0).toStringAsFixed(0)}',
+      );
+
+  /// Copy for the "watering due in 2 days" heads-up.
+  static String wateringSoonTitle(Goal goal, AppLocalizations l) =>
+      l.notifWaterSoonTitle(goal.name);
+  static String wateringSoonBody(Goal goal, AppLocalizations l) =>
+      l.notifWaterSoonMsg(
+        goal.name,
+        '\$${(goal.waterAmount ?? 0).toStringAsFixed(0)}',
+      );
+
   static String weeklySummaryTitle(AppLocalizations l) => l.notifWeeklyTitle;
 
   static String weeklySummary(List<Goal> goals, AppLocalizations l,

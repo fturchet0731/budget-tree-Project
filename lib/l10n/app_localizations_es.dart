@@ -1942,4 +1942,217 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setItUpMyself => 'Lo configuraré yo mismo';
+
+  @override
+  String get goalStepWhen => 'Plazo';
+
+  @override
+  String get timeframeNote =>
+      '¿Cuándo quieres alcanzar esta meta? Daremos forma a un plan de riego en función de eso.';
+
+  @override
+  String get timeframeUncappedNote =>
+      'Las metas sin límite no tienen fecha tope. Elige una fecha si quieres un objetivo, o sigue adelante.';
+
+  @override
+  String get wateringPlanTitle => 'Plan de riego';
+
+  @override
+  String get wateringPlanIntro =>
+      'Elige con qué frecuencia y cuánto regar esta meta. Te recordaremos para que sigas al día.';
+
+  @override
+  String get remindToWaterTitle => 'Recordarme regar';
+
+  @override
+  String get remindToWaterSub =>
+      'Recibe un aviso antes de cada riego, y un recordatorio el mismo día.';
+
+  @override
+  String planAboutMonths(int months) {
+    return 'Unos $months meses para alcanzarla';
+  }
+
+  @override
+  String get customWaterTitle => 'Personalizar';
+
+  @override
+  String get amountPerWatering => 'Cantidad por riego';
+
+  @override
+  String get cadenceWeekly => 'Semanal';
+
+  @override
+  String get cadenceBiweekly => 'Cada 2 semanas';
+
+  @override
+  String get cadenceMonthly => 'Mensual';
+
+  @override
+  String get cadenceEveryWeekly => 'cada semana';
+
+  @override
+  String get cadenceEveryBiweekly => 'cada 2 semanas';
+
+  @override
+  String get cadenceEveryMonthly => 'cada mes';
+
+  @override
+  String get wateringReminders => 'Recordatorios de riego';
+
+  @override
+  String get wateringRemindersSub =>
+      'Recordatorios para regar tus metas a tiempo';
+
+  @override
+  String notifWaterDueTitle(String name) {
+    return '💧 Hora de regar $name';
+  }
+
+  @override
+  String notifWaterDueMsg(String name, String amount) {
+    return 'Tu retoño $name necesita $amount. Riégalo para seguir al día.';
+  }
+
+  @override
+  String notifWaterSoonTitle(String name) {
+    return '🌱 Riego de $name próximo';
+  }
+
+  @override
+  String notifWaterSoonMsg(String name, String amount) {
+    return 'Aviso: $name necesita $amount en 2 días.';
+  }
+
+  @override
+  String get stepSurveyTitle => 'Unas preguntas rápidas';
+
+  @override
+  String get stepSurveySub => 'Ayuda al coach a dimensionar tu presupuesto';
+
+  @override
+  String get vineSurvey => 'Encuesta';
+
+  @override
+  String get surveyIntroTitle => 'Cuéntanos sobre ti';
+
+  @override
+  String get surveyIntroBody =>
+      'Responde unas preguntas rápidas y el coach estimará los montos de cualquier gasto que dejaste en blanco. Cada pregunta es opcional.';
+
+  @override
+  String get budgetNoteTitle => '¿Algo más? (opcional)';
+
+  @override
+  String get budgetNoteHint =>
+      'Por ejemplo: quiero ahorrar mucho para una casa, o guardar algo para gustos.';
+
+  @override
+  String get leftoverGoalTitle => 'Haz crecer una meta con tu sobrante';
+
+  @override
+  String leftoverGoalBody(String amount) {
+    return 'Te sobran $amount. Envíalos a una meta y se convierte en una rama que la financia cada ciclo de pago.';
+  }
+
+  @override
+  String get growAGoalWithIt => 'Hacer crecer una meta';
+
+  @override
+  String get leftoverPickGoalTitle => 'Enviar el sobrante a';
+
+  @override
+  String get leftoverNewGoal => 'Crear una meta nueva';
+
+  @override
+  String get leftoverNewGoalTitle => 'Nombra tu meta';
+
+  @override
+  String get surveyHousehold => '¿Cuántas personas hay en tu hogar?';
+
+  @override
+  String get surveyHouseholdJustMe => 'Solo yo';
+
+  @override
+  String get surveyHouseholdTwo => 'Dos';
+
+  @override
+  String get surveyHouseholdThreeFour => '3 a 4';
+
+  @override
+  String get surveyHouseholdFivePlus => '5 o más';
+
+  @override
+  String get surveyDining => '¿Con qué frecuencia comes fuera?';
+
+  @override
+  String get surveyDiningRarely => 'Rara vez';
+
+  @override
+  String get surveyDiningSometimes => 'A veces';
+
+  @override
+  String get surveyDiningOften => 'A menudo';
+
+  @override
+  String get surveyHousing => '¿Cómo es tu vivienda?';
+
+  @override
+  String get surveyHousingRent => 'Alquilo';
+
+  @override
+  String get surveyHousingOwn => 'Soy propietario';
+
+  @override
+  String get surveyHousingFamily => 'Con familia';
+
+  @override
+  String get surveyCommute => '¿Cómo te desplazas?';
+
+  @override
+  String get surveyCommuteCar => 'Coche';
+
+  @override
+  String get surveyCommuteTransit => 'Transporte';
+
+  @override
+  String get surveyCommuteActive => 'Bici o a pie';
+
+  @override
+  String get surveyCommuteRemote => 'Trabajo desde casa';
+
+  @override
+  String get surveyPriority => '¿Qué importa más ahora?';
+
+  @override
+  String get surveyPrioritySave => 'Ahorrar mucho';
+
+  @override
+  String get surveyPriorityBalanced => 'Un equilibrio';
+
+  @override
+  String get surveyPriorityEnjoy => 'Disfrutar ahora';
+
+  @override
+  String get surveyDebt => '¿Pagos de deudas?';
+
+  @override
+  String get surveyDebtNone => 'Ninguno';
+
+  @override
+  String get surveyDebtSome => 'Algunos';
+
+  @override
+  String get surveyDebtLots => 'Muchos';
+
+  @override
+  String get tutStepSurveyA => 'Ahora unas preguntas rápidas sobre tu vida.';
+
+  @override
+  String get tutStepSurveyB =>
+      'Tus respuestas me ayudan a estimar los gastos de los que no estabas seguro.';
+
+  @override
+  String get tutStepSurveyC =>
+      'Responde lo que quieras, luego construiremos tus planes.';
 }

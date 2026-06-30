@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/water_cadence.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/preset_labels.dart';
+import '../l10n/water_cadence_labels.dart';
 import '../models/ai_plan.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
@@ -13,6 +15,7 @@ import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
 import '../services/goal_plan_math.dart';
 import '../services/goal_repository.dart';
+import '../services/notification_scheduler.dart';
 import '../services/profile_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
@@ -49,12 +52,19 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   // manual when the AI coach isn't available so we don't dangle a dead option.
   bool? _useAi;
 
-  // Target date + AI contribution plan.
+  // Target date + AI watering plan.
   DateTime? _targetDate;
   bool _planLoading = false;
   String? _planError;
   GoalPlanResult? _planResult;
-  double? _fallbackMonthly; // offline simple math
+  double? _fallbackMonthly; // offline simple math (a monthly figure)
+
+  // Chosen watering schedule. Either a selected AI plan, or a custom one.
+  int? _selectedPlan; // index into _planResult.plans
+  bool _useCustom = false;
+  WaterCadence _customCadence = WaterCadence.biweekly;
+  final _customAmountCtrl = TextEditingController();
+  bool _remindToWater = true;
 
   @override
   void initState() {
@@ -67,19 +77,40 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     _nameCtrl.dispose();
     _targetCtrl.dispose();
     _descCtrl.dispose();
+    _customAmountCtrl.dispose();
     super.dispose();
   }
 
   /// Whether the current wizard step is complete enough to move forward.
+  /// Step 0 now defines the whole goal (name + amount), step 1 is the optional
+  /// timeframe, step 2 is the watering plan.
   bool get _canAdvance {
     switch (_gStep) {
       case 0:
-        return _nameCtrl.text.trim().isNotEmpty;
-      case 1:
+        if (_nameCtrl.text.trim().isEmpty) return false;
         return _uncapped || (double.tryParse(_targetCtrl.text) ?? 0) > 0;
       default:
         return true;
     }
+  }
+
+  /// The watering schedule the user settled on, if any: a selected AI plan, a
+  /// custom cadence + amount, or the offline monthly fallback. Null when nothing
+  /// is set (the goal is then saved without reminders).
+  ({WaterCadence cadence, double amount})? get _chosenWatering {
+    if (_useCustom) {
+      final amt = double.tryParse(_customAmountCtrl.text) ?? 0;
+      return amt > 0 ? (cadence: _customCadence, amount: amt) : null;
+    }
+    final plans = _planResult?.plans;
+    if (plans != null && _selectedPlan != null && _selectedPlan! < plans.length) {
+      final p = plans[_selectedPlan!];
+      return (cadence: p.cadence, amount: p.perWatering);
+    }
+    if (_fallbackMonthly != null && _fallbackMonthly! > 0) {
+      return (cadence: WaterCadence.monthly, amount: _fallbackMonthly!);
+    }
+    return null;
   }
 
   bool get _canSave {
@@ -145,9 +176,22 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       leafColorValue: _pickedCategory?.colorValue,
     );
     goal.targetDate = _targetDate;
+    // Apply the chosen watering schedule (drives the watering reminders).
+    final watering = _chosenWatering;
+    if (watering != null) {
+      goal.waterAmount = watering.amount;
+      goal.waterCadenceIndex = watering.cadence.index;
+      goal.nextWaterDate = DateTime.now().add(
+        Duration(days: watering.cadence.days),
+      );
+      goal.waterRemindersEnabled = _remindToWater;
+    }
     await GoalRepository.saveNew(goal);
     SoundService.goalSet();
     await AchievementService.evaluateAndUnlock();
+    if (goal.waterRemindersEnabled) {
+      await NotificationScheduler.rescheduleAll();
+    }
     if (!mounted) return;
     // Offer to fund the goal from a budget branch so the recommended monthly
     // contribution flows in automatically each pay cycle.
@@ -155,12 +199,6 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     if (!mounted) return;
     Navigator.pop(context, true);
   }
-
-  /// Recommended monthly contribution to surface in the plan UI: the AI's first
-  /// option when available, else the simple offline figure.
-  double? get _recommendedMonthly => _planResult?.plans.isNotEmpty == true
-      ? _planResult!.plans.first.monthly
-      : _fallbackMonthly;
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -328,10 +366,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                   currentStep: _gStep,
                   steps: [
                     VineStep(label: l.goalStepName, icon: Icons.spa),
-                    VineStep(
-                      label: l.goalStepAmount,
-                      icon: Icons.flag_outlined,
-                    ),
+                    VineStep(label: l.goalStepWhen, icon: Icons.event_outlined),
                     VineStep(label: l.vinePlan, icon: Icons.auto_awesome),
                   ],
                 ),
@@ -388,8 +423,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           const SizedBox(height: 14),
                         ],
 
-                        // ── Target ─────────────────────
-                        if (_gStep == 1) ...[
+                        // ── Target (now part of step 0) ──
+                        if (_gStep == 0) ...[
                           BarkCard(
                             label: l.howMuch,
                             icon: Icons.flag_outlined,
@@ -529,37 +564,64 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           const SizedBox(height: 14),
                         ],
 
-                        // ── Plan: ask to use AI, then date + plan ──
-                        if (_gStep == 2 && !_uncapped) ...[
-                          if (_useAi == null)
-                            _AiPrompt(
-                              onAi: () => setState(() => _useAi = true),
-                              onManual: () => setState(() => _useAi = false),
-                            )
-                          else
-                            BarkCard(
-                              label: l.targetDateLabel,
-                              icon: Icons.event_outlined,
-                              accent: AppColors.riverBlue,
-                              child: _PlanSection(
-                                targetDate: _targetDate,
-                                loading: _planLoading,
-                                error: _planError,
-                                result: _planResult,
-                                fallbackMonthly: _fallbackMonthly,
-                                recommendedMonthly: _recommendedMonthly,
-                                canPlan:
-                                    (double.tryParse(_targetCtrl.text) ?? 0) >
-                                    0,
-                                aiAvailable:
-                                    AiCoachService.instance.isAvailable &&
-                                    _useAi == true,
-                                onPickDate: _pickDate,
-                                onGenerate: _generatePlan,
-                                onApplyDate: (d) =>
-                                    setState(() => _targetDate = d),
-                              ),
-                            ),
+                        // ── Timeframe (step 1) ──
+                        if (_gStep == 1) ...[
+                          _TimeframeStep(
+                            targetDate: _targetDate,
+                            uncapped: _uncapped,
+                            onPickDate: _pickDate,
+                            onClear: () => setState(() {
+                              _targetDate = null;
+                              _planResult = null;
+                              _fallbackMonthly = null;
+                            }),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
+
+                        // ── Watering plan (step 2) ──
+                        if (_gStep == 2) ...[
+                          _WateringStep(
+                            uncapped: _uncapped,
+                            hasTarget:
+                                (double.tryParse(_targetCtrl.text) ?? 0) > 0,
+                            targetDate: _targetDate,
+                            aiAvailable: AiCoachService.instance.isAvailable,
+                            useAi: _useAi,
+                            onChooseAi: () => setState(() => _useAi = true),
+                            onChooseManual: () =>
+                                setState(() => _useAi = false),
+                            loading: _planLoading,
+                            error: _planError,
+                            result: _planResult,
+                            fallbackMonthly: _fallbackMonthly,
+                            selectedPlan: _selectedPlan,
+                            onSelectPlan: (i) => setState(() {
+                              _selectedPlan = i;
+                              _useCustom = false;
+                            }),
+                            onGenerate: _generatePlan,
+                            onApplyDate: (d) => setState(() {
+                              _targetDate = d;
+                              _planResult = null;
+                              _fallbackMonthly = null;
+                            }),
+                            useCustom: _useCustom,
+                            customCadence: _customCadence,
+                            customAmountCtrl: _customAmountCtrl,
+                            onPickCustomCadence: (c) => setState(() {
+                              _customCadence = c;
+                              _useCustom = true;
+                              _selectedPlan = null;
+                            }),
+                            onCustomFocus: () => setState(() {
+                              _useCustom = true;
+                              _selectedPlan = null;
+                            }),
+                            remind: _remindToWater,
+                            onRemindChanged: (v) =>
+                                setState(() => _remindToWater = v),
+                          ),
                           const SizedBox(height: 14),
                         ],
 
@@ -1111,190 +1173,504 @@ class _GoalSkyPainter extends CustomPainter {
 }
 
 // ──────────────────────────────────────────────
-// Target-date + AI contribution plan section
+// Step 1 — Timeframe (target date)
 // ──────────────────────────────────────────────
 
-class _PlanSection extends StatelessWidget {
+class _TimeframeStep extends StatelessWidget {
   final DateTime? targetDate;
-  final bool loading;
-  final String? error;
-  final GoalPlanResult? result;
-  final double? fallbackMonthly;
-  final double? recommendedMonthly;
-  final bool canPlan;
-  final bool aiAvailable;
+  final bool uncapped;
   final VoidCallback onPickDate;
-  final VoidCallback onGenerate;
-  final ValueChanged<DateTime> onApplyDate;
-
-  const _PlanSection({
+  final VoidCallback onClear;
+  const _TimeframeStep({
     required this.targetDate,
-    required this.loading,
-    required this.error,
-    required this.result,
-    required this.fallbackMonthly,
-    required this.recommendedMonthly,
-    required this.canPlan,
-    required this.aiAvailable,
+    required this.uncapped,
     required this.onPickDate,
-    required this.onGenerate,
-    required this.onApplyDate,
+    required this.onClear,
   });
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final mat = MaterialLocalizations.of(context);
+    return BarkCard(
+      label: l.targetDateLabel,
+      icon: Icons.event_outlined,
+      accent: AppColors.riverBlue,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            uncapped ? l.timeframeUncappedNote : l.timeframeNote,
+            style: GoogleFonts.nunito(
+              color: AppColors.mossGreen.withValues(alpha: 0.9),
+              fontSize: 12.5,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: onPickDate,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              decoration: BoxDecoration(
+                color: AppColors.soilMid,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.mossGreen.withValues(alpha: 0.40),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today_outlined,
+                    color: AppColors.mossGreen,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      targetDate == null
+                          ? l.pickATargetDate
+                          : mat.formatFullDate(targetDate!),
+                      style: GoogleFonts.nunito(
+                        color: targetDate == null
+                            ? AppColors.stoneBeigeColor.withValues(alpha: 0.5)
+                            : AppColors.stoneBeigeColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  if (targetDate != null)
+                    IconButton(
+                      onPressed: onClear,
+                      icon: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: AppColors.mossGreen.withValues(alpha: 0.6),
+                      ),
+                    )
+                  else
+                    const Icon(
+                      Icons.edit_calendar_outlined,
+                      color: AppColors.mossGreen,
+                      size: 18,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Step 2 — Watering plan (AI cadence plans + custom + reminders)
+// ──────────────────────────────────────────────
+
+class _WateringStep extends StatelessWidget {
+  final bool uncapped;
+  final bool hasTarget;
+  final DateTime? targetDate;
+  final bool aiAvailable;
+  final bool? useAi;
+  final VoidCallback onChooseAi;
+  final VoidCallback onChooseManual;
+  final bool loading;
+  final String? error;
+  final GoalPlanResult? result;
+  final double? fallbackMonthly;
+  final int? selectedPlan;
+  final ValueChanged<int> onSelectPlan;
+  final VoidCallback onGenerate;
+  final ValueChanged<DateTime> onApplyDate;
+  final bool useCustom;
+  final WaterCadence customCadence;
+  final TextEditingController customAmountCtrl;
+  final ValueChanged<WaterCadence> onPickCustomCadence;
+  final VoidCallback onCustomFocus;
+  final bool remind;
+  final ValueChanged<bool> onRemindChanged;
+
+  const _WateringStep({
+    required this.uncapped,
+    required this.hasTarget,
+    required this.targetDate,
+    required this.aiAvailable,
+    required this.useAi,
+    required this.onChooseAi,
+    required this.onChooseManual,
+    required this.loading,
+    required this.error,
+    required this.result,
+    required this.fallbackMonthly,
+    required this.selectedPlan,
+    required this.onSelectPlan,
+    required this.onGenerate,
+    required this.onApplyDate,
+    required this.useCustom,
+    required this.customCadence,
+    required this.customAmountCtrl,
+    required this.onPickCustomCadence,
+    required this.onCustomFocus,
+    required this.remind,
+    required this.onRemindChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final mat = MaterialLocalizations.of(context);
+    // AI planning only makes sense for a capped goal with a chosen date.
+    final showAi = aiAvailable && !uncapped && hasTarget && targetDate != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Date row
-        InkWell(
-          onTap: onPickDate,
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  color: AppColors.mossGreen,
-                  size: 16,
+        BarkCard(
+          label: l.wateringPlanTitle,
+          icon: Icons.water_drop_outlined,
+          accent: AppColors.riverBlue,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l.wateringPlanIntro,
+                style: GoogleFonts.nunito(
+                  color: AppColors.mossGreen.withValues(alpha: 0.9),
+                  fontSize: 12.5,
+                  height: 1.45,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    targetDate == null
-                        ? l.pickATargetDate
-                        : mat.formatFullDate(targetDate!),
-                    style: GoogleFonts.nunito(
-                      color: targetDate == null
-                          ? AppColors.mossGreen
-                          : AppColors.stoneBeigeColor,
-                      fontSize: 13.5,
+              ),
+              const SizedBox(height: 12),
+              if (showAi && useAi == null)
+                _AiPrompt(onAi: onChooseAi, onManual: onChooseManual)
+              else ...[
+                if (showAi && useAi == true) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: loading ? null : onGenerate,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.forestGreen,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: loading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.auto_awesome,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                      label: Text(
+                        result == null ? l.planWithAi : l.regeneratePlans,
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const Icon(
-                  Icons.edit_calendar_outlined,
-                  color: AppColors.mossGreen,
-                  size: 18,
+                  if (result != null) ...[
+                    const SizedBox(height: 12),
+                    for (var i = 0; i < result!.plans.length; i++)
+                      _WaterPlanCard(
+                        plan: result!.plans[i],
+                        selected: !useCustom && selectedPlan == i,
+                        onTap: () => onSelectPlan(i),
+                      ),
+                    if (result!.alternativeDates.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        l.alternativeDates,
+                        style: GoogleFonts.nunito(
+                          color: AppColors.mossGreen.withValues(alpha: 0.8),
+                          fontSize: 10.5,
+                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final a in result!.alternativeDates)
+                            ActionChip(
+                              backgroundColor: AppColors.darkBark,
+                              side: BorderSide(
+                                color: AppColors.mossGreen.withValues(
+                                  alpha: 0.4,
+                                ),
+                              ),
+                              label: Text(
+                                mat.formatShortDate(a.date),
+                                style: const TextStyle(
+                                  color: AppColors.stoneBeigeColor,
+                                  fontSize: 11.5,
+                                ),
+                              ),
+                              onPressed: () => onApplyDate(a.date),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ],
+                  if (error != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l.aiUnavailableSimple,
+                      style: GoogleFonts.nunito(
+                        color: AppColors.warningAmber,
+                        fontSize: 11.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                ],
+                // Custom watering schedule — always available.
+                _CustomWaterCard(
+                  active: useCustom,
+                  cadence: customCadence,
+                  amountCtrl: customAmountCtrl,
+                  onPickCadence: onPickCustomCadence,
+                  onFocus: onCustomFocus,
                 ),
               ],
-            ),
+            ],
           ),
         ),
-        if (targetDate != null && canPlan) ...[
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: loading ? null : onGenerate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.forestGreen,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+        const SizedBox(height: 14),
+        // Reminders toggle.
+        BarkCard(
+          label: l.remindToWaterTitle,
+          icon: Icons.notifications_active_outlined,
+          accent: AppColors.leafYellow,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l.remindToWaterSub,
+                  style: GoogleFonts.nunito(
+                    color: AppColors.mossGreen.withValues(alpha: 0.9),
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
                 ),
               ),
-              icon: loading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Icon(
-                      aiAvailable ? Icons.auto_awesome : Icons.calculate,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-              label: Text(
-                aiAvailable ? l.planWithAi : l.calculateMonthly,
-                style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              Switch(
+                value: remind,
+                onChanged: onRemindChanged,
+                activeThumbColor: AppColors.lightLeaf,
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// One selectable AI watering plan, e.g. "$100 every 2 weeks · about 8 months".
+class _WaterPlanCard extends StatelessWidget {
+  final GoalPlanOption plan;
+  final bool selected;
+  final VoidCallback onTap;
+  const _WaterPlanCard({
+    required this.plan,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.forestGreen.withValues(alpha: 0.35)
+                : AppColors.soilMid,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected
+                  ? AppColors.lightLeaf
+                  : AppColors.mossGreen.withValues(alpha: 0.4),
+              width: selected ? 1.5 : 1,
             ),
           ),
-        ],
-        if (recommendedMonthly != null && recommendedMonthly! > 0) ...[
-          const SizedBox(height: 12),
-          Text(
-            l.recommendedMonthly('\$${recommendedMonthly!.toStringAsFixed(0)}'),
-            style: GoogleFonts.fredoka(
-              fontWeight: FontWeight.w600,
-              color: AppColors.lightLeaf,
-              fontSize: 15,
-            ),
-          ),
-        ],
-        // AI plan options
-        if (result != null) ...[
-          for (final p in result!.plans)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                l.planMonthsLine(
-                  '\$${p.monthly.toStringAsFixed(0)}',
-                  p.monthsToTarget,
-                ),
-                style: GoogleFonts.nunito(
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 12.5,
-                ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                selected
+                    ? Icons.check_circle
+                    : Icons.radio_button_unchecked,
+                color: selected ? AppColors.lightLeaf : AppColors.mossGreen,
+                size: 18,
               ),
-            ),
-          if (result!.alternativeDates.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              l.alternativeDates,
-              style: GoogleFonts.nunito(
-                color: AppColors.mossGreen.withValues(alpha: 0.8),
-                fontSize: 10.5,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final a in result!.alternativeDates)
-                  ActionChip(
-                    backgroundColor: AppColors.darkBark,
-                    side: BorderSide(
-                      color: AppColors.mossGreen.withValues(alpha: 0.4),
-                    ),
-                    label: Text(
-                      '${mat.formatShortDate(a.date)}  ·  \$${a.monthly.toStringAsFixed(0)}/mo',
-                      style: const TextStyle(
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '\$${plan.perWatering.toStringAsFixed(0)} ${cadenceEvery(l, plan.cadence)}',
+                      style: GoogleFonts.fredoka(
+                        fontWeight: FontWeight.w600,
                         color: AppColors.stoneBeigeColor,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l.planAboutMonths(plan.monthsToTarget),
+                      style: GoogleFonts.nunito(
+                        color: AppColors.lightLeaf,
                         fontSize: 11.5,
                       ),
                     ),
-                    onPressed: () => onApplyDate(a.date),
-                  ),
-              ],
-            ),
-          ],
-        ],
-        if (error != null) ...[
-          const SizedBox(height: 8),
+                    if (plan.rationale.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        plan.rationale,
+                        style: GoogleFonts.nunito(
+                          color: AppColors.mossGreen.withValues(alpha: 0.9),
+                          fontSize: 11.5,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Custom watering schedule: pick a cadence and a per-watering amount.
+class _CustomWaterCard extends StatelessWidget {
+  final bool active;
+  final WaterCadence cadence;
+  final TextEditingController amountCtrl;
+  final ValueChanged<WaterCadence> onPickCadence;
+  final VoidCallback onFocus;
+  const _CustomWaterCard({
+    required this.active,
+    required this.cadence,
+    required this.amountCtrl,
+    required this.onPickCadence,
+    required this.onFocus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.darkBark.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: active
+              ? AppColors.lightLeaf
+              : AppColors.mossGreen.withValues(alpha: 0.3),
+          width: active ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            l.aiUnavailableSimple,
+            l.customWaterTitle,
             style: GoogleFonts.nunito(
-              color: AppColors.warningAmber,
-              fontSize: 11.5,
-              height: 1.4,
+              color: AppColors.stoneBeigeColor,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final c in WaterCadence.values)
+                GestureDetector(
+                  onTap: () => onPickCadence(c),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: active && cadence == c
+                          ? AppColors.forestGreen.withValues(alpha: 0.45)
+                          : AppColors.soilMid,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: active && cadence == c
+                            ? AppColors.lightLeaf
+                            : AppColors.mossGreen.withValues(alpha: 0.4),
+                        width: active && cadence == c ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Text(
+                      cadenceLabel(l, c),
+                      style: GoogleFonts.nunito(
+                        color: active && cadence == c
+                            ? AppColors.lightLeaf
+                            : AppColors.stoneBeigeColor,
+                        fontSize: 12.5,
+                        fontWeight: active && cadence == c
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: amountCtrl,
+            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+            ],
+            onTap: onFocus,
+            onChanged: (_) => onFocus(),
+            decoration: InputDecoration(
+              labelText: l.amountPerWatering,
+              prefixText: '\$ ',
+              isDense: true,
             ),
           ),
         ],
-      ],
+      ),
     );
   }
 }

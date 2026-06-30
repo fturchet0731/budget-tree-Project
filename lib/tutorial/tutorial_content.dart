@@ -209,11 +209,17 @@ List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
       ];
     case 2:
       return [
+        TutorialStep(l.tutStepSurveyA, expression: AcornExpression.happy),
+        TutorialStep(l.tutStepSurveyB),
+        TutorialStep(l.tutStepSurveyC),
+      ];
+    case 3:
+      return [
         TutorialStep(l.tutStepPlanA, expression: AcornExpression.happy),
         TutorialStep(l.tutStepPlanB),
         TutorialStep(l.tutStepPlanC),
       ];
-    case 3:
+    case 4:
     default:
       return [
         TutorialStep(l.tutStep2a),

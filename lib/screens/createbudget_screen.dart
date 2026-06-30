@@ -4,9 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../data/pay_frequency.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/preset_labels.dart';
+import '../l10n/survey_labels.dart';
 import '../models/ai_plan.dart';
 import '../models/budget_model.dart';
+import '../models/goal_model.dart';
 import '../services/ai_coach_service.dart';
+import '../services/goal_repository.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
 import '../widgets/acorn_coach.dart';
@@ -46,7 +49,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final _expAmountCtrl = TextEditingController();
   String _selectedIconKey = 'other';
 
-  // Step 3 – Budget name + pay schedule
+  // Step 3 – Survey (questionnaire answers keyed by question key -> option key)
+  // plus an optional free-text note the coach folds into its reasoning.
+  final Map<String, String> _surveyAnswers = {};
+  final _noteCtrl = TextEditingController();
+
+  // Step 5 – Budget name + pay schedule
   final _budgetNameCtrl = TextEditingController(text: 'My Budget');
   PayFrequency? _payFrequency;
   DateTime? _firstPayDate;
@@ -70,8 +78,35 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     _incomeAmountCtrl.dispose();
     _expNameCtrl.dispose();
     _expAmountCtrl.dispose();
+    _noteCtrl.dispose();
     _budgetNameCtrl.dispose();
     super.dispose();
+  }
+
+  /// The questionnaire answers converted to readable "question: answer" pairs
+  /// for the coach. Only answered questions are included.
+  Map<String, String> _surveyForAi(AppLocalizations l) => {
+    for (final q in budgetSurveyQuestions())
+      if (_surveyAnswers[q.key] != null)
+        q.prompt(l): q.options
+            .firstWhere((o) => o.key == _surveyAnswers[q.key])
+            .label(l),
+  };
+
+  /// Add a funding branch that routes the budget's leftover into [goal]. The
+  /// branch is linked to the goal so [PayScheduler] auto-funds it each cycle.
+  void _addGoalBranch(String name, double amount, String goalId) {
+    setState(() {
+      _expenses.add(
+        ExpenseCategory(
+          name: name,
+          allocated: amount,
+          emoji: 'savings',
+          linkedGoalIds: [goalId],
+        ),
+      );
+      // Leftover is intentionally consumed; allocations stay settled.
+    });
   }
 
   double get _totalIncome => _incomeSources.fold(0.0, (s, e) => s + e.amount);
@@ -161,12 +196,14 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     final titles = [
       l.stepIncomeTitle,
       l.stepExpensesTitle,
+      l.stepSurveyTitle,
       l.stepPlanTitle,
       l.stepNamePayTitle,
     ];
     final subtitles = [
       l.stepIncomeSub,
       l.stepExpensesSub,
+      l.stepSurveySub,
       l.stepPlanSub,
       l.stepNamePaySub,
     ];
@@ -205,6 +242,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                       label: l.vineBranches,
                       icon: Icons.account_tree_outlined,
                     ),
+                    VineStep(label: l.vineSurvey, icon: Icons.quiz_outlined),
                     VineStep(label: l.vinePlan, icon: Icons.auto_awesome),
                     VineStep(label: l.vineRoots, icon: Icons.park_outlined),
                   ],
@@ -256,16 +294,29 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             }),
                           )
                         : _step == 2
-                        ? _PlanStep(
+                        ? _SurveyStep(
                             key: const ValueKey(2),
+                            answers: _surveyAnswers,
+                            noteCtrl: _noteCtrl,
+                            onAnswer: (qKey, optKey) => setState(() {
+                              _surveyAnswers[qKey] = optKey;
+                              _planSettled = false; // answers changed; re-plan
+                            }),
+                          )
+                        : _step == 3
+                        ? _PlanStep(
+                            key: const ValueKey(3),
                             income: _totalIncome,
                             expenses: _expenses,
                             settled: _planSettled,
+                            note: _noteCtrl.text,
+                            survey: _surveyForAi(l),
                             onApplyPlan: _applyPlan,
                             onSettleManual: _settleManual,
+                            onAddGoalBranch: _addGoalBranch,
                           )
                         : _PersonalStep(
-                            key: const ValueKey(3),
+                            key: const ValueKey(4),
                             nameCtrl: _budgetNameCtrl,
                             payFrequency: _payFrequency,
                             firstPayDate: _firstPayDate,
@@ -278,16 +329,18 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 ),
                 _BottomBar(
                   step: _step,
-                  lastStep: 3,
+                  lastStep: 4,
                   canAdvance: _step == 0
                       ? _incomeSources.isNotEmpty
                       : _step == 1
                       ? _expenses.isNotEmpty
                       : _step == 2
+                      ? true // questionnaire is optional
+                      : _step == 3
                       ? _planSettled
                       : true,
                   onNext: () {
-                    if (_step < 3) {
+                    if (_step < 4) {
                       setState(() => _step++);
                     } else {
                       _plantTree();
@@ -537,98 +590,92 @@ class _IncomeStep extends StatelessWidget {
     return AppScrollbar(
       builder: (controller) => ListView(
         controller: controller,
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         children: [
-          // Quick-picks card
-          BarkCard(
-            label: l.quickPick,
-            icon: Icons.bolt,
-            accent: AppColors.riverBlue,
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: suggestions
-                  .map(
-                    (s) => GestureDetector(
-                      onTap: () => nameCtrl.text = incomeSuggestionLabel(l, s),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 13,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.riverBlue.withValues(alpha: 0.20),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.riverBlue.withValues(alpha: 0.65),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.water_drop_outlined,
-                              size: 12,
-                              color: AppColors.skyBlue,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              incomeSuggestionLabel(l, s),
-                              style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Add a source card
+          // One clear hero input: type a source + amount, tap to add. The
+          // quick-picks sit quietly beneath so the screen stays uncluttered.
           BarkCard(
             label: l.addASource,
             icon: Icons.add_circle_outline,
-            child: Row(
+            accent: AppColors.riverBlue,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: nameCtrl,
-                    style: const TextStyle(color: AppColors.stoneBeigeColor),
-                    decoration: InputDecoration(
-                      labelText: l.sourceName,
-                      hintText: l.sourceNameHint,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        controller: nameCtrl,
+                        style: const TextStyle(
+                          color: AppColors.stoneBeigeColor,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: l.sourceName,
+                          hintText: l.sourceNameHint,
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                      ),
                     ),
-                    textCapitalization: TextCapitalization.words,
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: amountCtrl,
+                        style: const TextStyle(
+                          color: AppColors.stoneBeigeColor,
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                        ],
+                        decoration: InputDecoration(
+                          labelText: l.amountDollar,
+                          hintText: '0.00',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: _AddButton(onTap: onAdd),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: amountCtrl,
-                    style: const TextStyle(color: AppColors.stoneBeigeColor),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: l.amountDollar,
-                      hintText: '0.00',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: _AddButton(onTap: onAdd),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final s in suggestions)
+                      GestureDetector(
+                        onTap: () =>
+                            nameCtrl.text = incomeSuggestionLabel(l, s),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.riverBlue.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: AppColors.riverBlue.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Text(
+                            incomeSuggestionLabel(l, s),
+                            style: GoogleFonts.nunito(
+                              color: AppColors.stoneBeigeColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
@@ -767,45 +814,37 @@ class _ExpenseStep extends StatelessWidget {
     return AppScrollbar(
       builder: (controller) => ListView(
         controller: controller,
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         children: [
-          // Budget meter
-          BarkCard(
-            label: l.canopyMeter,
-            icon: Icons.donut_large,
-            accent: overBudget ? AppColors.dangerRed : AppColors.lightLeaf,
+          // Slim remaining indicator (the full meter card was too heavy).
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               children: [
                 _BudgetBar(
                   totalIncome: totalIncome,
                   totalAllocated: totalAllocated,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      l.allocatedAmount(
-                        '\$${totalAllocated.toStringAsFixed(2)}',
-                      ),
+                      l.allocatedAmount('\$${totalAllocated.toStringAsFixed(0)}'),
                       style: GoogleFonts.nunito(
-                        color: AppColors.stoneBeigeColor,
-                        fontSize: 12,
+                        color: AppColors.mossGreen,
+                        fontSize: 11.5,
                       ),
                     ),
                     Text(
                       overBudget
-                          ? l.overByAmount(
-                              '\$${(-remaining).toStringAsFixed(2)}',
-                            )
-                          : l.remainingAmount(
-                              '\$${remaining.toStringAsFixed(2)}',
-                            ),
+                          ? l.overByAmount('\$${(-remaining).toStringAsFixed(0)}')
+                          : l.remainingAmount('\$${remaining.toStringAsFixed(0)}'),
                       style: GoogleFonts.nunito(
                         color: overBudget
                             ? AppColors.dangerRed
                             : AppColors.lightLeaf,
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -815,79 +854,8 @@ class _ExpenseStep extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          // Presets card
-          BarkCard(
-            label: l.pickABranch,
-            icon: Icons.account_tree_outlined,
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: presets.map((p) {
-                final iconKey = p.$1;
-                final name = expensePresetLabel(l, iconKey);
-                final isSelected = selectedIconKey == iconKey;
-                return GestureDetector(
-                  onTap: () => onPresetTap(name, iconKey),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.forestGreen.withValues(alpha: 0.45)
-                          : AppColors.soilMid,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppColors.lightLeaf
-                            : AppColors.mossGreen.withValues(alpha: 0.4),
-                        width: isSelected ? 1.5 : 1,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: AppColors.lightLeaf.withValues(
-                                  alpha: 0.3,
-                                ),
-                                blurRadius: 8,
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CategoryIcons.forKey(iconKey),
-                          size: 15,
-                          color: isSelected
-                              ? AppColors.lightLeaf
-                              : AppColors.mossGreen,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          name,
-                          style: GoogleFonts.nunito(
-                            color: isSelected
-                                ? AppColors.lightLeaf
-                                : AppColors.stoneBeigeColor,
-                            fontSize: 12.5,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Add a branch card
+          // One hero "Add a branch" card. The amount is optional (the survey
+          // and plan steps fill it in), and the presets sit quietly beneath.
           BarkCard(
             label: l.addABranch,
             icon: Icons.add_circle_outline,
@@ -934,7 +902,7 @@ class _ExpenseStep extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   l.amountOptionalHint,
                   style: GoogleFonts.nunito(
@@ -943,6 +911,63 @@ class _ExpenseStep extends StatelessWidget {
                     height: 1.4,
                     fontStyle: FontStyle.italic,
                   ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: presets.map((p) {
+                    final iconKey = p.$1;
+                    final name = expensePresetLabel(l, iconKey);
+                    final isSelected = selectedIconKey == iconKey;
+                    return GestureDetector(
+                      onTap: () => onPresetTap(name, iconKey),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 11,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.forestGreen.withValues(alpha: 0.45)
+                              : AppColors.soilMid,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.lightLeaf
+                                : AppColors.mossGreen.withValues(alpha: 0.4),
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CategoryIcons.forKey(iconKey),
+                              size: 14,
+                              color: isSelected
+                                  ? AppColors.lightLeaf
+                                  : AppColors.mossGreen,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              name,
+                              style: GoogleFonts.nunito(
+                                color: isSelected
+                                    ? AppColors.lightLeaf
+                                    : AppColors.stoneBeigeColor,
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
@@ -1016,23 +1041,155 @@ class _ExpenseStep extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────
-// Step 3 – AI allocation plan (rank importance, get plans, pick or do manual)
+// Step 3 – Survey (questionnaire + optional note)
+// ──────────────────────────────────────────────
+
+class _SurveyStep extends StatelessWidget {
+  final Map<String, String> answers;
+  final TextEditingController noteCtrl;
+  final void Function(String questionKey, String optionKey) onAnswer;
+
+  const _SurveyStep({
+    super.key,
+    required this.answers,
+    required this.noteCtrl,
+    required this.onAnswer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final questions = budgetSurveyQuestions();
+    return AppScrollbar(
+      builder: (controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        children: [
+          BarkCard(
+            label: l.surveyIntroTitle,
+            icon: Icons.quiz_outlined,
+            accent: AppColors.leafYellow,
+            child: Text(
+              l.surveyIntroBody,
+              style: GoogleFonts.nunito(
+                color: AppColors.mossGreen.withValues(alpha: 0.9),
+                fontSize: 12.5,
+                height: 1.45,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          for (final q in questions) ...[
+            BarkCard(
+              label: q.prompt(l),
+              icon: Icons.help_outline,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final opt in q.options)
+                    _SurveyChip(
+                      label: opt.label(l),
+                      selected: answers[q.key] == opt.key,
+                      onTap: () => onAnswer(q.key, opt.key),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+          // Optional free-text note folded into the coach's reasoning.
+          BarkCard(
+            label: l.budgetNoteTitle,
+            icon: Icons.chat_bubble_outline,
+            child: TextField(
+              controller: noteCtrl,
+              maxLines: 3,
+              style: const TextStyle(color: AppColors.stoneBeigeColor),
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                hintText: l.budgetNoteHint,
+                hintStyle: GoogleFonts.nunito(
+                  color: AppColors.mossGreen.withValues(alpha: 0.7),
+                  fontSize: 12.5,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SurveyChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _SurveyChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.forestGreen.withValues(alpha: 0.45)
+              : AppColors.soilMid,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected
+                ? AppColors.lightLeaf
+                : AppColors.mossGreen.withValues(alpha: 0.4),
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.nunito(
+            color: selected ? AppColors.lightLeaf : AppColors.stoneBeigeColor,
+            fontSize: 12.5,
+            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Step 4 – AI allocation plan (get plans, pick or do manual)
 // ──────────────────────────────────────────────
 
 class _PlanStep extends StatefulWidget {
   final double income;
   final List<ExpenseCategory> expenses;
   final bool settled;
+  final String note;
+  final Map<String, String> survey;
   final void Function(AllocationPlan) onApplyPlan;
   final VoidCallback onSettleManual;
+  final void Function(String name, double amount, String goalId)
+  onAddGoalBranch;
 
   const _PlanStep({
     super.key,
     required this.income,
     required this.expenses,
     required this.settled,
+    required this.note,
+    required this.survey,
     required this.onApplyPlan,
     required this.onSettleManual,
+    required this.onAddGoalBranch,
   });
 
   @override
@@ -1046,7 +1203,6 @@ class _PlanStepState extends State<_PlanStep> {
   int? _selected;
   bool _manual = false;
 
-  final _synopsisCtrl = TextEditingController();
   final Map<ExpenseCategory, TextEditingController> _amountCtrls = {};
 
   @override
@@ -1058,7 +1214,6 @@ class _PlanStepState extends State<_PlanStep> {
 
   @override
   void dispose() {
-    _synopsisCtrl.dispose();
     for (final c in _amountCtrls.values) {
       c.dispose();
     }
@@ -1086,7 +1241,8 @@ class _PlanStepState extends State<_PlanStep> {
       final plans = await AiCoachService.instance.budgetPlans(
         income: widget.income,
         expenses: inputs,
-        synopsis: _synopsisCtrl.text.trim(),
+        synopsis: widget.note.trim(),
+        survey: widget.survey,
       );
       if (!mounted) return;
       setState(() {
@@ -1167,60 +1323,6 @@ class _PlanStepState extends State<_PlanStep> {
           ),
           const SizedBox(height: 14),
           if (!_manual) ...[
-            // Free-text synopsis: the user describes how they want their budget
-            // to feel, and the coach builds plans around it.
-            BarkCard(
-              label: l.describeYourBudget,
-              icon: Icons.chat_bubble_outline,
-              accent: AppColors.leafYellow,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: _synopsisCtrl,
-                    maxLines: 3,
-                    style: const TextStyle(color: AppColors.stoneBeigeColor),
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      hintText: l.describeYourBudgetHint,
-                      hintStyle: GoogleFonts.nunito(
-                        color: AppColors.mossGreen.withValues(alpha: 0.7),
-                        fontSize: 12.5,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final example in [
-                        l.budgetIdeaSaveHard,
-                        l.budgetIdeaBalanced,
-                        l.budgetIdeaEssentials,
-                        l.budgetIdeaDebt,
-                      ])
-                        ActionChip(
-                          label: Text(example),
-                          backgroundColor: AppColors.darkBark,
-                          side: BorderSide(
-                            color: AppColors.mossGreen.withValues(alpha: 0.4),
-                          ),
-                          labelStyle: GoogleFonts.nunito(
-                            color: AppColors.stoneBeigeColor,
-                            fontSize: 11.5,
-                          ),
-                          onPressed: () => setState(() {
-                            _synopsisCtrl.text = example;
-                          }),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
             if (_plans == null)
               _GenerateButton(loading: _loading, onTap: _generate)
             else ...[
@@ -1345,7 +1447,7 @@ class _PlanStepState extends State<_PlanStep> {
               ),
             ],
           ],
-          if (widget.settled)
+          if (widget.settled) ...[
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Row(
@@ -1368,6 +1470,140 @@ class _PlanStepState extends State<_PlanStep> {
                 ],
               ),
             ),
+            if (_leftover > 0.5) ...[
+              const SizedBox(height: 14),
+              _buildLeftoverCard(context, l),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  double get _leftover =>
+      widget.income - widget.expenses.fold(0.0, (s, e) => s + e.allocated);
+
+  Widget _buildLeftoverCard(BuildContext context, AppLocalizations l) {
+    return BarkCard(
+      label: l.leftoverGoalTitle,
+      icon: Icons.eco_outlined,
+      accent: AppColors.leafYellow,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.leftoverGoalBody('\$${_leftover.toStringAsFixed(0)}'),
+            style: GoogleFonts.nunito(
+              color: AppColors.mossGreen.withValues(alpha: 0.9),
+              fontSize: 12.5,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _sendLeftoverToGoal(context, l),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.forestGreen,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.spa, color: Colors.white, size: 18),
+              label: Text(
+                l.growAGoalWithIt,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Let the user route the leftover into a goal: pick an existing goal or
+  /// quick-create one, then add a linked funding branch to the budget.
+  Future<void> _sendLeftoverToGoal(
+    BuildContext context,
+    AppLocalizations l,
+  ) async {
+    final leftover = _leftover;
+    final goals = await GoalRepository.loadAll();
+    if (!context.mounted) return;
+    final choice = await showDialog<Goal>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        backgroundColor: const Color(0xFF122B0F),
+        title: Text(
+          l.leftoverPickGoalTitle,
+          style: const TextStyle(color: AppColors.stoneBeigeColor),
+        ),
+        children: [
+          for (final g in goals)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, g),
+              child: Text(
+                g.name,
+                style: const TextStyle(color: AppColors.stoneBeigeColor),
+              ),
+            ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, Goal(name: '', targetAmount: 0)),
+            child: Text(
+              l.leftoverNewGoal,
+              style: const TextStyle(color: AppColors.lightLeaf),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (choice == null || !context.mounted) return;
+
+    Goal goal = choice;
+    // The "new goal" sentinel has an empty name — prompt for one and save it.
+    if (goal.name.isEmpty) {
+      final name = await _promptGoalName(context, l);
+      if (name == null || name.trim().isEmpty || !context.mounted) return;
+      goal = Goal(name: name.trim(), targetAmount: 0);
+      await GoalRepository.saveNew(goal);
+    }
+    widget.onAddGoalBranch(goal.name, leftover, goal.id);
+  }
+
+  Future<String?> _promptGoalName(
+    BuildContext context,
+    AppLocalizations l,
+  ) async {
+    final ctrl = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF122B0F),
+        title: Text(
+          l.leftoverNewGoalTitle,
+          style: const TextStyle(color: AppColors.stoneBeigeColor),
+        ),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          style: const TextStyle(color: AppColors.stoneBeigeColor),
+          textCapitalization: TextCapitalization.words,
+          decoration: InputDecoration(hintText: l.goalNameHint),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text),
+            child: Text(l.save),
+          ),
         ],
       ),
     );
