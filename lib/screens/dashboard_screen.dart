@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/pulse_strip.dart';
 import '../widgets/reflection_card.dart';
+import '../widgets/scenery.dart';
 import 'auth/login_screen.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
@@ -829,7 +830,9 @@ class _LeafVeinPainter extends CustomPainter {
 }
 
 // ──────────────────────────────────────────────
-// Decorative canopy background
+// Decorative canopy background — a composed scene (layered foliage curtain,
+// hanging vines framing the menu, light shafts, fireflies) instead of the old
+// scatter of random leaf blobs.
 // ──────────────────────────────────────────────
 
 class _CanopyPainter extends CustomPainter {
@@ -837,26 +840,59 @@ class _CanopyPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    final rng = math.Random(42);
-    final paint = Paint()..style = PaintingStyle.fill;
 
-    for (int i = 0; i < 18; i++) {
-      final x = rng.nextDouble() * w;
-      final y = rng.nextDouble() * h * 0.6;
-      final r = 20.0 + rng.nextDouble() * 30;
-      final opacity = 0.04 + rng.nextDouble() * 0.06;
-      paint.color = AppColors.leafGreen.withValues(alpha: opacity);
-      canvas.save();
-      canvas.translate(x, y);
-      canvas.rotate(rng.nextDouble() * math.pi * 2);
-      final path = Path()
-        ..moveTo(0, -r)
-        ..cubicTo(r, -r * 0.3, r, r * 0.8, 0, r)
-        ..cubicTo(-r, r * 0.8, -r, -r * 0.3, 0, -r)
-        ..close();
-      canvas.drawPath(path, paint);
-      canvas.restore();
-    }
+    // Soft light falling through the leaves, behind everything else.
+    Scenery.paintLightShaft(
+      canvas,
+      Offset(w * 0.30, 0),
+      h * 0.52,
+      w * 0.08,
+      AppColors.leafYellow.withValues(alpha: 0.05),
+    );
+    Scenery.paintLightShaft(
+      canvas,
+      Offset(w * 0.68, 0),
+      h * 0.4,
+      w * 0.05,
+      AppColors.leafYellow.withValues(alpha: 0.04),
+    );
+
+    // Three depths of foliage curtain along the top: darkest and deepest at
+    // the back, lighter and shallower in front.
+    canvas.drawPath(
+      Scenery.canopyBand(w, h * 0.22, lobes: 5, seed: 3),
+      Paint()..color = AppColors.darkForestGreen.withValues(alpha: 0.55),
+    );
+    canvas.drawPath(
+      Scenery.canopyBand(w, h * 0.15, lobes: 6, seed: 8),
+      Paint()..color = AppColors.forestGreen.withValues(alpha: 0.35),
+    );
+    canvas.drawPath(
+      Scenery.canopyBand(w, h * 0.09, lobes: 7, seed: 21),
+      Paint()..color = AppColors.leafGreen.withValues(alpha: 0.28),
+    );
+
+    // Vines trailing down the sides, framing the four-leaf menu.
+    final vine = AppColors.leafGreen.withValues(alpha: 0.30);
+    Scenery.paintHangingVine(
+      canvas, Offset(w * 0.06, h * 0.05), h * 0.30, 14, vine, leaves: 6);
+    Scenery.paintHangingVine(
+      canvas, Offset(w * 0.15, h * 0.08), h * 0.18, -10, vine, leaves: 4);
+    Scenery.paintHangingVine(
+      canvas, Offset(w * 0.93, h * 0.04), h * 0.26, -16, vine, leaves: 5);
+
+    // A few deliberate loose leaves drifting near the ground line.
+    final leaf = AppColors.leafGreen.withValues(alpha: 0.18);
+    Scenery.paintLeaf(canvas, Offset(w * 0.12, h * 0.82), 22, 0.7, leaf);
+    Scenery.paintLeaf(canvas, Offset(w * 0.86, h * 0.76), 18, -2.2, leaf);
+    Scenery.paintLeaf(canvas, Offset(w * 0.72, h * 0.88), 24, 2.6, leaf);
+
+    // Fireflies drifting in the dark mid-air, fixed so the scene is stable.
+    const glow = AppColors.leafYellow;
+    Scenery.paintFirefly(canvas, Offset(w * 0.22, h * 0.34), 1.6, glow);
+    Scenery.paintFirefly(canvas, Offset(w * 0.81, h * 0.28), 1.3, glow);
+    Scenery.paintFirefly(canvas, Offset(w * 0.58, h * 0.18), 1.1, glow);
+    Scenery.paintFirefly(canvas, Offset(w * 0.09, h * 0.55), 1.2, glow);
   }
 
   @override

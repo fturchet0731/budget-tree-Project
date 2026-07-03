@@ -17,6 +17,7 @@ import '../widgets/app_scrollbar.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/info_button.dart';
 import '../widgets/sapling_view.dart';
+import '../widgets/scenery.dart';
 import '../tutorial/tutorial_content.dart';
 import 'create_goal_screen.dart';
 import 'goal_detail_screen.dart';
@@ -880,22 +881,21 @@ class _GroveBgPainter extends CustomPainter {
             ),
     );
 
-    // Distant silhouetted trees row
+    // Distant tree line: full silhouettes along the horizon, staggered in
+    // height and opacity so the grove reads as receding depth.
     final rng = math.Random(13);
-    for (int i = 0; i < 12; i++) {
-      final tx = (i / 11) * w + rng.nextDouble() * 22;
-      final ty = h * (0.36 + rng.nextDouble() * 0.08);
-      final op = 0.18 + rng.nextDouble() * 0.18;
-      _silhouette(canvas, tx, ty, op);
+    for (int i = 0; i < 8; i++) {
+      final tx = (i + 0.5) / 8 * w + (rng.nextDouble() - 0.5) * 26;
+      final ty = h * (0.42 + rng.nextDouble() * 0.05);
+      final op = 0.16 + rng.nextDouble() * 0.18;
+      Scenery.paintTreeSilhouette(
+        canvas,
+        Offset(tx, ty),
+        44 + rng.nextDouble() * 34,
+        const Color(0xFF0A1E0A).withValues(alpha: op),
+        seed: i * 3 + 1,
+      );
     }
-  }
-
-  void _silhouette(Canvas canvas, double tx, double ty, double op) {
-    final c = const Color(0xFF0A1E0A).withValues(alpha: op);
-    canvas.drawCircle(Offset(tx, ty), 22, Paint()..color = c);
-    canvas.drawCircle(Offset(tx - 12, ty + 8), 16, Paint()..color = c);
-    canvas.drawCircle(Offset(tx + 11, ty + 6), 14, Paint()..color = c);
-    canvas.drawRect(Rect.fromLTWH(tx - 3, ty + 16, 6, 16), Paint()..color = c);
   }
 
   @override

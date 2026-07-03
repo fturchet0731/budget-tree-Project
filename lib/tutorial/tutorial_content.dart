@@ -192,7 +192,8 @@ List<TutorialStep> skippedSteps(TutorialSection section, AppLocalizations l) {
 // ──────────────────────────────────────────────
 
 /// The three phases of building a budget, matching the Create screen's steps:
-/// 0 = Seed (income), 1 = Branches (expenses), 2 = Roots (personal details).
+/// 0 = Seed (income), 1 = Branches (expenses), 2 = Survey, 3 = Plan (which
+/// also carries the finishing touches: name + pay schedule + plant).
 List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
   switch (step) {
     case 0:
@@ -214,15 +215,11 @@ List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
         TutorialStep(l.tutStepSurveyC),
       ];
     case 3:
+    default:
       return [
         TutorialStep(l.tutStepPlanA, expression: AcornExpression.happy),
         TutorialStep(l.tutStepPlanB),
         TutorialStep(l.tutStepPlanC),
-      ];
-    case 4:
-    default:
-      return [
-        TutorialStep(l.tutStep2a),
         TutorialStep(l.tutStep2b),
         TutorialStep(l.tutStep2c, expression: AcornExpression.happy),
       ];

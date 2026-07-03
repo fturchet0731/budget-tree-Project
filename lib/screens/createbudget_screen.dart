@@ -17,6 +17,7 @@ import '../widgets/allocation_plan_card.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/bark_card.dart';
 import '../widgets/info_button.dart';
+import '../widgets/scenery.dart';
 import '../widgets/vine_step_indicator.dart';
 import '../tutorial/tutorial_content.dart';
 import 'budget_tree_screen.dart';
@@ -201,14 +202,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       l.stepExpensesTitle,
       l.stepSurveyTitle,
       l.stepPlanTitle,
-      l.stepNamePayTitle,
     ];
     final subtitles = [
       l.stepIncomeSub,
       l.stepExpensesSub,
       l.stepSurveySub,
       l.stepPlanSub,
-      l.stepNamePaySub,
     ];
     final stepTitle = titles[_step];
     final stepSubtitle = subtitles[_step];
@@ -247,7 +246,6 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                     ),
                     VineStep(label: l.vineSurvey, icon: Icons.quiz_outlined),
                     VineStep(label: l.vinePlan, icon: Icons.auto_awesome),
-                    VineStep(label: l.vineRoots, icon: Icons.park_outlined),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -310,8 +308,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             onSkip: (qKey) =>
                                 setState(() => _surveySkipped.add(qKey)),
                           )
-                        : _step == 3
-                        ? _PlanStep(
+                        : _PlanStep(
                             key: const ValueKey(3),
                             income: _totalIncome,
                             expenses: _expenses,
@@ -321,9 +318,6 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             onApplyPlan: _applyPlan,
                             onSettleManual: _settleManual,
                             onAddGoalBranch: _addGoalBranch,
-                          )
-                        : _PersonalStep(
-                            key: const ValueKey(4),
                             nameCtrl: _budgetNameCtrl,
                             payFrequency: _payFrequency,
                             firstPayDate: _firstPayDate,
@@ -336,18 +330,16 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 ),
                 _BottomBar(
                   step: _step,
-                  lastStep: 4,
+                  lastStep: 3,
                   canAdvance: _step == 0
                       ? _incomeSources.isNotEmpty
                       : _step == 1
                       ? _expenses.isNotEmpty
                       : _step == 2
                       ? true // questionnaire is optional
-                      : _step == 3
-                      ? _planSettled
-                      : true,
+                      : _planSettled,
                   onNext: () {
-                    if (_step < 4) {
+                    if (_step < 3) {
                       setState(() => _step++);
                     } else {
                       _plantTree();
@@ -404,29 +396,29 @@ class _NatureBgPainter extends CustomPainter {
             ),
     );
 
-    // Distant tree silhouettes near the bottom (fading into bg)
-    final silhouette = const Color(0xFF050D04).withValues(alpha: 0.75);
-    final treeY = h * 0.86;
-    for (int i = 0; i < 12; i++) {
-      final t = (i / 11);
-      final x = t * w;
-      // Three overlapping ovals per tree forming a simple silhouette
-      final cR = 22.0 + ((i * 7) % 4) * 4;
-      canvas.drawCircle(Offset(x, treeY - 6), cR, Paint()..color = silhouette);
-      canvas.drawCircle(
-        Offset(x - 14, treeY + 6),
-        cR * 0.8,
-        Paint()..color = silhouette,
+    // A tree line near the bottom: two staggered rows of full silhouettes
+    // (fainter, taller row behind a darker front row) fading into the bg.
+    final back = const Color(0xFF050D04).withValues(alpha: 0.45);
+    final front = const Color(0xFF050D04).withValues(alpha: 0.8);
+    final treeY = h * 0.9;
+    for (int i = 0; i < 6; i++) {
+      final x = (i + 0.5) / 6 * w;
+      Scenery.paintTreeSilhouette(
+        canvas,
+        Offset(x, treeY - 8),
+        66 + ((i * 13) % 4) * 9,
+        back,
+        seed: i + 40,
       );
-      canvas.drawCircle(
-        Offset(x + 12, treeY + 6),
-        cR * 0.7,
-        Paint()..color = silhouette,
-      );
-      // Tiny trunk
-      canvas.drawRect(
-        Rect.fromCenter(center: Offset(x, treeY + 18), width: 5, height: 16),
-        Paint()..color = silhouette,
+    }
+    for (int i = 0; i < 5; i++) {
+      final x = (i + 0.2) / 5 * w + 12;
+      Scenery.paintTreeSilhouette(
+        canvas,
+        Offset(x, treeY + 6),
+        52 + ((i * 7) % 3) * 8,
+        front,
+        seed: i,
       );
     }
 
@@ -1442,7 +1434,9 @@ class _SurveyChip extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────
-// Step 4 – AI allocation plan (get plans, pick or do manual)
+// Step 4 – AI allocation plan (get plans, pick or do manual), and once the
+// allocations settle, the finishing touches (tree name + pay schedule) appear
+// below — the wizard ends here, no separate "roots" step.
 // ──────────────────────────────────────────────
 
 class _PlanStep extends StatefulWidget {
@@ -1455,6 +1449,11 @@ class _PlanStep extends StatefulWidget {
   final VoidCallback onSettleManual;
   final void Function(String name, double amount, String goalId)
   onAddGoalBranch;
+  final TextEditingController nameCtrl;
+  final PayFrequency? payFrequency;
+  final DateTime? firstPayDate;
+  final ValueChanged<PayFrequency?> onFrequencyChanged;
+  final ValueChanged<DateTime?> onFirstPayDateChanged;
 
   const _PlanStep({
     super.key,
@@ -1466,6 +1465,11 @@ class _PlanStep extends StatefulWidget {
     required this.onApplyPlan,
     required this.onSettleManual,
     required this.onAddGoalBranch,
+    required this.nameCtrl,
+    required this.payFrequency,
+    required this.firstPayDate,
+    required this.onFrequencyChanged,
+    required this.onFirstPayDateChanged,
   });
 
   @override
@@ -1750,10 +1754,175 @@ class _PlanStepState extends State<_PlanStep> {
               const SizedBox(height: 14),
               _buildLeftoverCard(context, l),
             ],
+            // Finishing touches, revealed only once the plan is settled so the
+            // step stays one decision at a time: name the tree, set the pay
+            // schedule, then the bottom bar plants it.
+            const SizedBox(height: 14),
+            _buildNameCard(l),
+            const SizedBox(height: 14),
+            _buildPayCard(context, l),
           ],
         ],
       ),
     );
+  }
+
+  Widget _buildNameCard(AppLocalizations l) {
+    return BarkCard(
+      label: l.nameYourTree,
+      icon: Icons.park,
+      child: TextField(
+        controller: widget.nameCtrl,
+        style: const TextStyle(color: AppColors.stoneBeigeColor),
+        decoration: InputDecoration(
+          labelText: l.budgetName,
+          hintText: l.budgetNameHint,
+          prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
+        ),
+        textCapitalization: TextCapitalization.words,
+      ),
+    );
+  }
+
+  Widget _buildPayCard(BuildContext context, AppLocalizations l) {
+    return BarkCard(
+      label: l.payScheduleLabel,
+      icon: Icons.event_repeat_outlined,
+      accent: AppColors.riverBlue,
+      child: Column(
+        children: [
+          DropdownButtonFormField<PayFrequency>(
+            initialValue: widget.payFrequency,
+            isExpanded: true,
+            dropdownColor: AppColors.darkBark,
+            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            decoration: InputDecoration(
+              labelText: l.payFrequencyLabel,
+              prefixIcon: const Icon(
+                Icons.event_repeat_outlined,
+                color: AppColors.mossGreen,
+              ),
+            ),
+            items: PayFrequency.values
+                .map(
+                  (f) => DropdownMenuItem(
+                    value: f,
+                    child: Text(
+                      f.label,
+                      style: const TextStyle(
+                        color: AppColors.stoneBeigeColor,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: widget.onFrequencyChanged,
+          ),
+          const SizedBox(height: 14),
+          InkWell(
+            onTap: () async {
+              final now = DateTime.now();
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: widget.firstPayDate ?? now,
+                firstDate: DateTime(now.year - 2),
+                lastDate: DateTime(now.year + 2),
+                builder: (ctx, child) => Theme(
+                  data: Theme.of(ctx).copyWith(
+                    colorScheme: const ColorScheme.dark(
+                      primary: AppColors.lightLeaf,
+                      onPrimary: Colors.white,
+                      surface: AppColors.darkBark,
+                      onSurface: AppColors.stoneBeigeColor,
+                    ),
+                    dialogTheme: const DialogThemeData(
+                      backgroundColor: AppColors.darkBark,
+                    ),
+                  ),
+                  child: child!,
+                ),
+              );
+              if (picked != null) widget.onFirstPayDateChanged(picked);
+            },
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 16,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.soilMid,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.mossGreen.withValues(alpha: 0.40),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today_outlined,
+                    color: AppColors.mossGreen,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      widget.firstPayDate == null
+                          ? l.firstPayDate
+                          : l.firstPayOn(
+                              _formatDate(widget.firstPayDate!, l)),
+                      style: TextStyle(
+                        color: widget.firstPayDate == null
+                            ? AppColors.stoneBeigeColor.withValues(alpha: 0.5)
+                            : AppColors.stoneBeigeColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  if (widget.firstPayDate != null)
+                    IconButton(
+                      onPressed: () => widget.onFirstPayDateChanged(null),
+                      icon: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: AppColors.mossGreen.withValues(alpha: 0.6),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.info_outline,
+                color: AppColors.riverBlue,
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l.payScheduleInfo,
+                  style: GoogleFonts.nunito(
+                    color: AppColors.stoneBeigeColor.withValues(alpha: 0.85),
+                    fontSize: 11.5,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _formatDate(DateTime d, AppLocalizations l) {
+    final m = monthAbbrevs(l);
+    return '${m[d.month - 1]} ${d.day}, ${d.year}';
   }
 
   double get _leftover =>
@@ -1954,201 +2123,6 @@ class _BudgetBar extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-// ──────────────────────────────────────────────
-// Step 3 – Personal info
-// ──────────────────────────────────────────────
-
-class _PersonalStep extends StatelessWidget {
-  final TextEditingController nameCtrl;
-  final PayFrequency? payFrequency;
-  final DateTime? firstPayDate;
-  final ValueChanged<PayFrequency?> onFrequencyChanged;
-  final ValueChanged<DateTime?> onFirstPayDateChanged;
-
-  const _PersonalStep({
-    super.key,
-    required this.nameCtrl,
-    required this.payFrequency,
-    required this.firstPayDate,
-    required this.onFrequencyChanged,
-    required this.onFirstPayDateChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return AppScrollbar(
-      builder: (controller) => ListView(
-        controller: controller,
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-        children: [
-          // Name card
-          BarkCard(
-            label: l.nameYourTree,
-            icon: Icons.park,
-            child: TextField(
-              controller: nameCtrl,
-              style: const TextStyle(color: AppColors.stoneBeigeColor),
-              decoration: InputDecoration(
-                labelText: l.budgetName,
-                hintText: l.budgetNameHint,
-                prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
-              ),
-              textCapitalization: TextCapitalization.words,
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Pay schedule card
-          BarkCard(
-            label: l.payScheduleLabel,
-            icon: Icons.event_repeat_outlined,
-            accent: AppColors.riverBlue,
-            child: Column(
-              children: [
-                DropdownButtonFormField<PayFrequency>(
-                  initialValue: payFrequency,
-                  isExpanded: true,
-                  dropdownColor: AppColors.darkBark,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor),
-                  decoration: InputDecoration(
-                    labelText: l.payFrequencyLabel,
-                    prefixIcon: const Icon(
-                      Icons.event_repeat_outlined,
-                      color: AppColors.mossGreen,
-                    ),
-                  ),
-                  items: PayFrequency.values
-                      .map(
-                        (f) => DropdownMenuItem(
-                          value: f,
-                          child: Text(
-                            f.label,
-                            style: const TextStyle(
-                              color: AppColors.stoneBeigeColor,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: onFrequencyChanged,
-                ),
-                const SizedBox(height: 14),
-                InkWell(
-                  onTap: () async {
-                    final now = DateTime.now();
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: firstPayDate ?? now,
-                      firstDate: DateTime(now.year - 2),
-                      lastDate: DateTime(now.year + 2),
-                      builder: (ctx, child) => Theme(
-                        data: Theme.of(ctx).copyWith(
-                          colorScheme: const ColorScheme.dark(
-                            primary: AppColors.lightLeaf,
-                            onPrimary: Colors.white,
-                            surface: AppColors.darkBark,
-                            onSurface: AppColors.stoneBeigeColor,
-                          ),
-                          dialogTheme: const DialogThemeData(
-                            backgroundColor: AppColors.darkBark,
-                          ),
-                        ),
-                        child: child!,
-                      ),
-                    );
-                    if (picked != null) onFirstPayDateChanged(picked);
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.soilMid,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: AppColors.mossGreen.withValues(alpha: 0.40),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          color: AppColors.mossGreen,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            firstPayDate == null
-                                ? l.firstPayDate
-                                : l.firstPayOn(_formatDate(firstPayDate!, l)),
-                            style: TextStyle(
-                              color: firstPayDate == null
-                                  ? AppColors.stoneBeigeColor.withValues(
-                                      alpha: 0.5,
-                                    )
-                                  : AppColors.stoneBeigeColor,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                        if (firstPayDate != null)
-                          IconButton(
-                            onPressed: () => onFirstPayDateChanged(null),
-                            icon: Icon(
-                              Icons.close,
-                              size: 16,
-                              color: AppColors.mossGreen.withValues(alpha: 0.6),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          BarkCard(
-            accent: AppColors.riverBlue,
-            padding: const EdgeInsets.all(14),
-            showAccentStrip: false,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.info_outline,
-                  color: AppColors.riverBlue,
-                  size: 18,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    l.payScheduleInfo,
-                    style: GoogleFonts.nunito(
-                      color: AppColors.stoneBeigeColor,
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static String _formatDate(DateTime d, AppLocalizations l) {
-    final m = monthAbbrevs(l);
-    return '${m[d.month - 1]} ${d.day}, ${d.year}';
   }
 }
 
