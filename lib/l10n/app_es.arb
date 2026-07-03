@@ -665,5 +665,14 @@
   "pulseStreakTitle": "Racha de ahorro",
   "pulseStreakBody": "{count, plural, =1{1 semana seguida.} other{{count} semanas seguidas.}} ¡Sigue así!",
   "pulsePlantTitle": "Empieza aquí",
-  "pulsePlantBody": "Planta tu primer árbol y mira crecer tu presupuesto."
+  "pulsePlantBody": "Planta tu primer árbol y mira crecer tu presupuesto.",
+
+  "surveyProgress": "Pregunta {current} de {total}",
+  "surveyDoneTitle": "Eso es todo",
+  "surveyDoneBody": "Toca una respuesta para cambiarla o añade una nota para el coach abajo.",
+  "surveySkippedLabel": "Omitida",
+
+  "guestUpgradeTitle": "¡Tu primer árbol está plantado!",
+  "guestUpgradeBody": "Crea una cuenta gratuita y tu bosque quedará guardado en la nube, a salvo aunque cambies de teléfono. Todo lo que creaste te acompaña.",
+  "guestUpgradeLater": "Quizás más tarde"
 }

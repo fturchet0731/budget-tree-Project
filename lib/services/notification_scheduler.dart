@@ -25,7 +25,11 @@ class NotificationScheduler {
   /// streak/summary copy stays current. Safe to call often.
   static Future<void> rescheduleAll() async {
     final settings = AppSettings.instance;
-    if (settings.anyNotificationsEnabled) {
+    // Only surface the OS permission dialog after the user has opted into
+    // notifications somewhere (Settings, or a goal's watering reminder) — a
+    // first launch should never open with a permission request out of thin
+    // air. Scheduling below is safe without permission; it just stays silent.
+    if (settings.anyNotificationsEnabled && settings.notifPermissionAsked) {
       await NotificationService.requestPermissions();
     }
 

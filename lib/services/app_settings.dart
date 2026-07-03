@@ -23,6 +23,7 @@ class AppSettings extends ChangeNotifier {
   static const _kWaterHour = 'settings_water_hour_v1';
   static const _kLocale = 'settings_locale_v1';
   static const _kAiCoach = 'settings_ai_coach_v1';
+  static const _kNotifPermissionAsked = 'settings_notif_perm_asked_v1';
 
   /// Languages the app ships translations for. `null` locale = follow device.
   static const supportedLanguageCodes = ['en', 'fr', 'es'];
@@ -52,6 +53,8 @@ class AppSettings extends ChangeNotifier {
   // weekly reflections). On by default; the features still only run when
   // Supabase is configured and the user is signed in.
   bool _aiCoachEnabled = true;
+
+  bool _notifPermissionAsked = false;
 
   AppPalette get palette => _palette;
   AppTextScale get textScale => _scale;
@@ -92,6 +95,21 @@ class AppSettings extends ChangeNotifier {
       _notifWeeklySummary ||
       _notifGoalWatering;
 
+  /// True once the user has taken a notification-related action (touched the
+  /// notification settings, or asked to be reminded to water a goal). The OS
+  /// permission dialog is held back until then, so the very first launch never
+  /// opens with a permission request the user has no context for.
+  bool get notifPermissionAsked => _notifPermissionAsked;
+
+  /// Record that the user opted into notifications somewhere; from now on the
+  /// scheduler may surface the OS permission prompt.
+  Future<void> markNotifPermissionAsked() async {
+    if (_notifPermissionAsked) return;
+    _notifPermissionAsked = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kNotifPermissionAsked, true);
+  }
+
   /// Whether the first-run acorn walkthrough has already played.
   bool get tutorialSeen => _tutorialSeen;
 
@@ -129,6 +147,7 @@ class AppSettings extends ChangeNotifier {
     _notifGoalWatering = prefs.getBool(_kNotifWatering) ?? true;
     _waterHour = prefs.getInt(_kWaterHour) ?? 9;
     _aiCoachEnabled = prefs.getBool(_kAiCoach) ?? true;
+    _notifPermissionAsked = prefs.getBool(_kNotifPermissionAsked) ?? false;
     final lc = prefs.getString(_kLocale);
     _locale = (lc != null && supportedLanguageCodes.contains(lc))
         ? Locale(lc)

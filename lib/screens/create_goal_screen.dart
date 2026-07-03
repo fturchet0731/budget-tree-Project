@@ -11,6 +11,7 @@ import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../services/achievement_service.dart';
 import '../services/ai_coach_service.dart';
+import '../services/app_settings.dart';
 import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
 import '../services/goal_plan_math.dart';
@@ -190,6 +191,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     SoundService.goalSet();
     await AchievementService.evaluateAndUnlock();
     if (goal.waterRemindersEnabled) {
+      // "Remind me to water" is an explicit opt-in: this is the moment the OS
+      // permission dialog makes sense to the user.
+      await AppSettings.instance.markNotifPermissionAsked();
       await NotificationScheduler.rescheduleAll();
     }
     if (!mounted) return;

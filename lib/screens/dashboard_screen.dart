@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
+import '../services/auth_service.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/pulse_strip.dart';
 import '../widgets/reflection_card.dart';
+import 'auth/login_screen.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
 import 'goals_screen.dart';
@@ -78,6 +81,14 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (!mounted) return;
     _pulseKey.currentState?.refresh();
     if (planted == true) {
+      // Peak-motivation moment for a guest: their tree is in the ground, so
+      // offer (once) to keep it safe with an account instead of the snackbar.
+      if (await AuthService.instance.shouldOfferAccountUpgrade()) {
+        await AuthService.instance.markAccountUpgradeOffered();
+        if (mounted) await _offerAccountUpgrade();
+        return;
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: const Color(0xFF122B0F),
@@ -104,6 +115,72 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
       );
     }
+  }
+
+  /// Bottom sheet celebrating a guest's first planted tree and inviting them
+  /// to create an account so the forest is backed up. Shown at most once.
+  Future<void> _offerAccountUpgrade() async {
+    final l = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF122B0F),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 24, 28, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(Icons.park, color: AppColors.lightLeaf, size: 44),
+              const SizedBox(height: 12),
+              Text(
+                l.guestUpgradeTitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.fredoka(
+                  color: AppColors.stoneBeigeColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l.guestUpgradeBody,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: AppColors.mossGreen,
+                  fontSize: 13.5,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LoginScreen(startInSignUp: true),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.cloud_done_outlined),
+                label: Text(l.createAccount),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(
+                  l.guestUpgradeLater,
+                  style: GoogleFonts.nunito(color: AppColors.mossGreen),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override

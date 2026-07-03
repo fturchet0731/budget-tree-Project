@@ -665,5 +665,14 @@
   "pulseStreakTitle": "Série d'épargne",
   "pulseStreakBody": "{count, plural, =1{1 semaine d'affilée.} other{{count} semaines d'affilée.}} Continuez comme ça !",
   "pulsePlantTitle": "Commencez ici",
-  "pulsePlantBody": "Plantez votre premier arbre et regardez votre budget grandir."
+  "pulsePlantBody": "Plantez votre premier arbre et regardez votre budget grandir.",
+
+  "surveyProgress": "Question {current} sur {total}",
+  "surveyDoneTitle": "C'est tout",
+  "surveyDoneBody": "Touchez une réponse pour la modifier, ou ajoutez une note pour le coach ci-dessous.",
+  "surveySkippedLabel": "Passée",
+
+  "guestUpgradeTitle": "Votre premier arbre est planté !",
+  "guestUpgradeBody": "Créez un compte gratuit et votre forêt sera sauvegardée dans le cloud, en sécurité même si vous changez de téléphone. Tout ce que vous avez créé vous suit.",
+  "guestUpgradeLater": "Plus tard"
 }

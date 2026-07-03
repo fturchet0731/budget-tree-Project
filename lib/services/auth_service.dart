@@ -44,6 +44,23 @@ class AuthService extends ChangeNotifier {
     await prefs.remove(_guestKey);
   }
 
+  static const _guestPromptKey = 'guest_account_prompt_shown_v1';
+
+  /// Whether to invite this guest to create an account right now. True exactly
+  /// once, at the peak-motivation moment the dashboard picks (first tree
+  /// planted); after that the launch screen's Register button is the only
+  /// nudge, so guests never feel nagged.
+  Future<bool> shouldOfferAccountUpgrade() async {
+    if (!isGuest) return false;
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool(_guestPromptKey) ?? false);
+  }
+
+  Future<void> markAccountUpgradeOffered() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_guestPromptKey, true);
+  }
+
   User? get currentUser =>
       isConfigured ? SupabaseConfig.client.auth.currentUser : null;
 

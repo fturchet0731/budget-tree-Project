@@ -11,6 +11,7 @@ import '../services/profile_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
+import '../widgets/skeleton.dart';
 import '../widgets/social_tab_bar.dart';
 import 'auth/login_screen.dart';
 import 'goal_detail_screen.dart';
@@ -197,9 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _body(AppLocalizations l) {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.lightLeaf),
-      );
+      return const ProfileSkeleton();
     }
     if (!ProfileService.instance.isAvailable) {
       // A guest can fix this on the spot: offer sign-up instead of a dead end.

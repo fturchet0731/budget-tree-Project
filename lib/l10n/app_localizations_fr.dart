@@ -2244,4 +2244,29 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pulsePlantBody =>
       'Plantez votre premier arbre et regardez votre budget grandir.';
+
+  @override
+  String surveyProgress(int current, int total) {
+    return 'Question $current sur $total';
+  }
+
+  @override
+  String get surveyDoneTitle => 'C\'est tout';
+
+  @override
+  String get surveyDoneBody =>
+      'Touchez une réponse pour la modifier, ou ajoutez une note pour le coach ci-dessous.';
+
+  @override
+  String get surveySkippedLabel => 'Passée';
+
+  @override
+  String get guestUpgradeTitle => 'Votre premier arbre est planté !';
+
+  @override
+  String get guestUpgradeBody =>
+      'Créez un compte gratuit et votre forêt sera sauvegardée dans le cloud, en sécurité même si vous changez de téléphone. Tout ce que vous avez créé vous suit.';
+
+  @override
+  String get guestUpgradeLater => 'Plus tard';
 }

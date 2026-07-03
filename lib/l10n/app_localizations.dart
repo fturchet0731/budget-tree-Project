@@ -3891,6 +3891,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plant your first tree and watch your budget grow.'**
   String get pulsePlantBody;
+
+  /// No description provided for @surveyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String surveyProgress(int current, int total);
+
+  /// No description provided for @surveyDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That is everything'**
+  String get surveyDoneTitle;
+
+  /// No description provided for @surveyDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an answer to change it, or add a note for the coach below.'**
+  String get surveyDoneBody;
+
+  /// No description provided for @surveySkippedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get surveySkippedLabel;
+
+  /// No description provided for @guestUpgradeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first tree is planted!'**
+  String get guestUpgradeTitle;
+
+  /// No description provided for @guestUpgradeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a free account and your forest is saved to the cloud, safe even if you switch phones. Everything you made stays with you.'**
+  String get guestUpgradeBody;
+
+  /// No description provided for @guestUpgradeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get guestUpgradeLater;
 }
 
 class _AppLocalizationsDelegate

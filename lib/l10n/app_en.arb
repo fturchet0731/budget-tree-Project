@@ -735,5 +735,15 @@
   "pulseStreakBody": "{count, plural, =1{1 week in a row.} other{{count} weeks in a row.}} Keep it growing!",
   "@pulseStreakBody": { "placeholders": { "count": { "type": "int" } } },
   "pulsePlantTitle": "Start here",
-  "pulsePlantBody": "Plant your first tree and watch your budget grow."
+  "pulsePlantBody": "Plant your first tree and watch your budget grow.",
+
+  "surveyProgress": "Question {current} of {total}",
+  "@surveyProgress": { "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } } },
+  "surveyDoneTitle": "That is everything",
+  "surveyDoneBody": "Tap an answer to change it, or add a note for the coach below.",
+  "surveySkippedLabel": "Skipped",
+
+  "guestUpgradeTitle": "Your first tree is planted!",
+  "guestUpgradeBody": "Create a free account and your forest is saved to the cloud, safe even if you switch phones. Everything you made stays with you.",
+  "guestUpgradeLater": "Maybe later"
 }

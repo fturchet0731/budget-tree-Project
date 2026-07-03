@@ -51,7 +51,10 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
   // Step 3 – Survey (questionnaire answers keyed by question key -> option key)
   // plus an optional free-text note the coach folds into its reasoning.
+  // Questions are shown one at a time; skipped ones are remembered so leaving
+  // and re-entering the step resumes at the summary instead of re-asking.
   final Map<String, String> _surveyAnswers = {};
+  final Set<String> _surveySkipped = {};
   final _noteCtrl = TextEditingController();
 
   // Step 5 – Budget name + pay schedule
@@ -297,11 +300,15 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                         ? _SurveyStep(
                             key: const ValueKey(2),
                             answers: _surveyAnswers,
+                            skipped: _surveySkipped,
                             noteCtrl: _noteCtrl,
                             onAnswer: (qKey, optKey) => setState(() {
                               _surveyAnswers[qKey] = optKey;
+                              _surveySkipped.remove(qKey);
                               _planSettled = false; // answers changed; re-plan
                             }),
+                            onSkip: (qKey) =>
+                                setState(() => _surveySkipped.add(qKey)),
                           )
                         : _step == 3
                         ? _PlanStep(
@@ -1044,80 +1051,349 @@ class _ExpenseStep extends StatelessWidget {
 // Step 3 – Survey (questionnaire + optional note)
 // ──────────────────────────────────────────────
 
-class _SurveyStep extends StatelessWidget {
+/// The questionnaire, one question at a time: tap an answer to move on, skip
+/// what you don't want to share, and edit any earlier answer from the summary
+/// rows. When every question is answered or skipped it settles on a summary
+/// view with the optional free-text note.
+class _SurveyStep extends StatefulWidget {
   final Map<String, String> answers;
+  final Set<String> skipped;
   final TextEditingController noteCtrl;
   final void Function(String questionKey, String optionKey) onAnswer;
+  final void Function(String questionKey) onSkip;
 
   const _SurveyStep({
     super.key,
     required this.answers,
+    required this.skipped,
     required this.noteCtrl,
     required this.onAnswer,
+    required this.onSkip,
   });
+
+  @override
+  State<_SurveyStep> createState() => _SurveyStepState();
+}
+
+class _SurveyStepState extends State<_SurveyStep> {
+  final List<SurveyQuestion> _questions = budgetSurveyQuestions();
+
+  /// Index of the question on screen; `_questions.length` is the summary view.
+  late int _index = _nextPending(0);
+
+  bool _seen(SurveyQuestion q) =>
+      widget.answers.containsKey(q.key) || widget.skipped.contains(q.key);
+
+  /// First question at or after [from] the user hasn't dealt with yet, or the
+  /// summary index when there is none.
+  int _nextPending(int from) {
+    for (var i = from; i < _questions.length; i++) {
+      if (!_seen(_questions[i])) return i;
+    }
+    return _questions.length;
+  }
+
+  void _answer(SurveyQuestion q, String optKey) {
+    widget.onAnswer(q.key, optKey);
+    // Let the chip's selected state land before sliding to the next question.
+    Future.delayed(const Duration(milliseconds: 220), () {
+      if (mounted) setState(() => _index = _nextPending(0));
+    });
+  }
+
+  void _skip(SurveyQuestion q) {
+    widget.onSkip(q.key);
+    setState(() => _index = _nextPending(0));
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final questions = budgetSurveyQuestions();
+    final done = _index >= _questions.length;
+    final answeredCount = _questions.where(_seen).length;
+
     return AppScrollbar(
       builder: (controller) => ListView(
         controller: controller,
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
         children: [
-          BarkCard(
-            label: l.surveyIntroTitle,
-            icon: Icons.quiz_outlined,
-            accent: AppColors.leafYellow,
-            child: Text(
-              l.surveyIntroBody,
-              style: GoogleFonts.nunito(
-                color: AppColors.mossGreen.withValues(alpha: 0.9),
-                fontSize: 12.5,
-                height: 1.45,
+          // Thin progress bar + counter so the user always knows how much of
+          // the questionnaire is left.
+          _SurveyProgress(
+            current: done ? _questions.length : _index + 1,
+            total: _questions.length,
+            completed: answeredCount,
+            label: done
+                ? l.surveyDoneTitle
+                : l.surveyProgress(_index + 1, _questions.length),
+          ),
+          const SizedBox(height: 12),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 260),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.08, 0),
+                  end: Offset.zero,
+                ).animate(anim),
+                child: child,
               ),
             ),
+            child: done
+                ? _summaryView(l)
+                : _questionView(l, _questions[_index]),
           ),
-          const SizedBox(height: 14),
-          for (final q in questions) ...[
-            BarkCard(
-              label: q.prompt(l),
-              icon: Icons.help_outline,
-              child: Wrap(
+        ],
+      ),
+    );
+  }
+
+  /// One question, its options, and a skip affordance.
+  Widget _questionView(AppLocalizations l, SurveyQuestion q) {
+    return Column(
+      key: ValueKey('q${q.key}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_index == 0 && widget.answers.isEmpty && widget.skipped.isEmpty) ...[
+          Text(
+            l.surveyIntroBody,
+            style: GoogleFonts.nunito(
+              color: AppColors.mossGreen.withValues(alpha: 0.9),
+              fontSize: 12.5,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        BarkCard(
+          label: q.prompt(l),
+          icon: Icons.help_outline,
+          accent: AppColors.leafYellow,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   for (final opt in q.options)
                     _SurveyChip(
                       label: opt.label(l),
-                      selected: answers[q.key] == opt.key,
-                      onTap: () => onAnswer(q.key, opt.key),
+                      selected: widget.answers[q.key] == opt.key,
+                      onTap: () => _answer(q, opt.key),
                     ),
                 ],
               ),
-            ),
-            const SizedBox(height: 14),
-          ],
-          // Optional free-text note folded into the coach's reasoning.
-          BarkCard(
-            label: l.budgetNoteTitle,
-            icon: Icons.chat_bubble_outline,
-            child: TextField(
-              controller: noteCtrl,
-              maxLines: 3,
-              style: const TextStyle(color: AppColors.stoneBeigeColor),
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintText: l.budgetNoteHint,
-                hintStyle: GoogleFonts.nunito(
-                  color: AppColors.mossGreen.withValues(alpha: 0.7),
-                  fontSize: 12.5,
-                  height: 1.4,
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => _skip(q),
+                  child: Text(
+                    l.tourSkip,
+                    style: GoogleFonts.nunito(
+                      color: AppColors.mossGreen,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
+              ),
+            ],
+          ),
+        ),
+        if (_answeredRows(l).isNotEmpty) ...[
+          const SizedBox(height: 16),
+          ..._answeredRows(l),
+        ],
+      ],
+    );
+  }
+
+  /// Everything answered or skipped: the editable recap + the optional note.
+  Widget _summaryView(AppLocalizations l) {
+    return Column(
+      key: const ValueKey('summary'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l.surveyDoneBody,
+          style: GoogleFonts.nunito(
+            color: AppColors.mossGreen.withValues(alpha: 0.9),
+            fontSize: 12.5,
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ..._answeredRows(l, includeSkipped: true),
+        const SizedBox(height: 6),
+        BarkCard(
+          label: l.budgetNoteTitle,
+          icon: Icons.chat_bubble_outline,
+          child: TextField(
+            controller: widget.noteCtrl,
+            maxLines: 3,
+            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              hintText: l.budgetNoteHint,
+              hintStyle: GoogleFonts.nunito(
+                color: AppColors.mossGreen.withValues(alpha: 0.7),
+                fontSize: 12.5,
+                height: 1.4,
               ),
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  /// Compact recap rows for questions the user has already dealt with. Tapping
+  /// one jumps back to that question to change the answer.
+  List<Widget> _answeredRows(
+    AppLocalizations l, {
+    bool includeSkipped = false,
+  }) {
+    final rows = <Widget>[];
+    for (var i = 0; i < _questions.length; i++) {
+      final q = _questions[i];
+      if (i == _index) continue;
+      final answerKey = widget.answers[q.key];
+      if (answerKey == null && !(includeSkipped && widget.skipped.contains(q.key))) {
+        continue;
+      }
+      final answerLabel = answerKey == null
+          ? null
+          : q.options.firstWhere((o) => o.key == answerKey).label(l);
+      rows.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: _AnswerRow(
+            prompt: q.prompt(l),
+            answer: answerLabel ?? l.surveySkippedLabel,
+            skipped: answerLabel == null,
+            onTap: () => setState(() => _index = i),
+          ),
+        ),
+      );
+    }
+    return rows;
+  }
+}
+
+/// "Question 2 of 6" over a thin fill bar.
+class _SurveyProgress extends StatelessWidget {
+  final int current;
+  final int total;
+  final int completed;
+  final String label;
+  const _SurveyProgress({
+    required this.current,
+    required this.total,
+    required this.completed,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.nunito(
+            color: AppColors.leafYellow,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.6,
+          ),
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: SizedBox(
+            height: 5,
+            child: LinearProgressIndicator(
+              value: completed / total,
+              backgroundColor: AppColors.soilMid,
+              valueColor: const AlwaysStoppedAnimation(AppColors.lightLeaf),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A settled question: prompt, chosen answer, and a pencil hinting it's
+/// editable. Tap anywhere on the row to reopen that question.
+class _AnswerRow extends StatelessWidget {
+  final String prompt;
+  final String answer;
+  final bool skipped;
+  final VoidCallback onTap;
+  const _AnswerRow({
+    required this.prompt,
+    required this.answer,
+    required this.skipped,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.soilMid.withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.mossGreen.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    prompt,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.nunito(
+                      color: AppColors.mossGreen,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    answer,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.nunito(
+                      color: skipped
+                          ? AppColors.mossGreen.withValues(alpha: 0.8)
+                          : AppColors.lightLeaf,
+                      fontSize: 13,
+                      fontStyle: skipped ? FontStyle.italic : FontStyle.normal,
+                      fontWeight: skipped ? FontWeight.w500 : FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.edit_outlined,
+              color: AppColors.mossGreen.withValues(alpha: 0.8),
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }

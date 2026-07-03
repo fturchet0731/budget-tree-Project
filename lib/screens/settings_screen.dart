@@ -840,6 +840,9 @@ class _NotificationsCard extends StatelessWidget {
 
   Future<void> _apply(Future<void> Function() change) async {
     await change();
+    // Touching any notification setting is the user opting in — from here on
+    // the scheduler may show the OS permission dialog (it prompts only once).
+    await AppSettings.instance.markNotifPermissionAsked();
     await NotificationScheduler.rescheduleAll();
   }
 
