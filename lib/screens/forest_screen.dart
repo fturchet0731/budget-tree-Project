@@ -14,6 +14,7 @@ import '../theme/leaf_palette.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/immersive_forest_view.dart';
 import '../widgets/info_button.dart';
+import '../widgets/scenery.dart';
 import '../tutorial/tutorial_content.dart';
 import 'budget_tree_screen.dart';
 
@@ -1261,26 +1262,16 @@ class _ForestBgPainter extends CustomPainter {
 
   void _silhouetteTree(
       Canvas canvas, double tx, double ty, double h, double op) {
+    // Tall slender forest trees: trunk foot on the ground line, crown up at
+    // ty where the sky is still light, like the original layout intended.
     final groundY = h * 0.80;
-    final trunkH = groundY - ty;
-    final scale = 0.6 + op * 0.9;
-
-    final crownPaint = Paint()
-      ..color = const Color(0xFF1A3A16).withValues(alpha: op * 0.85);
-    final crownMid = Paint()
-      ..color = const Color(0xFF243D1F).withValues(alpha: op * 0.60);
-
-    canvas.drawCircle(Offset(tx, ty), 26 * scale, crownPaint);
-    canvas.drawCircle(Offset(tx - 16 * scale, ty + 10 * scale), 19 * scale, crownPaint);
-    canvas.drawCircle(Offset(tx + 15 * scale, ty + 8 * scale), 17 * scale, crownPaint);
-    canvas.drawCircle(Offset(tx, ty - 20 * scale), 15 * scale, crownMid);
-
-    final trunkPaint = Paint()
-      ..color = const Color(0xFF100A05).withValues(alpha: op * 0.75);
-    canvas.drawRect(
-      Rect.fromLTWH(tx - 5 * scale, ty + 16 * scale, 10 * scale,
-          trunkH - 16 * scale),
-      trunkPaint,
+    Scenery.paintTreeSilhouette(
+      canvas,
+      Offset(tx, groundY),
+      (groundY - ty) + 26,
+      const Color(0xFF1A3A16).withValues(alpha: op * 0.85),
+      seed: (tx * 7).round(),
+      aspect: 0.22,
     );
   }
 

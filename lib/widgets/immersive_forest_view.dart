@@ -8,6 +8,7 @@ import '../services/app_settings.dart';
 import '../theme/app_theme.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
+import 'scenery.dart';
 import 'static_tree_view.dart';
 
 /// Swipeable carousel of saved budget trees. Tapping a tree shows an
@@ -735,13 +736,13 @@ class _ImmersiveBgPainter extends CustomPainter {
   }
 
   void _silhouette(Canvas canvas, double tx, double ty) {
-    final c = AppPalettes.groundClose().withValues(alpha: 0.7);
-    canvas.drawCircle(Offset(tx, ty), 18, Paint()..color = c);
-    canvas.drawCircle(Offset(tx - 11, ty + 7), 13, Paint()..color = c);
-    canvas.drawCircle(Offset(tx + 10, ty + 5), 11, Paint()..color = c);
-    canvas.drawRect(
-      Rect.fromLTWH(tx - 3, ty + 14, 6, 18),
-      Paint()..color = const Color(0xFF100A05).withValues(alpha: 0.55),
+    // Full tree standing on the horizon line, palette-tinted like before.
+    Scenery.paintTreeSilhouette(
+      canvas,
+      Offset(tx, ty + 32),
+      52,
+      AppPalettes.groundClose().withValues(alpha: 0.7),
+      seed: (tx * 3).round(),
     );
   }
 

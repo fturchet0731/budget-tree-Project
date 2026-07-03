@@ -16,20 +16,23 @@ class Scenery {
   /// A full tree silhouette standing on [base] (the trunk foot), [height]
   /// tall. The crown is a scalloped dome (not stacked circles) over a tapered
   /// trunk with a branch fork on each side. [seed] varies the scallop rhythm
-  /// so a row of trees doesn't repeat.
+  /// so a row of trees doesn't repeat. [aspect] is the crown width as a
+  /// fraction of the height — leave null for a natural rounded tree, or pass
+  /// something like 0.3 for the tall slender trees of a distant treeline.
   static void paintTreeSilhouette(
     Canvas canvas,
     Offset base,
     double height,
     Color color, {
     int seed = 0,
+    double? aspect,
   }) {
     final rng = math.Random(seed);
     final paint = Paint()..color = color;
 
     final trunkH = height * 0.38;
     final crownH = height - trunkH * 0.55; // crown overlaps the trunk top
-    final crownW = height * (0.62 + rng.nextDouble() * 0.14);
+    final crownW = height * (aspect ?? (0.62 + rng.nextDouble() * 0.14));
     final crownCx = base.dx + (rng.nextDouble() - 0.5) * height * 0.06;
     final crownBottom = base.dy - trunkH;
     final crownTop = base.dy - height;
@@ -207,6 +210,34 @@ class Scenery {
         ..strokeWidth = 0.9,
     );
     canvas.restore();
+  }
+
+  /// A small wildflower: five petals radiating from a bright center, instead
+  /// of the single colored dot the scenes used to scatter.
+  static void paintFlower(
+    Canvas canvas,
+    Offset at,
+    double radius,
+    Color petal, {
+    Color center = const Color(0xFFFFEE58),
+  }) {
+    final petalPaint = Paint()..color = petal;
+    for (var i = 0; i < 5; i++) {
+      final a = i * 2 * math.pi / 5 - math.pi / 2;
+      canvas.save();
+      canvas.translate(at.dx, at.dy);
+      canvas.rotate(a);
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(radius * 0.72, 0),
+          width: radius * 1.15,
+          height: radius * 0.72,
+        ),
+        petalPaint,
+      );
+      canvas.restore();
+    }
+    canvas.drawCircle(at, radius * 0.42, Paint()..color = center);
   }
 
   /// A glowing firefly: bright core over a soft radial halo.

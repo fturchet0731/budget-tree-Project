@@ -26,6 +26,7 @@ import '../widgets/app_scrollbar.dart';
 import '../widgets/bark_card.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/sapling_view.dart';
+import '../widgets/scenery.dart';
 import '../widgets/vine_step_indicator.dart';
 
 class CreateGoalScreen extends StatefulWidget {
@@ -1136,27 +1137,29 @@ class _GoalSkyPainter extends CustomPainter {
             ),
     );
 
-    // Tree silhouettes near the bottom
-    final silhouette = const Color(0xFF050D04).withValues(alpha: 0.78);
-    final treeY = h * 0.88;
-    for (int i = 0; i < 14; i++) {
-      final t = (i / 13);
-      final x = t * w;
-      final cR = 22.0 + ((i * 7) % 4) * 4;
-      canvas.drawCircle(Offset(x, treeY - 6), cR, Paint()..color = silhouette);
-      canvas.drawCircle(
-        Offset(x - 14, treeY + 6),
-        cR * 0.8,
-        Paint()..color = silhouette,
+    // Tree line near the bottom: two staggered depths of full silhouettes,
+    // matching the budget wizard's backdrop.
+    final back = const Color(0xFF050D04).withValues(alpha: 0.5);
+    final front = const Color(0xFF050D04).withValues(alpha: 0.82);
+    final treeY = h * 0.92;
+    for (int i = 0; i < 6; i++) {
+      final x = (i + 0.5) / 6 * w;
+      Scenery.paintTreeSilhouette(
+        canvas,
+        Offset(x, treeY - 10),
+        64 + ((i * 11) % 4) * 9,
+        back,
+        seed: i + 60,
       );
-      canvas.drawCircle(
-        Offset(x + 12, treeY + 6),
-        cR * 0.7,
-        Paint()..color = silhouette,
-      );
-      canvas.drawRect(
-        Rect.fromCenter(center: Offset(x, treeY + 18), width: 5, height: 16),
-        Paint()..color = silhouette,
+    }
+    for (int i = 0; i < 5; i++) {
+      final x = (i + 0.2) / 5 * w + 10;
+      Scenery.paintTreeSilhouette(
+        canvas,
+        Offset(x, treeY + 4),
+        50 + ((i * 7) % 3) * 8,
+        front,
+        seed: i + 12,
       );
     }
 

@@ -21,6 +21,7 @@ import '../theme/leaf_palette.dart';
 import '../widgets/achievements_sheet.dart';
 import '../widgets/acorn_coach.dart';
 import '../widgets/category_picker.dart';
+import '../widgets/scenery.dart';
 import '../widgets/tree_drawing.dart';
 import '../tutorial/tutorial_content.dart';
 
@@ -793,7 +794,27 @@ class _TreeSceneBackground extends CustomPainter {
     _drawSun(canvas, Offset(w * 0.84, h * 0.075), 30);
     _drawClouds(canvas, w, h);
     _drawBirds(canvas, w, h);
+    _drawTreeLine(canvas, w, h);
     _drawGround(canvas, w, h);
+  }
+
+  /// Faint distant trees along the horizon, behind the rolling ground —
+  /// gives the growing tree the same sense of depth as the other scenes.
+  void _drawTreeLine(Canvas canvas, double w, double h) {
+    final groundY = h * 0.74;
+    final c = AppPalettes.groundClose().withValues(alpha: 0.55);
+    for (int i = 0; i < 7; i++) {
+      final x = (i + 0.5) / 7 * w;
+      // Keep the center clear so the budget tree owns the stage.
+      if ((x - w / 2).abs() < w * 0.16) continue;
+      Scenery.paintTreeSilhouette(
+        canvas,
+        Offset(x, groundY + 4),
+        40 + ((i * 9) % 4) * 7,
+        c,
+        seed: i + 5,
+      );
+    }
   }
 
   void _drawSun(Canvas canvas, Offset c, double r) {
@@ -1012,7 +1033,7 @@ class _TreeSceneBackground extends CustomPainter {
       );
     }
 
-    // Wildflowers
+    // Wildflowers: petaled blooms, not plain dots.
     final fColors = [
       const Color(0xFFFFEE58),
       Colors.white,
@@ -1020,14 +1041,16 @@ class _TreeSceneBackground extends CustomPainter {
       const Color(0xFFCE93D8),
       const Color(0xFFFFB74D),
     ];
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 18; i++) {
       final x = 15.0 + rng.nextDouble() * (w - 30);
       if ((x - w / 2).abs() < 44) continue;
       final y = groundY + 2 + rng.nextDouble() * h * 0.07;
-      canvas.drawCircle(
+      Scenery.paintFlower(
+        canvas,
         Offset(x, y),
-        2.8 + rng.nextDouble() * 1.5,
-        Paint()..color = fColors[i % fColors.length],
+        3.0 + rng.nextDouble() * 1.6,
+        fColors[i % fColors.length],
+        center: i % 2 == 0 ? const Color(0xFFFFEE58) : const Color(0xFFF9A825),
       );
     }
   }
