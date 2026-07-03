@@ -2193,4 +2193,55 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get verifyBadCode =>
       'Ce code est incorrect ou expiré. Réessayez ou renvoyez-le.';
+
+  @override
+  String get loginExploreFirst => 'Essayez d\'abord, sans compte';
+
+  @override
+  String get pulseWaterTitle => 'C\'est l\'heure d\'arroser';
+
+  @override
+  String pulseWaterBody(String name, String amount) {
+    return 'Donnez $amount à $name pour qu\'il continue de pousser.';
+  }
+
+  @override
+  String pulseWaterOverdueBody(String name) {
+    return '$name a manqué son dernier arrosage. Un petit dépôt le rattrape.';
+  }
+
+  @override
+  String get pulseStreakAtRiskTitle => 'Série en danger';
+
+  @override
+  String pulseStreakAtRiskBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'série de $count semaines',
+      one: 'série de 1 semaine',
+    );
+    return 'Arrosez un objectif avant la fin de la semaine pour garder votre $_temp0.';
+  }
+
+  @override
+  String get pulseStreakTitle => 'Série d\'épargne';
+
+  @override
+  String pulseStreakBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines d\'affilée.',
+      one: '1 semaine d\'affilée.',
+    );
+    return '$_temp0 Continuez comme ça !';
+  }
+
+  @override
+  String get pulsePlantTitle => 'Commencez ici';
+
+  @override
+  String get pulsePlantBody =>
+      'Plantez votre premier arbre et regardez votre budget grandir.';
 }

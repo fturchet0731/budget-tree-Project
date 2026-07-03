@@ -4,12 +4,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../models/friendship_model.dart';
 import '../models/profile_model.dart';
+import '../services/auth_service.dart';
 import '../services/friends_service.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/social_tab_bar.dart';
+import 'auth/login_screen.dart';
 import 'friend_garden_screen.dart';
 
 /// The social hub: claim a username (first time), set how your status emoji is
@@ -277,10 +279,25 @@ class _FriendsScreenState extends State<FriendsScreen> {
       );
     }
     if (!ProfileService.instance.isAvailable) {
+      // A guest can fix this on the spot: offer sign-up instead of a dead end.
       return _notice(
         Icons.cloud_off,
         l.friendsNeedAccountTitle,
         l.friendsNeedAccountBody,
+        action: AuthService.instance.isConfigured
+            ? ElevatedButton.icon(
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const LoginScreen(startInSignUp: true),
+                    ),
+                  );
+                  if (mounted) await _load();
+                },
+                icon: const Icon(Icons.person_add_alt),
+                label: Text(l.createAccount),
+              )
+            : null,
       );
     }
     if (_errorMsg != null) {
@@ -521,6 +538,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     String title,
     String body, {
     Future<void> Function()? onRetry,
+    Widget? action,
   }) => Center(
     child: Padding(
       padding: const EdgeInsets.all(32),
@@ -551,6 +569,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
               icon: const Icon(Icons.refresh),
               label: Text(AppLocalizations.of(context).retry),
             ),
+          ],
+          if (action != null) ...[
+            const SizedBox(height: 20),
+            action,
           ],
         ],
       ),

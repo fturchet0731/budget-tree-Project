@@ -22,7 +22,13 @@ class AuthGate extends StatelessWidget {
     return AnimatedBuilder(
       animation: auth,
       builder: (context, _) {
-        if (!auth.isSignedIn) return const LoginScreen();
+        if (!auth.isSignedIn) {
+          // "Explore first": a guest uses the app local-only, exactly like the
+          // unconfigured mode. Their launch screen shows Sign In / Register,
+          // and signing up later migrates their local data to the account.
+          if (auth.isGuest) return const HomeScreen();
+          return const LoginScreen();
+        }
         // A signed-in user still has to finish onboarding (claim a username)
         // before reaching the app. Keyed by user id so switching accounts
         // re-runs the check.

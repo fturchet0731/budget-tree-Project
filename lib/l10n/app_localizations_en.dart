@@ -2172,4 +2172,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get verifyBadCode =>
       'That code is wrong or expired. Try again or resend.';
+
+  @override
+  String get loginExploreFirst => 'Try it first, no account needed';
+
+  @override
+  String get pulseWaterTitle => 'Time to water';
+
+  @override
+  String pulseWaterBody(String name, String amount) {
+    return 'Give $name $amount to keep it growing.';
+  }
+
+  @override
+  String pulseWaterOverdueBody(String name) {
+    return '$name missed its last watering. A quick deposit catches it up.';
+  }
+
+  @override
+  String get pulseStreakAtRiskTitle => 'Streak at risk';
+
+  @override
+  String pulseStreakAtRiskBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count week streak',
+      one: '1 week streak',
+    );
+    return 'Water a goal before the week ends to keep your $_temp0.';
+  }
+
+  @override
+  String get pulseStreakTitle => 'Saving streak';
+
+  @override
+  String pulseStreakBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks in a row.',
+      one: '1 week in a row.',
+    );
+    return '$_temp0 Keep it growing!';
+  }
+
+  @override
+  String get pulsePlantTitle => 'Start here';
+
+  @override
+  String get pulsePlantBody =>
+      'Plant your first tree and watch your budget grow.';
 }

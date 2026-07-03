@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_config.dart';
 import 'sync_engine.dart';
@@ -16,7 +17,32 @@ class AuthService extends ChangeNotifier {
 
   StreamSubscription<AuthState>? _sub;
 
+  static const _guestKey = 'guest_mode_v1';
+  bool _guest = false;
+
   bool get isConfigured => SupabaseConfig.isConfigured;
+
+  /// True when the user chose "explore first" on the login screen and hasn't
+  /// signed in yet. The app runs local-only (same as unconfigured mode); their
+  /// data migrates up automatically if they create an account later, because
+  /// [SyncEngine.onSignedIn] pushes all local rows on every sign-in.
+  bool get isGuest => _guest && !isSignedIn;
+
+  /// Let the user into the app without an account. Persisted so the next
+  /// launch skips the login gate too.
+  Future<void> enterGuestMode() async {
+    _guest = true;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_guestKey, true);
+  }
+
+  Future<void> _clearGuestMode() async {
+    if (!_guest) return;
+    _guest = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_guestKey);
+  }
 
   User? get currentUser =>
       isConfigured ? SupabaseConfig.client.auth.currentUser : null;
@@ -31,13 +57,20 @@ class AuthService extends ChangeNotifier {
   /// Begin listening to auth changes. Call once at boot, after
   /// [SupabaseConfig.init]. On every signed-in event we kick off a background
   /// sync; on sign-out we drop the local caches so the next user starts clean.
-  void start() {
+  /// Also restores the persisted guest flag so a returning guest skips the
+  /// login gate (await this before [runApp] so the gate opens correctly).
+  Future<void> start() async {
     if (!isConfigured) return;
+    final prefs = await SharedPreferences.getInstance();
+    _guest = prefs.getBool(_guestKey) ?? false;
     _sub ??= SupabaseConfig.client.auth.onAuthStateChange.listen((state) {
       switch (state.event) {
         case AuthChangeEvent.signedIn:
         case AuthChangeEvent.initialSession:
           if (isSignedIn) {
+            // Guest days are over: they have an account now, so the login
+            // gate should own the signed-out state again.
+            unawaited(_clearGuestMode());
             // Don't block the auth callback on network work.
             unawaited(SyncEngine.onSignedIn());
           }

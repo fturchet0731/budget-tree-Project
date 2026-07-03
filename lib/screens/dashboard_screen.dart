@@ -5,6 +5,7 @@ import '../services/app_settings.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import '../tutorial/tutorial_tour.dart';
+import '../widgets/pulse_strip.dart';
 import '../widgets/reflection_card.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
@@ -26,6 +27,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen>
     with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _pulseKey = GlobalKey<PulseStripState>();
   late AnimationController _entryController;
   late Animation<double> _entryAnimation;
 
@@ -59,8 +61,10 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.dispose();
   }
 
-  void _navigate(BuildContext context, Widget screen) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  Future<void> _navigate(BuildContext context, Widget screen) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    // Anything the user did in there may change what the pulse strip says.
+    _pulseKey.currentState?.refresh();
   }
 
   /// Opens the Create flow. When a tree is actually planted the flow pops back
@@ -72,6 +76,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       MaterialPageRoute(builder: (_) => const CreateBudgetScreen()),
     );
     if (!mounted) return;
+    _pulseKey.currentState?.refresh();
     if (planted == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -147,6 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     letterSpacing: 1.2,
                   ),
                 ),
+                PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
                 const ReflectionBanner(),
                 Expanded(
                   child: ScaleTransition(

@@ -653,5 +653,17 @@
   "verifyButton": "Verificar correo",
   "resendCode": "Reenviar código",
   "codeResent": "Te enviamos un código nuevo.",
-  "verifyBadCode": "Ese código es incorrecto o caducó. Inténtalo de nuevo o reenvíalo."
+  "verifyBadCode": "Ese código es incorrecto o caducó. Inténtalo de nuevo o reenvíalo.",
+
+  "loginExploreFirst": "Pruébala primero, sin cuenta",
+
+  "pulseWaterTitle": "Hora de regar",
+  "pulseWaterBody": "Dale {amount} a {name} para que siga creciendo.",
+  "pulseWaterOverdueBody": "{name} se perdió su último riego. Un depósito rápido lo pone al día.",
+  "pulseStreakAtRiskTitle": "Racha en peligro",
+  "pulseStreakAtRiskBody": "Riega una meta antes de que termine la semana para mantener tu {count, plural, =1{racha de 1 semana} other{racha de {count} semanas}}.",
+  "pulseStreakTitle": "Racha de ahorro",
+  "pulseStreakBody": "{count, plural, =1{1 semana seguida.} other{{count} semanas seguidas.}} ¡Sigue así!",
+  "pulsePlantTitle": "Empieza aquí",
+  "pulsePlantBody": "Planta tu primer árbol y mira crecer tu presupuesto."
 }

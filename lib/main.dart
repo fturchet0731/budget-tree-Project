@@ -14,7 +14,8 @@ import 'widgets/auth_gate.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SupabaseConfig.init();
-  AuthService.instance.start();
+  // Awaited so the persisted guest flag is known before the AuthGate builds.
+  await AuthService.instance.start();
   SyncEngine.init();
   await AppSettings.instance.load();
   await NotificationService.init();

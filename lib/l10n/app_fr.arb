@@ -653,5 +653,17 @@
   "verifyButton": "Vérifier l'e-mail",
   "resendCode": "Renvoyer le code",
   "codeResent": "Nous vous avons envoyé un nouveau code.",
-  "verifyBadCode": "Ce code est incorrect ou expiré. Réessayez ou renvoyez-le."
+  "verifyBadCode": "Ce code est incorrect ou expiré. Réessayez ou renvoyez-le.",
+
+  "loginExploreFirst": "Essayez d'abord, sans compte",
+
+  "pulseWaterTitle": "C'est l'heure d'arroser",
+  "pulseWaterBody": "Donnez {amount} à {name} pour qu'il continue de pousser.",
+  "pulseWaterOverdueBody": "{name} a manqué son dernier arrosage. Un petit dépôt le rattrape.",
+  "pulseStreakAtRiskTitle": "Série en danger",
+  "pulseStreakAtRiskBody": "Arrosez un objectif avant la fin de la semaine pour garder votre {count, plural, =1{série de 1 semaine} other{série de {count} semaines}}.",
+  "pulseStreakTitle": "Série d'épargne",
+  "pulseStreakBody": "{count, plural, =1{1 semaine d'affilée.} other{{count} semaines d'affilée.}} Continuez comme ça !",
+  "pulsePlantTitle": "Commencez ici",
+  "pulsePlantBody": "Plantez votre premier arbre et regardez votre budget grandir."
 }

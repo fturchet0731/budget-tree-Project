@@ -3831,6 +3831,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That code is wrong or expired. Try again or resend.'**
   String get verifyBadCode;
+
+  /// No description provided for @loginExploreFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Try it first, no account needed'**
+  String get loginExploreFirst;
+
+  /// No description provided for @pulseWaterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to water'**
+  String get pulseWaterTitle;
+
+  /// No description provided for @pulseWaterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Give {name} {amount} to keep it growing.'**
+  String pulseWaterBody(String name, String amount);
+
+  /// No description provided for @pulseWaterOverdueBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} missed its last watering. A quick deposit catches it up.'**
+  String pulseWaterOverdueBody(String name);
+
+  /// No description provided for @pulseStreakAtRiskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak at risk'**
+  String get pulseStreakAtRiskTitle;
+
+  /// No description provided for @pulseStreakAtRiskBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Water a goal before the week ends to keep your {count, plural, =1{1 week streak} other{{count} week streak}}.'**
+  String pulseStreakAtRiskBody(int count);
+
+  /// No description provided for @pulseStreakTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving streak'**
+  String get pulseStreakTitle;
+
+  /// No description provided for @pulseStreakBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week in a row.} other{{count} weeks in a row.}} Keep it growing!'**
+  String pulseStreakBody(int count);
+
+  /// No description provided for @pulsePlantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start here'**
+  String get pulsePlantTitle;
+
+  /// No description provided for @pulsePlantBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant your first tree and watch your budget grow.'**
+  String get pulsePlantBody;
 }
 
 class _AppLocalizationsDelegate

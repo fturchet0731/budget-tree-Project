@@ -37,12 +37,19 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _openVerify() {
-    Navigator.of(context).push(
+  Future<void> _openVerify() async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => VerifyEmailScreen(email: _email.text.trim()),
       ),
     );
+    // Verifying the code signs the user in. When this screen was pushed on top
+    // of the launch screen (guest upgrading to an account) the AuthGate can't
+    // remove it for us, so pop it too rather than landing on a stale form.
+    if (!mounted) return;
+    if (AuthService.instance.isSignedIn && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _submit() async {
@@ -262,6 +269,25 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: AppColors.lightLeaf, fontSize: 14),
                         ),
                       ),
+                      // Only at the gate root: let a new user in without an
+                      // account so they meet the app before committing. When
+                      // this screen is pushed over the launch screen the user
+                      // is already a guest, so the shortcut would be noise.
+                      if (!Navigator.of(context).canPop()) ...[
+                        const SizedBox(height: 4),
+                        TextButton.icon(
+                          onPressed: _busy
+                              ? null
+                              : () => AuthService.instance.enterGuestMode(),
+                          icon: const Icon(Icons.park_outlined,
+                              color: AppColors.mossGreen, size: 18),
+                          label: Text(
+                            l.loginExploreFirst,
+                            style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen, fontSize: 14),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

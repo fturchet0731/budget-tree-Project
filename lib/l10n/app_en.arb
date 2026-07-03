@@ -719,5 +719,21 @@
   "verifyButton": "Verify email",
   "resendCode": "Resend code",
   "codeResent": "We sent you a new code.",
-  "verifyBadCode": "That code is wrong or expired. Try again or resend."
+  "verifyBadCode": "That code is wrong or expired. Try again or resend.",
+
+  "loginExploreFirst": "Try it first, no account needed",
+
+  "pulseWaterTitle": "Time to water",
+  "pulseWaterBody": "Give {name} {amount} to keep it growing.",
+  "@pulseWaterBody": { "placeholders": { "name": { "type": "String" }, "amount": { "type": "String" } } },
+  "pulseWaterOverdueBody": "{name} missed its last watering. A quick deposit catches it up.",
+  "@pulseWaterOverdueBody": { "placeholders": { "name": { "type": "String" } } },
+  "pulseStreakAtRiskTitle": "Streak at risk",
+  "pulseStreakAtRiskBody": "Water a goal before the week ends to keep your {count, plural, =1{1 week streak} other{{count} week streak}}.",
+  "@pulseStreakAtRiskBody": { "placeholders": { "count": { "type": "int" } } },
+  "pulseStreakTitle": "Saving streak",
+  "pulseStreakBody": "{count, plural, =1{1 week in a row.} other{{count} weeks in a row.}} Keep it growing!",
+  "@pulseStreakBody": { "placeholders": { "count": { "type": "int" } } },
+  "pulsePlantTitle": "Start here",
+  "pulsePlantBody": "Plant your first tree and watch your budget grow."
 }
