@@ -69,6 +69,10 @@ class AiCoachService {
     String synopsis = '',
     Map<String, String> survey = const {},
     String currency = '\$',
+    // The budget's cycle (PayFrequency.wire): income and every amount are per
+    // this period, so the coach scales estimates (a weekly food budget is not
+    // a monthly one).
+    String cycle = 'monthly',
   }) async {
     final data = await _invoke({
       'action': 'budget_plans',
@@ -77,6 +81,7 @@ class AiCoachService {
       'locale': _locale,
       'synopsis': synopsis,
       'survey': survey,
+      'cycle': cycle,
       'expenses': expenses.map((e) => e.toJson()).toList(),
     });
     final plans = AllocationPlan.listFrom(data);

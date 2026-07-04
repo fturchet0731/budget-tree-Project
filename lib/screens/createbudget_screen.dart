@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/pay_frequency.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/pay_frequency_labels.dart';
 import '../l10n/preset_labels.dart';
 import '../l10n/survey_labels.dart';
 import '../models/ai_plan.dart';
@@ -39,10 +40,13 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   // whenever the expense set changes so stale allocations aren't carried over.
   bool _planSettled = false;
 
-  // Step 1 – Income
+  // Step 1 – Income. The budget cycle is chosen here, up front, so every
+  // amount in the wizard reads "per cycle"; each income source carries its
+  // own arrival rhythm and is normalised into the cycle.
   final List<IncomeSource> _incomeSources = [];
   final _incomeNameCtrl = TextEditingController();
   final _incomeAmountCtrl = TextEditingController();
+  PayFrequency? _newIncomeFreq; // null = arrives once per budget cycle
 
   // Step 2 – Expenses
   final List<ExpenseCategory> _expenses = [];
@@ -58,9 +62,10 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final Set<String> _surveySkipped = {};
   final _noteCtrl = TextEditingController();
 
-  // Step 5 – Budget name + pay schedule
+  // Finishing touches (Plan step) – budget name + first pay date. The cycle
+  // itself ([_payFrequency]) is picked on the Income step.
   final _budgetNameCtrl = TextEditingController(text: 'My Budget');
-  PayFrequency? _payFrequency;
+  PayFrequency _payFrequency = PayFrequency.monthly;
   DateTime? _firstPayDate;
 
   // icon key + display name
@@ -113,7 +118,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     });
   }
 
-  double get _totalIncome => _incomeSources.fold(0.0, (s, e) => s + e.amount);
+  double get _totalIncome =>
+      _incomeSources.fold(0.0, (s, e) => s + e.amountPerCycle(_payFrequency));
   double get _totalAllocated => _expenses.fold(0.0, (s, e) => s + e.allocated);
 
   void _addIncome() {
@@ -121,9 +127,14 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     final amount = double.tryParse(_incomeAmountCtrl.text) ?? 0;
     if (name.isEmpty || amount <= 0) return;
     setState(() {
-      _incomeSources.add(IncomeSource(name: name, amount: amount));
+      _incomeSources.add(IncomeSource(
+        name: name,
+        amount: amount,
+        frequency: _newIncomeFreq ?? _payFrequency,
+      ));
       _incomeNameCtrl.clear();
       _incomeAmountCtrl.clear();
+      _planSettled = false; // income changed; the plan totals are stale
     });
   }
 
@@ -271,9 +282,19 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             nameCtrl: _incomeNameCtrl,
                             amountCtrl: _incomeAmountCtrl,
                             suggestions: incomeSuggestionKeys,
+                            cycle: _payFrequency,
+                            newIncomeFreq: _newIncomeFreq ?? _payFrequency,
+                            onCycleChanged: (f) => setState(() {
+                              _payFrequency = f;
+                              _planSettled = false; // totals just changed
+                            }),
+                            onIncomeFreqChanged: (f) =>
+                                setState(() => _newIncomeFreq = f),
                             onAdd: _addIncome,
-                            onRemove: (i) =>
-                                setState(() => _incomeSources.removeAt(i)),
+                            onRemove: (i) => setState(() {
+                              _incomeSources.removeAt(i);
+                              _planSettled = false;
+                            }),
                           )
                         : _step == 1
                         ? _ExpenseStep(
@@ -569,6 +590,15 @@ class _IncomeStep extends StatelessWidget {
   final TextEditingController nameCtrl;
   final TextEditingController amountCtrl;
   final List<String> suggestions;
+
+  /// The budget's own rhythm, chosen here at the top of the wizard. Every
+  /// amount on later steps reads "per cycle".
+  final PayFrequency cycle;
+
+  /// Arrival rhythm for the income being typed into the hero input.
+  final PayFrequency newIncomeFreq;
+  final ValueChanged<PayFrequency> onCycleChanged;
+  final ValueChanged<PayFrequency> onIncomeFreqChanged;
   final VoidCallback onAdd;
   final void Function(int) onRemove;
 
@@ -578,6 +608,10 @@ class _IncomeStep extends StatelessWidget {
     required this.nameCtrl,
     required this.amountCtrl,
     required this.suggestions,
+    required this.cycle,
+    required this.newIncomeFreq,
+    required this.onCycleChanged,
+    required this.onIncomeFreqChanged,
     required this.onAdd,
     required this.onRemove,
   });
@@ -585,12 +619,45 @@ class _IncomeStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final total = sources.fold(0.0, (s, e) => s + e.amount);
+    final total = sources.fold(0.0, (s, e) => s + e.amountPerCycle(cycle));
     return AppScrollbar(
       builder: (controller) => ListView(
         controller: controller,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         children: [
+          // The budget's cycle: everything downstream is counted per cycle.
+          BarkCard(
+            label: l.budgetCycleTitle,
+            icon: Icons.event_repeat_outlined,
+            accent: AppColors.leafYellow,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final f in PayFrequency.values)
+                      _SurveyChip(
+                        label: f.localizedLabel(l),
+                        selected: cycle == f,
+                        onTap: () => onCycleChanged(f),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l.budgetCycleBody,
+                  style: GoogleFonts.nunito(
+                    color: AppColors.mossGreen.withValues(alpha: 0.9),
+                    fontSize: 11.5,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
           // One clear hero input: type a source + amount, tap to add. The
           // quick-picks sit quietly beneath so the screen stays uncluttered.
           BarkCard(
@@ -642,6 +709,30 @@ class _IncomeStep extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 8),
                       child: _AddButton(onTap: onAdd),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // The income's own rhythm; a bi-weekly salary in a monthly
+                // budget gets converted automatically.
+                Text(
+                  l.incomeArrives,
+                  style: GoogleFonts.nunito(
+                    color: AppColors.mossGreen,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final f in PayFrequency.values)
+                      _SurveyChip(
+                        label: f.localizedLabel(l),
+                        selected: newIncomeFreq == f,
+                        onTap: () => onIncomeFreqChanged(f),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -710,22 +801,52 @@ class _IncomeStep extends StatelessWidget {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
-                              s.name,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  s.name,
+                                  style: GoogleFonts.nunito(
+                                    color: AppColors.stoneBeigeColor,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (s.frequency != null)
+                                  Text(
+                                    s.frequency!.localizedLabel(l),
+                                    style: GoogleFonts.nunito(
+                                      color: AppColors.mossGreen,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                          Text(
-                            '\$${s.amount.toStringAsFixed(2)}',
-                            style: GoogleFonts.nunito(
-                              color: AppColors.lightLeaf,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '\$${s.amount.toStringAsFixed(2)}',
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.lightLeaf,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              // Show the per-cycle equivalent when the income
+                              // arrives on a different rhythm than the budget.
+                              if (s.frequency != null && s.frequency != cycle)
+                                Text(
+                                  l.approxEachCycle(
+                                    '\$${s.amountPerCycle(cycle).toStringAsFixed(0)}',
+                                  ),
+                                  style: GoogleFonts.nunito(
+                                    color: AppColors.mossGreen,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                            ],
                           ),
                           IconButton(
                             icon: Icon(
@@ -749,7 +870,7 @@ class _IncomeStep extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        l.totalMonthlyIncome,
+                        l.totalIncomeCycle(cycle.localizedLabel(l)),
                         style: GoogleFonts.nunito(
                           color: AppColors.mossGreen,
                           fontSize: 12.5,
@@ -1450,9 +1571,9 @@ class _PlanStep extends StatefulWidget {
   final void Function(String name, double amount, String goalId)
   onAddGoalBranch;
   final TextEditingController nameCtrl;
-  final PayFrequency? payFrequency;
+  final PayFrequency payFrequency;
   final DateTime? firstPayDate;
-  final ValueChanged<PayFrequency?> onFrequencyChanged;
+  final ValueChanged<PayFrequency> onFrequencyChanged;
   final ValueChanged<DateTime?> onFirstPayDateChanged;
 
   const _PlanStep({
@@ -1523,6 +1644,7 @@ class _PlanStepState extends State<_PlanStep> {
         expenses: inputs,
         synopsis: widget.note.trim(),
         survey: widget.survey,
+        cycle: widget.payFrequency.wire,
       );
       if (!mounted) return;
       setState(() {
@@ -1790,34 +1912,21 @@ class _PlanStepState extends State<_PlanStep> {
       icon: Icons.event_repeat_outlined,
       accent: AppColors.riverBlue,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DropdownButtonFormField<PayFrequency>(
-            initialValue: widget.payFrequency,
-            isExpanded: true,
-            dropdownColor: AppColors.darkBark,
-            style: const TextStyle(color: AppColors.stoneBeigeColor),
-            decoration: InputDecoration(
-              labelText: l.payFrequencyLabel,
-              prefixIcon: const Icon(
-                Icons.event_repeat_outlined,
-                color: AppColors.mossGreen,
-              ),
-            ),
-            items: PayFrequency.values
-                .map(
-                  (f) => DropdownMenuItem(
-                    value: f,
-                    child: Text(
-                      f.label,
-                      style: const TextStyle(
-                        color: AppColors.stoneBeigeColor,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: widget.onFrequencyChanged,
+          // The cycle was picked on the Income step; it stays adjustable here
+          // as the same chips, right where the pay date is set.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final f in PayFrequency.values)
+                _SurveyChip(
+                  label: f.localizedLabel(l),
+                  selected: widget.payFrequency == f,
+                  onTap: () => widget.onFrequencyChanged(f),
+                ),
+            ],
           ),
           const SizedBox(height: 14),
           InkWell(

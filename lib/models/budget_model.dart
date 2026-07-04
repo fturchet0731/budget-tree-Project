@@ -4,12 +4,33 @@ class IncomeSource {
   String name;
   double amount;
 
-  IncomeSource({required this.name, required this.amount});
+  /// How often this income arrives (e.g. a bi-weekly salary). Null means it
+  /// simply arrives once per budget cycle — the legacy behaviour, and what
+  /// old persisted records decode to.
+  PayFrequency? frequency;
 
-  Map<String, dynamic> toJson() => {'name': name, 'amount': amount};
+  IncomeSource({required this.name, required this.amount, this.frequency});
 
-  factory IncomeSource.fromJson(Map<String, dynamic> j) =>
-      IncomeSource(name: j['name'] as String, amount: (j['amount'] as num).toDouble());
+  /// This income expressed per one budget [cycle]: a $2000 salary arriving
+  /// every 2 weeks counts as ~$4333 in a monthly budget. When either side is
+  /// unknown (or they match) the raw amount passes through unchanged.
+  double amountPerCycle(PayFrequency? cycle) {
+    final f = frequency;
+    if (f == null || cycle == null || f == cycle) return amount;
+    return amount * f.periodsPerMonth / cycle.periodsPerMonth;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'amount': amount,
+        'frequency': frequency?.index,
+      };
+
+  factory IncomeSource.fromJson(Map<String, dynamic> j) => IncomeSource(
+        name: j['name'] as String,
+        amount: (j['amount'] as num).toDouble(),
+        frequency: payFrequencyFromIndex(j['frequency'] as int?),
+      );
 }
 
 class ExpenseCategory {
@@ -70,7 +91,11 @@ class BudgetModel {
     this.lastProcessedAt,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString();
 
-  double get totalIncome => incomeSources.fold(0.0, (s, e) => s + e.amount);
+  /// Total income per budget cycle: each source is normalised from its own
+  /// arrival rhythm into [payFrequency], so allocations (which are per cycle)
+  /// always compare against a like-for-like number.
+  double get totalIncome =>
+      incomeSources.fold(0.0, (s, e) => s + e.amountPerCycle(payFrequency));
   double get totalAllocated => expenses.fold(0.0, (s, e) => s + e.allocated);
   double get remaining => totalIncome - totalAllocated;
 

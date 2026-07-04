@@ -2258,4 +2258,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get guestUpgradeLater => 'Quizás más tarde';
+
+  @override
+  String get payFreqWeekly => 'Semanal';
+
+  @override
+  String get payFreqBiWeekly => 'Cada 2 semanas';
+
+  @override
+  String get payFreqSemiMonthly => 'Dos veces al mes';
+
+  @override
+  String get payFreqMonthly => 'Mensual';
+
+  @override
+  String get budgetCycleTitle => '¿Cada cuánto haces tu presupuesto?';
+
+  @override
+  String get budgetCycleBody =>
+      'Todo lo de abajo cuenta por ciclo. Un ingreso que llega con otro ritmo se convierte automáticamente.';
+
+  @override
+  String get incomeArrives => '¿Cada cuánto llega?';
+
+  @override
+  String approxEachCycle(String amount) {
+    return '≈ $amount por ciclo';
+  }
+
+  @override
+  String totalIncomeCycle(String cycle) {
+    return 'Ingreso total ($cycle)';
+  }
 }

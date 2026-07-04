@@ -83,6 +83,15 @@ async function budgetPlans(body: Record<string, unknown>) {
   const currency = String(body.currency ?? "$");
   const locale = String(body.locale ?? "en");
   const synopsis = String(body.synopsis ?? "").trim();
+  // The budget's cycle: income and every amount are per this period, not
+  // necessarily monthly, so estimates must be scaled to it.
+  const CYCLES: Record<string, string> = {
+    weekly: "week",
+    biweekly: "2 weeks",
+    semimonthly: "half month",
+    monthly: "month",
+  };
+  const cycle = CYCLES[String(body.cycle ?? "monthly")] ?? "month";
   // A small lifestyle questionnaire (question -> chosen answer) the user filled
   // in so the coach can estimate the amounts of expenses left blank.
   const survey = (body.survey as Record<string, string>) ?? {};
@@ -92,7 +101,7 @@ async function budgetPlans(body: Record<string, unknown>) {
     (body.expenses as Array<{ name: string; amount?: number }>) ?? [];
 
   const system =
-    `You are a friendly personal budgeting coach. The user gives a monthly income, a list of expense categories (each with an amount they already decided, or 0 meaning you choose it), answers to a short lifestyle questionnaire, and an optional note on how they want their budget to feel. Produce 2 or 3 distinct allocation plans. ${
+    `You are a friendly personal budgeting coach. The user budgets per ${cycle}: their income and every amount below are for one ${cycle}, so scale your estimates to that period. They give that income, a list of expense categories (each with an amount they already decided, or 0 meaning you choose it), answers to a short lifestyle questionnaire, and an optional note on how they want their budget to feel. Produce 2 or 3 distinct allocation plans. ${
       LOCALE_NOTE(locale)
     } Respond with ONLY a JSON object, no prose, of the shape:
 {"plans":[{"name":string,"items":[{"name":string,"amount":number}],"leftover":number,"rationale":string}]}

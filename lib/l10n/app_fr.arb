@@ -674,5 +674,15 @@
 
   "guestUpgradeTitle": "Votre premier arbre est planté !",
   "guestUpgradeBody": "Créez un compte gratuit et votre forêt sera sauvegardée dans le cloud, en sécurité même si vous changez de téléphone. Tout ce que vous avez créé vous suit.",
-  "guestUpgradeLater": "Plus tard"
+  "guestUpgradeLater": "Plus tard",
+
+  "payFreqWeekly": "Chaque semaine",
+  "payFreqBiWeekly": "Toutes les 2 semaines",
+  "payFreqSemiMonthly": "Deux fois par mois",
+  "payFreqMonthly": "Chaque mois",
+  "budgetCycleTitle": "À quel rythme faites-vous votre budget ?",
+  "budgetCycleBody": "Tout ce qui suit compte par cycle. Un revenu qui arrive à un autre rythme est converti pour vous.",
+  "incomeArrives": "À quelle fréquence arrive-t-il ?",
+  "approxEachCycle": "≈ {amount} par cycle",
+  "totalIncomeCycle": "Revenu total ({cycle})"
 }

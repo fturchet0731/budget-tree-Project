@@ -3933,6 +3933,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maybe later'**
   String get guestUpgradeLater;
+
+  /// No description provided for @payFreqWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get payFreqWeekly;
+
+  /// No description provided for @payFreqBiWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 2 weeks'**
+  String get payFreqBiWeekly;
+
+  /// No description provided for @payFreqSemiMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Twice a month'**
+  String get payFreqSemiMonthly;
+
+  /// No description provided for @payFreqMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get payFreqMonthly;
+
+  /// No description provided for @budgetCycleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How often do you budget?'**
+  String get budgetCycleTitle;
+
+  /// No description provided for @budgetCycleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything below counts per cycle. Income that arrives on a different rhythm is converted for you.'**
+  String get budgetCycleBody;
+
+  /// No description provided for @incomeArrives.
+  ///
+  /// In en, this message translates to:
+  /// **'How often does it arrive?'**
+  String get incomeArrives;
+
+  /// No description provided for @approxEachCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount} each cycle'**
+  String approxEachCycle(String amount);
+
+  /// No description provided for @totalIncomeCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Total income ({cycle})'**
+  String totalIncomeCycle(String cycle);
 }
 
 class _AppLocalizationsDelegate

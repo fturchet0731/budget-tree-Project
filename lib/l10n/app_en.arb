@@ -745,5 +745,17 @@
 
   "guestUpgradeTitle": "Your first tree is planted!",
   "guestUpgradeBody": "Create a free account and your forest is saved to the cloud, safe even if you switch phones. Everything you made stays with you.",
-  "guestUpgradeLater": "Maybe later"
+  "guestUpgradeLater": "Maybe later",
+
+  "payFreqWeekly": "Weekly",
+  "payFreqBiWeekly": "Every 2 weeks",
+  "payFreqSemiMonthly": "Twice a month",
+  "payFreqMonthly": "Monthly",
+  "budgetCycleTitle": "How often do you budget?",
+  "budgetCycleBody": "Everything below counts per cycle. Income that arrives on a different rhythm is converted for you.",
+  "incomeArrives": "How often does it arrive?",
+  "approxEachCycle": "≈ {amount} each cycle",
+  "@approxEachCycle": { "placeholders": { "amount": { "type": "String" } } },
+  "totalIncomeCycle": "Total income ({cycle})",
+  "@totalIncomeCycle": { "placeholders": { "cycle": { "type": "String" } } }
 }
