@@ -684,5 +684,8 @@
   "budgetCycleBody": "Todo lo de abajo cuenta por ciclo. Un ingreso que llega con otro ritmo se convierte automáticamente.",
   "incomeArrives": "¿Cada cuánto llega?",
   "approxEachCycle": "≈ {amount} por ciclo",
-  "totalIncomeCycle": "Ingreso total ({cycle})"
+  "totalIncomeCycle": "Ingreso total ({cycle})",
+  "incomeDoneAdding": "Eso es todo mi ingreso",
+  "expensesDoneAdding": "Esos son todos mis gastos",
+  "expenseSummaryTitle": "Cómo vas"
 }

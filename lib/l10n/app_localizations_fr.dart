@@ -2301,4 +2301,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String totalIncomeCycle(String cycle) {
     return 'Revenu total ($cycle)';
   }
+
+  @override
+  String get incomeDoneAdding => 'C\'est tout mon revenu';
+
+  @override
+  String get expensesDoneAdding => 'Ce sont toutes mes dépenses';
+
+  @override
+  String get expenseSummaryTitle => 'Votre situation';
 }

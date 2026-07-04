@@ -757,5 +757,8 @@
   "approxEachCycle": "≈ {amount} each cycle",
   "@approxEachCycle": { "placeholders": { "amount": { "type": "String" } } },
   "totalIncomeCycle": "Total income ({cycle})",
-  "@totalIncomeCycle": { "placeholders": { "cycle": { "type": "String" } } }
+  "@totalIncomeCycle": { "placeholders": { "cycle": { "type": "String" } } },
+  "incomeDoneAdding": "That's all my income",
+  "expensesDoneAdding": "That's all my expenses",
+  "expenseSummaryTitle": "Where you stand"
 }

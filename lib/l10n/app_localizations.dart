@@ -3987,6 +3987,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total income ({cycle})'**
   String totalIncomeCycle(String cycle);
+
+  /// No description provided for @incomeDoneAdding.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s all my income'**
+  String get incomeDoneAdding;
+
+  /// No description provided for @expensesDoneAdding.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s all my expenses'**
+  String get expensesDoneAdding;
+
+  /// No description provided for @expenseSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you stand'**
+  String get expenseSummaryTitle;
 }
 
 class _AppLocalizationsDelegate

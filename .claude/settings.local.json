@@ -11,7 +11,23 @@
       "Bash(flutter pub *)",
       "Bash(flutter test *)",
       "Bash([ -f \"$MEM\" ])",
-      "Bash(xargs -I {} basename {})"
+      "Bash(xargs -I {} basename {})",
+      "Bash(flutter devices *)",
+      "Bash(flutter gen-l10n *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git restore *)",
+      "Bash(python3 -m json.tool .vscode/launch.json)",
+      "Bash(cd *)",
+      "Bash(awk 'NR>=932 && /return AppScrollbar/{found=NR} END{}' lib/screens/createbudget_screen.dart)",
+      "Skill(run)",
+      "Bash(flutter run *)",
+      "Bash(xcrun simctl *)",
+      "Bash(osascript *)",
+      "Bash(supabase functions *)",
+      "Bash(grep -n \"BudgetModel\\\\` \\(tree\\)\" CLAUDE.md)",
+      "Bash(grep -n \"budget_plans\\\\` \\(income\" CLAUDE.md)"
     ]
   }
 }

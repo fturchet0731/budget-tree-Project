@@ -31,6 +31,11 @@
 
   <title>budget_app_project</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Passkeys Web SDK, required by the passkeys_web plugin (pulled in
+       transitively via supabase_flutter) when running on the web. Without it
+       the plugin throws "Passkeys Web SDK not loaded" on startup. -->
+  <script src="https://github.com/corbado/flutter-passkeys/releases/download/2.4.0/bundle.js"></script>
 </head>
 <body>
   <!--

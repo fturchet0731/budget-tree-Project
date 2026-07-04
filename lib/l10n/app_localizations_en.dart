@@ -2280,4 +2280,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String totalIncomeCycle(String cycle) {
     return 'Total income ($cycle)';
   }
+
+  @override
+  String get incomeDoneAdding => 'That\'s all my income';
+
+  @override
+  String get expensesDoneAdding => 'That\'s all my expenses';
+
+  @override
+  String get expenseSummaryTitle => 'Where you stand';
 }

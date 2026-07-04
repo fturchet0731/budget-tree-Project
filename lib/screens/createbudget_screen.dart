@@ -47,12 +47,18 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final _incomeNameCtrl = TextEditingController();
   final _incomeAmountCtrl = TextEditingController();
   PayFrequency? _newIncomeFreq; // null = arrives once per budget cycle
+  // Progressive reveal: the budget cycle card only appears once the user has
+  // confirmed they're done listing income, so the step opens uncluttered.
+  bool _incomeConfirmed = false;
 
   // Step 2 – Expenses
   final List<ExpenseCategory> _expenses = [];
   final _expNameCtrl = TextEditingController();
   final _expAmountCtrl = TextEditingController();
   String _selectedIconKey = 'other';
+  // Same reveal pattern: the budget-standing summary appears once the user
+  // confirms they're done adding expense branches.
+  bool _expensesConfirmed = false;
 
   // Step 3 – Survey (questionnaire answers keyed by question key -> option key)
   // plus an optional free-text note the coach folds into its reasoning.
@@ -161,6 +167,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   void _removeExpense(int i) => setState(() {
     _expenses.removeAt(i);
     _planSettled = false;
+    // Emptying the list retracts the revealed summary.
+    if (_expenses.isEmpty) _expensesConfirmed = false;
   });
 
   /// Apply a chosen AI plan: write each plan item's amount onto the matching
@@ -284,6 +292,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             suggestions: incomeSuggestionKeys,
                             cycle: _payFrequency,
                             newIncomeFreq: _newIncomeFreq ?? _payFrequency,
+                            confirmed: _incomeConfirmed,
+                            onConfirm: () =>
+                                setState(() => _incomeConfirmed = true),
                             onCycleChanged: (f) => setState(() {
                               _payFrequency = f;
                               _planSettled = false; // totals just changed
@@ -294,6 +305,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             onRemove: (i) => setState(() {
                               _incomeSources.removeAt(i);
                               _planSettled = false;
+                              if (_incomeSources.isEmpty) {
+                                _incomeConfirmed = false;
+                              }
                             }),
                           )
                         : _step == 1
@@ -306,6 +320,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             totalIncome: _totalIncome,
                             totalAllocated: _totalAllocated,
                             presets: _presets,
+                            confirmed: _expensesConfirmed,
+                            onConfirm: () =>
+                                setState(() => _expensesConfirmed = true),
                             onAdd: _addExpense,
                             onRemove: _removeExpense,
                             onPresetTap: (name, iconKey) => setState(() {
@@ -353,9 +370,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                   step: _step,
                   lastStep: 3,
                   canAdvance: _step == 0
-                      ? _incomeSources.isNotEmpty
+                      ? _incomeConfirmed
                       : _step == 1
-                      ? _expenses.isNotEmpty
+                      ? _expensesConfirmed
                       : _step == 2
                       ? true // questionnaire is optional
                       : _planSettled,
@@ -582,6 +599,70 @@ class _CreateHeader extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────
+// Progressive-reveal helpers (shared by the wizard steps)
+// ──────────────────────────────────────────────
+
+/// Fades + slides its child up once, when it is first inserted. Wrapping a
+/// newly revealed card in this makes it grow in gently instead of popping,
+/// which is what sells the "one box at a time" feel.
+class _Reveal extends StatelessWidget {
+  final Widget child;
+  const _Reveal({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, child) => Opacity(
+        opacity: t.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, (1 - t) * 20),
+          child: child,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// The quiet "I'm done with this box, show me the next" affordance that drives
+/// the reveal within a step. Full width so it reads as the step's forward move
+/// while the bottom bar stays disabled until the step is complete.
+class _ContinueButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _ContinueButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.lightLeaf,
+          side: BorderSide(color: AppColors.lightLeaf.withValues(alpha: 0.6)),
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        icon: const Icon(Icons.check_circle_outline, size: 18),
+        label: Text(
+          label,
+          style: GoogleFonts.nunito(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
 // Step 1 – Income
 // ──────────────────────────────────────────────
 
@@ -597,6 +678,11 @@ class _IncomeStep extends StatelessWidget {
 
   /// Arrival rhythm for the income being typed into the hero input.
   final PayFrequency newIncomeFreq;
+
+  /// True once the user has said they've listed all their income — reveals the
+  /// budget-cycle card.
+  final bool confirmed;
+  final VoidCallback onConfirm;
   final ValueChanged<PayFrequency> onCycleChanged;
   final ValueChanged<PayFrequency> onIncomeFreqChanged;
   final VoidCallback onAdd;
@@ -610,6 +696,8 @@ class _IncomeStep extends StatelessWidget {
     required this.suggestions,
     required this.cycle,
     required this.newIncomeFreq,
+    required this.confirmed,
+    required this.onConfirm,
     required this.onCycleChanged,
     required this.onIncomeFreqChanged,
     required this.onAdd,
@@ -625,39 +713,8 @@ class _IncomeStep extends StatelessWidget {
         controller: controller,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         children: [
-          // The budget's cycle: everything downstream is counted per cycle.
-          BarkCard(
-            label: l.budgetCycleTitle,
-            icon: Icons.event_repeat_outlined,
-            accent: AppColors.leafYellow,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final f in PayFrequency.values)
-                      _SurveyChip(
-                        label: f.localizedLabel(l),
-                        selected: cycle == f,
-                        onTap: () => onCycleChanged(f),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l.budgetCycleBody,
-                  style: GoogleFonts.nunito(
-                    color: AppColors.mossGreen.withValues(alpha: 0.9),
-                    fontSize: 11.5,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
+          // Only the "add a source" box is shown up front; the budget cycle
+          // reveals itself once the user confirms they've listed all income.
           // One clear hero input: type a source + amount, tap to add. The
           // quick-picks sit quietly beneath so the screen stays uncluttered.
           BarkCard(
@@ -770,9 +827,10 @@ class _IncomeStep extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          if (sources.isNotEmpty)
-            BarkCard(
+          if (sources.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            _Reveal(
+              child: BarkCard(
               label: l.rootsFeedingTree,
               icon: Icons.water_drop,
               accent: AppColors.lightLeaf,
@@ -889,6 +947,54 @@ class _IncomeStep extends StatelessWidget {
                 ],
               ),
             ),
+            ),
+          ],
+          // Once income is listed, confirm to reveal the budget cycle.
+          if (sources.isNotEmpty && !confirmed) ...[
+            const SizedBox(height: 14),
+            _Reveal(
+              child: _ContinueButton(
+                label: l.incomeDoneAdding,
+                onTap: onConfirm,
+              ),
+            ),
+          ],
+          if (confirmed) ...[
+            const SizedBox(height: 14),
+            _Reveal(
+              child: BarkCard(
+                label: l.budgetCycleTitle,
+                icon: Icons.event_repeat_outlined,
+                accent: AppColors.leafYellow,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final f in PayFrequency.values)
+                          _SurveyChip(
+                            label: f.localizedLabel(l),
+                            selected: cycle == f,
+                            onTap: () => onCycleChanged(f),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l.budgetCycleBody,
+                      style: GoogleFonts.nunito(
+                        color: AppColors.mossGreen.withValues(alpha: 0.9),
+                        fontSize: 11.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -907,6 +1013,11 @@ class _ExpenseStep extends StatelessWidget {
   final double totalIncome;
   final double totalAllocated;
   final List<(String, String)> presets;
+
+  /// True once the user confirms they've listed all their branches — reveals
+  /// the "where you stand" budget summary.
+  final bool confirmed;
+  final VoidCallback onConfirm;
   final VoidCallback onAdd;
   final void Function(int) onRemove;
   final void Function(String name, String iconKey) onPresetTap;
@@ -920,6 +1031,8 @@ class _ExpenseStep extends StatelessWidget {
     required this.totalIncome,
     required this.totalAllocated,
     required this.presets,
+    required this.confirmed,
+    required this.onConfirm,
     required this.onAdd,
     required this.onRemove,
     required this.onPresetTap,
@@ -928,54 +1041,16 @@ class _ExpenseStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final remaining = totalIncome - totalAllocated;
-    final overBudget = remaining < 0;
 
     return AppScrollbar(
       builder: (controller) => ListView(
         controller: controller,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         children: [
-          // Slim remaining indicator (the full meter card was too heavy).
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              children: [
-                _BudgetBar(
-                  totalIncome: totalIncome,
-                  totalAllocated: totalAllocated,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l.allocatedAmount('\$${totalAllocated.toStringAsFixed(0)}'),
-                      style: GoogleFonts.nunito(
-                        color: AppColors.mossGreen,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                    Text(
-                      overBudget
-                          ? l.overByAmount('\$${(-remaining).toStringAsFixed(0)}')
-                          : l.remainingAmount('\$${remaining.toStringAsFixed(0)}'),
-                      style: GoogleFonts.nunito(
-                        color: overBudget
-                            ? AppColors.dangerRed
-                            : AppColors.lightLeaf,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          // One hero "Add a branch" card. The amount is optional (the survey
-          // and plan steps fill it in), and the presets sit quietly beneath.
+          // The "add a branch" box comes first; the budget summary reveals
+          // itself once the user confirms they've listed all their expenses.
+          // The amount is optional (the survey and plan steps fill it in), and
+          // the presets sit quietly beneath.
           BarkCard(
             label: l.addABranch,
             icon: Icons.add_circle_outline,
@@ -1092,9 +1167,10 @@ class _ExpenseStep extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          if (expenses.isNotEmpty)
-            BarkCard(
+          if (expenses.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            _Reveal(
+              child: BarkCard(
               label: l.branchesReachingOut,
               icon: Icons.spa_outlined,
               child: Column(
@@ -1154,6 +1230,64 @@ class _ExpenseStep extends StatelessWidget {
                 }).toList(),
               ),
             ),
+            ),
+          ],
+          // Confirm the branch list, then reveal where the budget stands.
+          if (expenses.isNotEmpty && !confirmed) ...[
+            const SizedBox(height: 14),
+            _Reveal(
+              child: _ContinueButton(
+                label: l.expensesDoneAdding,
+                onTap: onConfirm,
+              ),
+            ),
+          ],
+          if (confirmed) ...[
+            const SizedBox(height: 14),
+            _Reveal(child: _summaryCard(l)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// The "where you stand" card: an allocation meter plus allocated / remaining
+  /// figures, revealed only after the user confirms the branch list.
+  Widget _summaryCard(AppLocalizations l) {
+    final remaining = totalIncome - totalAllocated;
+    final overBudget = remaining < 0;
+    return BarkCard(
+      label: l.expenseSummaryTitle,
+      icon: Icons.balance_outlined,
+      accent: AppColors.leafYellow,
+      child: Column(
+        children: [
+          _BudgetBar(totalIncome: totalIncome, totalAllocated: totalAllocated),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l.allocatedAmount('\$${totalAllocated.toStringAsFixed(0)}'),
+                style: GoogleFonts.nunito(
+                  color: AppColors.mossGreen,
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                overBudget
+                    ? l.overByAmount('\$${(-remaining).toStringAsFixed(0)}')
+                    : l.remainingAmount('\$${remaining.toStringAsFixed(0)}'),
+                style: GoogleFonts.nunito(
+                  color: overBudget
+                      ? AppColors.dangerRed
+                      : AppColors.lightLeaf,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -1874,15 +2008,15 @@ class _PlanStepState extends State<_PlanStep> {
             ),
             if (_leftover > 0.5) ...[
               const SizedBox(height: 14),
-              _buildLeftoverCard(context, l),
+              _Reveal(child: _buildLeftoverCard(context, l)),
             ],
             // Finishing touches, revealed only once the plan is settled so the
             // step stays one decision at a time: name the tree, set the pay
             // schedule, then the bottom bar plants it.
             const SizedBox(height: 14),
-            _buildNameCard(l),
+            _Reveal(child: _buildNameCard(l)),
             const SizedBox(height: 14),
-            _buildPayCard(context, l),
+            _Reveal(child: _buildPayCard(context, l)),
           ],
         ],
       ),
