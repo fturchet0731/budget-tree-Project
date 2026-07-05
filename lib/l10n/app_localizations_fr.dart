@@ -125,7 +125,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get enterValidEmail => 'Saisissez un e-mail valide';
 
   @override
-  String get passwordTooShort => 'Au moins 6 caractères';
+  String get passwordTooShort =>
+      '8 caractères ou plus, avec une lettre et un chiffre';
 
   @override
   String get accountCreatedConfirm =>

@@ -11,10 +11,24 @@
 //
 // Model is pinned to Sonnet per project constraint ("no more than Sonnet").
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-4-6";
+
+// Per-user cap on AI calls per rolling hour. Generous for real use (a handful
+// of budget/goal plans and the odd reflection) but low enough that an abuser
+// with the public anon key can't run up the Anthropic bill.
+const HOURLY_CALL_LIMIT = 30;
+
+// Hard caps on the free-form inputs that get embedded into the prompt, so a
+// caller can't inflate token cost (and spend) with an enormous payload.
+const MAX_EXPENSES = 40;
+const MAX_NAME_LEN = 60;
+const MAX_SYNOPSIS_LEN = 500;
+const MAX_SURVEY_ENTRIES = 20;
+const MAX_SURVEY_VALUE_LEN = 120;
 
 interface ClaudeResult {
   text: string;
@@ -92,13 +106,30 @@ async function budgetPlans(body: Record<string, unknown>) {
     monthly: "month",
   };
   const cycle = CYCLES[String(body.cycle ?? "monthly")] ?? "month";
+  const synopsisCapped = synopsis.slice(0, MAX_SYNOPSIS_LEN);
   // A small lifestyle questionnaire (question -> chosen answer) the user filled
-  // in so the coach can estimate the amounts of expenses left blank.
-  const survey = (body.survey as Record<string, string>) ?? {};
+  // in so the coach can estimate the amounts of expenses left blank. Bounded so
+  // an oversized payload can't amplify token cost.
+  const survey: Record<string, string> = {};
+  for (
+    const [k, v] of Object.entries(
+      (body.survey as Record<string, string>) ?? {},
+    ).slice(0, MAX_SURVEY_ENTRIES)
+  ) {
+    survey[String(k).slice(0, MAX_SURVEY_VALUE_LEN)] = String(v).slice(
+      0,
+      MAX_SURVEY_VALUE_LEN,
+    );
+  }
   // Each expense may carry a fixed amount the user already decided, or 0/absent
-  // meaning the coach should choose it.
+  // meaning the coach should choose it. Capped in count and name length.
   const expenses =
-    (body.expenses as Array<{ name: string; amount?: number }>) ?? [];
+    ((body.expenses as Array<{ name: string; amount?: number }>) ?? [])
+      .slice(0, MAX_EXPENSES)
+      .map((e) => ({
+        name: String(e?.name ?? "").slice(0, MAX_NAME_LEN),
+        amount: Number(e?.amount) || 0,
+      }));
 
   const system =
     `You are a friendly personal budgeting coach. The user budgets per ${cycle}: their income and every amount below are for one ${cycle}, so scale your estimates to that period. They give that income, a list of expense categories (each with an amount they already decided, or 0 meaning you choose it), answers to a short lifestyle questionnaire, and an optional note on how they want their budget to feel. Produce 2 or 3 distinct allocation plans. ${
@@ -107,7 +138,13 @@ async function budgetPlans(body: Record<string, unknown>) {
 {"plans":[{"name":string,"items":[{"name":string,"amount":number}],"leftover":number,"rationale":string}]}
 Rules: every input expense MUST appear in every plan's items. If an expense has an amount greater than 0, treat it as fixed and use exactly that amount in every plan; only choose amounts for the expenses left at 0. Use the questionnaire answers to make realistic estimates for those blank expenses (for example household size and dining habits shape a food budget). amount values are whole numbers in ${currency}. For each plan, the sum of all item amounts plus leftover MUST equal exactly ${income}. leftover represents money left for savings or goals. Let the questionnaire answers and the note drive how you weight categories and savings, and give each plan a clear distinct name that reflects a different reading of what they asked for. Keep each rationale to one sentence that ties back to their situation.`;
 
-  const user = JSON.stringify({ income, currency, synopsis, survey, expenses });
+  const user = JSON.stringify({
+    income,
+    currency,
+    synopsis: synopsisCapped,
+    survey,
+    expenses,
+  });
   const { text } = await callClaude(system, user, 1024);
   const parsed = extractJson<{ plans: unknown[] }>(text);
   if (!Array.isArray(parsed.plans) || parsed.plans.length === 0) {
@@ -162,15 +199,52 @@ async function reflection(body: Record<string, unknown>) {
 // ---- router ---------------------------------------------------------------
 
 Deno.serve(async (req) => {
+  const cors = corsHeaders(req.headers.get("Origin"));
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: cors });
   }
 
   const json = (payload: unknown, status = 200) =>
     new Response(JSON.stringify(payload), {
       status,
-      headers: { ...corsHeaders, "content-type": "application/json" },
+      headers: { ...cors, "content-type": "application/json" },
     });
+
+  // Verify the caller is a real signed-in user. The gateway's verify_jwt only
+  // proves the JWT is validly signed, which the *public* anon key also is — so
+  // we must reject the anon role here. getUser() validates the access token
+  // against the auth server and returns the user only for a genuine session.
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (!supabaseUrl || !anonKey) {
+    console.error("SUPABASE_URL / SUPABASE_ANON_KEY not available");
+    return json({ error: "server_misconfigured" }, 500);
+  }
+  const supabase = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return json({ error: "unauthorized" }, 401);
+  }
+
+  // Per-user hourly quota. The DB function records this call and tells us
+  // whether the caller is still under the limit; it is keyed to auth.uid() so
+  // it can't be spoofed by the request body.
+  const { data: underQuota, error: quotaError } = await supabase.rpc(
+    "check_ai_quota",
+    { max_calls: HOURLY_CALL_LIMIT },
+  );
+  if (quotaError) {
+    console.error("check_ai_quota failed", quotaError);
+    return json({ error: "internal_error" }, 500);
+  }
+  if (underQuota !== true) {
+    return json({ error: "rate_limited" }, 429);
+  }
 
   try {
     const body = await req.json();
@@ -183,10 +257,11 @@ Deno.serve(async (req) => {
       case "reflection":
         return json(await reflection(body));
       default:
-        return json({ error: `Unknown action: ${action}` }, 400);
+        return json({ error: "unknown_action" }, 400);
     }
   } catch (e) {
+    // Log the full detail server-side; never leak internals to the client.
     console.error(e);
-    return json({ error: String(e instanceof Error ? e.message : e) }, 500);
+    return json({ error: "internal_error" }, 500);
   }
 });

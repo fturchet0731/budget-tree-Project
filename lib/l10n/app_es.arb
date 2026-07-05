@@ -42,7 +42,7 @@
   "haveAccountSignIn": "¿Ya tienes una cuenta? Inicia sesión",
   "enterEmail": "Introduce tu correo electrónico",
   "enterValidEmail": "Introduce un correo electrónico válido",
-  "passwordTooShort": "Al menos 6 caracteres",
+  "passwordTooShort": "8 caracteres o más, con una letra y un número",
   "accountCreatedConfirm": "Cuenta creada. Revisa tu correo para confirmar y luego inicia sesión.",
   "somethingWentWrong": "Algo salió mal. Inténtalo de nuevo.",
 

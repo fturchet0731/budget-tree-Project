@@ -331,7 +331,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordTooShort.
   ///
   /// In en, this message translates to:
-  /// **'At least 6 characters'**
+  /// **'Use 8+ characters with a letter and a number'**
   String get passwordTooShort;
 
   /// No description provided for @accountCreatedConfirm.

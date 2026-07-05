@@ -6,6 +6,17 @@ import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import 'verify_email_screen.dart';
 
+/// Whether [password] meets the account password policy: at least 8 characters
+/// with at least one letter and one digit. Mirrors the Supabase auth config
+/// (`minimum_password_length = 8`, `password_requirements = "letters_digits"`)
+/// so the client rejects weak passwords before a round trip. Pure and
+/// top-level so it can be unit-tested (see test/password_policy_test.dart).
+bool isStrongPassword(String password) {
+  return password.length >= 8 &&
+      RegExp(r'[A-Za-z]').hasMatch(password) &&
+      RegExp(r'\d').hasMatch(password);
+}
+
 /// Email + password sign-in / sign-up, themed to match the forest aesthetic.
 /// On success the [AuthGate] swaps this out for the app automatically (it
 /// listens to [AuthService]), so this screen only has to clear errors.
@@ -175,7 +186,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: AppColors.mossGreen),
                         ),
                         validator: (v) {
-                          if ((v ?? '').length < 6) {
+                          // Mirror the server policy (min 8, letters + digits)
+                          // so users get an instant message instead of a
+                          // generic auth error. Only enforced on sign-up; sign
+                          // in accepts whatever the account already has.
+                          if (!_isSignUp) return null;
+                          if (!isStrongPassword(v ?? '')) {
                             return l.passwordTooShort;
                           }
                           return null;

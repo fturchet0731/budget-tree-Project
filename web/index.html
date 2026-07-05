@@ -20,6 +20,28 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
+  <!--
+    Content-Security-Policy for the web build. Flutter's bootstrap and CanvasKit
+    need 'unsafe-inline'/'unsafe-eval' for scripts, so this policy keeps those
+    (otherwise the app won't load) while locking down the rest of the surface:
+    object/embed is blocked, <base> can't be hijacked, the page can't be framed
+    (clickjacking), and scripts/connections/fonts are limited to known hosts
+    (self, gstatic/CanvasKit + Google Fonts, the passkeys bundle, and Supabase
+    over https/wss). For a hardened production web deploy, build with
+    `flutter build web --csp` and drop 'unsafe-inline'/'unsafe-eval' here.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://github.com https://objects.githubusercontent.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' data: https://fonts.gstatic.com;
+    img-src 'self' data: https:;
+    connect-src 'self' https: wss:;
+    object-src 'none';
+    base-uri 'self';
+    frame-ancestors 'none';
+  ">
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
