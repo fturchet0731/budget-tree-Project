@@ -2,12 +2,16 @@ import 'dart:ui' show Locale;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum AppPalette { forestDark, midnight, twilight }
+enum AppPalette { light, dark }
 
 enum AppTextScale { compact, normal, large }
 
 class AppSettings extends ChangeNotifier {
-  static const _kPalette = 'settings_palette_v1';
+  // Light/dark theme choice. The old key 'settings_palette_v1' indexed the
+  // retired forestDark/midnight/twilight palettes and is deliberately ignored:
+  // the redesign gives everyone the new light look by default, and dark is a
+  // fresh opt-in rather than a migration of the old dark palettes.
+  static const _kThemeMode = 'settings_theme_mode_v1';
   static const _kScale = 'settings_text_scale_v1';
   static const _kMotion = 'settings_motion_v1';
   static const _kSound = 'settings_sound_v1';
@@ -28,7 +32,7 @@ class AppSettings extends ChangeNotifier {
   /// Languages the app ships translations for. `null` locale = follow device.
   static const supportedLanguageCodes = ['en', 'fr', 'es'];
 
-  AppPalette _palette = AppPalette.forestDark;
+  AppPalette _palette = AppPalette.light;
   AppTextScale _scale = AppTextScale.normal;
   Locale? _locale; // null = follow the device language
   bool _motionFull = true;
@@ -57,6 +61,7 @@ class AppSettings extends ChangeNotifier {
   bool _notifPermissionAsked = false;
 
   AppPalette get palette => _palette;
+  bool get isDark => _palette == AppPalette.dark;
   AppTextScale get textScale => _scale;
   bool get motionFull => _motionFull;
 
@@ -130,7 +135,7 @@ class AppSettings extends ChangeNotifier {
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final pi = prefs.getInt(_kPalette) ?? 0;
+    final pi = prefs.getInt(_kThemeMode) ?? 0;
     _palette = AppPalette.values[pi.clamp(0, AppPalette.values.length - 1)];
     final si = prefs.getInt(_kScale) ?? 1;
     _scale = AppTextScale.values[si.clamp(0, AppTextScale.values.length - 1)];
@@ -257,7 +262,7 @@ class AppSettings extends ChangeNotifier {
     _palette = p;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_kPalette, p.index);
+    await prefs.setInt(_kThemeMode, p.index);
   }
 
   Future<void> setTextScale(AppTextScale s) async {

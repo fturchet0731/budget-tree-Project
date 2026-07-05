@@ -296,9 +296,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _ChoiceRow<AppPalette>(
                             current: settings.palette,
                             options: [
-                              (AppPalette.forestDark, l.paletteForest),
-                              (AppPalette.midnight, l.paletteMidnight),
-                              (AppPalette.twilight, l.paletteTwilight),
+                              (AppPalette.light, l.themeLight),
+                              (AppPalette.dark, l.themeDark),
                             ],
                             onChanged: settings.setPalette,
                           ),

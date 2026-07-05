@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/app_settings.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 
 /// Skeleton placeholders for the online-only screens: instead of a bare
 /// spinner, the loading state sketches the layout that's about to appear so
@@ -45,7 +45,7 @@ class _SkeletonPulseState extends State<SkeletonPulse>
   }
 }
 
-/// One grey-green block of the sketched layout.
+/// One soft neutral block of the sketched layout.
 class SkeletonBox extends StatelessWidget {
   const SkeletonBox({
     super.key,
@@ -64,7 +64,7 @@ class SkeletonBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.mossGreen.withValues(alpha: 0.18),
+        color: AppTokens.current.cardBorder.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(radius),
       ),
     );

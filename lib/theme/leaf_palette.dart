@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_tokens.dart';
 
 /// Four-stop colour ramp used by every leaf/crown drawing in the app.
 /// Derived from a single accent colour so that user-chosen category colours
@@ -38,11 +39,11 @@ class LeafPalette {
     );
   }
 
-  /// The default forest-green palette used when no category is selected.
+  /// The default conifer-green palette used when no category is selected.
   static const defaultGreen = LeafPalette(
-    light: Color(0xFF81C784),
-    mid: Color(0xFF4CAF50),
-    dark: Color(0xFF2E7D32),
-    outline: Color(0xFF1B5E20),
+    light: Conifer.c300,
+    mid: Conifer.c500,
+    dark: Conifer.c700,
+    outline: Conifer.c800,
   );
 }

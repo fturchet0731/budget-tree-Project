@@ -68,7 +68,7 @@ class _BudgetTreeAppState extends State<BudgetTreeApp>
         return MaterialApp(
           title: 'Budget Tree',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.theme,
+          theme: settings.isDark ? AppTheme.dark : AppTheme.light,
           // Language: follow the user's choice from Settings, or the device
           // language when they haven't picked one (locale == null).
           locale: settings.locale,

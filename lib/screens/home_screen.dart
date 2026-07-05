@@ -714,7 +714,7 @@ class _LaunchTheme {
 
   static _LaunchTheme of(AppPalette palette) {
     switch (palette) {
-      case AppPalette.forestDark:
+      case AppPalette.light:
         return const _LaunchTheme(
           leafBackstop: Color(0xFF237A37),
           leafDark: Color(0xFF2A8640),
@@ -737,7 +737,7 @@ class _LaunchTheme {
           skyBottom: Color(0xFF7CB342),
           cloud: Color(0xFFF7FBFF),
         );
-      case AppPalette.midnight:
+      case AppPalette.dark:
         return const _LaunchTheme(
           leafBackstop: Color(0xFF10331F),
           leafDark: Color(0xFF154029),
@@ -759,29 +759,6 @@ class _LaunchTheme {
           button: Color(0xFF2B6E48),
           skyBottom: Color(0xFF12281C),
           cloud: Color(0xFF3A4A63),
-        );
-      case AppPalette.twilight:
-        return const _LaunchTheme(
-          leafBackstop: Color(0xFF2C3A1A),
-          leafDark: Color(0xFF3A4A20),
-          leafMid: Color(0xFF566B2A),
-          leafLight: Color(0xFF8A9C44),
-          branchA: Color(0xFF6B4A2A),
-          branchB: Color(0xFF513620),
-          trunkA: Color(0xFF7A552F),
-          trunkB: Color(0xFF5E3F22),
-          trunkKnot: Color(0xFF3E2818),
-          grass: [Color(0xFF44521F), Color(0xFF55642A), Color(0xFF6B7A38)],
-          soilTop: Color(0xFF2A1820),
-          soilRim1: Color(0xFF4A2C30),
-          soilRim2: Color(0xFF2A1820),
-          bushDark: Color(0xFF3A4A20),
-          bushLight: Color(0xFF566B2A),
-          glow: Color(0xFFFFB870),
-          shade: Color(0xFF1A0E14),
-          button: Color(0xFFC56A4A),
-          skyBottom: Color(0xFF3D3528),
-          cloud: Color(0xFFF3D9C2),
         );
     }
   }

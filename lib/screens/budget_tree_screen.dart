@@ -818,7 +818,7 @@ class _TreeSceneBackground extends CustomPainter {
   }
 
   void _drawSun(Canvas canvas, Offset c, double r) {
-    final isMidnight = AppSettings.instance.palette == AppPalette.midnight;
+    final isMidnight = AppSettings.instance.palette == AppPalette.dark;
     final glow = AppPalettes.celestialGlow();
     final core = AppPalettes.celestial();
 
@@ -929,7 +929,7 @@ class _TreeSceneBackground extends CustomPainter {
   }
 
   void _drawBirds(Canvas canvas, double w, double h) {
-    final isMidnight = palette == AppPalette.midnight;
+    final isMidnight = palette == AppPalette.dark;
     final p = Paint()
       ..color = (isMidnight ? Colors.white : const Color(0xFF1A237E))
           .withValues(alpha: 0.45)

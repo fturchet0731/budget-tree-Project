@@ -625,7 +625,7 @@ class _ImmersiveBgPainter extends CustomPainter {
       Paint()..shader = AppPalettes.sky().createShader(Rect.fromLTWH(0, 0, w, h)),
     );
 
-    if (palette == AppPalette.midnight) {
+    if (palette == AppPalette.dark) {
       _drawStars(canvas, w, h);
     }
 
@@ -641,7 +641,7 @@ class _ImmersiveBgPainter extends CustomPainter {
     );
     canvas.drawCircle(
         celestial, 28, Paint()..color = AppPalettes.celestial());
-    if (palette == AppPalette.midnight) {
+    if (palette == AppPalette.dark) {
       canvas.drawCircle(
         Offset(celestial.dx + 8, celestial.dy - 2),
         26,
@@ -650,7 +650,7 @@ class _ImmersiveBgPainter extends CustomPainter {
     }
 
     final rng = math.Random(11);
-    final cloudAlpha = palette == AppPalette.midnight ? 0.42 : 0.88;
+    final cloudAlpha = palette == AppPalette.dark ? 0.42 : 0.88;
     final cloudPaint = Paint()..color = Colors.white.withValues(alpha: cloudAlpha);
     for (int i = 0; i < 5; i++) {
       final cx = ((i * 0.22 + 0.05) * w * 2 - parallax * 30) % (w * 1.2);

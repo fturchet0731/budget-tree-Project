@@ -812,16 +812,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scaleLarge => 'Grand';
 
   @override
-  String get themePalette => 'Palette de thème';
+  String get themePalette => 'Thème';
 
   @override
-  String get paletteForest => 'Forêt';
+  String get themeLight => 'Clair';
 
   @override
-  String get paletteMidnight => 'Minuit';
-
-  @override
-  String get paletteTwilight => 'Crépuscule';
+  String get themeDark => 'Sombre';
 
   @override
   String get motion => 'Animations';

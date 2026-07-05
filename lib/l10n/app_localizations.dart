@@ -1471,26 +1471,20 @@ abstract class AppLocalizations {
   /// No description provided for @themePalette.
   ///
   /// In en, this message translates to:
-  /// **'Theme palette'**
+  /// **'Theme'**
   String get themePalette;
 
-  /// No description provided for @paletteForest.
+  /// No description provided for @themeLight.
   ///
   /// In en, this message translates to:
-  /// **'Forest'**
-  String get paletteForest;
+  /// **'Light'**
+  String get themeLight;
 
-  /// No description provided for @paletteMidnight.
+  /// No description provided for @themeDark.
   ///
   /// In en, this message translates to:
-  /// **'Midnight'**
-  String get paletteMidnight;
-
-  /// No description provided for @paletteTwilight.
-  ///
-  /// In en, this message translates to:
-  /// **'Twilight'**
-  String get paletteTwilight;
+  /// **'Dark'**
+  String get themeDark;
 
   /// No description provided for @motion.
   ///

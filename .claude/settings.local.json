@@ -27,7 +27,18 @@
       "Bash(osascript *)",
       "Bash(supabase functions *)",
       "Bash(grep -n \"BudgetModel\\\\` \\(tree\\)\" CLAUDE.md)",
-      "Bash(grep -n \"budget_plans\\\\` \\(income\" CLAUDE.md)"
+      "Bash(grep -n \"budget_plans\\\\` \\(income\" CLAUDE.md)",
+      "Bash(git grep *)",
+      "Bash(deno --version)",
+      "Bash(supabase --version)",
+      "Bash(echo \"deno exit: $?\")",
+      "Bash(supabase migration *)",
+      "Bash(supabase db *)",
+      "Bash(python3 -c \"import json;print\\(json.load\\(open\\('env.json'\\)\\)['SUPABASE_URL']\\)\")",
+      "Bash(python3 -c \"import json;print\\(json.load\\(open\\('env.json'\\)\\)['SUPABASE_ANON_KEY']\\)\")",
+      "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' -X POST __TRACKED_VAR__/rest/v1/rpc/check_ai_quota -H 'apikey: __TRACKED_VAR__' -H 'authorization: Bearer __TRACKED_VAR__' -H 'content-type: application/json' -d '{\"max_calls\":30}')",
+      "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' __TRACKED_VAR__/rest/v1/ai_usage?select=* -H 'apikey: __TRACKED_VAR__' -H 'authorization: Bearer __TRACKED_VAR__')",
+      "Bash(flutter build *)"
     ]
   }
 }
