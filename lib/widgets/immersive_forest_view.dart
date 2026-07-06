@@ -286,7 +286,7 @@ class _TreeStage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.account_balance_wallet_outlined,
+                        Icon(Icons.account_balance_wallet_outlined,
                             color: AppColors.lightLeaf, size: 13),
                         const SizedBox(width: 4),
                         Text(
@@ -521,7 +521,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                               value: pct,
                               minHeight: 5,
                               backgroundColor: AppColors.soilMid,
-                              valueColor: const AlwaysStoppedAnimation(
+                              valueColor: AlwaysStoppedAnimation(
                                   AppColors.lightLeaf),
                             ),
                           ),

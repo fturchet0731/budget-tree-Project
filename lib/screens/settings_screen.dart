@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
 import '../services/notification_scheduler.dart';
@@ -11,6 +13,7 @@ import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/info_button.dart';
+import '../widgets/ui/segmented_choice.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -43,41 +46,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF14210C),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          l.signOutQuestion,
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.w600,
-            color: AppColors.stoneBeigeColor,
-            fontSize: 20,
-          ),
-        ),
-        content: Text(
-          l.signOutBody,
-          style: GoogleFonts.nunito(
-            color: AppColors.mossGreen,
-            fontSize: 14,
-            height: 1.55,
-          ),
-        ),
+        title: Text(l.signOutQuestion),
+        content: Text(l.signOutBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l.cancel,
-              style: GoogleFonts.nunito(color: AppColors.mossGreen),
-            ),
+            child: Text(l.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l.signOut,
-              style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text(l.signOut),
           ),
         ],
       ),
@@ -92,57 +70,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A0808),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.warning_amber_rounded,
-              color: AppColors.dangerRed,
+              color: AppTokens.current.danger,
               size: 24,
             ),
             const SizedBox(width: 10),
-            Text(
-              l.eraseAllTitle,
-              style: GoogleFonts.fredoka(
-                fontWeight: FontWeight.w600,
-                color: AppColors.stoneBeigeColor,
-                fontSize: 20,
-              ),
-            ),
+            Expanded(child: Text(l.eraseAllTitle)),
           ],
         ),
-        content: Text(
-          l.eraseAllBody,
-          style: GoogleFonts.nunito(
-            color: AppColors.mossGreen,
-            fontSize: 14,
-            height: 1.55,
-          ),
-        ),
+        content: Text(l.eraseAllBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l.cancel,
-              style: GoogleFonts.nunito(color: AppColors.mossGreen),
-            ),
+            child: Text(l.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.dangerRed,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              backgroundColor: AppTokens.current.danger,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l.eraseEverything,
-              style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text(l.eraseEverything),
           ),
         ],
       ),
@@ -154,47 +105,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final reallyOk = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A0808),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          l.absolutelySure,
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.w600,
-            color: AppColors.stoneBeigeColor,
-            fontSize: 19,
-          ),
-        ),
-        content: Text(
-          l.lastChanceBody,
-          style: GoogleFonts.nunito(
-            color: AppColors.mossGreen,
-            fontSize: 14,
-            height: 1.55,
-          ),
-        ),
+        title: Text(l.absolutelySure),
+        content: Text(l.lastChanceBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l.keepMyData,
-              style: GoogleFonts.nunito(color: AppColors.mossGreen),
-            ),
+            child: Text(l.keepMyData),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.dangerRed,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              backgroundColor: AppTokens.current.danger,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l.yesErase,
-              style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text(l.yesErase),
           ),
         ],
       ),
@@ -208,24 +132,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await SyncEngine.clearLocalCaches();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFF1A0808),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Row(
-          children: [
-            const Icon(Icons.delete_outline, color: Colors.white, size: 18),
-            const SizedBox(width: 10),
-            Text(
-              'All data erased.',
-              style: GoogleFonts.nunito(
-                color: AppColors.stoneBeigeColor,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-        duration: const Duration(seconds: 3),
+      const SnackBar(
+        content: Text('All data erased.'),
+        duration: Duration(seconds: 3),
       ),
     );
   }
@@ -234,19 +143,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(
+      body: SafeArea(
           child: AppScrollbar(
             builder: (controller) => CustomScrollView(
               controller: controller,
               slivers: [
                 SliverAppBar(
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: AppTokens.current.canvas,
                   elevation: 0,
                   pinned: true,
                   leading: IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back_ios,
                       color: AppColors.stoneBeigeColor,
                     ),
@@ -281,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           _TileLabel(text: l.textSize),
                           const SizedBox(height: 10),
-                          _ChoiceRow<AppTextScale>(
+                          SegmentedChoice<AppTextScale>(
                             current: settings.textScale,
                             options: [
                               (AppTextScale.compact, l.scaleCompact),
@@ -293,7 +200,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 18),
                           _TileLabel(text: l.themePalette),
                           const SizedBox(height: 10),
-                          _ChoiceRow<AppPalette>(
+                          SegmentedChoice<AppPalette>(
                             current: settings.palette,
                             options: [
                               (AppPalette.light, l.themeLight),
@@ -324,7 +231,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             value: settings.motionFull,
-                            activeThumbColor: AppColors.lightLeaf,
                             onChanged: settings.setMotionFull,
                           ),
                           const SizedBox(height: 12),
@@ -350,7 +256,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             value: settings.soundEnabled,
-                            activeThumbColor: AppColors.lightLeaf,
                             onChanged: settings.setSoundEnabled,
                           ),
                         ],
@@ -398,7 +303,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             value: settings.aiCoachEnabled,
-                            activeThumbColor: AppColors.lightLeaf,
                             onChanged: settings.setAiCoachEnabled,
                           ),
                           if (settings.aiCoachEnabled &&
@@ -432,7 +336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           _ActionTile(
                             icon: Icons.school_outlined,
-                            iconColor: AppColors.lightLeaf,
+                            iconColor: AppTokens.current.accentStrong,
                             title: l.replayTutorial,
                             subtitle: l.replayTutorialSub,
                             onTap: () => GuidedTour.start(context),
@@ -499,7 +403,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -548,25 +451,10 @@ class _SettingsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF152B12).withValues(alpha: 0.95),
-            const Color(0xFF0B1A09).withValues(alpha: 0.95),
-          ],
-        ),
+        color: AppTokens.current.card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: AppColors.forestGreen.withValues(alpha: 0.25),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppTokens.current.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,13 +513,13 @@ class _LanguagePicker extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.forestGreen.withValues(alpha: 0.45)
-                    : AppColors.soilMid,
+                    ? AppTokens.current.accentSoft
+                    : AppTokens.current.canvasSoft,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: selected
-                      ? AppColors.lightLeaf.withValues(alpha: 0.75)
-                      : AppColors.mossGreen.withValues(alpha: 0.25),
+                      ? AppTokens.current.accentStrong
+                      : AppTokens.current.cardBorder,
                   width: selected ? 1.5 : 1,
                 ),
               ),
@@ -642,8 +530,8 @@ class _LanguagePicker extends StatelessWidget {
                       label,
                       style: GoogleFonts.nunito(
                         color: selected
-                            ? AppColors.lightLeaf
-                            : AppColors.stoneBeigeColor,
+                            ? AppTokens.current.accentStrong
+                            : AppTokens.current.textPrimary,
                         fontSize: 14,
                         fontWeight: selected
                             ? FontWeight.bold
@@ -652,66 +540,12 @@ class _LanguagePicker extends StatelessWidget {
                     ),
                   ),
                   if (selected)
-                    const Icon(
+                    Icon(
                       Icons.check_circle,
-                      color: AppColors.lightLeaf,
+                      color: AppTokens.current.accentStrong,
                       size: 18,
                     ),
                 ],
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _ChoiceRow<T> extends StatelessWidget {
-  final T current;
-  final List<(T, String)> options;
-  final void Function(T) onChanged;
-  const _ChoiceRow({
-    required this.current,
-    required this.options,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: options.map((opt) {
-        final (value, label) = opt;
-        final selected = value == current;
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onChanged(value),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              decoration: BoxDecoration(
-                color: selected
-                    ? AppColors.forestGreen.withValues(alpha: 0.45)
-                    : AppColors.soilMid,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: selected
-                      ? AppColors.lightLeaf.withValues(alpha: 0.75)
-                      : AppColors.mossGreen.withValues(alpha: 0.25),
-                  width: selected ? 1.5 : 1,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                label,
-                style: GoogleFonts.nunito(
-                  color: selected
-                      ? AppColors.lightLeaf
-                      : AppColors.stoneBeigeColor,
-                  fontSize: 12.5,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                ),
               ),
             ),
           ),
@@ -899,7 +733,6 @@ class _NotificationsCard extends StatelessWidget {
             onTap: () async {
               final picked = await showModalBottomSheet<int>(
                 context: context,
-                backgroundColor: const Color(0xFF0D2010),
                 builder: (ctx) => SafeArea(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -913,9 +746,9 @@ class _NotificationsCard extends StatelessWidget {
                           ),
                         ),
                         trailing: s.weeklyWeekday == weekday
-                            ? const Icon(
+                            ? Icon(
                                 Icons.check,
-                                color: AppColors.lightLeaf,
+                                color: AppTokens.current.accentStrong,
                                 size: 18,
                               )
                             : null,
@@ -1004,7 +837,6 @@ class _NotifSwitch extends StatelessWidget {
         ),
       ),
       value: value,
-      activeThumbColor: AppColors.lightLeaf,
       onChanged: onChanged,
     );
   }
@@ -1040,11 +872,8 @@ class _TapRow extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.forestGreen.withValues(alpha: 0.3),
+                color: AppTokens.current.accentSoft,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: AppColors.lightLeaf.withValues(alpha: 0.4),
-                ),
               ),
               child: Text(
                 value,
@@ -1056,7 +885,7 @@ class _TapRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(
+            Icon(
               Icons.chevron_right,
               color: AppColors.mossGreen,
               size: 18,

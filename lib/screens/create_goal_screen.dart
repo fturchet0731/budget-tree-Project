@@ -285,7 +285,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
             child: Text(
               l.fundFromBranchBody,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.mossGreen,
                 fontSize: 12.5,
               ),
@@ -296,14 +296,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               onPressed: () => Navigator.pop(ctx, pair),
               child: Text(
                 '${pair.$2.name}  ·  ${pair.$1.budgetName}',
-                style: const TextStyle(color: AppColors.stoneBeigeColor),
+                style: TextStyle(color: AppColors.stoneBeigeColor),
               ),
             ),
           SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, null),
             child: Text(
               l.notNow,
-              style: const TextStyle(color: AppColors.mossGreen),
+              style: TextStyle(color: AppColors.mossGreen),
             ),
           ),
         ],
@@ -375,13 +375,13 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                               children: [
                                 TextField(
                                   controller: _nameCtrl,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.stoneBeigeColor,
                                   ),
                                   decoration: InputDecoration(
                                     labelText: l.goalName,
                                     hintText: l.goalNameHint,
-                                    prefixIcon: const Icon(
+                                    prefixIcon: Icon(
                                       Icons.spa,
                                       color: AppColors.mossGreen,
                                     ),
@@ -392,14 +392,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                 const SizedBox(height: 14),
                                 TextField(
                                   controller: _descCtrl,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.stoneBeigeColor,
                                   ),
                                   maxLines: 2,
                                   decoration: InputDecoration(
                                     labelText: l.notesOptional,
                                     hintText: l.notesHint,
-                                    prefixIcon: const Icon(
+                                    prefixIcon: Icon(
                                       Icons.notes_outlined,
                                       color: AppColors.mossGreen,
                                     ),
@@ -427,7 +427,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                   child: TextField(
                                     controller: _targetCtrl,
                                     enabled: !_uncapped,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.stoneBeigeColor,
                                     ),
                                     keyboardType:
@@ -442,7 +442,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                     decoration: InputDecoration(
                                       labelText: l.targetAmount,
                                       hintText: l.targetHint,
-                                      prefixIcon: const Icon(
+                                      prefixIcon: Icon(
                                         Icons.flag_outlined,
                                         color: AppColors.mossGreen,
                                       ),
@@ -753,7 +753,7 @@ class _Header extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppTokens.current.cardBorder),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back,
                 color: AppColors.stoneBeigeColor,
                 size: 20,
@@ -993,7 +993,7 @@ class _TimeframeStep extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_today_outlined,
                     color: AppColors.mossGreen,
                     size: 18,
@@ -1022,7 +1022,7 @@ class _TimeframeStep extends StatelessWidget {
                       ),
                     )
                   else
-                    const Icon(
+                    Icon(
                       Icons.edit_calendar_outlined,
                       color: AppColors.mossGreen,
                       size: 18,
@@ -1181,7 +1181,7 @@ class _WateringStep extends StatelessWidget {
                               ),
                               label: Text(
                                 mat.formatShortDate(a.date),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.stoneBeigeColor,
                                   fontSize: 11.5,
                                 ),
@@ -1421,7 +1421,7 @@ class _CustomWaterCard extends StatelessWidget {
           const SizedBox(height: 10),
           TextField(
             controller: amountCtrl,
-            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            style: TextStyle(color: AppColors.stoneBeigeColor),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),

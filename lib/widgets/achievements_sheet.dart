@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../models/achievement.dart';
 import '../services/achievement_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import 'celebration_overlay.dart';
 
 /// Present a celebration overlay for each freshly-unlocked badge, one after
@@ -48,9 +49,10 @@ class _AchievementsSheet extends StatelessWidget {
       maxChildSize: 0.92,
       minChildSize: 0.4,
       builder: (ctx, scrollCtrl) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF0D2010),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        decoration: BoxDecoration(
+          color: AppTokens.current.card,
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(26)),
         ),
         child: FutureBuilder<Map<String, DateTime>>(
           future: AchievementService.loadUnlocked(),
@@ -125,12 +127,12 @@ class _BadgeTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: earned
             ? tint.withValues(alpha: 0.12)
-            : Colors.white.withValues(alpha: 0.03),
+            : AppTokens.current.canvasSoft,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: earned
               ? tint.withValues(alpha: 0.55)
-              : AppColors.mossGreen.withValues(alpha: 0.18),
+              : AppTokens.current.cardBorder,
         ),
       ),
       child: Column(
@@ -144,7 +146,7 @@ class _BadgeTile extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: earned
                       ? tint.withValues(alpha: 0.2)
-                      : Colors.black.withValues(alpha: 0.2),
+                      : AppTokens.current.cardBorder,
                 ),
                 child: Icon(
                   earned ? achievement.icon : Icons.lock_outline,

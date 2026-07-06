@@ -8,7 +8,9 @@ import '../services/auth_service.dart';
 import '../services/friends_service.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/skeleton.dart';
 import '../widgets/social_tab_bar.dart';
@@ -264,11 +266,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               ),
         foregroundColor: AppColors.stoneBeigeColor,
       ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(child: _body()),
-      ),
+      body: SafeArea(child: _body()),
     );
   }
 
@@ -332,7 +330,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
                   l.noFriendsYet,
-                  style: const TextStyle(color: AppColors.mossGreen),
+                  style: TextStyle(color: AppColors.mossGreen),
                 ),
               ),
             for (final f in _friends) _friendTile(f),
@@ -353,7 +351,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               children: [
                 Text(
                   l.youAreUsername(_me!.username),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.stoneBeigeColor,
                     fontWeight: FontWeight.bold,
                   ),
@@ -361,7 +359,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   l.howFriendsSeeStatus,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.mossGreen,
                     fontSize: 12,
                   ),
@@ -374,7 +372,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             dropdownColor: AppColors.barkBrown,
             iconEnabledColor: AppColors.lightLeaf,
             underline: const SizedBox.shrink(),
-            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            style: TextStyle(color: AppColors.stoneBeigeColor),
             items: [
               for (final m in FriendStatusMode.values)
                 DropdownMenuItem(value: m, child: Text(_statusModeLabel(l, m))),
@@ -400,11 +398,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
               Expanded(
                 child: TextField(
                   controller: _search,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor),
+                  style: TextStyle(color: AppColors.stoneBeigeColor),
                   decoration: InputDecoration(
                     hintText: l.searchByUsername,
-                    hintStyle: const TextStyle(color: AppColors.mossGreen),
-                    prefixIcon: const Icon(
+                    hintStyle: TextStyle(color: AppColors.mossGreen),
+                    prefixIcon: Icon(
                       Icons.alternate_email,
                       color: AppColors.mossGreen,
                     ),
@@ -415,35 +413,35 @@ class _FriendsScreenState extends State<FriendsScreen> {
               ),
               IconButton(
                 onPressed: _runSearch,
-                icon: const Icon(Icons.search, color: AppColors.lightLeaf),
+                icon: Icon(Icons.search, color: AppColors.lightLeaf),
               ),
             ],
           ),
           if (_searching)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(8),
               child: LinearProgressIndicator(color: AppColors.lightLeaf),
             ),
           for (final p in _results)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(
+              leading: Icon(
                 Icons.person_outline,
                 color: AppColors.mossGreen,
               ),
               title: Text(
                 p.label,
-                style: const TextStyle(color: AppColors.stoneBeigeColor),
+                style: TextStyle(color: AppColors.stoneBeigeColor),
               ),
               subtitle: Text(
                 '@${p.username}',
-                style: const TextStyle(color: AppColors.mossGreen),
+                style: TextStyle(color: AppColors.mossGreen),
               ),
               trailing: TextButton(
                 onPressed: () => _add(p),
                 child: Text(
                   l.add,
-                  style: const TextStyle(color: AppColors.lightLeaf),
+                  style: TextStyle(color: AppColors.lightLeaf),
                 ),
               ),
             ),
@@ -457,26 +455,26 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return _card(
       child: Row(
         children: [
-          const Icon(Icons.person_add_alt, color: AppColors.lightLeaf),
+          Icon(Icons.person_add_alt, color: AppColors.lightLeaf),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               '@${p.username}',
-              style: const TextStyle(color: AppColors.stoneBeigeColor),
+              style: TextStyle(color: AppColors.stoneBeigeColor),
             ),
           ),
           TextButton(
             onPressed: () => _accept(p),
             child: Text(
               l.accept,
-              style: const TextStyle(color: AppColors.lightLeaf),
+              style: TextStyle(color: AppColors.lightLeaf),
             ),
           ),
           TextButton(
             onPressed: () => _decline(p),
             child: Text(
               l.decline,
-              style: const TextStyle(color: AppColors.dangerRed),
+              style: TextStyle(color: AppColors.dangerRed),
             ),
           ),
         ],
@@ -491,7 +489,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         leading: Text(f.statusEmoji, style: const TextStyle(fontSize: 26)),
         title: Text(
           f.profile.label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.stoneBeigeColor,
             fontWeight: FontWeight.bold,
           ),
@@ -499,9 +497,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
         subtitle: Text(
           '@${f.profile.username} · '
           '${AppLocalizations.of(context).sharedGoalsCount(f.sharedGoals.length)}',
-          style: const TextStyle(color: AppColors.mossGreen),
+          style: TextStyle(color: AppColors.mossGreen),
         ),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.mossGreen),
+        trailing: Icon(Icons.chevron_right, color: AppColors.mossGreen),
         onTap: () => _openGarden(f),
       ),
     );
@@ -513,7 +511,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     padding: const EdgeInsets.only(bottom: 8),
     child: Text(
       s,
-      style: const TextStyle(
+      style: TextStyle(
         color: AppColors.lightLeaf,
         fontWeight: FontWeight.bold,
         letterSpacing: 1,
@@ -525,9 +523,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: Colors.black.withValues(alpha: 0.18),
+      color: AppTokens.current.card,
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: AppColors.mossGreen.withValues(alpha: 0.3)),
+      border: Border.all(color: AppTokens.current.cardBorder),
+      boxShadow: AppShadows.card,
     ),
     child: child,
   );
@@ -549,7 +548,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.stoneBeigeColor,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -559,7 +558,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           Text(
             body,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.mossGreen),
+            style: TextStyle(color: AppColors.mossGreen),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 20),
@@ -635,7 +634,7 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.alternate_email,
               color: AppColors.lightLeaf,
               size: 48,
@@ -643,7 +642,7 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
             const SizedBox(height: 16),
             Text(
               l.claimUsernameTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.stoneBeigeColor,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -653,7 +652,7 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
             Text(
               l.claimUsernameBody,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.mossGreen),
+              style: TextStyle(color: AppColors.mossGreen),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -661,12 +660,12 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
               enabled: !_busy,
               autocorrect: false,
               enableSuggestions: false,
-              style: const TextStyle(color: AppColors.stoneBeigeColor),
+              style: TextStyle(color: AppColors.stoneBeigeColor),
               decoration: InputDecoration(
                 hintText: l.usernameHint,
-                hintStyle: const TextStyle(color: AppColors.mossGreen),
+                hintStyle: TextStyle(color: AppColors.mossGreen),
                 errorText: _error,
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.alternate_email,
                   color: AppColors.mossGreen,
                 ),

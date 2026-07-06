@@ -62,7 +62,7 @@ class GoalSaplingCard extends StatelessWidget {
             goal.name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.stoneBeigeColor,
               fontWeight: FontWeight.bold,
             ),

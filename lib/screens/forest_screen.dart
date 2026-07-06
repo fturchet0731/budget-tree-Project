@@ -187,7 +187,7 @@ class _ForestScreenState extends State<ForestScreen> {
                             border: Border.all(
                                 color: AppTokens.current.cardBorder),
                           ),
-                          child: const Icon(Icons.arrow_back,
+                          child: Icon(Icons.arrow_back,
                               color: AppColors.stoneBeigeColor, size: 20),
                         ),
                       ),
@@ -452,7 +452,7 @@ class _BudgetCard extends StatelessWidget {
                         const SizedBox(height: 5),
                         Row(
                           children: [
-                            const Icon(Icons.account_balance_wallet_outlined,
+                            Icon(Icons.account_balance_wallet_outlined,
                                 color: AppColors.forestGreen, size: 13),
                             const SizedBox(width: 4),
                             Text(
@@ -502,7 +502,7 @@ class _BudgetCard extends StatelessWidget {
                         Row(
                           children: [
                             if (isOver)
-                              const Icon(Icons.warning_amber_rounded,
+                              Icon(Icons.warning_amber_rounded,
                                   color: AppColors.dangerRed, size: 11),
                             if (isOver) const SizedBox(width: 3),
                             Text(
@@ -525,7 +525,7 @@ class _BudgetCard extends StatelessWidget {
                   AnimatedRotation(
                     turns: isExpanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 300),
-                    child: const Icon(Icons.keyboard_arrow_down,
+                    child: Icon(Icons.keyboard_arrow_down,
                         color: AppColors.mossGreen, size: 22),
                   ),
                 ],
@@ -598,7 +598,7 @@ class _BudgetCard extends StatelessWidget {
                                                 value: pct,
                                                 minHeight: 5,
                                                 backgroundColor: AppColors.soilMid,
-                                                valueColor: const AlwaysStoppedAnimation(
+                                                valueColor: AlwaysStoppedAnimation(
                                                     AppColors.forestGreen),
                                               ),
                                             ),
@@ -791,7 +791,7 @@ class _NoMatchInCategory extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.filter_alt_off_outlined,
+            Icon(Icons.filter_alt_off_outlined,
                 color: AppColors.forestGreen, size: 56),
             const SizedBox(height: 18),
             Text(
@@ -849,7 +849,7 @@ class _EmptyForest extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.park, color: AppColors.forestGreen, size: 72),
+            Icon(Icons.park, color: AppColors.forestGreen, size: 72),
             const SizedBox(height: 22),
             Text(
               AppLocalizations.of(context).forestEmptyTitle,
@@ -1000,10 +1000,10 @@ class _EditSheetState extends State<_EditSheet> {
           const SizedBox(height: 16),
           TextField(
             controller: _nameCtrl,
-            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            style: TextStyle(color: AppColors.stoneBeigeColor),
             decoration: InputDecoration(
               labelText: l.budgetName,
-              prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
+              prefixIcon: Icon(Icons.park, color: AppColors.mossGreen),
             ),
             textCapitalization: TextCapitalization.words,
           ),
@@ -1076,7 +1076,7 @@ class _EditSheetState extends State<_EditSheet> {
                           width: 94,
                           child: TextField(
                             controller: _amountCtrls[i],
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: AppColors.forestGreen, fontSize: 14),
                             keyboardType: const TextInputType.numberWithOptions(
                                 decimal: true),
@@ -1086,7 +1086,7 @@ class _EditSheetState extends State<_EditSheet> {
                             ],
                             onChanged: (_) => setState(() {}),
                             textAlign: TextAlign.right,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               prefixText: '\$  ',
                               prefixStyle:
                                   TextStyle(color: AppColors.mossGreen),

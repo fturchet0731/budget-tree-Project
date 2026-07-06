@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_overlay.dart';
 
@@ -26,13 +26,12 @@ class SectionInfoButton extends StatelessWidget {
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: AppTokens.current.canvasSoft,
             shape: BoxShape.circle,
-            border: Border.all(
-                color: AppColors.mossGreen.withValues(alpha: 0.35)),
+            border: Border.all(color: AppTokens.current.cardBorder),
           ),
-          child: const Icon(Icons.help_outline,
-              color: AppColors.stoneBeigeColor, size: 20),
+          child: Icon(Icons.help_outline,
+              color: AppTokens.current.textPrimary, size: 20),
         ),
       ),
     );

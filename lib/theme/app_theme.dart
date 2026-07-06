@@ -5,26 +5,27 @@ import 'app_dims.dart';
 import 'app_tokens.dart';
 
 /// LEGACY — migrate call sites to [AppTokens]; this class is deleted in the
-/// final redesign sweep. Values have been re-pointed at the new light look so
-/// unmigrated screens render sensibly, but they cannot adapt to dark mode.
-/// Members must stay `const` (many call sites use them in const expressions).
+/// final redesign sweep. Members are now theme-aware getters over the token
+/// roles so every unmigrated screen adapts to light AND dark.
 class AppColors {
-  static const Color forestGreen = Conifer.c600;
-  static const Color darkForestGreen = Conifer.c700;
-  static const Color mossGreen = Color(0xFF6B7263);
-  static const Color leafGreen = Conifer.c500;
-  static const Color lightLeaf = Conifer.c400;
+  static AppTokens get _t => AppTokens.current;
+
+  static Color get forestGreen => _t.accentStrong;
+  static Color get darkForestGreen => _t.accentStrong;
+  static Color get mossGreen => _t.textSecondary;
+  static Color get leafGreen => _t.accent;
+  static Color get lightLeaf => _t.accent;
   static const Color barkBrown = Color(0xFF8A6B4F);
-  static const Color darkBark = Color(0xFFFFFFFF);
-  static const Color stoneBeigeColor = Color(0xFF20261B);
+  static Color get darkBark => _t.card;
+  static Color get stoneBeigeColor => _t.textPrimary;
   static const Color riverBlue = Color(0xFF5B8DB8);
   static const Color skyBlue = Color(0xFFBFE0F5);
-  static const Color soilDark = Color(0xFFF7F6F1);
-  static const Color soilMid = Color(0xFFEFEEE6);
+  static Color get soilDark => _t.canvas;
+  static Color get soilMid => _t.canvasSoft;
   static const Color leafYellow = Color(0xFFD4A843);
   static const Color leafOrange = Color(0xFFE8873A);
-  static const Color warningAmber = Color(0xFFE8A230);
-  static const Color dangerRed = Color(0xFFCC4B44);
+  static Color get warningAmber => _t.warning;
+  static Color get dangerRed => _t.danger;
 }
 
 /// LEGACY — facade over [AppTokens]; deleted in the final redesign sweep.

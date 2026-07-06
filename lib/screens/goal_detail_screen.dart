@@ -196,7 +196,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
               TextField(
                 controller: ctrl,
                 autofocus: true,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.forestGreen,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -208,7 +208,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                 ],
                 textAlign: TextAlign.center,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   prefixText: '\$ ',
                   prefixStyle: TextStyle(
                     color: AppColors.mossGreen,
@@ -230,7 +230,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     },
                     backgroundColor: AppTokens.current.canvasSoft,
                     side: BorderSide(color: AppTokens.current.cardBorder),
-                    labelStyle: const TextStyle(
+                    labelStyle: TextStyle(
                       color: AppColors.stoneBeigeColor,
                     ),
                   );
@@ -305,7 +305,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     await _persist();
                     await _animateTo(_goal.progress);
                   },
-                  icon: const Icon(Icons.remove, color: AppColors.warningAmber),
+                  icon: Icon(Icons.remove, color: AppColors.warningAmber),
                   label: Text(
                     l.withdraw,
                     style: GoogleFonts.nunito(
@@ -439,7 +439,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
               children: [
                 TextField(
                   controller: nameCtrl,
-                  style: const TextStyle(color: AppColors.stoneBeigeColor),
+                  style: TextStyle(color: AppColors.stoneBeigeColor),
                   decoration: InputDecoration(labelText: l.name),
                   textCapitalization: TextCapitalization.words,
                 ),
@@ -450,7 +450,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   child: TextField(
                     controller: targetCtrl,
                     enabled: !uncapped,
-                    style: const TextStyle(color: AppColors.stoneBeigeColor),
+                    style: TextStyle(color: AppColors.stoneBeigeColor),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),

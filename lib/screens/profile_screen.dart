@@ -8,7 +8,9 @@ import '../services/auth_service.dart';
 import '../services/category_repository.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
 import '../widgets/skeleton.dart';
@@ -97,21 +99,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0D2410),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          l.bio,
-          style: const TextStyle(color: AppColors.stoneBeigeColor),
-        ),
+        title: Text(l.bio),
         content: TextField(
           controller: controller,
           autofocus: true,
           maxLines: 4,
           maxLength: 280,
-          style: const TextStyle(color: AppColors.stoneBeigeColor),
           decoration: InputDecoration(
             hintText: l.bioHint,
-            hintStyle: const TextStyle(color: AppColors.mossGreen),
           ),
         ),
         actions: [
@@ -119,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               l.cancel,
-              style: const TextStyle(color: AppColors.mossGreen),
+              style: TextStyle(color: AppColors.mossGreen),
             ),
           ),
           ElevatedButton(
@@ -188,11 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         foregroundColor: AppColors.stoneBeigeColor,
       ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(child: _body(l)),
-      ),
+      body: SafeArea(child: _body(l)),
     );
   }
 
@@ -253,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Text(
                     l.shareGoalsToShowOnProfile,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.mossGreen),
+                    style: TextStyle(color: AppColors.mossGreen),
                   ),
                 ),
               )
@@ -311,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: AppColors.mossGreen.withValues(alpha: 0.4),
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person,
                   color: AppColors.lightLeaf,
                   size: 28,
@@ -326,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _me!.displayName!.trim().isNotEmpty)
                       Text(
                         _me!.displayName!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.stoneBeigeColor,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -334,7 +325,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     Text(
                       '@${_me!.username}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.mossGreen,
                         fontSize: 14,
                       ),
@@ -353,11 +344,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.18),
+                color: AppTokens.current.card,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: AppColors.mossGreen.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: AppTokens.current.cardBorder),
+                boxShadow: AppShadows.card,
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,7 +366,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(
+                  Icon(
                     Icons.edit_outlined,
                     color: AppColors.mossGreen,
                     size: 18,
@@ -388,7 +378,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 18),
           Text(
             l.sharedGoals,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.lightLeaf,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
@@ -416,7 +406,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.stoneBeigeColor,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -426,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             body,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.mossGreen),
+            style: TextStyle(color: AppColors.mossGreen),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 20),

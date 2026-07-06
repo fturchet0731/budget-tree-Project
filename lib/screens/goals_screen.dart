@@ -126,7 +126,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               color: AppTokens.current.cardBorder,
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back,
                             color: AppColors.stoneBeigeColor,
                             size: 20,

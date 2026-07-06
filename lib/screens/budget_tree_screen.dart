@@ -188,7 +188,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
         builder: (sbCtx, setSBState) => AlertDialog(
           title: Row(
             children: [
-              const Icon(Icons.park, color: AppColors.forestGreen, size: 22),
+              Icon(Icons.park, color: AppColors.forestGreen, size: 22),
               const SizedBox(width: 10),
               Text(
                 l.saveBudgetTreeQuestion,
@@ -364,7 +364,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     behavior: SnackBarBehavior.floating,
                     content: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.park,
                           color: AppColors.forestGreen,
                           size: 20,
@@ -1549,7 +1549,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       ),
                       child: Column(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.spa_outlined,
                             color: AppColors.forestGreen,
                             size: 36,
@@ -1741,7 +1741,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       value: widget.budget.percentageFor(cat),
                       minHeight: 12,
                       backgroundColor: AppColors.soilMid,
-                      valueColor: const AlwaysStoppedAnimation(
+                      valueColor: AlwaysStoppedAnimation(
                         AppColors.forestGreen,
                       ),
                     ),
@@ -1797,7 +1797,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 ),
                 TextButton.icon(
                   onPressed: _loaded ? _openLinkPicker : null,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.add,
                     color: AppColors.forestGreen,
                     size: 16,
@@ -1814,7 +1814,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
             ),
             const SizedBox(height: 6),
             if (!_loaded)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: CircularProgressIndicator(

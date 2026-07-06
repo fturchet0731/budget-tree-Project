@@ -633,7 +633,7 @@ class _IncomeStep extends StatelessWidget {
                       flex: 3,
                       child: TextField(
                         controller: nameCtrl,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.stoneBeigeColor,
                         ),
                         decoration: InputDecoration(
@@ -648,7 +648,7 @@ class _IncomeStep extends StatelessWidget {
                       flex: 2,
                       child: TextField(
                         controller: amountCtrl,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.stoneBeigeColor,
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
@@ -966,7 +966,7 @@ class _ExpenseStep extends StatelessWidget {
                       flex: 3,
                       child: TextField(
                         controller: nameCtrl,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.stoneBeigeColor,
                         ),
                         decoration: InputDecoration(labelText: l.categoryName),
@@ -978,7 +978,7 @@ class _ExpenseStep extends StatelessWidget {
                       flex: 2,
                       child: TextField(
                         controller: amountCtrl,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.stoneBeigeColor,
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
@@ -1381,7 +1381,7 @@ class _SurveyStepState extends State<_SurveyStep> {
           child: TextField(
             controller: widget.noteCtrl,
             maxLines: 3,
-            style: const TextStyle(color: AppColors.stoneBeigeColor),
+            style: TextStyle(color: AppColors.stoneBeigeColor),
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
               hintText: l.budgetNoteHint,
@@ -1465,7 +1465,7 @@ class _SurveyProgress extends StatelessWidget {
             child: LinearProgressIndicator(
               value: completed / total,
               backgroundColor: AppColors.soilMid,
-              valueColor: const AlwaysStoppedAnimation(AppColors.forestGreen),
+              valueColor: AlwaysStoppedAnimation(AppColors.forestGreen),
             ),
           ),
         ),
@@ -1835,7 +1835,7 @@ class _PlanStepState extends State<_PlanStep> {
                             width: 90,
                             child: TextField(
                               controller: _ctrlFor(cat),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.stoneBeigeColor,
                               ),
                               keyboardType:
@@ -1886,7 +1886,7 @@ class _PlanStepState extends State<_PlanStep> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_circle,
                     color: AppColors.forestGreen,
                     size: 16,
@@ -1926,11 +1926,11 @@ class _PlanStepState extends State<_PlanStep> {
       icon: Icons.park,
       child: TextField(
         controller: widget.nameCtrl,
-        style: const TextStyle(color: AppColors.stoneBeigeColor),
+        style: TextStyle(color: AppColors.stoneBeigeColor),
         decoration: InputDecoration(
           labelText: l.budgetName,
           hintText: l.budgetNameHint,
-          prefixIcon: const Icon(Icons.park, color: AppColors.mossGreen),
+          prefixIcon: Icon(Icons.park, color: AppColors.mossGreen),
         ),
         textCapitalization: TextCapitalization.words,
       ),
@@ -1986,7 +1986,7 @@ class _PlanStepState extends State<_PlanStep> {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_today_outlined,
                     color: AppColors.mossGreen,
                     size: 18,
@@ -2111,7 +2111,7 @@ class _PlanStepState extends State<_PlanStep> {
       builder: (ctx) => SimpleDialog(
         title: Text(
           l.leftoverPickGoalTitle,
-          style: const TextStyle(color: AppColors.stoneBeigeColor),
+          style: TextStyle(color: AppColors.stoneBeigeColor),
         ),
         children: [
           for (final g in goals)
@@ -2119,14 +2119,14 @@ class _PlanStepState extends State<_PlanStep> {
               onPressed: () => Navigator.pop(ctx, g),
               child: Text(
                 g.name,
-                style: const TextStyle(color: AppColors.stoneBeigeColor),
+                style: TextStyle(color: AppColors.stoneBeigeColor),
               ),
             ),
           SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, Goal(name: '', targetAmount: 0)),
             child: Text(
               l.leftoverNewGoal,
-              style: const TextStyle(color: AppColors.forestGreen),
+              style: TextStyle(color: AppColors.forestGreen),
             ),
           ),
         ],
@@ -2155,12 +2155,12 @@ class _PlanStepState extends State<_PlanStep> {
       builder: (ctx) => AlertDialog(
         title: Text(
           l.leftoverNewGoalTitle,
-          style: const TextStyle(color: AppColors.stoneBeigeColor),
+          style: TextStyle(color: AppColors.stoneBeigeColor),
         ),
         content: TextField(
           controller: ctrl,
           autofocus: true,
-          style: const TextStyle(color: AppColors.stoneBeigeColor),
+          style: TextStyle(color: AppColors.stoneBeigeColor),
           textCapitalization: TextCapitalization.words,
           decoration: InputDecoration(hintText: l.goalNameHint),
         ),

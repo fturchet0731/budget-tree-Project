@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../widgets/acorn_mascot.dart';
 import 'tutorial_content.dart';
 
@@ -246,20 +248,10 @@ class _SpeechBubble extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFFDF6E3), Color(0xFFF3E6C8)],
-          ),
+          color: AppTokens.current.card,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.barkBrown, width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          border: Border.all(color: AppTokens.current.cardBorder),
+          boxShadow: AppShadows.card,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +260,7 @@ class _SpeechBubble extends StatelessWidget {
             // Speaker name plate.
             Row(
               children: [
-                const Icon(Icons.eco, size: 15, color: AppColors.forestGreen),
+                Icon(Icons.eco, size: 15, color: AppColors.forestGreen),
                 const SizedBox(width: 6),
                 Text(
                   speaker,
@@ -300,7 +292,7 @@ class _SpeechBubble extends StatelessWidget {
                   fontSize: 17,
                   height: 1.4,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF3A2A18),
+                  color: AppTokens.current.textPrimary,
                 ),
               ),
             ),
@@ -345,13 +337,13 @@ class _BubbleTailPainter extends CustomPainter {
       ..lineTo(x + 14, tailTop)
       ..lineTo(x - 4, tailTop + 16)
       ..close();
-    canvas.drawPath(path, Paint()..color = AppColors.barkBrown);
+    canvas.drawPath(path, Paint()..color = AppTokens.current.cardBorder);
     final inner = Path()
       ..moveTo(x - 9, tailTop - 1)
       ..lineTo(x + 9, tailTop - 1)
       ..lineTo(x - 3, tailTop + 11)
       ..close();
-    canvas.drawPath(inner, Paint()..color = const Color(0xFFF3E6C8));
+    canvas.drawPath(inner, Paint()..color = AppTokens.current.card);
   }
 
   @override
@@ -385,7 +377,7 @@ class _BlinkingChevronState extends State<_BlinkingChevron>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: Tween<double>(begin: 0.3, end: 1).animate(_c),
-      child: const Icon(Icons.play_arrow_rounded,
+      child: Icon(Icons.play_arrow_rounded,
           size: 18, color: AppColors.forestGreen),
     );
   }

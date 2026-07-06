@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 
 class ViewBudgetsScreen extends StatelessWidget {
   const ViewBudgetsScreen({super.key});
@@ -10,13 +10,9 @@ class ViewBudgetsScreen extends StatelessWidget {
     final l = AppLocalizations.of(context);
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppColors.stoneBeigeColor,
-        title: Text(l.myBudgets),
-      ),
+      appBar: AppBar(title: Text(l.myBudgets)),
       body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
+        color: AppTokens.current.canvas,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -25,16 +21,16 @@ class ViewBudgetsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 l.noBudgetsTitle,
-                style: const TextStyle(
-                  color: AppColors.stoneBeigeColor,
+                style: TextStyle(
+                  color: AppTokens.current.textPrimary,
                   fontSize: 18,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 l.noBudgetsBody,
-                style: const TextStyle(
-                    color: AppColors.mossGreen, fontSize: 13),
+                style: TextStyle(
+                    color: AppTokens.current.textSecondary, fontSize: 13),
               ),
             ],
           ),

@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../models/goal_model.dart';
 import '../models/profile_model.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
 import 'friend_goal_screen.dart';
@@ -35,9 +36,8 @@ class FriendGardenScreen extends StatelessWidget {
         title: Text('${profile.label}  $statusEmoji'),
         foregroundColor: AppColors.stoneBeigeColor,
       ),
-      extendBodyBehindAppBar: true,
       body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
+        color: AppTokens.current.canvas,
         child: SafeArea(
           child: AppScrollbar(
             builder: (controller) => CustomScrollView(
@@ -49,7 +49,7 @@ class FriendGardenScreen extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                       child: Text(
                         bio,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.stoneBeigeColor,
                           fontSize: 14,
                           height: 1.4,
@@ -66,7 +66,7 @@ class FriendGardenScreen extends StatelessWidget {
                         child: Text(
                           l.noSharedGoalsYet(profile.label),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.mossGreen),
+                          style: TextStyle(color: AppColors.mossGreen),
                         ),
                       ),
                     ),

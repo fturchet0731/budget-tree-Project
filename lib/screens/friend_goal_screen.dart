@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/goal_labels.dart';
 import '../models/goal_model.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import '../widgets/sapling_view.dart';
@@ -39,7 +40,18 @@ class FriendGoalScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Container(decoration: BoxDecoration(gradient: AppPalettes.sky())),
+          Positioned(
+            left: 16,
+            right: 16,
+            top: 88,
+            bottom: 250,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppTokens.current.accentTint,
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+          ),
           // Sapling — uncapped goals scale up per tier, matching the owner view.
           Positioned.fill(
             child: Padding(
@@ -63,10 +75,10 @@ class FriendGoalScreen extends StatelessWidget {
                 SavingsThermometer(
                   fill: progress,
                   color: complete
-                      ? const Color(0xFFFFD54F)
+                      ? const Color(0xFFBA8514)
                       : (goal.leafColorValue != null
                             ? Color(goal.leafColorValue!)
-                            : AppColors.lightLeaf),
+                            : AppColors.forestGreen),
                 ),
                 const SizedBox(height: 6),
                 Container(
@@ -75,15 +87,16 @@ class FriendGoalScreen extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.28),
+                    color: AppTokens.current.card,
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTokens.current.cardBorder),
                   ),
                   child: Text(
                     goal.isUncapped
                         ? 'T${goal.tier}'
                         : '${(progress * 100).round()}%',
                     style: GoogleFonts.nunito(
-                      color: Colors.white,
+                      color: AppTokens.current.textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 11,
                     ),
@@ -103,12 +116,14 @@ class FriendGoalScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.25),
+                        color: AppTokens.current.canvasSoft,
                         shape: BoxShape.circle,
+                        border:
+                            Border.all(color: AppTokens.current.cardBorder),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back,
-                        color: Colors.white,
+                        color: AppTokens.current.textPrimary,
                         size: 20,
                       ),
                     ),
@@ -117,12 +132,12 @@ class FriendGoalScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.22),
+                      color: AppTokens.current.accentSoft,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       GoalIcons.forKey(goal.iconKey),
-                      color: Colors.white,
+                      color: AppTokens.current.accentStrong,
                       size: 18,
                     ),
                   ),
@@ -136,15 +151,8 @@ class FriendGoalScreen extends StatelessWidget {
                           goal.name,
                           style: GoogleFonts.fredoka(
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: AppTokens.current.textPrimary,
                             fontSize: 20,
-                            shadows: const [
-                              Shadow(
-                                color: Colors.black54,
-                                offset: Offset(1, 2),
-                                blurRadius: 5,
-                              ),
-                            ],
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -152,7 +160,7 @@ class FriendGoalScreen extends StatelessWidget {
                         Text(
                           l.sharedByName(ownerLabel),
                           style: GoogleFonts.nunito(
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: AppTokens.current.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -171,16 +179,18 @@ class FriendGoalScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    const Color(0xFF0D2010).withValues(alpha: 0.85),
-                    const Color(0xFF0D2010),
-                  ],
-                  stops: const [0.0, 0.3, 1.0],
+                color: AppTokens.current.card,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
                 ),
+                border: Border.all(color: AppTokens.current.cardBorder),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, -6),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -208,8 +218,8 @@ class FriendGoalScreen extends StatelessWidget {
                             style: GoogleFonts.fredoka(
                               fontWeight: FontWeight.w600,
                               color: complete
-                                  ? const Color(0xFFFFD54F)
-                                  : AppColors.lightLeaf,
+                                  ? const Color(0xFFBA8514)
+                                  : AppColors.forestGreen,
                               fontSize: 30,
                             ),
                           ),
@@ -233,7 +243,7 @@ class FriendGoalScreen extends StatelessWidget {
                                 ? '${goal.tier} · ${goal.localizedTierName(l)}'
                                 : '\$${goal.targetAmount.toStringAsFixed(0)}',
                             style: GoogleFonts.nunito(
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: AppTokens.current.textPrimary,
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
@@ -251,8 +261,8 @@ class FriendGoalScreen extends StatelessWidget {
                       backgroundColor: AppColors.soilMid,
                       valueColor: AlwaysStoppedAnimation(
                         complete
-                            ? const Color(0xFFFFD54F)
-                            : AppColors.lightLeaf,
+                            ? const Color(0xFFBA8514)
+                            : AppColors.forestGreen,
                       ),
                     ),
                   ),
@@ -279,7 +289,7 @@ class FriendGoalScreen extends StatelessWidget {
                               ),
                         style: GoogleFonts.nunito(
                           color: complete
-                              ? const Color(0xFFFFD54F)
+                              ? const Color(0xFFBA8514)
                               : AppColors.mossGreen,
                           fontSize: 11,
                           fontWeight: complete
