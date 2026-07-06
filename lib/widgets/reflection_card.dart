@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/reflection_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_dims.dart';
+import '../theme/app_tokens.dart';
+import 'ui/pressable.dart';
 
 /// Compact banner shown on the dashboard surfacing the latest AI reflection
 /// ("Your week in the forest"). Tapping it opens the full text. Renders nothing
@@ -37,13 +39,11 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0D2410),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.auto_awesome,
-              color: AppColors.lightLeaf,
+              color: AppTokens.current.accentStrong,
               size: 20,
             ),
             const SizedBox(width: 10),
@@ -52,30 +52,15 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
                 r.period == 'monthly'
                     ? l.reflectionMonthlyTitle
                     : l.reflectionWeeklyTitle,
-                style: GoogleFonts.fredoka(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 18,
-                ),
               ),
             ),
           ],
         ),
-        content: Text(
-          r.text,
-          style: GoogleFonts.nunito(
-            color: AppColors.stoneBeigeColor,
-            fontSize: 14,
-            height: 1.5,
-          ),
-        ),
+        content: Text(r.text),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              l.close,
-              style: const TextStyle(color: AppColors.lightLeaf),
-            ),
+            child: Text(l.close),
           ),
         ],
       ),
@@ -87,25 +72,28 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
     final r = _reflection;
     if (r == null) return const SizedBox.shrink();
     final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-      child: GestureDetector(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: PressableScale(
         onTap: _open,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.28),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.lightLeaf.withValues(alpha: 0.4),
-            ),
+            color: t.accentTint,
+            borderRadius: BorderRadius.circular(AppDims.rInner),
           ),
           child: Row(
             children: [
-              const Icon(
-                Icons.auto_awesome,
-                color: AppColors.lightLeaf,
-                size: 18,
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: t.accentSoft,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.auto_awesome,
+                    color: t.accentStrong, size: 18),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -117,9 +105,9 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
                           ? l.reflectionMonthlyTitle
                           : l.reflectionWeeklyTitle,
                       style: GoogleFonts.nunito(
-                        color: AppColors.lightLeaf,
+                        color: t.accentStrong,
                         fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -129,7 +117,7 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
-                        color: AppColors.stoneBeigeColor,
+                        color: t.textPrimary,
                         fontSize: 12.5,
                         height: 1.3,
                       ),
@@ -137,11 +125,7 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.mossGreen,
-                size: 20,
-              ),
+              Icon(Icons.chevron_right, color: t.textTertiary, size: 20),
             ],
           ),
         ),

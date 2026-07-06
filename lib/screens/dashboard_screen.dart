@@ -1,15 +1,17 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_shadows.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/pulse_strip.dart';
 import '../widgets/reflection_card.dart';
-import '../widgets/scenery.dart';
+import '../widgets/ui/app_buttons.dart';
+import '../widgets/ui/entrance.dart';
+import '../widgets/ui/pressable.dart';
 import 'auth/login_screen.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
@@ -28,24 +30,13 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
-    with SingleTickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _pulseKey = GlobalKey<PulseStripState>();
-  late AnimationController _entryController;
-  late Animation<double> _entryAnimation;
 
   @override
   void initState() {
     super.initState();
-    _entryController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..forward();
-    _entryAnimation = CurvedAnimation(
-      parent: _entryController,
-      curve: Curves.easeOutBack,
-    );
     if (widget.runTour) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _runTour());
     }
@@ -57,12 +48,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (!mounted) return;
     await GuidedTour.start(context);
     await AppSettings.instance.setTutorialSeen(true);
-  }
-
-  @override
-  void dispose() {
-    _entryController.dispose();
-    super.dispose();
   }
 
   Future<void> _navigate(BuildContext context, Widget screen) async {
@@ -92,23 +77,12 @@ class _DashboardScreenState extends State<DashboardScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: const Color(0xFF122B0F),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
           content: Row(
             children: [
-              const Icon(Icons.park, color: AppColors.lightLeaf, size: 20),
+              const Icon(Icons.park, color: Conifer.c300, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  AppLocalizations.of(context).newTreeInForest,
-                  style: const TextStyle(
-                    color: AppColors.stoneBeigeColor,
-                    fontSize: 14,
-                  ),
-                ),
+                child: Text(AppLocalizations.of(context).newTreeInForest),
               ),
             ],
           ),
@@ -122,12 +96,9 @@ class _DashboardScreenState extends State<DashboardScreen>
   /// to create an account so the forest is backed up. Shown at most once.
   Future<void> _offerAccountUpgrade() async {
     final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF122B0F),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(28, 24, 28, 20),
@@ -135,29 +106,31 @@ class _DashboardScreenState extends State<DashboardScreen>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.park, color: AppColors.lightLeaf, size: 44),
-              const SizedBox(height: 12),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppTokens.current.accentTint,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.park, color: Conifer.c500, size: 36),
+              ),
+              const SizedBox(height: AppDims.s12),
               Text(
                 l.guestUpgradeTitle,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.fredoka(
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: text.headlineSmall,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppDims.s8),
               Text(
                 l.guestUpgradeBody,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                  color: AppColors.mossGreen,
-                  fontSize: 13.5,
-                  height: 1.45,
-                ),
+                style: text.bodyMedium,
               ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
+              const SizedBox(height: AppDims.s20),
+              AppPrimaryButton(
+                label: l.createAccount,
+                icon: Icons.cloud_done_outlined,
                 onPressed: () {
                   Navigator.pop(ctx);
                   Navigator.push(
@@ -167,14 +140,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   );
                 },
-                icon: const Icon(Icons.cloud_done_outlined),
-                label: Text(l.createAccount),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(
-                  l.guestUpgradeLater,
-                  style: GoogleFonts.nunito(color: AppColors.mossGreen),
+              Center(
+                child: AppTextButton(
+                  label: l.guestUpgradeLater,
+                  onPressed: () => Navigator.pop(ctx),
                 ),
               ),
             ],
@@ -186,6 +156,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
     return Scaffold(
       key: _scaffoldKey,
       // Friends live in a swipe-in sidebar (swipe from the right edge or tap
@@ -199,71 +171,52 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-          ),
-          CustomPaint(
-            size: Size(
-              MediaQuery.of(context).size.width,
-              MediaQuery.of(context).size.height,
-            ),
-            painter: _CanopyPainter(),
-          ),
           SafeArea(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 12),
-                Text(
-                  'Budget Tree',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: 28,
-                    letterSpacing: 3,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  AppLocalizations.of(context).dashboardChooseBranch,
-                  style: TextStyle(
-                    color: AppColors.mossGreen.withValues(alpha: 0.8),
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: 1.2,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                  child: Entrance(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Budget Tree', style: text.headlineLarge),
+                        const SizedBox(height: 2),
+                        Text(l.dashboardChooseBranch, style: text.bodyMedium),
+                      ],
+                    ),
                   ),
                 ),
                 PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
                 const ReflectionBanner(),
                 Expanded(
-                  child: ScaleTransition(
-                    scale: _entryAnimation,
-                    child: FadeTransition(
-                      opacity: _entryAnimation,
-                      child: _LeafGrid(
-                        onTapCreate: () => _openCreate(),
-                        onTapModify: () =>
-                            _navigate(context, const ForestScreen()),
-                        onTapGoals: () =>
-                            _navigate(context, const GoalsScreen()),
-                        onTapSettings: () =>
-                            _navigate(context, const SettingsScreen()),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 460),
+                        child: _MenuGrid(
+                          onTapCreate: _openCreate,
+                          onTapModify: () =>
+                              _navigate(context, const ForestScreen()),
+                          onTapGoals: () =>
+                              _navigate(context, const GoalsScreen()),
+                          onTapSettings: () =>
+                              _navigate(context, const SettingsScreen()),
+                        ),
                       ),
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: TextButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.arrow_downward,
-                      color: AppColors.mossGreen,
-                      size: 16,
-                    ),
-                    label: Text(
-                      AppLocalizations.of(context).dashboardBackToGround,
-                      style: const TextStyle(
-                        color: AppColors.mossGreen,
-                        letterSpacing: 1,
-                      ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: AppTextButton(
+                      icon: Icons.arrow_downward,
+                      label: l.dashboardBackToGround,
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
                 ),
@@ -289,50 +242,74 @@ class _DashboardScreenState extends State<DashboardScreen>
 // Social sidebar handle (swipe hint)
 // ──────────────────────────────────────────────
 
-class _SocialHandle extends StatelessWidget {
+class _SocialHandle extends StatefulWidget {
   final VoidCallback onTap;
   const _SocialHandle({required this.onTap});
 
   @override
+  State<_SocialHandle> createState() => _SocialHandleState();
+}
+
+class _SocialHandleState extends State<_SocialHandle>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _bob;
+
+  @override
+  void initState() {
+    super.initState();
+    _bob = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    );
+    if (AppSettings.instance.motionFull) _bob.repeat();
+    AppSettings.instance.addListener(_onSettings);
+  }
+
+  void _onSettings() {
+    if (!mounted) return;
+    final motion = AppSettings.instance.motionFull;
+    if (motion && !_bob.isAnimating) {
+      _bob.repeat();
+    } else if (!motion && _bob.isAnimating) {
+      _bob.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    AppSettings.instance.removeListener(_onSettings);
+    _bob.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 30,
-        height: 116,
-        decoration: BoxDecoration(
-          color: AppColors.forestGreen,
-          borderRadius: const BorderRadius.horizontal(
-            left: Radius.circular(16),
+    final t = AppTokens.of(context);
+    return AnimatedBuilder(
+      animation: _bob,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(math.sin(_bob.value * math.pi * 2) * 2, 0),
+        child: child,
+      ),
+      child: PressableScale(
+        onTap: widget.onTap,
+        child: Container(
+          width: 26,
+          height: 92,
+          decoration: BoxDecoration(
+            color: t.accent,
+            borderRadius:
+                const BorderRadius.horizontal(left: Radius.circular(14)),
+            boxShadow: AppShadows.pill,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.forestGreen.withValues(alpha: 0.55),
-              blurRadius: 12,
-              offset: const Offset(-2, 0),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.chevron_left, color: Colors.white, size: 20),
-            const SizedBox(height: 4),
-            const Icon(Icons.people_alt_rounded, color: Colors.white, size: 16),
-            const SizedBox(height: 6),
-            RotatedBox(
-              quarterTurns: 1,
-              child: Text(
-                AppLocalizations.of(context).social.toUpperCase(),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.95),
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-          ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.chevron_left, color: t.onAccent, size: 18),
+              const SizedBox(height: 6),
+              Icon(Icons.people_alt_rounded, color: t.onAccent, size: 15),
+            ],
+          ),
         ),
       ),
     );
@@ -340,16 +317,16 @@ class _SocialHandle extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────
-// 4-Leaf grid layout
+// 2×2 menu grid — white cards with flat spot illustrations
 // ──────────────────────────────────────────────
 
-class _LeafGrid extends StatelessWidget {
+class _MenuGrid extends StatelessWidget {
   final VoidCallback onTapCreate;
   final VoidCallback onTapModify;
   final VoidCallback onTapGoals;
   final VoidCallback onTapSettings;
 
-  const _LeafGrid({
+  const _MenuGrid({
     required this.onTapCreate,
     required this.onTapModify,
     required this.onTapGoals,
@@ -359,542 +336,258 @@ class _LeafGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Center(
-        child: AspectRatio(
-          aspectRatio: 0.78,
-          child: Stack(
-            alignment: Alignment.center,
+    final t = AppTokens.of(context);
+    final tiles = [
+      (
+        l.dashboardCreate,
+        l.dashboardCreateSub,
+        _TileArt.sprout,
+        t.accentTint,
+        onTapCreate,
+      ),
+      (
+        l.dashboardModify,
+        l.dashboardModifySub,
+        _TileArt.forest,
+        t.brightness == Brightness.light
+            ? Conifer.c100
+            : const Color(0xFF2A3618),
+        onTapModify,
+      ),
+      (
+        l.dashboardGoals,
+        l.dashboardGoalsSub,
+        _TileArt.target,
+        t.skyTint,
+        onTapGoals,
+      ),
+      (
+        l.dashboardSettings,
+        l.dashboardSettingsSub,
+        _TileArt.tune,
+        t.soilTint,
+        onTapSettings,
+      ),
+    ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var row = 0; row < 2; row++) ...[
+          if (row > 0) const SizedBox(height: AppDims.s16),
+          Row(
             children: [
-              // Branch backdrop drawn behind the leaves so the leaves
-              // appear to hang off real curving branches.
-              const Positioned.fill(
-                child: CustomPaint(painter: _BranchTrellisPainter()),
-              ),
-              // Leaves positioned around a central trunk
-              LayoutBuilder(
-                builder: (ctx, c) {
-                  final w = c.maxWidth;
-                  final h = c.maxHeight;
-                  const leafW = 0.44; // % of parent width
-                  const leafH = 0.33;
-                  return Stack(
-                    children: [
-                      _placeLeaf(
-                        left: w * 0.04,
-                        top: h * 0.11,
-                        width: w * leafW,
-                        height: h * leafH,
-                        child: _LeafButton(
-                          label: l.dashboardCreate,
-                          sublabel: l.dashboardCreateSub,
-                          icon: Icons.park,
-                          color: AppColors.forestGreen,
-                          rotation: -0.18,
-                          onTap: onTapCreate,
-                        ),
-                      ),
-                      _placeLeaf(
-                        right: w * 0.04,
-                        top: h * 0.11,
-                        width: w * leafW,
-                        height: h * leafH,
-                        child: _LeafButton(
-                          label: l.dashboardModify,
-                          sublabel: l.dashboardModifySub,
-                          icon: Icons.forest,
-                          color: AppColors.mossGreen,
-                          rotation: 0.18,
-                          onTap: onTapModify,
-                        ),
-                      ),
-                      _placeLeaf(
-                        left: w * 0.04,
-                        bottom: h * 0.11,
-                        width: w * leafW,
-                        height: h * leafH,
-                        child: _LeafButton(
-                          label: l.dashboardGoals,
-                          sublabel: l.dashboardGoalsSub,
-                          icon: Icons.flag_outlined,
-                          color: AppColors.riverBlue,
-                          rotation: -0.18,
-                          onTap: onTapGoals,
-                        ),
-                      ),
-                      _placeLeaf(
-                        right: w * 0.04,
-                        bottom: h * 0.11,
-                        width: w * leafW,
-                        height: h * leafH,
-                        child: _LeafButton(
-                          label: l.dashboardSettings,
-                          sublabel: l.dashboardSettingsSub,
-                          icon: Icons.tune,
-                          color: AppColors.barkBrown,
-                          rotation: 0.18,
-                          onTap: onTapSettings,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+              for (var col = 0; col < 2; col++) ...[
+                if (col > 0) const SizedBox(width: AppDims.s16),
+                Expanded(
+                  child: Entrance(
+                    delay: Duration(milliseconds: 70 * (row * 2 + col)),
+                    child: _MenuTile(
+                      label: tiles[row * 2 + col].$1,
+                      sublabel: tiles[row * 2 + col].$2,
+                      art: tiles[row * 2 + col].$3,
+                      tint: tiles[row * 2 + col].$4,
+                      onTap: tiles[row * 2 + col].$5,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _placeLeaf({
-    double? left,
-    double? right,
-    double? top,
-    double? bottom,
-    required double width,
-    required double height,
-    required Widget child,
-  }) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: SizedBox(width: width, height: height, child: child),
+        ],
+      ],
     );
   }
 }
 
-// ──────────────────────────────────────────────
-// Branch trellis behind the 4 leaves
-// ──────────────────────────────────────────────
+class _MenuTile extends StatelessWidget {
+  final String label;
+  final String sublabel;
+  final _TileArt art;
+  final Color tint;
+  final VoidCallback onTap;
 
-class _BranchTrellisPainter extends CustomPainter {
-  const _BranchTrellisPainter();
+  const _MenuTile({
+    required this.label,
+    required this.sublabel,
+    required this.art,
+    required this.tint,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppTokens.of(context);
+    final text = Theme.of(context).textTheme;
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppDims.s12),
+        decoration: BoxDecoration(
+          color: t.card,
+          borderRadius: BorderRadius.circular(AppDims.rCard),
+          border: Border.all(color: t.cardBorder),
+          boxShadow: AppShadows.card,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AspectRatio(
+              aspectRatio: 1.9,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: tint,
+                  borderRadius: BorderRadius.circular(AppDims.rInner),
+                ),
+                child: CustomPaint(painter: _TileArtPainter(art)),
+              ),
+            ),
+            const SizedBox(height: AppDims.s12),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: text.titleLarge,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              sublabel,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: text.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _TileArt { sprout, forest, target, tune }
+
+/// Tiny flat spot illustrations for the menu tiles, drawn in the conifer
+/// ramp so each tinted square carries the app's color.
+class _TileArtPainter extends CustomPainter {
+  final _TileArt art;
+  const _TileArtPainter(this.art);
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
     final cx = w / 2;
-    final groundY = h * 0.92;
-    final trunkTopY = h * 0.10;
 
-    // Trunk
-    final trunkPath = Path()
-      ..moveTo(cx - 14, groundY)
-      ..quadraticBezierTo(cx - 11, (groundY + trunkTopY) / 2, cx - 6, trunkTopY)
-      ..lineTo(cx + 6, trunkTopY)
-      ..quadraticBezierTo(cx + 11, (groundY + trunkTopY) / 2, cx + 14, groundY)
-      ..close();
-    canvas.drawPath(
-      trunkPath,
-      Paint()
-        ..shader =
-            const LinearGradient(
-              colors: [
-                Color(0xFF1A0C06),
-                Color(0xFF5D4037),
-                Color(0xFF8D6E63),
-                Color(0xFF5D4037),
-                Color(0xFF1A0C06),
-              ],
-              stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ).createShader(
-              Rect.fromLTWH(cx - 14, trunkTopY, 28, groundY - trunkTopY),
-            ),
-    );
+    switch (art) {
+      case _TileArt.sprout:
+        // Soil mound + stem + two leaves.
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(cx, h * 0.88), width: w * 0.36, height: h * 0.14),
+          Paint()..color = const Color(0xFF8A6B4F),
+        );
+        final stem = Paint()
+          ..color = Conifer.c600
+          ..strokeWidth = 3.5
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke;
+        canvas.drawLine(
+            Offset(cx, h * 0.85), Offset(cx, h * 0.38), stem);
+        final leaf = Paint()..color = Conifer.c400;
+        canvas.save();
+        canvas.translate(cx, h * 0.48);
+        canvas.rotate(-0.7);
+        canvas.drawOval(
+            Rect.fromCenter(
+                center: Offset(-w * 0.09, 0), width: w * 0.20, height: h * 0.16),
+            leaf);
+        canvas.restore();
+        canvas.save();
+        canvas.translate(cx, h * 0.40);
+        canvas.rotate(0.7);
+        canvas.drawOval(
+            Rect.fromCenter(
+                center: Offset(w * 0.09, 0), width: w * 0.20, height: h * 0.16),
+            Paint()..color = Conifer.c500);
+        canvas.restore();
+        break;
 
-    // Horizontal bark wrinkles
-    final bark = Paint()
-      ..color = const Color(0xFF1A0C06).withValues(alpha: 0.45)
-      ..strokeWidth = 0.8
-      ..style = PaintingStyle.stroke;
-    for (int i = 1; i <= 8; i++) {
-      final t = i / 9.0;
-      final y = trunkTopY + (groundY - trunkTopY) * t;
-      final hw = 6 + (14 - 6) * t;
-      canvas.drawLine(Offset(cx - hw * 0.8, y), Offset(cx + hw * 0.8, y), bark);
-    }
+      case _TileArt.forest:
+        // Three flat trees at staggered depths.
+        void tree(double x, double s, Color crown) {
+          canvas.drawRect(
+            Rect.fromCenter(
+                center: Offset(x, h * 0.72 * s + h * (1 - s) * 0.72),
+                width: w * 0.035 * s,
+                height: h * 0.28 * s),
+            Paint()..color = const Color(0xFF8A6B4F),
+          );
+          canvas.drawCircle(
+              Offset(x, h * 0.45 * s + h * (1 - s) * 0.60), w * 0.13 * s,
+              Paint()..color = crown);
+        }
 
-    // Root flare
-    canvas.drawOval(
-      Rect.fromCenter(center: Offset(cx, groundY + 3), width: 60, height: 12),
-      Paint()..color = const Color(0xFF3E2723),
-    );
+        tree(cx - w * 0.24, 0.8, Conifer.c600);
+        tree(cx + w * 0.24, 0.85, Conifer.c500);
+        tree(cx, 1.0, Conifer.c400);
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(cx, h * 0.90), width: w * 0.75, height: h * 0.10),
+          Paint()..color = Conifer.c300.withValues(alpha: 0.6),
+        );
+        break;
 
-    // Four branches reaching to the leaf positions
-    // Each branch has a thick taper, drawn as a polygon for natural feel.
-    final branchColor = const Color(0xFF5D4037);
-    final highlight = Colors.white.withValues(alpha: 0.08);
+      case _TileArt.target:
+        // A sapling reaching for a golden ring (the goal).
+        canvas.drawCircle(
+          Offset(cx + w * 0.16, h * 0.30),
+          w * 0.10,
+          Paint()
+            ..color = const Color(0xFFD4A843)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 4,
+        );
+        final stem = Paint()
+          ..color = Conifer.c600
+          ..strokeWidth = 3.5
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke;
+        final path = Path()
+          ..moveTo(cx - w * 0.10, h * 0.86)
+          ..quadraticBezierTo(
+              cx - w * 0.06, h * 0.55, cx + w * 0.08, h * 0.42);
+        canvas.drawPath(path, stem);
+        canvas.drawCircle(Offset(cx + w * 0.08, h * 0.42), w * 0.055,
+            Paint()..color = Conifer.c400);
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(cx - w * 0.10, h * 0.88),
+              width: w * 0.26,
+              height: h * 0.10),
+          Paint()..color = Conifer.c200,
+        );
+        break;
 
-    // Approximate target points for the four leaves (inside-edge of each)
-    final tl = Offset(w * 0.26, h * 0.20);
-    final tr = Offset(w * 0.74, h * 0.20);
-    final bl = Offset(w * 0.26, h * 0.78);
-    final br = Offset(w * 0.74, h * 0.78);
-
-    // Branch attach points along the trunk
-    final upperAttach = Offset(cx, trunkTopY + (groundY - trunkTopY) * 0.18);
-    final lowerAttach = Offset(cx, trunkTopY + (groundY - trunkTopY) * 0.72);
-
-    _drawCurvedBranch(canvas, upperAttach, tl, branchColor, highlight, 13);
-    _drawCurvedBranch(canvas, upperAttach, tr, branchColor, highlight, 13);
-    _drawCurvedBranch(canvas, lowerAttach, bl, branchColor, highlight, 14);
-    _drawCurvedBranch(canvas, lowerAttach, br, branchColor, highlight, 14);
-  }
-
-  /// Draws a tapering branch from [start] to [end] using a quadratic curve.
-  /// The branch is widest at [start] (thickness [w0]) and narrows to ~3px at end.
-  void _drawCurvedBranch(
-    Canvas canvas,
-    Offset start,
-    Offset end,
-    Color color,
-    Color highlight,
-    double w0,
-  ) {
-    final w1 = 3.0;
-    // Control point biased outward and slightly downward for organic droop
-    final mid = Offset((start.dx + end.dx) / 2, (start.dy + end.dy) / 2);
-    final outward = (end.dx - start.dx).sign;
-    final ctrl = Offset(mid.dx + outward * 18, mid.dy + 12);
-
-    // Tapered ribbon: sample N points along the curve, offset normal to it.
-    final steps = 18;
-    final leftPoints = <Offset>[];
-    final rightPoints = <Offset>[];
-    Offset? prev;
-    for (int i = 0; i <= steps; i++) {
-      final t = i / steps;
-      // quadratic bezier
-      final x =
-          (1 - t) * (1 - t) * start.dx +
-          2 * (1 - t) * t * ctrl.dx +
-          t * t * end.dx;
-      final y =
-          (1 - t) * (1 - t) * start.dy +
-          2 * (1 - t) * t * ctrl.dy +
-          t * t * end.dy;
-      final pt = Offset(x, y);
-      final thick = w0 + (w1 - w0) * t;
-
-      // Normal direction (derivative of bezier)
-      final dx =
-          2 * (1 - t) * (ctrl.dx - start.dx) + 2 * t * (end.dx - ctrl.dx);
-      final dy =
-          2 * (1 - t) * (ctrl.dy - start.dy) + 2 * t * (end.dy - ctrl.dy);
-      final len = math.sqrt(dx * dx + dy * dy);
-      if (len == 0) continue;
-      final nx = -dy / len;
-      final ny = dx / len;
-
-      leftPoints.add(Offset(pt.dx + nx * thick / 2, pt.dy + ny * thick / 2));
-      rightPoints.add(Offset(pt.dx - nx * thick / 2, pt.dy - ny * thick / 2));
-      prev = pt;
-    }
-
-    final path = Path()..moveTo(leftPoints.first.dx, leftPoints.first.dy);
-    for (final p in leftPoints.skip(1)) {
-      path.lineTo(p.dx, p.dy);
-    }
-    for (final p in rightPoints.reversed) {
-      path.lineTo(p.dx, p.dy);
-    }
-    path.close();
-    canvas.drawPath(path, Paint()..color = color);
-
-    // Highlight strip along the top edge (one-pixel offset along the left side)
-    final hp = Path()..moveTo(leftPoints.first.dx, leftPoints.first.dy);
-    for (final p in leftPoints.skip(1)) {
-      hp.lineTo(p.dx, p.dy);
-    }
-    canvas.drawPath(
-      hp,
-      Paint()
-        ..color = highlight
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
-    );
-
-    // Small twig at the end for a natural finish
-    if (prev != null) {
-      canvas.drawCircle(end, w1 * 0.9, Paint()..color = color);
+      case _TileArt.tune:
+        // Three flat slider tracks with knobs.
+        final track = Paint()
+          ..color = Conifer.c200
+          ..strokeWidth = 5
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke;
+        final knob = Paint()..color = Conifer.c500;
+        final xs = [0.30, 0.62, 0.44];
+        for (var i = 0; i < 3; i++) {
+          final y = h * (0.28 + i * 0.22);
+          canvas.drawLine(
+              Offset(w * 0.22, y), Offset(w * 0.78, y), track);
+          canvas.drawCircle(Offset(w * (0.22 + 0.56 * xs[i] / 0.78), y),
+              w * 0.035, knob);
+        }
+        break;
     }
   }
 
   @override
-  bool shouldRepaint(_BranchTrellisPainter old) => false;
-}
-
-// ──────────────────────────────────────────────
-// Single leaf-shaped button
-// ──────────────────────────────────────────────
-
-class _LeafButton extends StatefulWidget {
-  final String label;
-  final String sublabel;
-  final IconData icon;
-  final Color color;
-  final double rotation;
-  final VoidCallback onTap;
-
-  const _LeafButton({
-    required this.label,
-    required this.sublabel,
-    required this.icon,
-    required this.color,
-    required this.rotation,
-    required this.onTap,
-  });
-
-  @override
-  State<_LeafButton> createState() => _LeafButtonState();
-}
-
-class _LeafButtonState extends State<_LeafButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.93 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: Transform.rotate(
-          angle: widget.rotation,
-          child: DecoratedBox(
-            // Soft drop shadow follows the leaf's clipped shape.
-            decoration: ShapeDecoration(
-              shape: _LeafShapeBorder(),
-              shadows: AppShadows.card,
-            ),
-            child: ClipPath(
-              clipper: _LeafClipper(),
-              child: Container(
-                height: 145,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      widget.color.withValues(alpha: 0.9),
-                      widget.color,
-                      widget.color.withValues(alpha: 0.75),
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    CustomPaint(
-                      size: const Size(double.infinity, 145),
-                      painter: _LeafVeinPainter(widget.color),
-                    ),
-                    Center(
-                      child: Padding(
-                        // Keep longer translations (FR/ES) off the leaf's curved
-                        // edges so nothing looks crammed against the clip.
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              widget.icon,
-                              color: Colors.white.withValues(alpha: 0.92),
-                              size: 30,
-                            ),
-                            const SizedBox(height: 8),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                widget.label,
-                                maxLines: 1,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              widget.sublabel,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────────────────
-// Leaf clip path
-// ──────────────────────────────────────────────
-
-class _LeafClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) => _leafPath(size);
-
-  @override
-  bool shouldReclip(_LeafClipper old) => false;
-}
-
-Path _leafPath(Size size) {
-  final w = size.width;
-  final h = size.height;
-  return Path()
-    ..moveTo(w / 2, 0)
-    ..cubicTo(w * 1.05, h * 0.1, w * 1.05, h * 0.85, w / 2, h)
-    ..cubicTo(-w * 0.05, h * 0.85, -w * 0.05, h * 0.1, w / 2, 0)
-    ..close();
-}
-
-/// ShapeBorder version of the leaf clip — lets `ShapeDecoration.shadows`
-/// cast a drop shadow that follows the leaf outline.
-class _LeafShapeBorder extends ShapeBorder {
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) =>
-      _leafPath(rect.size).shift(rect.topLeft);
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
-      getOuterPath(rect, textDirection: textDirection);
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
-
-  @override
-  ShapeBorder scale(double t) => this;
-}
-
-// ──────────────────────────────────────────────
-// Leaf vein decoration
-// ──────────────────────────────────────────────
-
-class _LeafVeinPainter extends CustomPainter {
-  final Color leafColor;
-  const _LeafVeinPainter(this.leafColor);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawLine(Offset(w / 2, h * 0.05), Offset(w / 2, h * 0.92), paint);
-
-    for (int i = 1; i <= 4; i++) {
-      final t = i / 5.0;
-      final y = h * (0.15 + t * 0.65);
-      final xReach = w * (0.25 + t * 0.08);
-      canvas.drawLine(Offset(w / 2, y), Offset(w / 2 - xReach, y + 15), paint);
-      canvas.drawLine(Offset(w / 2, y), Offset(w / 2 + xReach, y + 15), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_LeafVeinPainter old) => false;
-}
-
-// ──────────────────────────────────────────────
-// Decorative canopy background — a composed scene (layered foliage curtain,
-// hanging vines framing the menu, light shafts, fireflies) instead of the old
-// scatter of random leaf blobs.
-// ──────────────────────────────────────────────
-
-class _CanopyPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // Soft light falling through the leaves, behind everything else.
-    Scenery.paintLightShaft(
-      canvas,
-      Offset(w * 0.30, 0),
-      h * 0.52,
-      w * 0.08,
-      AppColors.leafYellow.withValues(alpha: 0.05),
-    );
-    Scenery.paintLightShaft(
-      canvas,
-      Offset(w * 0.68, 0),
-      h * 0.4,
-      w * 0.05,
-      AppColors.leafYellow.withValues(alpha: 0.04),
-    );
-
-    // Three depths of foliage curtain along the top: darkest and deepest at
-    // the back, lighter and shallower in front.
-    canvas.drawPath(
-      Scenery.canopyBand(w, h * 0.22, lobes: 5, seed: 3),
-      Paint()..color = AppColors.darkForestGreen.withValues(alpha: 0.55),
-    );
-    canvas.drawPath(
-      Scenery.canopyBand(w, h * 0.15, lobes: 6, seed: 8),
-      Paint()..color = AppColors.forestGreen.withValues(alpha: 0.35),
-    );
-    canvas.drawPath(
-      Scenery.canopyBand(w, h * 0.09, lobes: 7, seed: 21),
-      Paint()..color = AppColors.leafGreen.withValues(alpha: 0.28),
-    );
-
-    // Vines trailing down the sides, framing the four-leaf menu.
-    final vine = AppColors.leafGreen.withValues(alpha: 0.30);
-    Scenery.paintHangingVine(
-      canvas, Offset(w * 0.06, h * 0.05), h * 0.30, 14, vine, leaves: 6);
-    Scenery.paintHangingVine(
-      canvas, Offset(w * 0.15, h * 0.08), h * 0.18, -10, vine, leaves: 4);
-    Scenery.paintHangingVine(
-      canvas, Offset(w * 0.93, h * 0.04), h * 0.26, -16, vine, leaves: 5);
-
-    // A few deliberate loose leaves drifting near the ground line.
-    final leaf = AppColors.leafGreen.withValues(alpha: 0.18);
-    Scenery.paintLeaf(canvas, Offset(w * 0.12, h * 0.82), 22, 0.7, leaf);
-    Scenery.paintLeaf(canvas, Offset(w * 0.86, h * 0.76), 18, -2.2, leaf);
-    Scenery.paintLeaf(canvas, Offset(w * 0.72, h * 0.88), 24, 2.6, leaf);
-
-    // Fireflies drifting in the dark mid-air, fixed so the scene is stable.
-    const glow = AppColors.leafYellow;
-    Scenery.paintFirefly(canvas, Offset(w * 0.22, h * 0.34), 1.6, glow);
-    Scenery.paintFirefly(canvas, Offset(w * 0.81, h * 0.28), 1.3, glow);
-    Scenery.paintFirefly(canvas, Offset(w * 0.58, h * 0.18), 1.1, glow);
-    Scenery.paintFirefly(canvas, Offset(w * 0.09, h * 0.55), 1.2, glow);
-  }
-
-  @override
-  bool shouldRepaint(_CanopyPainter old) => false;
+  bool shouldRepaint(_TileArtPainter old) => old.art != art;
 }

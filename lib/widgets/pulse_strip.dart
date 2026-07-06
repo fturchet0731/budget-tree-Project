@@ -9,7 +9,10 @@ import '../screens/goals_screen.dart';
 import '../services/budget_repository.dart';
 import '../services/goal_repository.dart';
 import '../services/pulse_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_dims.dart';
+import '../theme/app_shadows.dart';
+import '../theme/app_tokens.dart';
+import 'ui/pressable.dart';
 
 /// The dashboard's "one thing right now" strip: surfaces the weekly habit in
 /// the app itself instead of leaving it to notifications. Shows the single
@@ -77,6 +80,7 @@ class PulseStripState extends State<PulseStrip> {
     if (_pulse.kind == PulseKind.none) return const SizedBox.shrink();
     final l = AppLocalizations.of(context);
 
+    final t = AppTokens.of(context);
     final IconData icon;
     final Color accent;
     final String title;
@@ -86,7 +90,7 @@ class PulseStripState extends State<PulseStrip> {
         final goal = _pulse.goal!;
         final amount = goal.waterAmount ?? 0;
         icon = Icons.water_drop;
-        accent = AppColors.riverBlue;
+        accent = const Color(0xFF5B8DB8);
         title = l.pulseWaterTitle;
         body = _pulse.overdue
             ? l.pulseWaterOverdueBody(goal.name)
@@ -95,19 +99,19 @@ class PulseStripState extends State<PulseStrip> {
         break;
       case PulseKind.streakAtRisk:
         icon = Icons.local_fire_department;
-        accent = AppColors.warningAmber;
+        accent = t.warning;
         title = l.pulseStreakAtRiskTitle;
         body = l.pulseStreakAtRiskBody(_pulse.streakWeeks);
         break;
       case PulseKind.streakActive:
         icon = Icons.local_fire_department;
-        accent = AppColors.lightLeaf;
+        accent = t.accentStrong;
         title = l.pulseStreakTitle;
         body = l.pulseStreakBody(_pulse.streakWeeks);
         break;
       case PulseKind.plantFirstTree:
         icon = Icons.park;
-        accent = AppColors.lightLeaf;
+        accent = t.accentStrong;
         title = l.pulsePlantTitle;
         body = l.pulsePlantBody;
         break;
@@ -116,19 +120,28 @@ class PulseStripState extends State<PulseStrip> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-      child: GestureDetector(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: PressableScale(
         onTap: _open,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.28),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: accent.withValues(alpha: 0.4)),
+            color: t.card,
+            borderRadius: BorderRadius.circular(AppDims.rInner),
+            border: Border.all(color: t.cardBorder),
+            boxShadow: AppShadows.card,
           ),
           child: Row(
             children: [
-              Icon(icon, color: accent, size: 18),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: accent, size: 18),
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -139,7 +152,7 @@ class PulseStripState extends State<PulseStrip> {
                       style: GoogleFonts.nunito(
                         color: accent,
                         fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -149,7 +162,7 @@ class PulseStripState extends State<PulseStrip> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
-                        color: AppColors.stoneBeigeColor,
+                        color: t.textPrimary,
                         fontSize: 12.5,
                         height: 1.3,
                       ),
@@ -157,11 +170,7 @@ class PulseStripState extends State<PulseStrip> {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.mossGreen,
-                size: 20,
-              ),
+              Icon(Icons.chevron_right, color: t.textTertiary, size: 20),
             ],
           ),
         ),
