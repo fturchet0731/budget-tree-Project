@@ -20,14 +20,15 @@ import '../services/notification_scheduler.dart';
 import '../services/profile_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import '../widgets/app_scrollbar.dart';
-import '../widgets/bark_card.dart';
+import '../widgets/ui/app_card.dart' show AppCard;
+import '../widgets/ui/app_buttons.dart';
+import '../widgets/ui/step_progress.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/sapling_view.dart';
-import '../widgets/scenery.dart';
-import '../widgets/vine_step_indicator.dart';
 
 class CreateGoalScreen extends StatefulWidget {
   const CreateGoalScreen({super.key});
@@ -278,11 +279,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     final picked = await showDialog<(BudgetModel, ExpenseCategory)?>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        backgroundColor: const Color(0xFF122B0F),
-        title: Text(
-          l.fundFromBranchTitle,
-          style: const TextStyle(color: AppColors.stoneBeigeColor),
-        ),
+        title: Text(l.fundFromBranchTitle),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
@@ -341,16 +338,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     final l = AppLocalizations.of(context);
     final hasName = _nameCtrl.text.trim().isNotEmpty;
     return Scaffold(
-      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // ── Palette-driven background scene ───────
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-            ),
-          ),
-          Positioned.fill(child: CustomPaint(painter: _GoalSkyPainter())),
           SafeArea(
             child: Column(
               children: [
@@ -367,13 +356,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                   goalName: hasName ? _nameCtrl.text.trim() : l.newSapling,
                   category: _pickedCategory,
                 ),
-                VineStepIndicator(
+                StepProgress(
                   currentStep: _gStep,
-                  steps: [
-                    VineStep(label: l.goalStepName, icon: Icons.spa),
-                    VineStep(label: l.goalStepWhen, icon: Icons.event_outlined),
-                    VineStep(label: l.vinePlan, icon: Icons.auto_awesome),
-                  ],
+                  labels: [l.goalStepName, l.goalStepWhen, l.vinePlan],
                 ),
                 Expanded(
                   child: AppScrollbar(
@@ -383,7 +368,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                       children: [
                         if (_gStep == 0) ...[
                           // ── About this goal ──────────
-                          BarkCard(
+                          AppCard(
                             label: l.aboutThisGoal,
                             icon: Icons.spa,
                             child: Column(
@@ -430,10 +415,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
                         // ── Target (now part of step 0) ──
                         if (_gStep == 0) ...[
-                          BarkCard(
+                          AppCard(
                             label: l.howMuch,
                             icon: Icons.flag_outlined,
-                            accent: AppColors.leafYellow,
+                            accent: const Color(0xFFBA8514),
                             child: Column(
                               children: [
                                 AnimatedOpacity(
@@ -479,27 +464,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                       vertical: 10,
                                     ),
                                     decoration: BoxDecoration(
-                                      gradient: _uncapped
-                                          ? LinearGradient(
-                                              colors: [
-                                                AppColors.forestGreen
-                                                    .withValues(alpha: 0.50),
-                                                AppColors.darkBark,
-                                              ],
-                                            )
-                                          : null,
                                       color: _uncapped
-                                          ? null
-                                          : AppColors.soilMid,
+                                          ? AppTokens.current.accentSoft
+                                          : AppTokens.current.canvasSoft,
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: _uncapped
-                                            ? AppColors.lightLeaf.withValues(
-                                                alpha: 0.8,
-                                              )
-                                            : AppColors.mossGreen.withValues(
-                                                alpha: 0.35,
-                                              ),
+                                            ? AppTokens.current.accentStrong
+                                            : AppTokens.current.cardBorder,
                                         width: _uncapped ? 1.5 : 1,
                                       ),
                                     ),
@@ -514,11 +486,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: _uncapped
-                                                ? AppColors.lightLeaf
+                                                ? AppColors.forestGreen
                                                 : Colors.transparent,
                                             border: Border.all(
                                               color: _uncapped
-                                                  ? AppColors.lightLeaf
+                                                  ? AppColors.forestGreen
                                                   : AppColors.mossGreen
                                                         .withValues(alpha: 0.6),
                                               width: 1.6,
@@ -632,7 +604,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
                         // ── Icon ───────────────────────
                         if (_gStep == 0) ...[
-                          BarkCard(
+                          AppCard(
                             label: l.iconLabel,
                             icon: Icons.local_florist_outlined,
                             child: Wrap(
@@ -658,7 +630,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
                                         color: selected
-                                            ? AppColors.lightLeaf
+                                            ? AppColors.forestGreen
                                             : AppColors.mossGreen.withValues(
                                                 alpha: 0.4,
                                               ),
@@ -667,7 +639,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                       boxShadow: selected
                                           ? [
                                               BoxShadow(
-                                                color: AppColors.lightLeaf
+                                                color: AppColors.forestGreen
                                                     .withValues(alpha: 0.30),
                                                 blurRadius: 8,
                                               ),
@@ -681,7 +653,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                           icon,
                                           size: 15,
                                           color: selected
-                                              ? AppColors.lightLeaf
+                                              ? AppColors.forestGreen
                                               : AppColors.mossGreen,
                                         ),
                                         const SizedBox(width: 6),
@@ -689,7 +661,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                           goalIconLabel(l, key),
                                           style: GoogleFonts.nunito(
                                             color: selected
-                                                ? AppColors.lightLeaf
+                                                ? AppColors.forestGreen
                                                 : AppColors.stoneBeigeColor,
                                             fontSize: 12.5,
                                             fontWeight: selected
@@ -709,7 +681,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
                         // ── Group ──────────────────────
                         if (_gStep == 2) ...[
-                          BarkCard(
+                          AppCard(
                             label: l.groupOptional,
                             icon: Icons.label_outline,
                             accent: AppColors.riverBlue,
@@ -777,11 +749,9 @@ class _Header extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: AppTokens.current.canvasSoft,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.mossGreen.withValues(alpha: 0.35),
-                ),
+                border: Border.all(color: AppTokens.current.cardBorder),
               ),
               child: const Icon(
                 Icons.arrow_back,
@@ -801,13 +771,6 @@ class _Header extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: AppColors.stoneBeigeColor,
                     fontSize: 22,
-                    shadows: const [
-                      Shadow(
-                        color: Colors.black54,
-                        offset: Offset(0, 2),
-                        blurRadius: 6,
-                      ),
-                    ],
                   ),
                 ),
                 Text(
@@ -815,31 +778,20 @@ class _Header extends StatelessWidget {
                   style: GoogleFonts.nunito(
                     color: AppColors.mossGreen,
                     fontSize: 12.5,
-                    fontStyle: FontStyle.italic,
                   ),
                 ),
               ],
             ),
           ),
-          // Decorative leaf badge
+          // Small leaf badge
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppTokens.current.accentSoft,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.forestGreen.withValues(alpha: 0.5),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                ),
-              ],
             ),
-            child: const Icon(Icons.eco, color: Colors.white, size: 14),
+            child: Icon(Icons.eco,
+                color: AppTokens.current.accentStrong, size: 14),
           ),
         ],
       ),
@@ -872,47 +824,13 @@ class _SaplingPreviewBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 6, 16, 10),
       height: 170,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF7EC8E3), Color(0xFFB6D7A8), Color(0xFF7CB342)],
-          stops: [0.0, 0.55, 1.0],
-        ),
+        color: AppTokens.current.accentTint,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.25),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22),
         child: Stack(
           children: [
-            // Sun glow upper-right
-            Positioned(
-              top: -20,
-              right: -20,
-              child: Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFFFF59D).withValues(alpha: 0.7),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
             // The animated sapling
             Positioned.fill(
               child: AnimatedSwitcher(
@@ -935,15 +853,16 @@ class _SaplingPreviewBanner extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.38),
+                  color: AppTokens.current.card,
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTokens.current.cardBorder),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       GoalIcons.forKey(iconKey),
-                      color: Colors.white,
+                      color: AppTokens.current.textSecondary,
                       size: 14,
                     ),
                     const SizedBox(width: 6),
@@ -955,7 +874,7 @@ class _SaplingPreviewBanner extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.fredoka(
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: AppTokens.current.textPrimary,
                           fontSize: 13,
                         ),
                       ),
@@ -975,18 +894,6 @@ class _SaplingPreviewBanner extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Color(category!.colorValue),
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(
-                          category!.colorValue,
-                        ).withValues(alpha: 0.5),
-                        blurRadius: 6,
-                      ),
-                    ],
                   ),
                 ),
               ),
@@ -1013,170 +920,27 @@ class _PlantButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: canSave
-              ? const LinearGradient(
-                  colors: [
-                    Color(0xFF66BB6A),
-                    Color(0xFF2E7D32),
-                    Color(0xFF1B5E20),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : LinearGradient(
-                  colors: [
-                    AppColors.forestGreen.withValues(alpha: 0.35),
-                    AppColors.darkBark,
-                  ],
+      child: saving
+          ? const SizedBox(
+              height: 54,
+              child: Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: canSave
-                ? Colors.white.withValues(alpha: 0.5)
-                : AppColors.mossGreen.withValues(alpha: 0.2),
-            width: canSave ? 1.6 : 1,
-          ),
-          boxShadow: canSave
-              ? [
-                  BoxShadow(
-                    color: AppColors.forestGreen.withValues(alpha: 0.5),
-                    blurRadius: 24,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 6),
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: canSave && !saving ? onTap : null,
-            borderRadius: BorderRadius.circular(18),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  saving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Icon(
-                          Icons.spa,
-                          color: canSave
-                              ? Colors.white
-                              : AppColors.stoneBeigeColor.withValues(
-                                  alpha: 0.5,
-                                ),
-                          size: 18,
-                        ),
-                  const SizedBox(width: 10),
-                  Text(
-                    AppLocalizations.of(context).plantSapling,
-                    style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.w600,
-                      color: canSave
-                          ? Colors.white
-                          : AppColors.stoneBeigeColor.withValues(alpha: 0.5),
-                      fontSize: 16,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────────────────
-// Sky → forest background painter
-// ──────────────────────────────────────────────
-
-class _GoalSkyPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // The base gradient is painted behind us from AppPalettes.deepForest();
-    // here we only add the glow + silhouettes so the scene follows the palette.
-
-    // Soft glow upper right, tinted to the active palette.
-    canvas.drawCircle(
-      Offset(w * 0.86, h * 0.06),
-      130,
-      Paint()
-        ..shader =
-            RadialGradient(
-              colors: [
-                AppPalettes.celestialGlow().withValues(alpha: 0.18),
-                Colors.transparent,
-              ],
-            ).createShader(
-              Rect.fromCircle(center: Offset(w * 0.86, h * 0.06), radius: 130),
+            )
+          : AppPrimaryButton(
+              label: l.plantSapling,
+              icon: Icons.spa,
+              onPressed: canSave ? onTap : null,
             ),
     );
-
-    // Tree line near the bottom: two staggered depths of full silhouettes,
-    // matching the budget wizard's backdrop.
-    final back = const Color(0xFF050D04).withValues(alpha: 0.5);
-    final front = const Color(0xFF050D04).withValues(alpha: 0.82);
-    final treeY = h * 0.92;
-    for (int i = 0; i < 6; i++) {
-      final x = (i + 0.5) / 6 * w;
-      Scenery.paintTreeSilhouette(
-        canvas,
-        Offset(x, treeY - 10),
-        64 + ((i * 11) % 4) * 9,
-        back,
-        seed: i + 60,
-      );
-    }
-    for (int i = 0; i < 5; i++) {
-      final x = (i + 0.2) / 5 * w + 10;
-      Scenery.paintTreeSilhouette(
-        canvas,
-        Offset(x, treeY + 4),
-        50 + ((i * 7) % 3) * 8,
-        front,
-        seed: i + 12,
-      );
-    }
-
-    // Bottom vignette
-    canvas.drawRect(
-      Rect.fromLTWH(0, h * 0.8, w, h * 0.2),
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.transparent, Color(0xFF050905)],
-        ).createShader(Rect.fromLTWH(0, h * 0.8, w, h * 0.2)),
-    );
   }
-
-  @override
-  bool shouldRepaint(_GoalSkyPainter old) => false;
 }
 
 // ──────────────────────────────────────────────
@@ -1199,7 +963,7 @@ class _TimeframeStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final mat = MaterialLocalizations.of(context);
-    return BarkCard(
+    return AppCard(
       label: l.targetDateLabel,
       icon: Icons.event_outlined,
       accent: AppColors.riverBlue,
@@ -1335,7 +1099,7 @@ class _WateringStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BarkCard(
+        AppCard(
           label: l.wateringPlanTitle,
           icon: Icons.water_drop_outlined,
           accent: AppColors.riverBlue,
@@ -1360,11 +1124,7 @@ class _WateringStep extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: loading ? null : onGenerate,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.forestGreen,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                       icon: loading
                           ? const SizedBox(
@@ -1415,11 +1175,9 @@ class _WateringStep extends StatelessWidget {
                         children: [
                           for (final a in result!.alternativeDates)
                             ActionChip(
-                              backgroundColor: AppColors.darkBark,
+                              backgroundColor: AppTokens.current.canvasSoft,
                               side: BorderSide(
-                                color: AppColors.mossGreen.withValues(
-                                  alpha: 0.4,
-                                ),
+                                color: AppTokens.current.cardBorder,
                               ),
                               label: Text(
                                 mat.formatShortDate(a.date),
@@ -1461,10 +1219,10 @@ class _WateringStep extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         // Reminders toggle.
-        BarkCard(
+        AppCard(
           label: l.remindToWaterTitle,
           icon: Icons.notifications_active_outlined,
-          accent: AppColors.leafYellow,
+          accent: const Color(0xFFBA8514),
           child: Row(
             children: [
               Expanded(
@@ -1477,11 +1235,7 @@ class _WateringStep extends StatelessWidget {
                   ),
                 ),
               ),
-              Switch(
-                value: remind,
-                onChanged: onRemindChanged,
-                activeThumbColor: AppColors.lightLeaf,
-              ),
+              Switch(value: remind, onChanged: onRemindChanged),
             ],
           ),
         ),
@@ -1514,13 +1268,13 @@ class _WaterPlanCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.forestGreen.withValues(alpha: 0.35)
-                : AppColors.soilMid,
+                ? AppTokens.current.accentSoft
+                : AppTokens.current.canvasSoft,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected
-                  ? AppColors.lightLeaf
-                  : AppColors.mossGreen.withValues(alpha: 0.4),
+                  ? AppTokens.current.accentStrong
+                  : AppTokens.current.cardBorder,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -1531,7 +1285,9 @@ class _WaterPlanCard extends StatelessWidget {
                 selected
                     ? Icons.check_circle
                     : Icons.radio_button_unchecked,
-                color: selected ? AppColors.lightLeaf : AppColors.mossGreen,
+                color: selected
+                    ? AppTokens.current.accentStrong
+                    : AppTokens.current.textTertiary,
                 size: 18,
               ),
               const SizedBox(width: 10),
@@ -1551,7 +1307,7 @@ class _WaterPlanCard extends StatelessWidget {
                     Text(
                       l.planAboutMonths(plan.monthsToTarget),
                       style: GoogleFonts.nunito(
-                        color: AppColors.lightLeaf,
+                        color: AppColors.forestGreen,
                         fontSize: 11.5,
                       ),
                     ),
@@ -1598,12 +1354,14 @@ class _CustomWaterCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.darkBark.withValues(alpha: 0.5),
+        color: active
+            ? AppTokens.current.accentTint
+            : AppTokens.current.canvasSoft,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: active
-              ? AppColors.lightLeaf
-              : AppColors.mossGreen.withValues(alpha: 0.3),
+              ? AppTokens.current.accentStrong
+              : AppTokens.current.cardBorder,
           width: active ? 1.5 : 1,
         ),
       ),
@@ -1634,13 +1392,13 @@ class _CustomWaterCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: active && cadence == c
-                          ? AppColors.forestGreen.withValues(alpha: 0.45)
-                          : AppColors.soilMid,
+                          ? AppTokens.current.accentSoft
+                          : AppTokens.current.card,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: active && cadence == c
-                            ? AppColors.lightLeaf
-                            : AppColors.mossGreen.withValues(alpha: 0.4),
+                            ? AppTokens.current.accentStrong
+                            : AppTokens.current.cardBorder,
                         width: active && cadence == c ? 1.5 : 1,
                       ),
                     ),
@@ -1648,7 +1406,7 @@ class _CustomWaterCard extends StatelessWidget {
                       cadenceLabel(l, c),
                       style: GoogleFonts.nunito(
                         color: active && cadence == c
-                            ? AppColors.lightLeaf
+                            ? AppTokens.current.accentStrong
                             : AppColors.stoneBeigeColor,
                         fontSize: 12.5,
                         fontWeight: active && cadence == c
@@ -1694,10 +1452,10 @@ class _AiPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return BarkCard(
+    return AppCard(
       label: l.aiPlanPromptTitle,
       icon: Icons.auto_awesome,
-      accent: AppColors.leafYellow,
+      accent: const Color(0xFFBA8514),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1714,21 +1472,8 @@ class _AiPrompt extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: onAi,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.forestGreen,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.auto_awesome, color: Colors.white),
-              label: Text(
-                l.planWithAi,
-                style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              icon: const Icon(Icons.auto_awesome),
+              label: Text(l.planWithAi),
             ),
           ),
           const SizedBox(height: 8),
@@ -1758,29 +1503,10 @@ class _NextButton extends StatelessWidget {
     final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: enabled ? onTap : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.forestGreen,
-            disabledBackgroundColor: AppColors.darkBark,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          icon: const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-          label: Text(
-            l.next,
-            style: GoogleFonts.fredoka(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              fontSize: 16,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
+      child: AppPrimaryButton(
+        label: l.next,
+        icon: Icons.arrow_forward,
+        onPressed: enabled ? onTap : null,
       ),
     );
   }

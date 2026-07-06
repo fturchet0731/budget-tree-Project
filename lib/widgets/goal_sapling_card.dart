@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/goal_labels.dart';
 import '../models/goal_model.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../theme/leaf_palette.dart';
 import 'sapling_view.dart';
 
@@ -16,7 +18,7 @@ class GoalSaplingCard extends StatelessWidget {
 
   final Goal goal;
 
-  static const _gold = Color(0xFFFFD54F);
+  static const _gold = Color(0xFFBA8514);
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +30,16 @@ class GoalSaplingCard extends StatelessWidget {
     final leafPalette = goal.leafColorValue != null
         ? LeafPalette.fromAccent(Color(goal.leafColorValue!))
         : LeafPalette.defaultGreen;
+    final t = AppTokens.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.18),
+        color: t.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: completed
-              ? _gold.withValues(alpha: 0.85)
-              : AppColors.mossGreen.withValues(alpha: 0.3),
-          width: completed ? 2 : 1,
+          color: completed ? const Color(0xFFE3B93F) : t.cardBorder,
+          width: completed ? 1.6 : 1,
         ),
+        boxShadow: AppShadows.card,
       ),
       padding: const EdgeInsets.all(10),
       child: Column(

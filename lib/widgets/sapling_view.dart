@@ -80,116 +80,50 @@ class SaplingPainter extends CustomPainter {
   /// scattered pebbles and a generous grass fringe so the sapling
   /// reads as planted in real earth rather than floating on a dot.
   void _drawSoil(Canvas canvas, double cx, double groundY, double w) {
-    // Drop shadow under the soil mound
+    // Flat modern mound: two warm-brown ovals, no texture or shadows.
     canvas.drawOval(
       Rect.fromCenter(
-          center: Offset(cx + 3, groundY + 14), width: 220, height: 22),
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.18)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+          center: Offset(cx, groundY + 8), width: 200, height: 30),
+      Paint()..color = const Color(0xFF8A6B4F),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(cx, groundY + 4), width: 150, height: 18),
+      Paint()..color = const Color(0xFFA98A68),
     );
 
-    // Three-layer soil mound — outermost = darkest, innermost = warm
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx, groundY + 9), width: 210, height: 32),
-      Paint()..color = const Color(0xFF120804),
-    );
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx, groundY + 6), width: 180, height: 24),
-      Paint()..color = const Color(0xFF3E2723),
-    );
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx, groundY + 3), width: 150, height: 16),
-      Paint()..color = const Color(0xFF5D4037),
-    );
-    // Soft top-of-soil highlight
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx - 6, groundY - 1), width: 80, height: 6),
-      Paint()..color = const Color(0xFF8D6E63).withValues(alpha: 0.55),
-    );
-
-    // Pebbles scattered across the wider soil patch
+    // A few flat grass blades framing the mound.
     final rng = math.Random(31);
-    for (int i = 0; i < 14; i++) {
-      final x = cx + (rng.nextDouble() - 0.5) * 180;
-      final y = groundY + 2 + rng.nextDouble() * 10;
-      final r = 1.0 + rng.nextDouble() * 2.0;
-      canvas.drawCircle(
-        Offset(x, y),
-        r,
-        Paint()
-          ..color = const Color(0xFF1A0C06).withValues(alpha: 0.55),
-      );
-      // Pebble highlight dot
-      canvas.drawCircle(
-        Offset(x - r * 0.35, y - r * 0.35),
-        r * 0.4,
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.25),
-      );
-    }
-
-    // Grass tufts framing the soil patch on both sides
     final bladePaint = Paint()
-      ..strokeWidth = 1.5
+      ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
-    for (int i = 0; i < 22; i++) {
-      final x = cx + (rng.nextDouble() - 0.5) * 200;
-      if ((x - cx).abs() < 26) continue; // leave room near the seed
-      final h = 6 + rng.nextDouble() * 11;
+    for (int i = 0; i < 10; i++) {
+      final x = cx + (rng.nextDouble() - 0.5) * 190;
+      if ((x - cx).abs() < 30) continue; // leave room near the seed
+      final bh = 7 + rng.nextDouble() * 9;
       final lean = (rng.nextDouble() - 0.5) * 6;
-      bladePaint.color = Color.fromRGBO(
-        (24 + rng.nextDouble() * 36).round(),
-        (96 + rng.nextDouble() * 70).round(),
-        (28 + rng.nextDouble() * 32).round(),
-        0.85,
-      );
+      bladePaint.color =
+          i.isEven ? leafPalette.mid : leafPalette.light;
       canvas.drawLine(
-          Offset(x, groundY + 1), Offset(x + lean, groundY - h), bladePaint);
+          Offset(x, groundY + 1), Offset(x + lean, groundY - bh), bladePaint);
     }
 
-    // A couple of mushrooms / small flowers for life
-    for (int i = 0; i < 4; i++) {
-      final side = i.isEven ? -1.0 : 1.0;
-      final x = cx + side * (40 + rng.nextDouble() * 60);
-      final y = groundY + 1;
-      final isFlower = i.isEven;
-      if (isFlower) {
-        // simple flower
-        canvas.drawCircle(
-          Offset(x, y - 6),
-          2.4,
-          Paint()..color = const Color(0xFFFFD54F),
-        );
-        canvas.drawLine(
-          Offset(x, y),
-          Offset(x, y - 5),
-          Paint()
-            ..color = const Color(0xFF388E3C)
-            ..strokeWidth = 1.0,
-        );
-      } else {
-        // little mushroom
-        canvas.drawCircle(
-          Offset(x, y - 4),
-          3.0,
-          Paint()..color = const Color(0xFFB84040),
-        );
-        canvas.drawCircle(
-          Offset(x - 1, y - 5),
-          0.6,
-          Paint()..color = Colors.white,
-        );
-        canvas.drawRect(
-          Rect.fromCenter(center: Offset(x, y - 1), width: 2.2, height: 3),
-          Paint()..color = const Color(0xFFF5F5F0),
-        );
-      }
+    // Two tiny flat flowers for life.
+    for (final side in [-1.0, 1.0]) {
+      final x = cx + side * (55 + rng.nextDouble() * 30);
+      canvas.drawLine(
+        Offset(x, groundY),
+        Offset(x, groundY - 6),
+        Paint()
+          ..color = leafPalette.dark
+          ..strokeWidth = 1.2,
+      );
+      canvas.drawCircle(
+        Offset(x, groundY - 8),
+        2.6,
+        Paint()..color = const Color(0xFFFFD54F),
+      );
     }
   }
 
@@ -254,15 +188,7 @@ class SaplingPainter extends CustomPainter {
       ..quadraticBezierTo(dir * 12, 4, 0, 0)
       ..close();
     final lp = leafPalette;
-    canvas.drawPath(
-      path,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [lp.light, lp.dark],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ).createShader(const Rect.fromLTWH(-14, -8, 28, 12)),
-    );
+    canvas.drawPath(path, Paint()..color = lp.mid);
     canvas.drawPath(
       path,
       Paint()
@@ -288,16 +214,7 @@ class SaplingPainter extends CustomPainter {
       ..quadraticBezierTo(cx + 2.0, (groundY + stemTopY) / 2,
           cx + 2.2, groundY)
       ..close();
-    canvas.drawPath(
-      trunkPath,
-      Paint()
-        ..shader = const LinearGradient(
-          colors: [Color(0xFF3E2723), Color(0xFF6D4C41), Color(0xFF3E2723)],
-          stops: [0.0, 0.5, 1.0],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ).createShader(Rect.fromLTWH(cx - 3, stemTopY, 6, stemH)),
-    );
+    canvas.drawPath(trunkPath, Paint()..color = const Color(0xFF8A6B4F));
 
     // 4 small leaves on alternating sides
     final leafCount = 4;
@@ -324,15 +241,7 @@ class SaplingPainter extends CustomPainter {
       ..cubicTo(dir * 6, 4, dir * 2, 4, 0, 0)
       ..close();
     final lp = leafPalette;
-    canvas.drawPath(
-      path,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [lp.light, lp.dark],
-          begin: isLeft ? Alignment.topRight : Alignment.topLeft,
-          end: isLeft ? Alignment.bottomLeft : Alignment.bottomRight,
-        ).createShader(Rect.fromLTWH(-14, -4, 28, 10)),
-    );
+    canvas.drawPath(path, Paint()..color = lp.mid);
     canvas.drawPath(
       path,
       Paint()
@@ -365,16 +274,7 @@ class SaplingPainter extends CustomPainter {
       ..quadraticBezierTo(cx + trunkW * 0.9, (groundY + stemTopY) / 2,
           cx + trunkW, groundY)
       ..close();
-    canvas.drawPath(
-      trunkPath,
-      Paint()
-        ..shader = const LinearGradient(
-          colors: [Color(0xFF1A0C06), Color(0xFF6D4C41), Color(0xFF1A0C06)],
-          stops: [0.0, 0.5, 1.0],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ).createShader(Rect.fromLTWH(cx - trunkW, stemTopY, trunkW * 2, stemH)),
-    );
+    canvas.drawPath(trunkPath, Paint()..color = const Color(0xFF8A6B4F));
 
     // Two small leafy clusters at the upper trunk
     if (localProg > 0.15) {
@@ -388,11 +288,6 @@ class SaplingPainter extends CustomPainter {
   void _leafCluster(Canvas canvas, Offset c, double r) {
     if (r <= 0) return;
     final lp = leafPalette;
-    canvas.drawCircle(
-      Offset(c.dx + 1, c.dy + 1),
-      r,
-      Paint()..color = Colors.black.withValues(alpha: 0.18),
-    );
     canvas.drawCircle(c, r, Paint()..color = lp.dark);
     canvas.drawCircle(
       Offset(c.dx - r * 0.3, c.dy - r * 0.3),
