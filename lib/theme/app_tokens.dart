@@ -95,10 +95,10 @@ class AppTokens {
 
   static const light = AppTokens._(
     brightness: Brightness.light,
-    canvas: Color(0xFFF7F6F1),
-    canvasSoft: Color(0xFFEFEEE6),
-    card: Color(0xFFFFFFFF),
-    cardBorder: Color(0xFFE8E6DD),
+    canvas: Color(0xFFF1EBDE),
+    canvasSoft: Color(0xFFE8E1D0),
+    card: Color(0xFFFBF7EC),
+    cardBorder: Color(0xFFE0D8C4),
     textPrimary: Color(0xFF20261B),
     textSecondary: Color(0xFF6B7263),
     textTertiary: Color(0xFF9AA091),

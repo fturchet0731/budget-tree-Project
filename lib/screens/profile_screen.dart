@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
@@ -14,6 +16,7 @@ import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
 import '../widgets/skeleton.dart';
+import '../widgets/profile_avatar.dart';
 import '../widgets/social_tab_bar.dart';
 import 'auth/login_screen.dart';
 import 'goal_detail_screen.dart';
@@ -91,6 +94,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     }
+  }
+
+  /// Let the user pick a profile photo from the device gallery. The image is
+  /// resized/compressed on device (~256px JPEG) and stored inline on the
+  /// profile row, so friends see it with no extra infrastructure.
+  Future<void> _pickAvatar() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 256,
+      maxHeight: 256,
+      imageQuality: 70,
+    );
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    await ProfileService.instance.setAvatar(base64Encode(bytes));
+    await _load();
   }
 
   Future<void> _editBio() async {
@@ -293,19 +312,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.forestGreen.withValues(alpha: 0.30),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.mossGreen.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Icon(
-                  Icons.person,
-                  color: AppColors.lightLeaf,
-                  size: 28,
+              GestureDetector(
+                onTap: _pickAvatar,
+                child: Stack(
+                  children: [
+                    ProfileAvatar(profile: _me, size: 56),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: AppTokens.current.accent,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: AppTokens.current.card, width: 1.5),
+                        ),
+                        child: Icon(Icons.photo_camera,
+                            size: 10, color: AppTokens.current.onAccent),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: 12),

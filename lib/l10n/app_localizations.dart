@@ -1258,6 +1258,12 @@ abstract class AppLocalizations {
   /// **'e.g. Salary'**
   String get sourceNameHint;
 
+  /// No description provided for @incomeAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another source'**
+  String get incomeAddAnother;
+
   /// No description provided for @amountDollar.
   ///
   /// In en, this message translates to:
@@ -2181,6 +2187,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This branch has no money flowing to it. Fund it or prune it to keep your tree focused.'**
   String get sugPruneReason;
+
+  /// No description provided for @sugGoalBranchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a branch for \"{name}\"'**
+  String sugGoalBranchTitle(String name);
+
+  /// No description provided for @sugGoalBranchReason.
+  ///
+  /// In en, this message translates to:
+  /// **'This goal is not fed by any branch here. Link one and it gets watered every pay cycle.'**
+  String get sugGoalBranchReason;
 
   /// No description provided for @sugHeavyTitle.
   ///

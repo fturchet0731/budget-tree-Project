@@ -45,16 +45,14 @@ class GoalSaplingCard extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: Center(
-              // FittedBox scales the fixed-size sapling down to whatever space
-              // the grid cell allows, so the tree never overflows the card.
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: SaplingView(
-                  progress: goal.progress,
-                  size: const Size(120, 150),
-                  leafPalette: leafPalette,
-                ),
+            // SaplingView scales its fixed design size down to whatever space
+            // the grid cell allows, so the tree never overflows the card.
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: SaplingView(
+                progress: goal.progress,
+                size: Size.infinite,
+                leafPalette: leafPalette,
               ),
             ),
           ),

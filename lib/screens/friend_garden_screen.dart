@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
+import '../widgets/profile_avatar.dart';
 import 'friend_goal_screen.dart';
 
 /// Read-only view of a friend's profile: their name + bio, and the goals they
@@ -33,7 +34,19 @@ class FriendGardenScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text('${profile.label}  $statusEmoji'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ProfileAvatar(profile: profile, size: 32),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                '${profile.label}  $statusEmoji',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         foregroundColor: AppColors.stoneBeigeColor,
       ),
       body: Container(

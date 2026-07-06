@@ -402,9 +402,12 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
 
   /// Opens the allocation-advice sheet: explained suggestions for adding,
   /// pruning, or trimming branches based on the current budget.
-  void _showSuggestions() {
+  Future<void> _showSuggestions() async {
     final l = AppLocalizations.of(context);
-    final suggestions = SuggestionService.forBudget(widget.budget, l);
+    final goals = await GoalRepository.loadAll();
+    if (!mounted) return;
+    final suggestions =
+        SuggestionService.forBudget(widget.budget, l, goals: goals);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

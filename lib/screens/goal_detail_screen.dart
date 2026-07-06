@@ -582,6 +582,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
       child: Scaffold(
         body: Stack(
           children: [
+            // Hero panel: the sapling lives inside the clipped tinted card
+            // so it always sits centered and never spills over the screen.
+            // Uncapped goals scale up per tier so a Tier 6 tree looks
+            // substantially larger than a Tier 1.
             Positioned(
               left: 16,
               right: 16,
@@ -592,19 +596,16 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   color: AppTokens.current.accentTint,
                   borderRadius: BorderRadius.circular(24),
                 ),
-              ),
-            ),
-            // Sapling stage — uncapped goals scale up per tier so a Tier 6
-            // tree looks substantially larger than a Tier 1.
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 96, 0, 280),
-                child: Transform.scale(
-                  scale: _goal.isUncapped ? _goal.tierScale : 1.0,
-                  child: SaplingView(
-                    progress: _displayedProgress,
-                    size: Size.infinite,
-                    leafPalette: _leafPalette,
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Transform.scale(
+                    scale: _goal.isUncapped ? _goal.tierScale : 1.0,
+                    child: SaplingView(
+                      progress: _displayedProgress,
+                      size: Size.infinite,
+                      leafPalette: _leafPalette,
+                    ),
                   ),
                 ),
               ),

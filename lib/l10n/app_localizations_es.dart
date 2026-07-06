@@ -693,6 +693,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sourceNameHint => 'p. ej. Salario';
 
   @override
+  String get incomeAddAnother => 'Añadir otra fuente';
+
+  @override
   String get amountDollar => 'Cantidad \$';
 
   @override
@@ -1217,6 +1220,15 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get sugPruneReason =>
       'Esta rama no recibe dinero. Finánciala o pódala para mantener tu árbol enfocado.';
+
+  @override
+  String sugGoalBranchTitle(String name) {
+    return 'Añade una rama para \"$name\"';
+  }
+
+  @override
+  String get sugGoalBranchReason =>
+      'Ninguna rama alimenta esta meta aquí. Vincula una y se regará en cada ciclo de pago.';
 
   @override
   String sugHeavyTitle(String name) {

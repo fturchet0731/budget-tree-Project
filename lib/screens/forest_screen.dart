@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/pay_frequency.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/pay_frequency_labels.dart';
 import '../l10n/preset_labels.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
+import '../services/leftover_to_goal.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
@@ -144,6 +147,17 @@ class _ForestScreenState extends State<ForestScreen> {
         setState(() => _expandedIndex = null);
         _load();
       }
+    }
+  }
+
+  Future<void> _allocateLeftover(BudgetModel budget) async {
+    final changed = await routeLeftoverToGoal(context, budget);
+    if (changed && mounted) {
+      final l = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l.allocationsReady)),
+      );
+      _load();
     }
   }
 
@@ -301,6 +315,8 @@ class _ForestScreenState extends State<ForestScreen> {
                                           onEdit: () => _editBudget(budget),
                                           onDelete: () =>
                                               _deleteBudget(budget),
+                                          onAllocateLeftover: () =>
+                                              _allocateLeftover(budget),
                                           onView: () {
                                             Navigator.push(
                                               context,
@@ -345,6 +361,7 @@ class _BudgetCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onView;
+  final VoidCallback onAllocateLeftover;
 
   const _BudgetCard({
     required this.budget,
@@ -354,6 +371,7 @@ class _BudgetCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onView,
+    required this.onAllocateLeftover,
   });
 
   @override
@@ -612,6 +630,36 @@ class _BudgetCard extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (budget.remaining > 0.5)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor:
+                                      AppTokens.current.accentStrong,
+                                  side: BorderSide(
+                                      color: AppTokens.current.accentStrong
+                                          .withValues(alpha: 0.55)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(11)),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 11),
+                                ),
+                                icon: const Icon(Icons.spa, size: 15),
+                                label: Text(
+                                  '${AppLocalizations.of(context).growAGoalWithIt} · \$${budget.remaining.toStringAsFixed(0)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.nunito(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                onPressed: onAllocateLeftover,
+                              ),
+                            ),
+                          ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
                           child: SizedBox(
@@ -910,6 +958,9 @@ class _EditSheet extends StatefulWidget {
 class _EditSheetState extends State<_EditSheet> {
   late TextEditingController _nameCtrl;
   late List<TextEditingController> _amountCtrls;
+  // Editable copy of the roots feeding this tree: name + amount + rhythm.
+  late List<(TextEditingController, TextEditingController, PayFrequency?)>
+      _incomes;
   String? _categoryId;
   bool _saving = false;
 
@@ -921,6 +972,13 @@ class _EditSheetState extends State<_EditSheet> {
     _amountCtrls = widget.budget.expenses
         .map((e) => TextEditingController(text: e.allocated.toStringAsFixed(2)))
         .toList();
+    _incomes = widget.budget.incomeSources
+        .map((inc) => (
+              TextEditingController(text: inc.name),
+              TextEditingController(text: inc.amount.toStringAsFixed(2)),
+              inc.frequency,
+            ))
+        .toList();
   }
 
   @override
@@ -929,11 +987,47 @@ class _EditSheetState extends State<_EditSheet> {
     for (final c in _amountCtrls) {
       c.dispose();
     }
+    for (final (n, a, _) in _incomes) {
+      n.dispose();
+      a.dispose();
+    }
     super.dispose();
   }
 
   double get _allocatedNow =>
       _amountCtrls.fold(0.0, (s, c) => s + (double.tryParse(c.text) ?? 0.0));
+
+  List<IncomeSource> get _editedIncomes => [
+        for (final (n, a, f) in _incomes)
+          if (n.text.trim().isNotEmpty && (double.tryParse(a.text) ?? 0) > 0)
+            IncomeSource(
+              name: n.text.trim(),
+              amount: double.tryParse(a.text) ?? 0,
+              frequency: f,
+            ),
+      ];
+
+  double get _incomeNow {
+    final cycle = widget.budget.payFrequency;
+    return _editedIncomes.fold(0.0, (s, e) => s + e.amountPerCycle(cycle));
+  }
+
+  void _addIncomeRow() {
+    setState(() {
+      _incomes.add((
+        TextEditingController(),
+        TextEditingController(),
+        widget.budget.payFrequency,
+      ));
+    });
+  }
+
+  void _removeIncomeRow(int i) {
+    final (n, a, _) = _incomes[i];
+    setState(() => _incomes.removeAt(i));
+    n.dispose();
+    a.dispose();
+  }
 
   Future<void> _save() async {
     if (_saving) return;
@@ -942,7 +1036,7 @@ class _EditSheetState extends State<_EditSheet> {
       budgetName: _nameCtrl.text.trim().isEmpty
           ? widget.budget.budgetName
           : _nameCtrl.text.trim(),
-      incomeSources: widget.budget.incomeSources,
+      incomeSources: _editedIncomes,
       expenses: widget.budget.expenses.asMap().entries.map((entry) {
         final cat = entry.value;
         final amount =
@@ -958,14 +1052,87 @@ class _EditSheetState extends State<_EditSheet> {
       id: widget.budget.id,
       savedAt: widget.budget.savedAt,
       categoryId: _categoryId,
+      // Keep the pay engine's state: cycle, first pay date, and the point it
+      // has already processed up to must survive an edit.
+      payFrequency: widget.budget.payFrequency,
+      firstPayDate: widget.budget.firstPayDate,
+      lastProcessedAt: widget.budget.lastProcessedAt,
     );
     await widget.onSaved(updated);
+  }
+
+  Widget _incomeRow(int i, AppLocalizations l) {
+    final (nameCtrl, amountCtrl, freq) = _incomes[i];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: TextField(
+              controller: nameCtrl,
+              style: TextStyle(color: AppColors.stoneBeigeColor, fontSize: 13),
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: l.sourceName,
+                isDense: true,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 86,
+            child: TextField(
+              controller: amountCtrl,
+              style: TextStyle(color: AppColors.forestGreen, fontSize: 13),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
+              ],
+              onChanged: (_) => setState(() {}),
+              textAlign: TextAlign.right,
+              decoration: const InputDecoration(
+                prefixText: '\$ ',
+                isDense: true,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          PopupMenuButton<PayFrequency>(
+            tooltip: l.incomeArrives,
+            initialValue: freq ?? widget.budget.payFrequency,
+            onSelected: (f) => setState(() {
+              _incomes[i] = (nameCtrl, amountCtrl, f);
+            }),
+            itemBuilder: (ctx) => [
+              for (final f in PayFrequency.values)
+                PopupMenuItem(value: f, child: Text(f.localizedLabel(l))),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+              child: Icon(Icons.event_repeat_outlined,
+                  size: 18, color: AppColors.mossGreen),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _removeIncomeRow(i),
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Icon(Icons.close,
+                  size: 16,
+                  color: AppColors.stoneBeigeColor.withValues(alpha: 0.45)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final totalIncome = widget.budget.totalIncome;
+    final totalIncome = _incomeNow;
     final remaining = totalIncome - _allocatedNow;
     final isOver = remaining < 0;
 
@@ -1056,7 +1223,39 @@ class _EditSheetState extends State<_EditSheet> {
           Flexible(
             child: SingleChildScrollView(
               child: Column(
-                children: widget.budget.expenses.asMap().entries.map((entry) {
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.rootsFeedingTree.toUpperCase(),
+                    style: GoogleFonts.nunito(
+                      color: AppColors.mossGreen.withValues(alpha: 0.75),
+                      fontSize: 10.5,
+                      letterSpacing: 1.3,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  for (var i = 0; i < _incomes.length; i++) _incomeRow(i, l),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: _addIncomeRow,
+                      icon: const Icon(Icons.add, size: 16),
+                      label: Text(l.incomeAddAnother),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    l.branchesReachingOut.toUpperCase(),
+                    style: GoogleFonts.nunito(
+                      color: AppColors.mossGreen.withValues(alpha: 0.75),
+                      fontSize: 10.5,
+                      letterSpacing: 1.3,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...widget.budget.expenses.asMap().entries.map((entry) {
                   final i = entry.key;
                   final cat = entry.value;
                   return Padding(
@@ -1099,7 +1298,8 @@ class _EditSheetState extends State<_EditSheet> {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
+                ],
               ),
             ),
           ),

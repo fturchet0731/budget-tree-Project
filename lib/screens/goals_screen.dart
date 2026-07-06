@@ -473,12 +473,15 @@ class _GoalCardState extends State<_GoalCard> {
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child: Transform.scale(
-                        scale: goal.isUncapped ? goal.tierScale : 1.0,
-                        child: SaplingView(
-                          progress: goal.progress,
-                          size: Size.infinite,
-                          leafPalette: palette,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Transform.scale(
+                          scale: goal.isUncapped ? goal.tierScale : 1.0,
+                          child: SaplingView(
+                            progress: goal.progress,
+                            size: Size.infinite,
+                            leafPalette: palette,
+                          ),
                         ),
                       ),
                     ),

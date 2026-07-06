@@ -568,7 +568,7 @@ class _ContinueButton extends StatelessWidget {
 // Step 1 – Income
 // ──────────────────────────────────────────────
 
-class _IncomeStep extends StatelessWidget {
+class _IncomeStep extends StatefulWidget {
   final List<IncomeSource> sources;
   final TextEditingController nameCtrl;
   final TextEditingController amountCtrl;
@@ -607,11 +607,52 @@ class _IncomeStep extends StatelessWidget {
   });
 
   @override
+  State<_IncomeStep> createState() => _IncomeStepState();
+}
+
+class _IncomeStepState extends State<_IncomeStep> {
+  final _nameFocus = FocusNode();
+  ScrollController? _scrollCtrl;
+
+  List<IncomeSource> get sources => widget.sources;
+  TextEditingController get nameCtrl => widget.nameCtrl;
+  TextEditingController get amountCtrl => widget.amountCtrl;
+  List<String> get suggestions => widget.suggestions;
+  PayFrequency get cycle => widget.cycle;
+  PayFrequency get newIncomeFreq => widget.newIncomeFreq;
+  bool get confirmed => widget.confirmed;
+  VoidCallback get onConfirm => widget.onConfirm;
+  ValueChanged<PayFrequency> get onCycleChanged => widget.onCycleChanged;
+  ValueChanged<PayFrequency> get onIncomeFreqChanged =>
+      widget.onIncomeFreqChanged;
+  VoidCallback get onAdd => widget.onAdd;
+  void Function(int) get onRemove => widget.onRemove;
+
+  @override
+  void dispose() {
+    _nameFocus.dispose();
+    super.dispose();
+  }
+
+  /// Jump back to the add-a-source box at the top and put the cursor in the
+  /// name field, so adding several incomes never means scrolling around.
+  void _backToAddBox() {
+    _scrollCtrl?.animateTo(
+      0,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+    _nameFocus.requestFocus();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final total = sources.fold(0.0, (s, e) => s + e.amountPerCycle(cycle));
     return AppScrollbar(
-      builder: (controller) => ListView(
+      builder: (controller) {
+        _scrollCtrl = controller;
+        return ListView(
         controller: controller,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         children: [
@@ -633,6 +674,7 @@ class _IncomeStep extends StatelessWidget {
                       flex: 3,
                       child: TextField(
                         controller: nameCtrl,
+                        focusNode: _nameFocus,
                         style: TextStyle(
                           color: AppColors.stoneBeigeColor,
                         ),
@@ -897,8 +939,19 @@ class _IncomeStep extends StatelessWidget {
               ),
             ),
           ],
+          // Once the list has grown past the fold, offer a one-tap way back
+          // to the add box instead of making the user scroll.
+          if (sources.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            AppSecondaryButton(
+              label: l.incomeAddAnother,
+              icon: Icons.add,
+              onPressed: _backToAddBox,
+            ),
+          ],
         ],
-      ),
+      );
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
+import '../models/goal_model.dart';
 
 enum SuggestionTone { good, info, warn }
 
@@ -41,7 +42,7 @@ class SuggestionService {
   /// overwhelms the user (respecting the app's "keep it simple" surface area).
   static List<BudgetSuggestion> forBudget(
       BudgetModel budget, AppLocalizations l,
-      {int limit = 4}) {
+      {int limit = 4, List<Goal> goals = const []}) {
     final income = budget.totalIncome;
     if (income <= 0) {
       return [
@@ -69,7 +70,7 @@ class SuggestionService {
         reason:
             l.sugOverAllocReason('\$${(-remaining).toStringAsFixed(0)}'),
       ));
-    } else if (remaining > income * 0.25) {
+    } else if (remaining > income * 0.25 || remaining > 200) {
       // A lot of income left unassigned: money that could be growing.
       final pct = (remaining / income * 100).round();
       infos.add(BudgetSuggestion(
@@ -100,6 +101,21 @@ class SuggestionService {
           ));
         }
       }
+    }
+
+    // Goals this budget doesn't water yet: suggest a branch per goal (the
+    // most concrete advice we can give, so it goes ahead of generic info).
+    final linkedIds = <String>{
+      for (final c in budget.expenses) ...c.linkedGoalIds,
+    };
+    for (final goal in goals) {
+      if (goal.isCompleted || linkedIds.contains(goal.id)) continue;
+      infos.add(BudgetSuggestion(
+        tone: SuggestionTone.info,
+        icon: Icons.spa_outlined,
+        title: l.sugGoalBranchTitle(goal.name),
+        reason: l.sugGoalBranchReason,
+      ));
     }
 
     // Positive reinforcement: any branch feeding a goal is a win worth noting.

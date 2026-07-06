@@ -695,6 +695,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sourceNameHint => 'ex. Salaire';
 
   @override
+  String get incomeAddAnother => 'Ajouter une autre source';
+
+  @override
   String get amountDollar => 'Montant \$';
 
   @override
@@ -1223,6 +1226,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sugPruneReason =>
       'Cette branche ne reçoit aucun argent. Financez-la ou taillez-la pour garder votre arbre concentré.';
+
+  @override
+  String sugGoalBranchTitle(String name) {
+    return 'Ajoutez une branche pour « $name »';
+  }
+
+  @override
+  String get sugGoalBranchReason =>
+      'Cet objectif n\'est nourri par aucune branche ici. Reliez en une et il sera arrosé à chaque cycle de paie.';
 
   @override
   String sugHeavyTitle(String name) {

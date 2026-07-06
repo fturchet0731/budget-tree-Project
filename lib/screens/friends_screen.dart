@@ -13,6 +13,7 @@ import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/skeleton.dart';
+import '../widgets/profile_avatar.dart';
 import '../widgets/social_tab_bar.dart';
 import 'auth/login_screen.dart';
 import 'friend_garden_screen.dart';
@@ -486,7 +487,18 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return _card(
       child: ListTile(
         contentPadding: EdgeInsets.zero,
-        leading: Text(f.statusEmoji, style: const TextStyle(fontSize: 26)),
+        leading: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            ProfileAvatar(profile: f.profile, size: 44),
+            Positioned(
+              right: -4,
+              bottom: -4,
+              child: Text(f.statusEmoji,
+                  style: const TextStyle(fontSize: 16)),
+            ),
+          ],
+        ),
         title: Text(
           f.profile.label,
           style: TextStyle(

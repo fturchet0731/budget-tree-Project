@@ -5,7 +5,13 @@ import '../theme/leaf_palette.dart';
 /// Renders a growing sapling whose visual stage is driven by [progress] (0..1).
 /// The painter smoothly interpolates between stages so adding money
 /// produces a continuous growth effect rather than discrete jumps.
+///
+/// The painter draws at a fixed design size (220x260) and the view scales
+/// that drawing down/up to fit whatever box it is given, centered, so the
+/// tree never overflows a card or sits off center regardless of cell size.
 class SaplingView extends StatelessWidget {
+  static const _designSize = Size(220, 260);
+
   final double progress;
   final Size size;
   final bool showGround;
@@ -14,23 +20,31 @@ class SaplingView extends StatelessWidget {
   const SaplingView({
     super.key,
     required this.progress,
-    this.size = const Size(220, 260),
+    this.size = _designSize,
     this.showGround = true,
     this.leafPalette = LeafPalette.defaultGreen,
   });
 
   @override
   Widget build(BuildContext context) {
+    final painter = CustomPaint(
+      size: _designSize,
+      painter: SaplingPainter(
+        progress: progress.clamp(0.0, 1.0),
+        showGround: showGround,
+        leafPalette: leafPalette,
+      ),
+    );
+    final fitted = FittedBox(
+      fit: BoxFit.contain,
+      child: SizedBox.fromSize(size: _designSize, child: painter),
+    );
+    // Size.infinite means "fill whatever the parent gives us".
+    if (!size.isFinite) return Center(child: fitted);
     return SizedBox(
       width: size.width,
       height: size.height,
-      child: CustomPaint(
-        painter: SaplingPainter(
-          progress: progress.clamp(0.0, 1.0),
-          showGround: showGround,
-          leafPalette: leafPalette,
-        ),
-      ),
+      child: Center(child: fitted),
     );
   }
 }

@@ -56,6 +56,10 @@ class Profile {
   final FriendStatusMode statusMode;
   final String? statusGoalId;
 
+  /// Small profile picture as a base64 JPEG (resized on device before upload),
+  /// or null when the user hasn't picked one.
+  final String? avatarB64;
+
   const Profile({
     required this.id,
     required this.username,
@@ -63,6 +67,7 @@ class Profile {
     this.bio,
     this.statusMode = FriendStatusMode.best,
     this.statusGoalId,
+    this.avatarB64,
   });
 
   /// Name to show in the UI — the display name if set, else the @username.
@@ -78,6 +83,7 @@ class Profile {
         bio: r['bio'] as String?,
         statusMode: FriendStatusModeWire.fromWire(r['status_mode'] as String?),
         statusGoalId: r['status_goal_id'] as String?,
+        avatarB64: r['avatar_b64'] as String?,
       );
 
   /// Columns to insert/update. `id` is set by the service from `auth.uid()`.
@@ -90,5 +96,6 @@ class Profile {
         'status_goal_id': statusMode == FriendStatusMode.goal
             ? statusGoalId
             : null,
+        'avatar_b64': avatarB64,
       };
 }

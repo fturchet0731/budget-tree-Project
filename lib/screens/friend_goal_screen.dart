@@ -40,6 +40,8 @@ class FriendGoalScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          // Sapling lives inside the clipped tinted panel, centered, matching
+          // the owner view. Uncapped goals scale up per tier.
           Positioned(
             left: 16,
             right: 16,
@@ -50,18 +52,16 @@ class FriendGoalScreen extends StatelessWidget {
                 color: AppTokens.current.accentTint,
                 borderRadius: BorderRadius.circular(24),
               ),
-            ),
-          ),
-          // Sapling — uncapped goals scale up per tier, matching the owner view.
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 96, 0, 230),
-              child: Transform.scale(
-                scale: goal.isUncapped ? goal.tierScale : 1.0,
-                child: SaplingView(
-                  progress: progress,
-                  size: Size.infinite,
-                  leafPalette: _leafPalette,
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Transform.scale(
+                  scale: goal.isUncapped ? goal.tierScale : 1.0,
+                  child: SaplingView(
+                    progress: progress,
+                    size: Size.infinite,
+                    leafPalette: _leafPalette,
+                  ),
                 ),
               ),
             ),
