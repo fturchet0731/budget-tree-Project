@@ -580,78 +580,15 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
         Navigator.pop(context, _changed);
       },
       child: Scaffold(
-        body: Stack(
-          children: [
-            // Hero panel: the sapling lives inside the clipped tinted card
-            // so it always sits centered and never spills over the screen.
-            // Uncapped goals scale up per tier so a Tier 6 tree looks
-            // substantially larger than a Tier 1.
-            Positioned(
-              left: 16,
-              right: 16,
-              top: 88,
-              bottom: 300,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTokens.current.accentTint,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Transform.scale(
-                    scale: _goal.isUncapped ? _goal.tierScale : 1.0,
-                    child: SaplingView(
-                      progress: _displayedProgress,
-                      size: Size.infinite,
-                      leafPalette: _leafPalette,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Savings thermometer — fills as money accumulates toward the
-            // target, mirroring the sapling's growth on a precise gauge.
-            Positioned(
-              right: 16,
-              top: 150,
-              child: Column(
-                children: [
-                  SavingsThermometer(
-                    fill: _displayedProgress,
-                    color: complete
-                        ? const Color(0xFFBA8514)
-                        : (_category != null
-                              ? Color(_category!.colorValue)
-                              : AppColors.forestGreen),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTokens.current.card,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTokens.current.cardBorder),
-                    ),
-                    child: Text(
-                      _goal.isUncapped
-                          ? 'T${_goal.tier}'
-                          : '${(_displayedProgress * 100).round()}%',
-                      style: GoogleFonts.nunito(
-                        color: AppTokens.current.textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SafeArea(
-              child: Padding(
+        // Laid out as a Column so the hero always sits between the header and
+        // the info panel and scales to whatever space is left — no absolute
+        // offsets that push content off-screen on shorter devices.
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              // Header row: back, goal icon, name, edit, delete.
+              Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 10,
@@ -733,13 +670,85 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   ],
                 ),
               ),
-            ),
-            // Bottom info panel
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
+              // Hero: the sapling lives inside the clipped tinted card and
+              // fills the space left between header and panel, so it is always
+              // centered and never spills over. Uncapped goals scale up per
+              // tier so a Tier 6 tree looks substantially larger than a Tier 1.
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppTokens.current.accentTint,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Transform.scale(
+                              scale: _goal.isUncapped ? _goal.tierScale : 1.0,
+                              child: SaplingView(
+                                progress: _displayedProgress,
+                                size: Size.infinite,
+                                leafPalette: _leafPalette,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Savings thermometer — fills as money accumulates
+                      // toward the target, mirroring the sapling's growth on a
+                      // precise gauge.
+                      Positioned(
+                        right: 12,
+                        top: 16,
+                        child: Column(
+                          children: [
+                            SavingsThermometer(
+                              fill: _displayedProgress,
+                              color: complete
+                                  ? const Color(0xFFBA8514)
+                                  : (_category != null
+                                        ? Color(_category!.colorValue)
+                                        : AppColors.forestGreen),
+                            ),
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTokens.current.card,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: AppTokens.current.cardBorder,
+                                ),
+                              ),
+                              child: Text(
+                                _goal.isUncapped
+                                    ? 'T${_goal.tier}'
+                                    : '${(_displayedProgress * 100).round()}%',
+                                style: GoogleFonts.nunito(
+                                  color: AppTokens.current.textPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Bottom info panel
+              Container(
+                width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
                 decoration: BoxDecoration(
                   color: AppTokens.current.card,
@@ -989,8 +998,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
