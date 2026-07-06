@@ -28,63 +28,6 @@ class AppColors {
   static Color get dangerRed => _t.danger;
 }
 
-/// LEGACY — facade over [AppTokens]; deleted in the final redesign sweep.
-/// The old full-screen forest/sky gradients are now near-flat neutral washes
-/// so unmigrated screens sit on the new canvas. Each screen phase removes its
-/// uses in favor of plain token backgrounds.
-class AppPalettes {
-  AppPalettes._();
-
-  /// Was the dim interior forest gradient; now a near-flat canvas wash.
-  static LinearGradient deepForest() {
-    final t = AppTokens.current;
-    return LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [t.canvas, t.canvasSoft],
-    );
-  }
-
-  /// Was the bright sky-to-grass gradient; now a soft sky-tinted wash.
-  static LinearGradient sky() {
-    final t = AppTokens.current;
-    return LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [t.skyTint, t.canvas, t.accentTint],
-      stops: const [0.0, 0.55, 1.0],
-    );
-  }
-
-  /// Sun (light) / moon (dark) disc color.
-  static Color celestial() => AppSettings.instance.isDark
-      ? const Color(0xFFE3EEF7)
-      : const Color(0xFFFFD54F);
-
-  /// Soft glow around the celestial body.
-  static Color celestialGlow() => AppSettings.instance.isDark
-      ? const Color(0xFFB3C9E0)
-      : const Color(0xFFFFE082);
-
-  /// Scenery depth ramp — farther layers read lighter (light mode) or
-  /// deeper (dark mode).
-  static Color hillBack() => AppSettings.instance.isDark
-      ? const Color(0xFF1B2410)
-      : Conifer.c100;
-
-  static Color hillMid() => AppSettings.instance.isDark
-      ? const Color(0xFF1F2A12)
-      : Conifer.c200;
-
-  static Color groundClose() => AppSettings.instance.isDark
-      ? const Color(0xFF2A3618)
-      : Conifer.c400;
-
-  static Color groundMid() => AppSettings.instance.isDark
-      ? const Color(0xFF243014)
-      : Conifer.c300;
-}
-
 /// The two app themes, built from the same [AppTokens] roles. Type is set
 /// once here (Fredoka for display, Nunito for body) so per-widget GoogleFonts
 /// calls can collapse over time.

@@ -23,8 +23,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // One-shot grow of the hero tree on arrival.
   late final AnimationController _grow;
   // Gentle idle sway of the canopy, gated by the Motion setting.
@@ -162,10 +161,7 @@ class _HomeScreenState extends State<HomeScreen>
     final l = AppLocalizations.of(context);
     final t = AppTokens.of(context);
     final text = Theme.of(context).textTheme;
-    final heroH = math.min(
-      MediaQuery.of(context).size.height * 0.40,
-      420.0,
-    );
+    final heroH = math.min(MediaQuery.of(context).size.height * 0.40, 420.0);
 
     return Scaffold(
       body: SafeArea(
@@ -178,25 +174,27 @@ class _HomeScreenState extends State<HomeScreen>
                 child: IllustrationCard(
                   height: heroH,
                   padding: EdgeInsets.zero,
-                  illustration: AnimatedBuilder(
-                    animation: Listenable.merge([_grow, _sway]),
-                    builder: (context, _) => CustomPaint(
-                      painter: _HeroTreePainter(
-                        grow: Curves.easeOutCubic.transform(
-                          AppSettings.instance.motionMultiplier == 0
-                              ? 1.0
-                              : _grow.value,
+                  illustration: RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: Listenable.merge([_grow, _sway]),
+                      builder: (context, _) => CustomPaint(
+                        painter: _HeroTreePainter(
+                          grow: Curves.easeOutCubic.transform(
+                            AppSettings.instance.motionMultiplier == 0
+                                ? 1.0
+                                : _grow.value,
+                          ),
+                          sway: AppSettings.instance.motionFull
+                              ? math.sin(_sway.value * math.pi * 2)
+                              : 0,
+                          dark: t.brightness == Brightness.dark,
                         ),
-                        sway: AppSettings.instance.motionFull
-                            ? math.sin(_sway.value * math.pi * 2)
-                            : 0,
-                        dark: t.brightness == Brightness.dark,
-                      ),
-                      child: const Align(
-                        alignment: Alignment(0.78, 1.0),
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 10),
-                          child: AcornMascot(size: 64, sway: true),
+                        child: const Align(
+                          alignment: Alignment(0.78, 1.0),
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: AcornMascot(size: 64, sway: true),
+                          ),
                         ),
                       ),
                     ),
@@ -238,10 +236,7 @@ class _HomeScreenState extends State<HomeScreen>
               const SizedBox(height: AppDims.s12),
               Text(
                 'Developed by Fabian Turchetti',
-                style: GoogleFonts.nunito(
-                  color: t.textTertiary,
-                  fontSize: 11,
-                ),
+                style: GoogleFonts.nunito(color: t.textTertiary, fontSize: 11),
               ),
               const SizedBox(height: AppDims.s12),
             ],
@@ -295,13 +290,17 @@ class _HeroTreePainter extends CustomPainter {
     final trunkPath = Path()
       ..moveTo(cx - trunkW * 0.62, groundY)
       ..quadraticBezierTo(
-        cx - trunkW * 0.40, groundY - trunkH * 0.55,
-        cx - trunkW * 0.34 + lean, trunkTop,
+        cx - trunkW * 0.40,
+        groundY - trunkH * 0.55,
+        cx - trunkW * 0.34 + lean,
+        trunkTop,
       )
       ..lineTo(cx + trunkW * 0.34 + lean, trunkTop)
       ..quadraticBezierTo(
-        cx + trunkW * 0.40, groundY - trunkH * 0.55,
-        cx + trunkW * 0.62, groundY,
+        cx + trunkW * 0.40,
+        groundY - trunkH * 0.55,
+        cx + trunkW * 0.62,
+        groundY,
       )
       ..close();
     canvas.drawPath(trunkPath, trunk);

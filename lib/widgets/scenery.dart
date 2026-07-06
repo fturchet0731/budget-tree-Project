@@ -118,74 +118,6 @@ class Scenery {
   /// A curtain of foliage hanging from the top edge across [width], its lower
   /// edge dipping in leafy lobes down to at most [depth]. Drawn as one closed
   /// path; layer two or three with different colors/depths for a canopy.
-  static Path canopyBand(
-    double width,
-    double depth, {
-    int lobes = 6,
-    int seed = 0,
-  }) {
-    final rng = math.Random(seed);
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(0, depth * (0.45 + rng.nextDouble() * 0.3));
-    var x = 0.0;
-    final step = width / lobes;
-    for (var i = 0; i < lobes; i++) {
-      final nextX = x + step;
-      final dipY = depth * (0.55 + rng.nextDouble() * 0.45);
-      final riseY = depth * (0.25 + rng.nextDouble() * 0.3);
-      // Each lobe: bulge down then tuck up, like overlapping leaf masses.
-      path.quadraticBezierTo(x + step * 0.5, dipY, nextX, riseY);
-      x = nextX;
-    }
-    path
-      ..lineTo(width, 0)
-      ..close();
-    return path;
-  }
-
-  /// A vine hanging from [top], [length] long, swaying [sway] to the side,
-  /// with paired leaves along it. Draws stem + leaves in [color].
-  static void paintHangingVine(
-    Canvas canvas,
-    Offset top,
-    double length,
-    double sway,
-    Color color, {
-    int leaves = 5,
-  }) {
-    final stem = Paint()
-      ..color = color
-      ..strokeWidth = 1.6
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    final path = Path()
-      ..moveTo(top.dx, top.dy)
-      ..quadraticBezierTo(
-        top.dx + sway,
-        top.dy + length * 0.55,
-        top.dx + sway * 0.4,
-        top.dy + length,
-      );
-    canvas.drawPath(path, stem);
-
-    // Leaves alternate sides along the stem.
-    for (var i = 1; i <= leaves; i++) {
-      final t = i / (leaves + 1);
-      final pos = _quadPoint(
-        top,
-        Offset(top.dx + sway, top.dy + length * 0.55),
-        Offset(top.dx + sway * 0.4, top.dy + length),
-        t,
-      );
-      final side = i.isEven ? 1.0 : -1.0;
-      final size = length * 0.085 * (1.15 - t * 0.5);
-      paintLeaf(canvas, pos, size, side * (0.9 + t * 0.5), color);
-    }
-  }
-
-  /// One complete leaf: pointed-oval blade with a center vein, rotated by
-  /// [angle], tip [size] away from [base].
   static void paintLeaf(
     Canvas canvas,
     Offset base,
@@ -241,49 +173,6 @@ class Scenery {
   }
 
   /// A glowing firefly: bright core over a soft radial halo.
-  static void paintFirefly(
-    Canvas canvas,
-    Offset at,
-    double radius,
-    Color glow,
-  ) {
-    canvas.drawCircle(
-      at,
-      radius * 4,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [glow.withValues(alpha: 0.35), Colors.transparent],
-        ).createShader(Rect.fromCircle(center: at, radius: radius * 4)),
-    );
-    canvas.drawCircle(at, radius, Paint()..color = glow.withValues(alpha: 0.9));
-  }
-
-  /// A soft slanted light shaft from [top] widening as it falls [length].
-  static void paintLightShaft(
-    Canvas canvas,
-    Offset top,
-    double length,
-    double slant,
-    Color color,
-  ) {
-    final path = Path()
-      ..moveTo(top.dx - 14, top.dy)
-      ..lineTo(top.dx + 14, top.dy)
-      ..lineTo(top.dx + slant + 52, top.dy + length)
-      ..lineTo(top.dx + slant - 52, top.dy + length)
-      ..close();
-    canvas.drawPath(
-      path,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [color, Colors.transparent],
-        ).createShader(path.getBounds())
-        ..blendMode = BlendMode.plus,
-    );
-  }
-
   static void _scallopedEdge(
     Path path, {
     required Offset from,
@@ -316,11 +205,4 @@ class Scenery {
     }
   }
 
-  static Offset _quadPoint(Offset p0, Offset c, Offset p1, double t) {
-    final u = 1 - t;
-    return Offset(
-      u * u * p0.dx + 2 * u * t * c.dx + t * t * p1.dx,
-      u * u * p0.dy + 2 * u * t * c.dy + t * t * p1.dy,
-    );
-  }
 }

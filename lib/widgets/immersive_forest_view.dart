@@ -620,7 +620,12 @@ class _ImmersiveBgPainter extends CustomPainter {
 
     canvas.drawRect(
       Rect.fromLTWH(0, 0, w, h),
-      Paint()..shader = AppPalettes.sky().createShader(Rect.fromLTWH(0, 0, w, h)),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppTokens.current.skyTint, AppTokens.current.canvas],
+        ).createShader(Rect.fromLTWH(0, 0, w, h)),
     );
 
     if (palette == AppPalette.dark) {
@@ -633,12 +638,20 @@ class _ImmersiveBgPainter extends CustomPainter {
       120,
       Paint()
         ..shader = RadialGradient(colors: [
-          AppPalettes.celestialGlow().withValues(alpha: 0.32),
+          (AppSettings.instance.isDark
+                  ? const Color(0xFFB3C9E0)
+                  : const Color(0xFFFFE082))
+              .withValues(alpha: 0.32),
           Colors.transparent,
         ]).createShader(Rect.fromCircle(center: celestial, radius: 120)),
     );
     canvas.drawCircle(
-        celestial, 28, Paint()..color = AppPalettes.celestial());
+        celestial,
+        28,
+        Paint()
+          ..color = AppSettings.instance.isDark
+              ? const Color(0xFFE3EEF7)
+              : const Color(0xFFFFD54F));
     if (palette == AppPalette.dark) {
       canvas.drawCircle(
         Offset(celestial.dx + 8, celestial.dy - 2),
@@ -672,7 +685,7 @@ class _ImmersiveBgPainter extends CustomPainter {
         ..lineTo(w, h)
         ..lineTo(0, h)
         ..close(),
-      Paint()..color = AppPalettes.groundClose(),
+      Paint()..color = _sceneGroundClose(),
     );
     canvas.drawPath(
       Path()
@@ -681,7 +694,7 @@ class _ImmersiveBgPainter extends CustomPainter {
         ..lineTo(w, h)
         ..lineTo(0, h)
         ..close(),
-      Paint()..color = AppPalettes.groundMid(),
+      Paint()..color = _sceneGroundMid(),
     );
 
     final blade = Paint()
@@ -739,7 +752,7 @@ class _ImmersiveBgPainter extends CustomPainter {
       canvas,
       Offset(tx, ty + 32),
       52,
-      AppPalettes.groundClose().withValues(alpha: 0.7),
+      _sceneGroundClose().withValues(alpha: 0.7),
       seed: (tx * 3).round(),
     );
   }
@@ -748,3 +761,11 @@ class _ImmersiveBgPainter extends CustomPainter {
   bool shouldRepaint(_ImmersiveBgPainter old) =>
       old.parallax != parallax || old.palette != palette;
 }
+
+/// Flat scenery colors for the outdoor illustration scenes, theme-aware.
+Color _sceneGroundClose() => AppSettings.instance.isDark
+    ? const Color(0xFF2A3618)
+    : Conifer.c400;
+Color _sceneGroundMid() => AppSettings.instance.isDark
+    ? const Color(0xFF243014)
+    : Conifer.c300;

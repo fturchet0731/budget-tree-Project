@@ -1,8 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/budget_model.dart';
-import '../theme/app_theme.dart';
+import '../services/app_settings.dart';
 import '../theme/category_icons.dart';
+import '../theme/app_tokens.dart';
 import '../theme/leaf_palette.dart';
 import 'tree_drawing.dart';
 
@@ -84,7 +85,7 @@ class _StaticTreePainter extends CustomPainter {
       ..lineTo(w, h)
       ..lineTo(0, h)
       ..close();
-    canvas.drawPath(back, Paint()..color = AppPalettes.groundClose());
+    canvas.drawPath(back, Paint()..color = _sceneGroundClose());
 
     final front = Path()
       ..moveTo(0, groundY + 14)
@@ -93,7 +94,7 @@ class _StaticTreePainter extends CustomPainter {
       ..lineTo(w, h)
       ..lineTo(0, h)
       ..close();
-    canvas.drawPath(front, Paint()..color = AppPalettes.groundMid());
+    canvas.drawPath(front, Paint()..color = _sceneGroundMid());
 
     // Grass blades near the trunk for a soft horizon
     final rng = math.Random(31);
@@ -308,3 +309,11 @@ class _StaticTreePainter extends CustomPainter {
       old.scale != scale ||
       old.leafPalette != leafPalette;
 }
+
+/// Flat scenery colors for the outdoor illustration scenes, theme-aware.
+Color _sceneGroundClose() => AppSettings.instance.isDark
+    ? const Color(0xFF2A3618)
+    : Conifer.c400;
+Color _sceneGroundMid() => AppSettings.instance.isDark
+    ? const Color(0xFF243014)
+    : Conifer.c300;
