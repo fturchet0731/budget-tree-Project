@@ -12,16 +12,22 @@ import '../models/goal_model.dart';
 import '../services/ai_coach_service.dart';
 import '../services/goal_repository.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../widgets/acorn_coach.dart';
 import '../widgets/allocation_plan_card.dart';
 import '../widgets/app_scrollbar.dart';
-import '../widgets/bark_card.dart';
 import '../widgets/info_button.dart';
-import '../widgets/scenery.dart';
-import '../widgets/vine_step_indicator.dart';
+import '../theme/app_shadows.dart';
+import '../widgets/ui/app_buttons.dart';
+import '../widgets/ui/app_card.dart' show AppCard;
+import '../widgets/ui/step_progress.dart';
 import '../tutorial/tutorial_content.dart';
 import 'budget_tree_screen.dart';
+
+/// Deep amber used for small labels on white cards (the shared warm accent,
+/// dark enough to stay readable on a light surface).
+const _amber = Color(0xFFBA8514);
 
 class CreateBudgetScreen extends StatefulWidget {
   /// When true, Acorn rides along and coaches each phase (used by the tour).
@@ -232,18 +238,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     final stepSubtitle = subtitles[_step];
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // ── Atmospheric background — palette-driven so the Settings theme
-          //    changes this screen's mood like every other surface ──
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-            ),
-          ),
-          Positioned.fill(child: CustomPaint(painter: _NatureBgPainter())),
-          // ── Foreground content ───────────────────
           SafeArea(
             child: Column(
               children: [
@@ -255,16 +251,13 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                       ? () => Navigator.pop(context)
                       : () => setState(() => _step--),
                 ),
-                VineStepIndicator(
+                StepProgress(
                   currentStep: _step,
-                  steps: [
-                    VineStep(label: l.vineSeed, icon: Icons.eco),
-                    VineStep(
-                      label: l.vineBranches,
-                      icon: Icons.account_tree_outlined,
-                    ),
-                    VineStep(label: l.vineSurvey, icon: Icons.quiz_outlined),
-                    VineStep(label: l.vinePlan, icon: Icons.auto_awesome),
+                  labels: [
+                    l.vineSeed,
+                    l.vineBranches,
+                    l.vineSurvey,
+                    l.vinePlan,
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -405,78 +398,6 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 }
 
 // ──────────────────────────────────────────────
-// Atmospheric background painter (sky → forest)
-// ──────────────────────────────────────────────
-
-class _NatureBgPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // The base gradient is painted behind us from AppPalettes.deepForest();
-    // here we only add the celestial glow + silhouettes so the whole scene
-    // follows the active palette.
-
-    // Soft celestial glow upper right, tinted to the active palette.
-    canvas.drawCircle(
-      Offset(w * 0.85, h * 0.08),
-      120,
-      Paint()
-        ..shader =
-            RadialGradient(
-              colors: [
-                AppPalettes.celestialGlow().withValues(alpha: 0.18),
-                Colors.transparent,
-              ],
-            ).createShader(
-              Rect.fromCircle(center: Offset(w * 0.85, h * 0.08), radius: 120),
-            ),
-    );
-
-    // A tree line near the bottom: two staggered rows of full silhouettes
-    // (fainter, taller row behind a darker front row) fading into the bg.
-    final back = const Color(0xFF050D04).withValues(alpha: 0.45);
-    final front = const Color(0xFF050D04).withValues(alpha: 0.8);
-    final treeY = h * 0.9;
-    for (int i = 0; i < 6; i++) {
-      final x = (i + 0.5) / 6 * w;
-      Scenery.paintTreeSilhouette(
-        canvas,
-        Offset(x, treeY - 8),
-        66 + ((i * 13) % 4) * 9,
-        back,
-        seed: i + 40,
-      );
-    }
-    for (int i = 0; i < 5; i++) {
-      final x = (i + 0.2) / 5 * w + 12;
-      Scenery.paintTreeSilhouette(
-        canvas,
-        Offset(x, treeY + 6),
-        52 + ((i * 7) % 3) * 8,
-        front,
-        seed: i,
-      );
-    }
-
-    // Foreground vignette darkening the very bottom
-    canvas.drawRect(
-      Rect.fromLTWH(0, h * 0.8, w, h * 0.2),
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.transparent, Color(0xFF050905)],
-        ).createShader(Rect.fromLTWH(0, h * 0.8, w, h * 0.2)),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_NatureBgPainter old) => false;
-}
-
-// ──────────────────────────────────────────────
 // Header bar — back button + step title plaque
 // ──────────────────────────────────────────────
 
@@ -504,11 +425,9 @@ class _CreateHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: AppTokens.current.canvasSoft,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.mossGreen.withValues(alpha: 0.35),
-                ),
+                border: Border.all(color: AppTokens.current.cardBorder),
               ),
               child: Icon(
                 step == 0 ? Icons.arrow_back : Icons.chevron_left,
@@ -541,13 +460,6 @@ class _CreateHeader extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
                       fontSize: 22,
-                      shadows: const [
-                        Shadow(
-                          color: Colors.black54,
-                          offset: Offset(0, 2),
-                          blurRadius: 6,
-                        ),
-                      ],
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -556,7 +468,6 @@ class _CreateHeader extends StatelessWidget {
                     style: GoogleFonts.nunito(
                       color: AppColors.mossGreen,
                       fontSize: 12.5,
-                      fontStyle: FontStyle.italic,
                     ),
                   ),
                 ],
@@ -565,29 +476,20 @@ class _CreateHeader extends StatelessWidget {
           ),
           const SectionInfoButton(section: TutorialSection.create),
           const SizedBox(width: 10),
-          // Decorative small leaf badge
+          // Small step-count badge
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppTokens.current.accentSoft,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.forestGreen.withValues(alpha: 0.5),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                ),
-              ],
             ),
             child: Text(
               '${step + 1}',
               style: GoogleFonts.fredoka(
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppTokens.current.accentStrong,
                 fontSize: 14,
               ),
             ),
@@ -642,8 +544,8 @@ class _ContinueButton extends StatelessWidget {
       child: OutlinedButton.icon(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.lightLeaf,
-          side: BorderSide(color: AppColors.lightLeaf.withValues(alpha: 0.6)),
+          foregroundColor: AppColors.forestGreen,
+          side: BorderSide(color: AppColors.forestGreen.withValues(alpha: 0.6)),
           padding: const EdgeInsets.symmetric(vertical: 13),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -717,7 +619,7 @@ class _IncomeStep extends StatelessWidget {
           // reveals itself once the user confirms they've listed all income.
           // One clear hero input: type a source + amount, tap to add. The
           // quick-picks sit quietly beneath so the screen stays uncluttered.
-          BarkCard(
+          AppCard(
             label: l.addASource,
             icon: Icons.add_circle_outline,
             accent: AppColors.riverBlue,
@@ -830,10 +732,10 @@ class _IncomeStep extends StatelessWidget {
           if (sources.isNotEmpty) ...[
             const SizedBox(height: 14),
             _Reveal(
-              child: BarkCard(
+              child: AppCard(
               label: l.rootsFeedingTree,
               icon: Icons.water_drop,
-              accent: AppColors.lightLeaf,
+              accent: AppColors.forestGreen,
               child: Column(
                 children: [
                   ...sources.asMap().entries.map((entry) {
@@ -887,7 +789,7 @@ class _IncomeStep extends StatelessWidget {
                               Text(
                                 '\$${s.amount.toStringAsFixed(2)}',
                                 style: GoogleFonts.nunito(
-                                  color: AppColors.lightLeaf,
+                                  color: AppColors.forestGreen,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
@@ -938,7 +840,7 @@ class _IncomeStep extends StatelessWidget {
                         '\$${total.toStringAsFixed(2)}',
                         style: GoogleFonts.fredoka(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.lightLeaf,
+                          color: AppColors.forestGreen,
                           fontSize: 20,
                         ),
                       ),
@@ -962,10 +864,10 @@ class _IncomeStep extends StatelessWidget {
           if (confirmed) ...[
             const SizedBox(height: 14),
             _Reveal(
-              child: BarkCard(
+              child: AppCard(
                 label: l.budgetCycleTitle,
                 icon: Icons.event_repeat_outlined,
-                accent: AppColors.leafYellow,
+                accent: _amber,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1051,7 +953,7 @@ class _ExpenseStep extends StatelessWidget {
           // itself once the user confirms they've listed all their expenses.
           // The amount is optional (the survey and plan steps fill it in), and
           // the presets sit quietly beneath.
-          BarkCard(
+          AppCard(
             label: l.addABranch,
             icon: Icons.add_circle_outline,
             child: Column(
@@ -1115,6 +1017,7 @@ class _ExpenseStep extends StatelessWidget {
                     final iconKey = p.$1;
                     final name = expensePresetLabel(l, iconKey);
                     final isSelected = selectedIconKey == iconKey;
+                    final t = AppTokens.current;
                     return GestureDetector(
                       onTap: () => onPresetTap(name, iconKey),
                       child: AnimatedContainer(
@@ -1124,14 +1027,11 @@ class _ExpenseStep extends StatelessWidget {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.forestGreen.withValues(alpha: 0.45)
-                              : AppColors.soilMid,
+                          color: isSelected ? t.accentSoft : t.canvasSoft,
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
-                            color: isSelected
-                                ? AppColors.lightLeaf
-                                : AppColors.mossGreen.withValues(alpha: 0.4),
+                            color:
+                                isSelected ? t.accentStrong : t.cardBorder,
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
@@ -1142,16 +1042,16 @@ class _ExpenseStep extends StatelessWidget {
                               CategoryIcons.forKey(iconKey),
                               size: 14,
                               color: isSelected
-                                  ? AppColors.lightLeaf
-                                  : AppColors.mossGreen,
+                                  ? t.accentStrong
+                                  : t.textSecondary,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               name,
                               style: GoogleFonts.nunito(
                                 color: isSelected
-                                    ? AppColors.lightLeaf
-                                    : AppColors.stoneBeigeColor,
+                                    ? t.accentStrong
+                                    : t.textPrimary,
                                 fontSize: 12,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
@@ -1170,7 +1070,7 @@ class _ExpenseStep extends StatelessWidget {
           if (expenses.isNotEmpty) ...[
             const SizedBox(height: 14),
             _Reveal(
-              child: BarkCard(
+              child: AppCard(
               label: l.branchesReachingOut,
               icon: Icons.spa_outlined,
               child: Column(
@@ -1191,7 +1091,7 @@ class _ExpenseStep extends StatelessWidget {
                           ),
                           child: Icon(
                             CategoryIcons.forKey(exp.emoji),
-                            color: AppColors.lightLeaf,
+                            color: AppColors.forestGreen,
                             size: 16,
                           ),
                         ),
@@ -1209,7 +1109,7 @@ class _ExpenseStep extends StatelessWidget {
                         Text(
                           '\$${exp.allocated.toStringAsFixed(2)}',
                           style: GoogleFonts.nunito(
-                            color: AppColors.lightLeaf,
+                            color: AppColors.forestGreen,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -1256,10 +1156,10 @@ class _ExpenseStep extends StatelessWidget {
   Widget _summaryCard(AppLocalizations l) {
     final remaining = totalIncome - totalAllocated;
     final overBudget = remaining < 0;
-    return BarkCard(
+    return AppCard(
       label: l.expenseSummaryTitle,
       icon: Icons.balance_outlined,
-      accent: AppColors.leafYellow,
+      accent: _amber,
       child: Column(
         children: [
           _BudgetBar(totalIncome: totalIncome, totalAllocated: totalAllocated),
@@ -1281,7 +1181,7 @@ class _ExpenseStep extends StatelessWidget {
                 style: GoogleFonts.nunito(
                   color: overBudget
                       ? AppColors.dangerRed
-                      : AppColors.lightLeaf,
+                      : AppColors.forestGreen,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1415,10 +1315,10 @@ class _SurveyStepState extends State<_SurveyStep> {
           ),
           const SizedBox(height: 12),
         ],
-        BarkCard(
+        AppCard(
           label: q.prompt(l),
           icon: Icons.help_outline,
-          accent: AppColors.leafYellow,
+          accent: _amber,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1475,7 +1375,7 @@ class _SurveyStepState extends State<_SurveyStep> {
         const SizedBox(height: 12),
         ..._answeredRows(l, includeSkipped: true),
         const SizedBox(height: 6),
-        BarkCard(
+        AppCard(
           label: l.budgetNoteTitle,
           icon: Icons.chat_bubble_outline,
           child: TextField(
@@ -1551,7 +1451,7 @@ class _SurveyProgress extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.nunito(
-            color: AppColors.leafYellow,
+            color: _amber,
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.6,
@@ -1565,7 +1465,7 @@ class _SurveyProgress extends StatelessWidget {
             child: LinearProgressIndicator(
               value: completed / total,
               backgroundColor: AppColors.soilMid,
-              valueColor: const AlwaysStoppedAnimation(AppColors.lightLeaf),
+              valueColor: const AlwaysStoppedAnimation(AppColors.forestGreen),
             ),
           ),
         ),
@@ -1624,7 +1524,7 @@ class _AnswerRow extends StatelessWidget {
                     style: GoogleFonts.nunito(
                       color: skipped
                           ? AppColors.mossGreen.withValues(alpha: 0.8)
-                          : AppColors.lightLeaf,
+                          : AppColors.forestGreen,
                       fontSize: 13,
                       fontStyle: skipped ? FontStyle.italic : FontStyle.normal,
                       fontWeight: skipped ? FontWeight.w500 : FontWeight.bold,
@@ -1658,27 +1558,24 @@ class _SurveyChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppTokens.current;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.forestGreen.withValues(alpha: 0.45)
-              : AppColors.soilMid,
+          color: selected ? t.accentSoft : t.canvasSoft,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected
-                ? AppColors.lightLeaf
-                : AppColors.mossGreen.withValues(alpha: 0.4),
+            color: selected ? t.accentStrong : t.cardBorder,
             width: selected ? 1.5 : 1,
           ),
         ),
         child: Text(
           label,
           style: GoogleFonts.nunito(
-            color: selected ? AppColors.lightLeaf : AppColors.stoneBeigeColor,
+            color: selected ? t.accentStrong : t.textPrimary,
             fontSize: 12.5,
             fontWeight: selected ? FontWeight.bold : FontWeight.w500,
           ),
@@ -1813,7 +1710,7 @@ class _PlanStepState extends State<_PlanStep> {
         children: [
           // The expenses the user declared (read-only here). A "$X" tag means
           // they fixed that amount; the rest are left for the coach to choose.
-          BarkCard(
+          AppCard(
             label: l.yourExpenses,
             icon: Icons.account_tree_outlined,
             child: Wrap(
@@ -1897,7 +1794,7 @@ class _PlanStepState extends State<_PlanStep> {
               ),
             ),
           ] else ...[
-            BarkCard(
+            AppCard(
               label: l.setAmounts,
               icon: Icons.tune,
               child: Column(
@@ -1991,14 +1888,14 @@ class _PlanStepState extends State<_PlanStep> {
                 children: [
                   const Icon(
                     Icons.check_circle,
-                    color: AppColors.lightLeaf,
+                    color: AppColors.forestGreen,
                     size: 16,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     l.allocationsReady,
                     style: GoogleFonts.nunito(
-                      color: AppColors.lightLeaf,
+                      color: AppColors.forestGreen,
                       fontSize: 12.5,
                       fontWeight: FontWeight.bold,
                     ),
@@ -2024,7 +1921,7 @@ class _PlanStepState extends State<_PlanStep> {
   }
 
   Widget _buildNameCard(AppLocalizations l) {
-    return BarkCard(
+    return AppCard(
       label: l.nameYourTree,
       icon: Icons.park,
       child: TextField(
@@ -2041,7 +1938,7 @@ class _PlanStepState extends State<_PlanStep> {
   }
 
   Widget _buildPayCard(BuildContext context, AppLocalizations l) {
-    return BarkCard(
+    return AppCard(
       label: l.payScheduleLabel,
       icon: Icons.event_repeat_outlined,
       accent: AppColors.riverBlue,
@@ -2071,20 +1968,6 @@ class _PlanStepState extends State<_PlanStep> {
                 initialDate: widget.firstPayDate ?? now,
                 firstDate: DateTime(now.year - 2),
                 lastDate: DateTime(now.year + 2),
-                builder: (ctx, child) => Theme(
-                  data: Theme.of(ctx).copyWith(
-                    colorScheme: const ColorScheme.dark(
-                      primary: AppColors.lightLeaf,
-                      onPrimary: Colors.white,
-                      surface: AppColors.darkBark,
-                      onSurface: AppColors.stoneBeigeColor,
-                    ),
-                    dialogTheme: const DialogThemeData(
-                      backgroundColor: AppColors.darkBark,
-                    ),
-                  ),
-                  child: child!,
-                ),
               );
               if (picked != null) widget.onFirstPayDateChanged(picked);
             },
@@ -2172,10 +2055,10 @@ class _PlanStepState extends State<_PlanStep> {
       widget.income - widget.expenses.fold(0.0, (s, e) => s + e.allocated);
 
   Widget _buildLeftoverCard(BuildContext context, AppLocalizations l) {
-    return BarkCard(
+    return AppCard(
       label: l.leftoverGoalTitle,
       icon: Icons.eco_outlined,
-      accent: AppColors.leafYellow,
+      accent: _amber,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2226,7 +2109,6 @@ class _PlanStepState extends State<_PlanStep> {
     final choice = await showDialog<Goal>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        backgroundColor: const Color(0xFF122B0F),
         title: Text(
           l.leftoverPickGoalTitle,
           style: const TextStyle(color: AppColors.stoneBeigeColor),
@@ -2244,7 +2126,7 @@ class _PlanStepState extends State<_PlanStep> {
             onPressed: () => Navigator.pop(ctx, Goal(name: '', targetAmount: 0)),
             child: Text(
               l.leftoverNewGoal,
-              style: const TextStyle(color: AppColors.lightLeaf),
+              style: const TextStyle(color: AppColors.forestGreen),
             ),
           ),
         ],
@@ -2271,7 +2153,6 @@ class _PlanStepState extends State<_PlanStep> {
     return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF122B0F),
         title: Text(
           l.leftoverNewGoalTitle,
           style: const TextStyle(color: AppColors.stoneBeigeColor),
@@ -2311,11 +2192,7 @@ class _GenerateButton extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: loading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.forestGreen,
           padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
         ),
         icon: loading
             ? const SizedBox(
@@ -2356,7 +2233,7 @@ class _BudgetBar extends StatelessWidget {
       child: LinearProgressIndicator(
         value: pct,
         minHeight: 10,
-        backgroundColor: AppColors.darkBark,
+        backgroundColor: AppColors.soilMid,
         valueColor: AlwaysStoppedAnimation(
           overBudget
               ? AppColors.dangerRed
@@ -2389,20 +2266,10 @@ class _AddButton extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              colors: [Color(0xFF8BE65C), Color(0xFF43A047)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.lightLeaf.withValues(alpha: 0.55),
-                blurRadius: 12,
-                spreadRadius: 1,
-              ),
-            ],
+            color: AppTokens.current.accent,
+            boxShadow: AppShadows.pill,
           ),
-          child: const Icon(Icons.add, color: Colors.white, size: 22),
+          child: Icon(Icons.add, color: AppTokens.current.onAccent, size: 22),
         ),
       ),
     );
@@ -2432,88 +2299,10 @@ class _BottomBar extends StatelessWidget {
     final isLast = step == lastStep;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: canAdvance
-              ? const LinearGradient(
-                  colors: [
-                    Color(0xFF66BB6A),
-                    Color(0xFF2E7D32),
-                    Color(0xFF1B5E20),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : LinearGradient(
-                  colors: [
-                    AppColors.forestGreen.withValues(alpha: 0.35),
-                    AppColors.darkBark,
-                  ],
-                ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: canAdvance
-                ? Colors.white.withValues(alpha: 0.5)
-                : AppColors.mossGreen.withValues(alpha: 0.2),
-            width: canAdvance ? 1.6 : 1,
-          ),
-          boxShadow: canAdvance
-              ? [
-                  BoxShadow(
-                    color: AppColors.forestGreen.withValues(alpha: 0.5),
-                    blurRadius: 24,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 6),
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: canAdvance ? onNext : null,
-            borderRadius: BorderRadius.circular(18),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    isLast ? Icons.park : Icons.arrow_forward,
-                    color: canAdvance
-                        ? Colors.white
-                        : AppColors.stoneBeigeColor.withValues(alpha: 0.5),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 10),
-                  Flexible(
-                    child: Text(
-                      isLast ? l.plantMyBudgetTree : l.next,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.fredoka(
-                        fontWeight: FontWeight.w600,
-                        color: canAdvance
-                            ? Colors.white
-                            : AppColors.stoneBeigeColor.withValues(alpha: 0.5),
-                        fontSize: 16,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+      child: AppPrimaryButton(
+        label: isLast ? l.plantMyBudgetTree : l.next,
+        icon: isLast ? Icons.park : Icons.arrow_forward,
+        onPressed: canAdvance ? onNext : null,
       ),
     );
   }

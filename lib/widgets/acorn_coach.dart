@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/app_settings.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_content.dart';
 import 'acorn_mascot.dart';
 
@@ -247,18 +249,12 @@ class _AcornCoachState extends State<AcornCoach>
               width: 34,
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFDF6E3),
+                color: AppTokens.current.card,
                 borderRadius: _hiddenOnRight
                     ? const BorderRadius.horizontal(left: Radius.circular(16))
                     : const BorderRadius.horizontal(right: Radius.circular(16)),
-                border: Border.all(color: AppColors.barkBrown, width: 2.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.30),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: Border.all(color: AppTokens.current.cardBorder),
+                boxShadow: AppShadows.card,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -283,16 +279,10 @@ class _AcornCoachState extends State<AcornCoach>
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFDF6E3),
+        color: AppTokens.current.card,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.barkBrown, width: 2.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        border: Border.all(color: AppTokens.current.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -319,20 +309,10 @@ class _AcornCoachState extends State<AcornCoach>
       constraints: const BoxConstraints(maxWidth: 360),
       padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFDF6E3), Color(0xFFF3E6C8)],
-        ),
+        color: AppTokens.current.card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.barkBrown, width: 3),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 7),
-          ),
-        ],
+        border: Border.all(color: AppTokens.current.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -392,7 +372,7 @@ class _AcornCoachState extends State<AcornCoach>
                       fontSize: 14.5,
                       height: 1.35,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF3A2A18),
+                      color: AppTokens.current.textPrimary,
                     ),
                   ),
                 ),

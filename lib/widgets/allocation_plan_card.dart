@@ -3,7 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/ai_plan.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
+import 'ui/pressable.dart';
 
 /// One AI-proposed allocation plan, rendered as a selectable card: the plan
 /// name, a one-line rationale, each branch with its dollar amount, and the
@@ -23,31 +26,21 @@ class AllocationPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return GestureDetector(
+    final t = AppTokens.of(context);
+    return PressableScale(
       onTap: onSelect,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.forestGreen.withValues(alpha: 0.30)
-              : Colors.black.withValues(alpha: 0.20),
+          color: selected ? t.accentTint : t.card,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: selected
-                ? AppColors.lightLeaf
-                : AppColors.mossGreen.withValues(alpha: 0.35),
+            color: selected ? t.accentStrong : t.cardBorder,
             width: selected ? 2 : 1,
           ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppColors.lightLeaf.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                  ),
-                ]
-              : null,
+          boxShadow: AppShadows.card,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +49,7 @@ class AllocationPlanCard extends StatelessWidget {
               children: [
                 Icon(
                   selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? AppColors.lightLeaf : AppColors.mossGreen,
+                  color: selected ? t.accentStrong : t.textTertiary,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -104,7 +97,7 @@ class AllocationPlanCard extends StatelessWidget {
                     Text(
                       '\$${item.amount.toStringAsFixed(0)}',
                       style: GoogleFonts.nunito(
-                        color: AppColors.lightLeaf,
+                        color: AppColors.forestGreen,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
@@ -123,7 +116,7 @@ class AllocationPlanCard extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.savings_outlined,
-                      color: AppColors.leafYellow,
+                      color: Color(0xFFBA8514),
                       size: 15,
                     ),
                     const SizedBox(width: 6),
@@ -140,7 +133,7 @@ class AllocationPlanCard extends StatelessWidget {
                   '\$${plan.leftover.toStringAsFixed(0)}',
                   style: GoogleFonts.fredoka(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.leafYellow,
+                    color: const Color(0xFFBA8514),
                     fontSize: 16,
                   ),
                 ),

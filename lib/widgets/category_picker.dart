@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
 import '../services/category_repository.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 
 /// Palette of colours offered when the user creates a new category.
 const List<Color> categoryColorChoices = [
@@ -73,47 +74,20 @@ class _CategoryPickerState extends State<CategoryPicker> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0D2410),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          l.deleteCategoryTitle,
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.w600,
-            color: AppColors.stoneBeigeColor,
-            fontSize: 20,
-          ),
-        ),
-        content: Text(
-          l.deleteCategoryBody(cat.name),
-          style: GoogleFonts.nunito(
-            color: AppColors.mossGreen,
-            fontSize: 14,
-            height: 1.5,
-          ),
-        ),
+        title: Text(l.deleteCategoryTitle),
+        content: Text(l.deleteCategoryBody(cat.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              l.cancel,
-              style: GoogleFonts.nunito(color: AppColors.mossGreen),
-            ),
+            child: Text(l.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.dangerRed,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              backgroundColor: AppTokens.current.danger,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l.delete,
-              style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -130,10 +104,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
       return const SizedBox(
         height: 32,
         child: Center(
-          child: CircularProgressIndicator(
-            color: AppColors.lightLeaf,
-            strokeWidth: 2,
-          ),
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
       );
     }
@@ -178,22 +149,18 @@ class _CategoryPickerState extends State<CategoryPicker> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: AppColors.darkBark,
+            color: AppTokens.current.accentSoft,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: AppColors.mossGreen.withValues(alpha: 0.45),
-              width: 1,
-            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.add, size: 14, color: AppColors.lightLeaf),
+              Icon(Icons.add, size: 14, color: AppTokens.current.accentStrong),
               const SizedBox(width: 5),
               Text(
                 'New',
                 style: GoogleFonts.nunito(
-                  color: AppColors.lightLeaf,
+                  color: AppTokens.current.accentStrong,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -215,7 +182,6 @@ class _CategoryPickerState extends State<CategoryPicker> {
             style: GoogleFonts.nunito(
               color: AppColors.mossGreen.withValues(alpha: 0.7),
               fontSize: 10.5,
-              fontStyle: FontStyle.italic,
             ),
           ),
         ],
@@ -247,10 +213,12 @@ class _PickerChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.35) : AppColors.darkBark,
+          color: selected
+              ? color.withValues(alpha: 0.18)
+              : AppTokens.current.canvasSoft,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? color : color.withValues(alpha: 0.45),
+            color: selected ? color : AppTokens.current.cardBorder,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -301,24 +269,15 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (sbCtx, setSBState) => AlertDialog(
-        backgroundColor: const Color(0xFF122B0F),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.label_outline,
-              color: AppColors.lightLeaf,
+              color: AppTokens.current.accentStrong,
               size: 22,
             ),
             const SizedBox(width: 10),
-            Text(
-              l.newCategoryTitle,
-              style: GoogleFonts.fredoka(
-                fontWeight: FontWeight.w600,
-                color: AppColors.stoneBeigeColor,
-                fontSize: 20,
-              ),
-            ),
+            Text(l.newCategoryTitle),
           ],
         ),
         content: Column(
@@ -328,7 +287,7 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
             Text(
               l.newCategoryBody,
               style: GoogleFonts.nunito(
-                color: AppColors.mossGreen,
+                color: AppTokens.current.textSecondary,
                 fontSize: 12.5,
                 height: 1.45,
               ),
@@ -337,7 +296,6 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
             TextField(
               controller: nameCtrl,
               autofocus: true,
-              style: const TextStyle(color: AppColors.stoneBeigeColor),
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: l.categoryName,
@@ -370,7 +328,9 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
                       color: c,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSel ? Colors.white : Colors.transparent,
+                        color: isSel
+                            ? AppTokens.current.textPrimary
+                            : Colors.transparent,
                         width: 2.5,
                       ),
                       boxShadow: isSel
@@ -395,18 +355,9 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              l.cancel,
-              style: GoogleFonts.nunito(color: AppColors.mossGreen),
-            ),
+            child: Text(l.cancel),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.forestGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
             onPressed: () async {
               final name = nameCtrl.text.trim();
               if (name.isEmpty) return;
@@ -417,13 +368,7 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
               await CategoryRepository.saveNew(created);
               if (ctx.mounted) Navigator.pop(ctx, created);
             },
-            child: Text(
-              l.createButton,
-              style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text(l.createButton),
           ),
         ],
       ),
