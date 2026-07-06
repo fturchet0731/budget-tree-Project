@@ -3,7 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
-import '../../theme/app_theme.dart';
+import '../../theme/app_dims.dart';
+import '../../theme/app_tokens.dart';
+import '../../widgets/acorn_mascot.dart';
+import '../../widgets/ui/app_buttons.dart';
+import '../../widgets/ui/app_card.dart';
+import '../../widgets/ui/entrance.dart';
 import 'verify_email_screen.dart';
 
 /// Whether [password] meets the account password policy: at least 8 characters
@@ -17,9 +22,10 @@ bool isStrongPassword(String password) {
       RegExp(r'\d').hasMatch(password);
 }
 
-/// Email + password sign-in / sign-up, themed to match the forest aesthetic.
-/// On success the [AuthGate] swaps this out for the app automatically (it
-/// listens to [AuthService]), so this screen only has to clear errors.
+/// Email + password sign-in / sign-up on the neutral canvas: one white card
+/// with Acorn greeting the user from a soft green circle. On success the
+/// [AuthGate] swaps this out for the app automatically (it listens to
+/// [AuthService]), so this screen only has to clear errors.
 class LoginScreen extends StatefulWidget {
   /// When opened from the launch screen's "Register" button we want the
   /// sign-up form up front; the [AuthGate] root opens in sign-in mode.
@@ -103,210 +109,198 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _error = e.message);
     } catch (e) {
       if (mounted) {
-        setState(() =>
-            _error = AppLocalizations.of(context).somethingWentWrong);
+        setState(
+            () => _error = AppLocalizations.of(context).somethingWentWrong);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
+  Widget _messageBox({
+    required String message,
+    required IconData icon,
+    required Color color,
+  }) {
+    final t = AppTokens.of(context);
+    return Container(
+      padding: const EdgeInsets.all(AppDims.s12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(AppDims.rInner),
+        border: Border.all(color: color.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: GoogleFonts.nunito(color: t.textPrimary, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final text = Theme.of(context).textTheme;
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Icon(Icons.park_rounded,
-                          color: AppColors.lightLeaf, size: 72),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Budget Tree',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          color: AppColors.stoneBeigeColor,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: StaggeredColumn(
+                children: [
+                  Center(
+                    child: Container(
+                      width: 108,
+                      height: 108,
+                      decoration: BoxDecoration(
+                        color: t.accentTint,
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        _isSignUp ? l.loginPlantForest : l.loginWelcomeBack,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          color: AppColors.mossGreen,
-                          fontSize: 15,
-                        ),
+                      child: const Center(
+                        child: AcornMascot(size: 64, sway: true),
                       ),
-                      const SizedBox(height: 32),
-                      TextFormField(
-                        controller: _email,
-                        keyboardType: TextInputType.emailAddress,
-                        autocorrect: false,
-                        enabled: !_busy,
-                        style: const TextStyle(
-                            color: AppColors.stoneBeigeColor),
-                        decoration: InputDecoration(
-                          labelText: l.email,
-                          prefixIcon: const Icon(Icons.email_outlined,
-                              color: AppColors.mossGreen),
-                        ),
-                        validator: (v) {
-                          final s = v?.trim() ?? '';
-                          if (s.isEmpty) return l.enterEmail;
-                          if (!s.contains('@') || !s.contains('.')) {
-                            return l.enterValidEmail;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _password,
-                        obscureText: true,
-                        enabled: !_busy,
-                        style: const TextStyle(
-                            color: AppColors.stoneBeigeColor),
-                        decoration: InputDecoration(
-                          labelText: l.password,
-                          prefixIcon: const Icon(Icons.lock_outline,
-                              color: AppColors.mossGreen),
-                        ),
-                        validator: (v) {
-                          // Mirror the server policy (min 8, letters + digits)
-                          // so users get an instant message instead of a
-                          // generic auth error. Only enforced on sign-up; sign
-                          // in accepts whatever the account already has.
-                          if (!_isSignUp) return null;
-                          if (!isStrongPassword(v ?? '')) {
-                            return l.passwordTooShort;
-                          }
-                          return null;
-                        },
-                        onFieldSubmitted: (_) => _submit(),
-                      ),
-                      if (_notice != null) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.mossGreen.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: AppColors.mossGreen
-                                    .withValues(alpha: 0.5)),
+                    ),
+                  ),
+                  const SizedBox(height: AppDims.s16),
+                  Text(
+                    'Budget Tree',
+                    textAlign: TextAlign.center,
+                    style: text.headlineLarge,
+                  ),
+                  const SizedBox(height: AppDims.s4),
+                  Text(
+                    _isSignUp ? l.loginPlantForest : l.loginWelcomeBack,
+                    textAlign: TextAlign.center,
+                    style: text.bodyMedium,
+                  ),
+                  const SizedBox(height: AppDims.s24),
+                  AppCard(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            controller: _email,
+                            keyboardType: TextInputType.emailAddress,
+                            autocorrect: false,
+                            enabled: !_busy,
+                            decoration: InputDecoration(
+                              labelText: l.email,
+                              prefixIcon: Icon(Icons.email_outlined,
+                                  color: t.textSecondary),
+                            ),
+                            validator: (v) {
+                              final s = v?.trim() ?? '';
+                              if (s.isEmpty) return l.enterEmail;
+                              if (!s.contains('@') || !s.contains('.')) {
+                                return l.enterValidEmail;
+                              }
+                              return null;
+                            },
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.mark_email_read_outlined,
-                                  color: AppColors.lightLeaf, size: 18),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  _notice!,
-                                  style: GoogleFonts.nunito(
-                                      color: AppColors.stoneBeigeColor,
-                                      fontSize: 13),
+                          const SizedBox(height: AppDims.s16),
+                          TextFormField(
+                            controller: _password,
+                            obscureText: true,
+                            enabled: !_busy,
+                            decoration: InputDecoration(
+                              labelText: l.password,
+                              prefixIcon: Icon(Icons.lock_outline,
+                                  color: t.textSecondary),
+                            ),
+                            validator: (v) {
+                              // Mirror the server policy (min 8, letters +
+                              // digits) so users get an instant message
+                              // instead of a generic auth error. Only enforced
+                              // on sign-up; sign in accepts whatever the
+                              // account already has.
+                              if (!_isSignUp) return null;
+                              if (!isStrongPassword(v ?? '')) {
+                                return l.passwordTooShort;
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _submit(),
+                          ),
+                          if (_notice != null) ...[
+                            const SizedBox(height: AppDims.s16),
+                            _messageBox(
+                              message: _notice!,
+                              icon: Icons.mark_email_read_outlined,
+                              color: t.accentStrong,
+                            ),
+                          ],
+                          if (_error != null) ...[
+                            const SizedBox(height: AppDims.s16),
+                            _messageBox(
+                              message: _error!,
+                              icon: Icons.error_outline,
+                              color: t.danger,
+                            ),
+                          ],
+                          const SizedBox(height: AppDims.s24),
+                          _busy
+                              ? const SizedBox(
+                                  height: 54,
+                                  child: Center(
+                                    child: SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                  ),
+                                )
+                              : AppPrimaryButton(
+                                  label:
+                                      _isSignUp ? l.createAccount : l.signIn,
+                                  onPressed: _submit,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      if (_error != null) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.dangerRed.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: AppColors.dangerRed
-                                    .withValues(alpha: 0.5)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline,
-                                  color: AppColors.dangerRed, size: 18),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  _error!,
-                                  style: GoogleFonts.nunito(
-                                      color: AppColors.stoneBeigeColor,
-                                      fontSize: 13),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: _busy ? null : _submit,
-                        child: _busy
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
-                              )
-                            : Text(
-                                _isSignUp ? l.createAccount : l.signIn,
-                                style: GoogleFonts.nunito(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      TextButton(
+                    ),
+                  ),
+                  const SizedBox(height: AppDims.s8),
+                  Center(
+                    child: AppTextButton(
+                      label: _isSignUp ? l.haveAccountSignIn : l.newHereCreate,
+                      onPressed: _busy
+                          ? null
+                          : () => setState(() {
+                                _isSignUp = !_isSignUp;
+                                _error = null;
+                                _notice = null;
+                              }),
+                    ),
+                  ),
+                  // Only at the gate root: let a new user in without an
+                  // account so they meet the app before committing. When
+                  // this screen is pushed over the launch screen the user
+                  // is already a guest, so the shortcut would be noise.
+                  if (!Navigator.of(context).canPop())
+                    Center(
+                      child: AppTextButton(
+                        icon: Icons.park_outlined,
+                        label: l.loginExploreFirst,
                         onPressed: _busy
                             ? null
-                            : () => setState(() {
-                                  _isSignUp = !_isSignUp;
-                                  _error = null;
-                                  _notice = null;
-                                }),
-                        child: Text(
-                          _isSignUp ? l.haveAccountSignIn : l.newHereCreate,
-                          style: GoogleFonts.nunito(
-                              color: AppColors.lightLeaf, fontSize: 14),
-                        ),
+                            : () => AuthService.instance.enterGuestMode(),
                       ),
-                      // Only at the gate root: let a new user in without an
-                      // account so they meet the app before committing. When
-                      // this screen is pushed over the launch screen the user
-                      // is already a guest, so the shortcut would be noise.
-                      if (!Navigator.of(context).canPop()) ...[
-                        const SizedBox(height: 4),
-                        TextButton.icon(
-                          onPressed: _busy
-                              ? null
-                              : () => AuthService.instance.enterGuestMode(),
-                          icon: const Icon(Icons.park_outlined,
-                              color: AppColors.mossGreen, size: 18),
-                          label: Text(
-                            l.loginExploreFirst,
-                            style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen, fontSize: 14),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                    ),
+                ],
               ),
             ),
           ),

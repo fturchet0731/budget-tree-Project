@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../services/app_settings.dart';
 
@@ -25,6 +26,7 @@ class _EntranceState extends State<Entrance>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final CurvedAnimation _anim;
+  Timer? _delayTimer;
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class _EntranceState extends State<Entrance>
     } else if (widget.delay == Duration.zero) {
       _ctrl.forward();
     } else {
-      Future.delayed(widget.delay, () {
+      _delayTimer = Timer(widget.delay, () {
         if (mounted) _ctrl.forward();
       });
     }
@@ -48,6 +50,7 @@ class _EntranceState extends State<Entrance>
 
   @override
   void dispose() {
+    _delayTimer?.cancel();
     _ctrl.dispose();
     super.dispose();
   }

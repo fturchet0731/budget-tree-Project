@@ -4,8 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
-import '../../theme/app_theme.dart';
+import '../../theme/app_dims.dart';
+import '../../theme/app_tokens.dart';
 import '../../widgets/acorn_mascot.dart';
+import '../../widgets/ui/app_buttons.dart';
+import '../../widgets/ui/app_card.dart';
+import '../../widgets/ui/entrance.dart';
 
 /// Shown right after sign-up (or when signing in with an unconfirmed email).
 /// The user types the 6-digit code Supabase emailed them; on success a session
@@ -84,122 +88,128 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final text = Theme.of(context).textTheme;
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: StaggeredColumn(
+                children: [
+                  Center(
+                    child: Container(
+                      width: 108,
+                      height: 108,
+                      decoration: BoxDecoration(
+                        color: t.accentTint,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
                         child: AcornMascot(
-                          size: 96,
+                          size: 64,
                           speaking: false,
                           expression: AcornExpression.happy,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l.verifyTitle,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          color: AppColors.stoneBeigeColor,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l.verifyBody(widget.email),
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(
-                          color: AppColors.mossGreen,
-                          fontSize: 14,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      TextFormField(
-                        controller: _code,
-                        enabled: !_busy,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        autofocus: true,
-                        maxLength: 6,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        style: GoogleFonts.nunito(
-                          color: AppColors.stoneBeigeColor,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 6,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: l.verifyCodeLabel,
-                          counterText: '',
-                          prefixIcon: const Icon(Icons.pin_outlined,
-                              color: AppColors.mossGreen),
-                        ),
-                        validator: (v) {
-                          final s = v?.trim() ?? '';
-                          if (s.length < 6) return l.enterCode;
-                          return null;
-                        },
-                        onFieldSubmitted: (_) => _verify(),
-                      ),
-                      if (_notice != null) ...[
-                        const SizedBox(height: 16),
-                        _Banner(
-                          icon: Icons.mark_email_read_outlined,
-                          color: AppColors.lightLeaf,
-                          text: _notice!,
-                        ),
-                      ],
-                      if (_error != null) ...[
-                        const SizedBox(height: 16),
-                        _Banner(
-                          icon: Icons.error_outline,
-                          color: AppColors.dangerRed,
-                          text: _error!,
-                        ),
-                      ],
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: _busy ? null : _verify,
-                        child: _busy
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
-                              )
-                            : Text(
-                                l.verifyButton,
-                                style: GoogleFonts.nunito(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextButton(
-                        onPressed: _busy ? null : _resend,
-                        child: Text(
-                          l.resendCode,
-                          style: GoogleFonts.nunito(
-                              color: AppColors.lightLeaf, fontSize: 14),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: AppDims.s16),
+                  Text(
+                    l.verifyTitle,
+                    textAlign: TextAlign.center,
+                    style: text.headlineMedium,
+                  ),
+                  const SizedBox(height: AppDims.s8),
+                  Text(
+                    l.verifyBody(widget.email),
+                    textAlign: TextAlign.center,
+                    style: text.bodyMedium,
+                  ),
+                  const SizedBox(height: AppDims.s24),
+                  AppCard(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            controller: _code,
+                            enabled: !_busy,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            autofocus: true,
+                            maxLength: 6,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            style: GoogleFonts.nunito(
+                              color: t.textPrimary,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 6,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: l.verifyCodeLabel,
+                              counterText: '',
+                              prefixIcon: Icon(Icons.pin_outlined,
+                                  color: t.textSecondary),
+                            ),
+                            validator: (v) {
+                              final s = v?.trim() ?? '';
+                              if (s.length < 6) return l.enterCode;
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _verify(),
+                          ),
+                          if (_notice != null) ...[
+                            const SizedBox(height: AppDims.s16),
+                            _Banner(
+                              icon: Icons.mark_email_read_outlined,
+                              color: t.accentStrong,
+                              text: _notice!,
+                            ),
+                          ],
+                          if (_error != null) ...[
+                            const SizedBox(height: AppDims.s16),
+                            _Banner(
+                              icon: Icons.error_outline,
+                              color: t.danger,
+                              text: _error!,
+                            ),
+                          ],
+                          const SizedBox(height: AppDims.s24),
+                          _busy
+                              ? const SizedBox(
+                                  height: 54,
+                                  child: Center(
+                                    child: SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                  ),
+                                )
+                              : AppPrimaryButton(
+                                  label: l.verifyButton,
+                                  onPressed: _verify,
+                                ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppDims.s8),
+                  Center(
+                    child: AppTextButton(
+                      label: l.resendCode,
+                      onPressed: _busy ? null : _resend,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -218,12 +228,13 @@ class _Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppTokens.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppDims.s12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(AppDims.rInner),
+        border: Border.all(color: color.withValues(alpha: 0.45)),
       ),
       child: Row(
         children: [
@@ -232,8 +243,7 @@ class _Banner extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.nunito(
-                  color: AppColors.stoneBeigeColor, fontSize: 13),
+              style: GoogleFonts.nunito(color: t.textPrimary, fontSize: 13),
             ),
           ),
         ],

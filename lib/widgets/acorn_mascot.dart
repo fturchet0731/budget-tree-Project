@@ -155,7 +155,7 @@ class _AcornPainter extends CustomPainter {
     canvas.drawOval(
       Rect.fromCenter(
           center: Offset(w * 0.5, h * 0.97), width: w * 0.62, height: h * 0.07),
-      Paint()..color = Colors.black.withValues(alpha: 0.18),
+      Paint()..color = Colors.black.withValues(alpha: 0.10),
     );
 
     // Seam where the cap meets the nut. The nut rises a little above it with
@@ -176,15 +176,16 @@ class _AcornPainter extends CustomPainter {
       ..quadraticBezierTo(nutRect.left, nutRect.bottom - nutRect.height * 0.06,
           nutRect.left, nutRect.top + nutRect.height * 0.16)
       ..close();
-    canvas.drawPath(
-      nut,
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(-0.3, -0.4),
-          radius: 1.1,
-          colors: const [_nutLight, _nutDark],
-        ).createShader(nutRect),
+    // Flat modern fill: one warm tan, with a single flat highlight crescent
+    // instead of a gradient.
+    canvas.drawPath(nut, Paint()..color = _nutLight);
+    canvas.save();
+    canvas.clipPath(nut);
+    canvas.drawOval(
+      Rect.fromLTRB(w * 0.42, h * 0.40, w * 0.92, h * 0.95),
+      Paint()..color = _nutDark.withValues(alpha: 0.35),
     );
+    canvas.restore();
 
     // ── CAP — wide dome that sits down onto the nut, with a little stem ──
     final capRect = Rect.fromLTRB(w * 0.07, h * 0.05, w * 0.93, capBottom);
@@ -197,21 +198,23 @@ class _AcornPainter extends CustomPainter {
       ..quadraticBezierTo(capRect.center.dx, capRect.bottom + capRect.height * 0.22,
           capRect.left, capRect.bottom - capRect.height * 0.20)
       ..close();
-    canvas.drawPath(
-      cap,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [_capLight, _capDark],
-        ).createShader(capRect),
+    // Flat cap in the lighter brown with a darker underside band.
+    canvas.drawPath(cap, Paint()..color = _capLight);
+    canvas.save();
+    canvas.clipPath(cap);
+    canvas.drawRect(
+      Rect.fromLTRB(capRect.left, capRect.bottom - capRect.height * 0.34,
+          capRect.right, capRect.bottom + capRect.height * 0.3),
+      Paint()..color = _capDark.withValues(alpha: 0.55),
     );
+    canvas.restore();
 
-    // Cap cross-hatch texture (the classic acorn waffle pattern).
+    // Cap cross-hatch texture (the classic acorn waffle pattern), kept quiet
+    // so the cap still reads as one flat shape.
     canvas.save();
     canvas.clipPath(cap);
     final hatch = Paint()
-      ..color = _capDark.withValues(alpha: 0.45)
+      ..color = _capDark.withValues(alpha: 0.25)
       ..strokeWidth = 1.2
       ..style = PaintingStyle.stroke;
     for (double x = capRect.left - capRect.height; x < capRect.right; x += w * 0.10) {

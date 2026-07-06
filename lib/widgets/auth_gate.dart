@@ -5,7 +5,7 @@ import '../screens/home_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 
 /// Root decision point: rebuilds on auth changes and shows either the login
 /// screen or the normal app. When Supabase isn't configured (no dart-defines)
@@ -110,13 +110,8 @@ class _GateLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: const Center(
-          child: CircularProgressIndicator(color: AppColors.lightLeaf),
-        ),
-      ),
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -128,41 +123,36 @@ class _GateError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final text = Theme.of(context).textTheme;
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.wifi_off,
-                      color: AppColors.mossGreen, size: 48),
-                  const SizedBox(height: 16),
-                  Text(
-                    l.gateErrorTitle,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        color: AppColors.stoneBeigeColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l.gateErrorBody,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.mossGreen),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh),
-                    label: Text(l.retry),
-                  ),
-                ],
-              ),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.wifi_off, color: t.textSecondary, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  l.gateErrorTitle,
+                  textAlign: TextAlign.center,
+                  style: text.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l.gateErrorBody,
+                  textAlign: TextAlign.center,
+                  style: text.bodyMedium,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: Text(l.retry),
+                ),
+              ],
             ),
           ),
         ),

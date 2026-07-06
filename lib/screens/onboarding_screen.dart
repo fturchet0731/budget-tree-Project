@@ -3,8 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/profile_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_dims.dart';
+import '../theme/app_tokens.dart';
 import '../widgets/acorn_mascot.dart';
+import '../widgets/ui/app_buttons.dart';
+import '../widgets/ui/app_card.dart';
+import '../widgets/ui/entrance.dart';
 
 /// Forced first-run onboarding for a signed-in user who hasn't claimed a
 /// profile yet. Every account needs a username (it's how friends find them and
@@ -84,121 +88,128 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Center so the Column's stretch alignment doesn't
-                      // squish the mascot's fixed-size CustomPaint to full width.
-                      Center(
-                        child: AcornMascot(
-                          size: 104,
-                          speaking: !_busy,
-                          expression: _acornFace,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Form(
+                key: _formKey,
+                child: StaggeredColumn(
+                  children: [
+                    // Center so the Column's stretch alignment doesn't squish
+                    // the mascot's fixed-size CustomPaint to full width.
+                    Center(
+                      child: Container(
+                        width: 116,
+                        height: 116,
+                        decoration: BoxDecoration(
+                          color: t.accentTint,
+                          shape: BoxShape.circle,
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      _AcornBubble(text: _acornLine(l)),
-                      const SizedBox(height: 28),
-                      TextFormField(
-                        controller: _username,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        enabled: !_busy,
-                        textInputAction: TextInputAction.next,
-                        style:
-                            const TextStyle(color: AppColors.stoneBeigeColor),
-                        decoration: InputDecoration(
-                          labelText: l.username,
-                          helperText: l.onboardingUsernameHelper,
-                          helperStyle:
-                              const TextStyle(color: AppColors.mossGreen),
-                          prefixIcon: const Icon(Icons.alternate_email,
-                              color: AppColors.mossGreen),
-                        ),
-                        validator: (v) {
-                          final s = v?.trim() ?? '';
-                          if (s.isEmpty) return l.chooseUsername;
-                          if (!ProfileService.usernamePattern.hasMatch(s)) {
-                            return l.usernameRule;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _displayName,
-                        enabled: !_busy,
-                        textInputAction: TextInputAction.done,
-                        style:
-                            const TextStyle(color: AppColors.stoneBeigeColor),
-                        decoration: InputDecoration(
-                          labelText: l.onboardingDisplayNameLabel,
-                          helperText: l.onboardingDisplayNameHelper,
-                          helperStyle:
-                              const TextStyle(color: AppColors.mossGreen),
-                          prefixIcon: const Icon(Icons.badge_outlined,
-                              color: AppColors.mossGreen),
-                        ),
-                        onFieldSubmitted: (_) => _claim(),
-                      ),
-                      if (_error != null) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.dangerRed.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: AppColors.dangerRed
-                                    .withValues(alpha: 0.5)),
+                        child: Center(
+                          child: AcornMascot(
+                            size: 68,
+                            speaking: !_busy,
+                            expression: _acornFace,
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline,
-                                  color: AppColors.dangerRed, size: 18),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  _error!,
-                                  style: GoogleFonts.nunito(
-                                      color: AppColors.stoneBeigeColor,
-                                      fontSize: 13),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppDims.s12),
+                    _AcornBubble(text: _acornLine(l)),
+                    const SizedBox(height: AppDims.s24),
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            controller: _username,
+                            autocorrect: false,
+                            enableSuggestions: false,
+                            enabled: !_busy,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              labelText: l.username,
+                              helperText: l.onboardingUsernameHelper,
+                              prefixIcon: Icon(Icons.alternate_email,
+                                  color: t.textSecondary),
+                            ),
+                            validator: (v) {
+                              final s = v?.trim() ?? '';
+                              if (s.isEmpty) return l.chooseUsername;
+                              if (!ProfileService.usernamePattern
+                                  .hasMatch(s)) {
+                                return l.usernameRule;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppDims.s16),
+                          TextFormField(
+                            controller: _displayName,
+                            enabled: !_busy,
+                            textInputAction: TextInputAction.done,
+                            decoration: InputDecoration(
+                              labelText: l.onboardingDisplayNameLabel,
+                              helperText: l.onboardingDisplayNameHelper,
+                              prefixIcon: Icon(Icons.badge_outlined,
+                                  color: t.textSecondary),
+                            ),
+                            onFieldSubmitted: (_) => _claim(),
+                          ),
+                          if (_error != null) ...[
+                            const SizedBox(height: AppDims.s16),
+                            Container(
+                              padding: const EdgeInsets.all(AppDims.s12),
+                              decoration: BoxDecoration(
+                                color: t.danger.withValues(alpha: 0.10),
+                                borderRadius:
+                                    BorderRadius.circular(AppDims.rInner),
+                                border: Border.all(
+                                    color: t.danger.withValues(alpha: 0.45)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.error_outline,
+                                      color: t.danger, size: 18),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _error!,
+                                      style: GoogleFonts.nunito(
+                                          color: t.textPrimary, fontSize: 13),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: AppDims.s24),
+                          _busy
+                              ? const SizedBox(
+                                  height: 54,
+                                  child: Center(
+                                    child: SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                  ),
+                                )
+                              : AppPrimaryButton(
+                                  label: l.onboardingEnterForest,
+                                  onPressed: _claim,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: _busy ? null : _claim,
-                        child: _busy
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white),
-                              )
-                            : Text(
-                                l.onboardingEnterForest,
-                                style: GoogleFonts.nunito(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -217,6 +228,7 @@ class _AcornBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppTokens.of(context);
     return Column(
       children: [
         // Little pointer triangle toward Acorn.
@@ -225,16 +237,14 @@ class _AcornBubble extends StatelessWidget {
           child: Container(
             width: 18,
             height: 9,
-            color: Colors.black.withValues(alpha: 0.30),
+            color: t.accentSoft,
           ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.30),
-            borderRadius: BorderRadius.circular(16),
-            border:
-                Border.all(color: AppColors.lightLeaf.withValues(alpha: 0.45)),
+            color: t.accentSoft,
+            borderRadius: BorderRadius.circular(AppDims.rInner),
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
@@ -243,9 +253,10 @@ class _AcornBubble extends StatelessWidget {
               key: ValueKey(text),
               textAlign: TextAlign.center,
               style: GoogleFonts.nunito(
-                color: AppColors.stoneBeigeColor,
+                color: t.textPrimary,
                 fontSize: 14,
                 height: 1.4,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
