@@ -5,7 +5,9 @@ import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../services/app_settings.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import 'scenery.dart';
@@ -158,19 +160,21 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.35),
+                  color: AppTokens.current.card,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTokens.current.cardBorder),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.swipe,
-                        color: Colors.white, size: 13),
+                    Icon(Icons.swipe,
+                        color: AppTokens.current.textSecondary, size: 13),
                     const SizedBox(width: 6),
                     Text(
                       AppLocalizations.of(context).swipeToWalk,
                       style: GoogleFonts.nunito(
-                          color: Colors.white, fontSize: 11),
+                          color: AppTokens.current.textSecondary,
+                          fontSize: 11),
                     ),
                   ],
                 ),
@@ -230,20 +234,14 @@ class _TreeStage extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      const Color(0xFF152B12).withValues(alpha: 0.94),
-                      const Color(0xFF0B1A09).withValues(alpha: 0.94),
+                      AppTokens.current.card,
+                      AppTokens.current.card,
                     ],
                   ),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                      color: AppColors.forestGreen.withValues(alpha: 0.40)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.40),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
+                  border:
+                      Border.all(color: AppTokens.current.cardBorder),
+                  boxShadow: AppShadows.card,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

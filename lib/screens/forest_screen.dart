@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,13 +7,14 @@ import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/immersive_forest_view.dart';
 import '../widgets/info_button.dart';
-import '../widgets/scenery.dart';
 import '../tutorial/tutorial_content.dart';
 import 'budget_tree_screen.dart';
 
@@ -37,17 +37,16 @@ class _ViewModeToggle extends StatelessWidget {
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: selected
-                  ? AppColors.forestGreen.withValues(alpha: 0.55)
-                  : Colors.transparent,
+              color: selected ? AppTokens.current.card : Colors.transparent,
               borderRadius: BorderRadius.circular(20),
+              boxShadow: selected ? AppShadows.pill : null,
             ),
             child: Icon(
               icon,
               size: 17,
               color: selected
-                  ? AppColors.lightLeaf
-                  : AppColors.mossGreen.withValues(alpha: 0.75),
+                  ? AppTokens.current.accentStrong
+                  : AppTokens.current.textSecondary,
             ),
           ),
         ),
@@ -57,10 +56,9 @@ class _ViewModeToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.30),
+        color: AppTokens.current.canvasSoft,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-            color: AppColors.mossGreen.withValues(alpha: 0.30)),
+        border: Border.all(color: AppTokens.current.cardBorder),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -122,30 +120,20 @@ class _ForestScreenState extends State<ForestScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0D2410),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          l.removeTreeTitle,
-          style: GoogleFonts.fredoka(fontWeight: FontWeight.w600,
-              color: AppColors.stoneBeigeColor, fontSize: 20),
-        ),
-        content: Text(
-          l.removeTreeBody(budget.budgetName),
-          style: GoogleFonts.nunito(color: AppColors.mossGreen, fontSize: 14, height: 1.5),
-        ),
+        title: Text(l.removeTreeTitle),
+        content: Text(l.removeTreeBody(budget.budgetName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l.cancel, style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(l.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.dangerRed,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              backgroundColor: AppTokens.current.danger,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l.delete,
-                style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -177,18 +165,10 @@ class _ForestScreenState extends State<ForestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final l = AppLocalizations.of(context);
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-          ),
-          CustomPaint(
-            size: Size(size.width, size.height),
-            painter: _ForestBgPainter(),
-          ),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,10 +182,10 @@ class _ForestScreenState extends State<ForestScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(9),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
+                            color: AppTokens.current.canvasSoft,
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: AppColors.mossGreen.withValues(alpha: 0.35)),
+                                color: AppTokens.current.cardBorder),
                           ),
                           child: const Icon(Icons.arrow_back,
                               color: AppColors.stoneBeigeColor, size: 20),
@@ -222,12 +202,6 @@ class _ForestScreenState extends State<ForestScreen> {
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.stoneBeigeColor,
                                 fontSize: 26,
-                                shadows: const [
-                                  Shadow(
-                                      color: Colors.black54,
-                                      offset: Offset(1, 2),
-                                      blurRadius: 5)
-                                ],
                               ),
                             ),
                             Text(
@@ -272,9 +246,7 @@ class _ForestScreenState extends State<ForestScreen> {
                 const SizedBox(height: 4),
                 Expanded(
                   child: _loading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                              color: AppColors.lightLeaf))
+                      ? const Center(child: CircularProgressIndicator())
                       : _budgets.isEmpty
                           ? _EmptyForest(
                               onPlant: () => Navigator.pop(context))
@@ -399,34 +371,15 @@ class _BudgetCard extends StatelessWidget {
         curve: Curves.easeInOut,
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF152B12).withValues(alpha: 0.97),
-              const Color(0xFF0B1A09).withValues(alpha: 0.97),
-            ],
-          ),
+          color: AppTokens.current.card,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isExpanded
-                ? AppColors.lightLeaf.withValues(alpha: 0.55)
-                : AppColors.forestGreen.withValues(alpha: 0.22),
+                ? AppTokens.current.accentStrong
+                : AppTokens.current.cardBorder,
             width: isExpanded ? 1.5 : 1.0,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.45),
-              blurRadius: 14,
-              offset: const Offset(0, 5),
-            ),
-            if (isExpanded)
-              BoxShadow(
-                color: AppColors.forestGreen.withValues(alpha: 0.12),
-                blurRadius: 20,
-                spreadRadius: 2,
-              ),
-          ],
+          boxShadow: AppShadows.card,
         ),
         child: Column(
           children: [
@@ -440,24 +393,8 @@ class _BudgetCard extends StatelessWidget {
                     width: 92,
                     height: 116,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0xFF5B9BD5),
-                          Color(0xFF7EC8E3),
-                          Color(0xFF8DC06A),
-                        ],
-                        stops: [0.0, 0.58, 1.0],
-                      ),
+                      color: AppTokens.current.accentTint,
                       borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(14),
@@ -516,12 +453,12 @@ class _BudgetCard extends StatelessWidget {
                         Row(
                           children: [
                             const Icon(Icons.account_balance_wallet_outlined,
-                                color: AppColors.lightLeaf, size: 13),
+                                color: AppColors.forestGreen, size: 13),
                             const SizedBox(width: 4),
                             Text(
                               '\$${budget.totalIncome.toStringAsFixed(2)}',
                               style: GoogleFonts.nunito(
-                                color: AppColors.lightLeaf,
+                                color: AppColors.forestGreen,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -557,7 +494,7 @@ class _BudgetCard extends StatelessWidget {
                                   ? AppColors.dangerRed
                                   : allocPct > 0.85
                                       ? AppColors.warningAmber
-                                      : AppColors.lightLeaf,
+                                      : AppColors.forestGreen,
                             ),
                           ),
                         ),
@@ -631,7 +568,7 @@ class _BudgetCard extends StatelessWidget {
                                   child: Row(
                                     children: [
                                       Icon(CategoryIcons.forKey(cat.emoji),
-                                          color: AppColors.lightLeaf, size: 18),
+                                          color: AppColors.forestGreen, size: 18),
                                       const SizedBox(width: 9),
                                       Expanded(
                                         child: Column(
@@ -647,7 +584,7 @@ class _BudgetCard extends StatelessWidget {
                                                 Text(
                                                   '\$${cat.allocated.toStringAsFixed(2)}',
                                                   style: GoogleFonts.nunito(
-                                                    color: AppColors.lightLeaf,
+                                                    color: AppColors.forestGreen,
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.bold,
                                                   ),
@@ -662,7 +599,7 @@ class _BudgetCard extends StatelessWidget {
                                                 minHeight: 5,
                                                 backgroundColor: AppColors.soilMid,
                                                 valueColor: const AlwaysStoppedAnimation(
-                                                    AppColors.lightLeaf),
+                                                    AppColors.forestGreen),
                                               ),
                                             ),
                                           ],
@@ -681,12 +618,8 @@ class _BudgetCard extends StatelessWidget {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.forestGreen,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(13)),
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 13),
-                                elevation: 3,
                               ),
                               icon: const Icon(Icons.park,
                                   size: 16, color: Colors.white),
@@ -782,28 +715,7 @@ class _MiniTreePainter extends CustomPainter {
       ..lineTo(cx + 3.5, trunkTopY)
       ..quadraticBezierTo(cx + 7, (groundY + trunkTopY) / 2, cx + 7, groundY)
       ..close();
-    canvas.drawPath(
-      trunkPath,
-      Paint()
-        ..shader = const LinearGradient(
-          colors: [Color(0xFF2E1B0E), Color(0xFF7B5040), Color(0xFF2E1B0E)],
-          stops: [0.0, 0.5, 1.0],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ).createShader(Rect.fromLTWH(cx - 7, trunkTopY, 14, groundY - trunkTopY)),
-    );
-
-    // Bark lines
-    final barkLine = Paint()
-      ..color = const Color(0xFF1A0C06).withValues(alpha: 0.35)
-      ..strokeWidth = 0.7
-      ..style = PaintingStyle.stroke;
-    for (int i = 1; i <= 3; i++) {
-      final t = i / 4.0;
-      final y = trunkTopY + (groundY - trunkTopY) * t;
-      final hw = 3.5 + (7 - 3.5) * t;
-      canvas.drawLine(Offset(cx - hw * 0.8, y), Offset(cx + hw * 0.8, y), barkLine);
-    }
+    canvas.drawPath(trunkPath, Paint()..color = const Color(0xFF8A6B4F));
 
     // Crown blobs — palette-tinted
     final lp = leafPalette;
@@ -821,18 +733,11 @@ class _MiniTreePainter extends CustomPainter {
       canvas.drawCircle(Offset(bx, by), br, Paint()..color = bc);
     }
 
-    // Highlight on crown (top-left)
-    canvas.drawCircle(
-      Offset(cx - 14, crownY - 14),
-      8,
-      Paint()..color = Colors.white.withValues(alpha: 0.08),
-    );
-
     // Branches with tiny leaf clusters
     if (budget.expenses.isNotEmpty) {
       final count = budget.expenses.length.clamp(1, 5);
       final branchPaint = Paint()
-        ..color = const Color(0xFF4E342E)
+        ..color = const Color(0xFF8A6B4F)
         ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke;
@@ -865,7 +770,7 @@ class _MiniTreePainter extends CustomPainter {
     canvas.drawOval(
       Rect.fromCenter(
           center: Offset(cx, groundY + 1), width: w * 0.75, height: 7),
-      Paint()..color = const Color(0xFF2E7D32),
+      Paint()..color = Conifer.c300,
     );
   }
 
@@ -887,7 +792,7 @@ class _NoMatchInCategory extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.filter_alt_off_outlined,
-                color: AppColors.lightLeaf, size: 56),
+                color: AppColors.forestGreen, size: 56),
             const SizedBox(height: 18),
             Text(
               AppLocalizations.of(context).noTreesCategoryTitle,
@@ -944,7 +849,7 @@ class _EmptyForest extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.park, color: AppColors.lightLeaf, size: 72),
+            const Icon(Icons.park, color: AppColors.forestGreen, size: 72),
             const SizedBox(height: 22),
             Text(
               AppLocalizations.of(context).forestEmptyTitle,
@@ -1065,9 +970,10 @@ class _EditSheetState extends State<_EditSheet> {
     final isOver = remaining < 0;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF0D2010),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      decoration: BoxDecoration(
+        color: AppTokens.current.card,
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(26)),
       ),
       padding: EdgeInsets.fromLTRB(
           22, 18, 22, MediaQuery.of(context).viewInsets.bottom + 28),
@@ -1138,7 +1044,7 @@ class _EditSheetState extends State<_EditSheet> {
                       ? l.overAmount('\$${(-remaining).toStringAsFixed(2)}')
                       : l.leftAmount('\$${remaining.toStringAsFixed(2)}'),
                   style: GoogleFonts.nunito(
-                    color: isOver ? AppColors.dangerRed : AppColors.lightLeaf,
+                    color: isOver ? AppColors.dangerRed : AppColors.forestGreen,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1158,7 +1064,7 @@ class _EditSheetState extends State<_EditSheet> {
                     child: Row(
                       children: [
                         Icon(CategoryIcons.forKey(cat.emoji),
-                            color: AppColors.lightLeaf, size: 20),
+                            color: AppColors.forestGreen, size: 20),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(cat.name,
@@ -1171,7 +1077,7 @@ class _EditSheetState extends State<_EditSheet> {
                           child: TextField(
                             controller: _amountCtrls[i],
                             style: const TextStyle(
-                                color: AppColors.lightLeaf, fontSize: 14),
+                                color: AppColors.forestGreen, fontSize: 14),
                             keyboardType: const TextInputType.numberWithOptions(
                                 decimal: true),
                             inputFormatters: [
@@ -1230,115 +1136,3 @@ class _EditSheetState extends State<_EditSheet> {
   }
 }
 
-// ──────────────────────────────────────────────
-// Forest background painter
-// ──────────────────────────────────────────────
-
-class _ForestBgPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    _drawDistantTrees(canvas, w, h);
-    _drawGround(canvas, w, h);
-    _drawMist(canvas, w, h);
-  }
-
-  void _drawDistantTrees(Canvas canvas, double w, double h) {
-    final trees = [
-      (w * 0.04, h * 0.44, 0.28),
-      (w * 0.16, h * 0.38, 0.38),
-      (w * 0.30, h * 0.41, 0.30),
-      (w * 0.46, h * 0.36, 0.42),
-      (w * 0.60, h * 0.40, 0.32),
-      (w * 0.74, h * 0.37, 0.36),
-      (w * 0.88, h * 0.42, 0.26),
-      (w * 0.97, h * 0.45, 0.22),
-    ];
-    for (final (tx, ty, op) in trees) {
-      _silhouetteTree(canvas, tx, ty, h, op);
-    }
-  }
-
-  void _silhouetteTree(
-      Canvas canvas, double tx, double ty, double h, double op) {
-    // Tall slender forest trees: trunk foot on the ground line, crown up at
-    // ty where the sky is still light, like the original layout intended.
-    final groundY = h * 0.80;
-    Scenery.paintTreeSilhouette(
-      canvas,
-      Offset(tx, groundY),
-      (groundY - ty) + 26,
-      const Color(0xFF1A3A16).withValues(alpha: op * 0.85),
-      seed: (tx * 7).round(),
-      aspect: 0.22,
-    );
-  }
-
-  void _drawGround(Canvas canvas, double w, double h) {
-    final groundY = h * 0.80;
-
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, groundY)
-        ..quadraticBezierTo(w * 0.35, groundY - 14, w * 0.65, groundY - 3)
-        ..quadraticBezierTo(w * 0.82, groundY + 4, w, groundY - 7)
-        ..lineTo(w, h)
-        ..lineTo(0, h)
-        ..close(),
-      Paint()..color = const Color(0xFF080F07),
-    );
-
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, groundY + 12)
-        ..quadraticBezierTo(w * 0.28, groundY + 5, w * 0.55, groundY + 14)
-        ..quadraticBezierTo(w * 0.78, groundY + 10, w, groundY + 8)
-        ..lineTo(w, h)
-        ..lineTo(0, h)
-        ..close(),
-      Paint()..color = const Color(0xFF0C1A0A),
-    );
-
-    // Grass blades
-    final rng = math.Random(77);
-    final blade = Paint()
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    for (int i = 0; i < 70; i++) {
-      final x = rng.nextDouble() * w;
-      final baseY = groundY + 10 + (x / w) * 14;
-      final blH = 10 + rng.nextDouble() * 24;
-      final lean = (rng.nextDouble() - 0.5) * 16;
-      blade.color = Color.fromRGBO(
-        (10 + (rng.nextDouble() * 18)).round(),
-        (52 + (rng.nextDouble() * 44)).round(),
-        (12 + (rng.nextDouble() * 18)).round(),
-        0.65 + rng.nextDouble() * 0.35,
-      );
-      canvas.drawLine(
-          Offset(x, baseY), Offset(x + lean, baseY - blH), blade);
-    }
-  }
-
-  void _drawMist(Canvas canvas, double w, double h) {
-    canvas.drawRect(
-      Rect.fromLTWH(0, h * 0.28, w, h * 0.38),
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            const Color(0xFF0A1A08).withValues(alpha: 0.18),
-            Colors.transparent,
-          ],
-          stops: const [0.0, 0.55, 1.0],
-        ).createShader(Rect.fromLTWH(0, h * 0.28, w, h * 0.38)),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ForestBgPainter old) => false;
-}

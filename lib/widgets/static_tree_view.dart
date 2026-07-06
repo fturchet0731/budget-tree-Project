@@ -135,16 +135,6 @@ class _StaticTreePainter extends CustomPainter {
     final seedBase = budget.id.hashCode;
 
     // Soft shadow below the canopy
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx + 8, trunkTopY + 8),
-          width: 150 * scale,
-          height: 22 * scale),
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.18)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
-    );
-
     // Organic foliage clusters from back to front
     final clusters = [
       (cx - 50, cy + 28, 50.0),

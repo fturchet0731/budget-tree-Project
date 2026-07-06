@@ -16,6 +16,7 @@ import '../services/pay_scheduler.dart';
 import '../services/sound_service.dart';
 import '../services/suggestion_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import '../widgets/achievements_sheet.dart';
@@ -122,7 +123,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF122B0F),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
@@ -131,7 +131,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               result.hadActivity
                   ? Icons.water_drop_outlined
                   : Icons.schedule_outlined,
-              color: AppColors.lightLeaf,
+              color: AppColors.forestGreen,
               size: 18,
             ),
             const SizedBox(width: 10),
@@ -186,13 +186,9 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (sbCtx, setSBState) => AlertDialog(
-          backgroundColor: const Color(0xFF122B0F),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
           title: Row(
             children: [
-              const Icon(Icons.park, color: AppColors.lightLeaf, size: 22),
+              const Icon(Icons.park, color: AppColors.forestGreen, size: 22),
               const SizedBox(width: 10),
               Text(
                 l.saveBudgetTreeQuestion,
@@ -257,11 +253,11 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: autoLink
-                                ? AppColors.lightLeaf
+                                ? AppColors.forestGreen
                                 : Colors.transparent,
                             border: Border.all(
                               color: autoLink
-                                  ? AppColors.lightLeaf
+                                  ? AppColors.forestGreen
                                   : AppColors.mossGreen.withValues(alpha: 0.6),
                               width: 1.6,
                             ),
@@ -315,12 +311,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               ),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.forestGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
               onPressed: () async {
                 Navigator.pop(ctx);
                 // Capture before stamping savedAt: a never-saved budget is a
@@ -352,7 +342,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 if (autoLinkedCount > 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      backgroundColor: const Color(0xFF122B0F),
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -369,7 +358,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: const Color(0xFF122B0F),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -378,7 +366,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                       children: [
                         const Icon(
                           Icons.park,
-                          color: AppColors.lightLeaf,
+                          color: AppColors.forestGreen,
                           size: 20,
                         ),
                         const SizedBox(width: 10),
@@ -422,9 +410,10 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF0D2010),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        decoration: BoxDecoration(
+          color: AppTokens.current.card,
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(26)),
         ),
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
         child: Column(
@@ -548,7 +537,15 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
       body: Stack(
         children: [
           // ── Palette-aware sky gradient ────────
-          Container(decoration: BoxDecoration(gradient: AppPalettes.sky())),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppTokens.current.skyTint, AppTokens.current.canvas],
+              ),
+            ),
+          ),
           // ── Static background scene ───────────
           CustomPaint(
             size: Size(size.width, size.height),
@@ -594,19 +591,14 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.22),
+                        color: AppTokens.current.card,
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        border:
+                            Border.all(color: AppTokens.current.cardBorder),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back,
-                        color: Colors.white,
+                        color: AppTokens.current.textPrimary,
                         size: 20,
                       ),
                     ),
@@ -626,17 +618,8 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.fredoka(
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: AppTokens.current.textPrimary,
                                   fontSize: 20,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      offset: const Offset(1, 2),
-                                      blurRadius: 5,
-                                    ),
-                                  ],
                                 ),
                               ),
                             ),
@@ -650,17 +633,13 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                                 decoration: BoxDecoration(
                                   color: Color(
                                     _category!.colorValue,
-                                  ).withValues(alpha: 0.35),
+                                  ).withValues(alpha: 0.18),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.5),
-                                    width: 1,
-                                  ),
                                 ),
                                 child: Text(
                                   _category!.name.toUpperCase(),
                                   style: GoogleFonts.nunito(
-                                    color: Colors.white,
+                                    color: AppTokens.current.textPrimary,
                                     fontSize: 9,
                                     letterSpacing: 1.0,
                                     fontWeight: FontWeight.w700,
@@ -673,7 +652,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                         Text(
                           'Income: \$${widget.budget.totalIncome.toStringAsFixed(2)}',
                           style: GoogleFonts.nunito(
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: AppTokens.current.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -686,19 +665,12 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD54F).withValues(alpha: 0.22),
+                        color: const Color(0xFFFFD54F).withValues(alpha: 0.30),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: const Icon(
                         Icons.lightbulb_outline,
-                        color: Colors.white,
+                        color: Color(0xFFBA8514),
                         size: 20,
                       ),
                     ),
@@ -724,18 +696,20 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.38),
+                      color: AppTokens.current.card,
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTokens.current.cardBorder),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.eco, color: Colors.white, size: 14),
+                        Icon(Icons.eco,
+                            color: AppTokens.current.accentStrong, size: 14),
                         const SizedBox(width: 6),
                         Text(
                           l.tapALeaf,
                           style: GoogleFonts.nunito(
-                            color: Colors.white,
+                            color: AppTokens.current.textPrimary,
                             fontSize: 13,
                           ),
                         ),
@@ -791,18 +765,18 @@ class _TreeSceneBackground extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    _drawSun(canvas, Offset(w * 0.84, h * 0.075), 30);
-    _drawClouds(canvas, w, h);
-    _drawBirds(canvas, w, h);
+    _drawSun(canvas, Offset(w * 0.84, h * 0.075), 26);
     _drawTreeLine(canvas, w, h);
     _drawGround(canvas, w, h);
   }
 
-  /// Faint distant trees along the horizon, behind the rolling ground —
-  /// gives the growing tree the same sense of depth as the other scenes.
+  /// Faint distant trees along the horizon, in a flat conifer tint so the
+  /// growing budget tree owns the stage.
   void _drawTreeLine(Canvas canvas, double w, double h) {
     final groundY = h * 0.74;
-    final c = AppPalettes.groundClose().withValues(alpha: 0.55);
+    final c = AppSettings.instance.isDark
+        ? const Color(0xFF243014)
+        : Conifer.c200;
     for (int i = 0; i < 7; i++) {
       final x = (i + 0.5) / 7 * w;
       // Keep the center clear so the budget tree owns the stage.
@@ -818,163 +792,37 @@ class _TreeSceneBackground extends CustomPainter {
   }
 
   void _drawSun(Canvas canvas, Offset c, double r) {
-    final isMidnight = AppSettings.instance.palette == AppPalette.dark;
-    final glow = AppPalettes.celestialGlow();
-    final core = AppPalettes.celestial();
-
-    // Glow
+    final dark = AppSettings.instance.isDark;
+    // One flat disc with a flat halo ring; a flat crescent makes the moon.
     canvas.drawCircle(
       c,
-      r * 4.5,
+      r * 1.6,
       Paint()
-        ..shader = RadialGradient(
-          colors: [glow.withValues(alpha: 0.32), Colors.transparent],
-        ).createShader(Rect.fromCircle(center: c, radius: r * 4.5)),
+        ..color = (dark ? const Color(0xFFB3C9E0) : const Color(0xFFFFE082))
+            .withValues(alpha: 0.35),
     );
-    // Rays (skipped for moon — moons don't have rays)
-    if (!isMidnight) {
-      final rayPaint = Paint()
-        ..color = glow.withValues(alpha: 0.30)
-        ..strokeWidth = 1.5
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
-      for (int i = 0; i < 8; i++) {
-        final angle = i * math.pi / 4;
-        canvas.drawLine(
-          Offset(
-            c.dx + math.cos(angle) * r * 1.5,
-            c.dy + math.sin(angle) * r * 1.5,
-          ),
-          Offset(
-            c.dx + math.cos(angle) * r * 3.2,
-            c.dy + math.sin(angle) * r * 3.2,
-          ),
-          rayPaint,
-        );
-      }
-    }
-    // Core disc
-    canvas.drawCircle(c, r, Paint()..color = core);
     canvas.drawCircle(
       c,
       r,
       Paint()
-        ..color = glow
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+        ..color = dark ? const Color(0xFFE3EEF7) : const Color(0xFFFFD54F),
     );
-    // Shine spot
-    canvas.drawCircle(
-      Offset(c.dx - r * 0.30, c.dy - r * 0.30),
-      r * 0.32,
-      Paint()..color = Colors.white.withValues(alpha: 0.40),
-    );
-    // Moon crescent shading
-    if (isMidnight) {
+    if (dark) {
       canvas.drawCircle(
         Offset(c.dx + r * 0.30, c.dy - r * 0.05),
         r * 0.95,
-        Paint()..color = const Color(0xFF030814).withValues(alpha: 0.55),
-      );
-    }
-  }
-
-  void _drawClouds(Canvas canvas, double w, double h) {
-    _cloud(canvas, Offset(w * 0.13, h * 0.085), 1.0);
-    _cloud(canvas, Offset(w * 0.57, h * 0.055), 0.72);
-    _cloud(canvas, Offset(w * 0.35, h * 0.135), 0.52);
-  }
-
-  void _cloud(Canvas canvas, Offset c, double s) {
-    final r = 22.0 * s;
-
-    // Shadow underside
-    final shadowPaint = Paint()
-      ..color = const Color(0xFFB0C4DE).withValues(alpha: 0.30);
-    for (final (dx, dy, dr) in [
-      (0.0, r * 0.30, 1.0),
-      (r * 1.05, r * 0.45, 0.80),
-      (-r * 0.95, r * 0.50, 0.68),
-    ]) {
-      canvas.drawCircle(
-        Offset(c.dx + dx, c.dy + dy),
-        r * dr * 0.5,
-        shadowPaint,
-      );
-    }
-    canvas.drawRect(
-      Rect.fromLTWH(c.dx - r * 1.35, c.dy + r * 0.25, r * 2.7, r * 0.4),
-      shadowPaint,
-    );
-
-    // Main cloud body
-    final p = Paint()..color = Colors.white.withValues(alpha: 0.92);
-    for (final (dx, dy, dr) in [
-      (0.0, 0.0, 1.0),
-      (r * 1.05, r * 0.20, 0.80),
-      (-r * 0.95, r * 0.28, 0.68),
-      (r * 0.35, -r * 0.46, 0.88),
-      (-r * 0.35, -r * 0.36, 0.65),
-    ]) {
-      canvas.drawCircle(Offset(c.dx + dx, c.dy + dy), r * dr, p);
-    }
-    canvas.drawRect(Rect.fromLTWH(c.dx - r * 1.35, c.dy, r * 2.7, r * 0.5), p);
-
-    // Highlight on top
-    canvas.drawCircle(
-      Offset(c.dx - r * 0.2, c.dy - r * 0.3),
-      r * 0.25,
-      Paint()..color = Colors.white.withValues(alpha: 0.55),
-    );
-  }
-
-  void _drawBirds(Canvas canvas, double w, double h) {
-    final isMidnight = palette == AppPalette.dark;
-    final p = Paint()
-      ..color = (isMidnight ? Colors.white : const Color(0xFF1A237E))
-          .withValues(alpha: 0.45)
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    for (final (bx, by, bs) in [
-      (w * 0.20, h * 0.17, 7.0),
-      (w * 0.26, h * 0.145, 5.5),
-      (w * 0.50, h * 0.10, 8.0),
-      (w * 0.56, h * 0.085, 6.2),
-      (w * 0.63, h * 0.125, 5.0),
-    ]) {
-      canvas.drawArc(
-        Rect.fromCenter(center: Offset(bx - bs, by), width: bs * 2, height: bs),
-        math.pi,
-        math.pi,
-        false,
-        p,
-      );
-      canvas.drawArc(
-        Rect.fromCenter(center: Offset(bx + bs, by), width: bs * 2, height: bs),
-        math.pi,
-        math.pi,
-        false,
-        p,
+        Paint()..color = const Color(0xFF1C2430).withValues(alpha: 0.75),
       );
     }
   }
 
   void _drawGround(Canvas canvas, double w, double h) {
     final groundY = h * 0.74;
+    final dark = AppSettings.instance.isDark;
+    final closeC = dark ? const Color(0xFF2A3618) : Conifer.c400;
+    final midC = dark ? const Color(0xFF243014) : Conifer.c300;
 
-    // Soil base (darkest, right at trunk bottom)
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(w / 2, groundY + 4),
-        width: 100,
-        height: 14,
-      ),
-      Paint()..color = const Color(0xFF1A0C06).withValues(alpha: 0.55),
-    );
-
-    // Rolling ground layers — palette aware
+    // Rolling flat ground bands.
     canvas.drawPath(
       Path()
         ..moveTo(0, groundY)
@@ -983,9 +831,8 @@ class _TreeSceneBackground extends CustomPainter {
         ..lineTo(w, h)
         ..lineTo(0, h)
         ..close(),
-      Paint()..color = AppPalettes.groundClose(),
+      Paint()..color = closeC,
     );
-
     canvas.drawPath(
       Path()
         ..moveTo(0, groundY + 8)
@@ -994,38 +841,21 @@ class _TreeSceneBackground extends CustomPainter {
         ..lineTo(w, h)
         ..lineTo(0, h)
         ..close(),
-      Paint()..color = AppPalettes.groundMid(),
+      Paint()..color = midC,
     );
 
-    // Horizon edge lighter strip
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, groundY - 1)
-        ..quadraticBezierTo(w * 0.30, groundY - 11, w * 0.60, groundY - 1)
-        ..quadraticBezierTo(w * 0.82, groundY + 5, w, groundY - 3)
-        ..lineTo(w, groundY + 4)
-        ..lineTo(0, groundY + 4)
-        ..close(),
-      Paint()..color = AppPalettes.hillMid().withValues(alpha: 0.55),
-    );
-
-    // Grass blades
+    // A few flat grass blades in the conifer greens.
     final bladePaint = Paint()
       ..strokeWidth = 1.7
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     final rng = math.Random(21);
-    for (int i = 0; i < 48; i++) {
+    for (int i = 0; i < 26; i++) {
       final x = rng.nextDouble() * w;
       final baseY = groundY + (x / w) * 6;
-      final blH = 9 + rng.nextDouble() * 19;
+      final blH = 9 + rng.nextDouble() * 16;
       final lean = (rng.nextDouble() - 0.5) * 13;
-      bladePaint.color = Color.fromRGBO(
-        (18 + (rng.nextDouble() * 28)).round(),
-        (96 + (rng.nextDouble() * 62)).round(),
-        (18 + (rng.nextDouble() * 28)).round(),
-        1,
-      );
+      bladePaint.color = i.isEven ? Conifer.c600 : Conifer.c500;
       canvas.drawLine(
         Offset(x, baseY),
         Offset(x + lean, baseY - blH),
@@ -1039,9 +869,8 @@ class _TreeSceneBackground extends CustomPainter {
       Colors.white,
       const Color(0xFFFF8A65),
       const Color(0xFFCE93D8),
-      const Color(0xFFFFB74D),
     ];
-    for (int i = 0; i < 18; i++) {
+    for (int i = 0; i < 12; i++) {
       final x = 15.0 + rng.nextDouble() * (w - 30);
       if ((x - w / 2).abs() < 44) continue;
       final y = groundY + 2 + rng.nextDouble() * h * 0.07;
@@ -1722,7 +1551,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                         children: [
                           const Icon(
                             Icons.spa_outlined,
-                            color: AppColors.lightLeaf,
+                            color: AppColors.forestGreen,
                             size: 36,
                           ),
                           const SizedBox(height: 10),
@@ -1771,11 +1600,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.forestGreen,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                       onPressed: () => Navigator.pop(ctx),
                       child: Text(
@@ -1808,14 +1633,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppPalettes.deepForest().colors.last,
-            const Color(0xFF050805),
-          ],
-        ),
+        color: AppTokens.current.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
       ),
       padding: EdgeInsets.fromLTRB(
@@ -1855,7 +1673,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   child: Icon(
                     CategoryIcons.forKey(cat.emoji),
                     size: 30,
-                    color: AppColors.lightLeaf,
+                    color: AppColors.forestGreen,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1910,7 +1728,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                         '\$${cat.allocated.toStringAsFixed(2)}',
                         style: GoogleFonts.fredoka(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.lightLeaf,
+                          color: AppColors.forestGreen,
                           fontSize: 28,
                         ),
                       ),
@@ -1924,7 +1742,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       minHeight: 12,
                       backgroundColor: AppColors.soilMid,
                       valueColor: const AlwaysStoppedAnimation(
-                        AppColors.lightLeaf,
+                        AppColors.forestGreen,
                       ),
                     ),
                   ),
@@ -1981,13 +1799,13 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   onPressed: _loaded ? _openLinkPicker : null,
                   icon: const Icon(
                     Icons.add,
-                    color: AppColors.lightLeaf,
+                    color: AppColors.forestGreen,
                     size: 16,
                   ),
                   label: Text(
                     l.linkEllipsis,
                     style: GoogleFonts.nunito(
-                      color: AppColors.lightLeaf,
+                      color: AppColors.forestGreen,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -2000,7 +1818,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: CircularProgressIndicator(
-                    color: AppColors.lightLeaf,
+                    color: AppColors.forestGreen,
                     strokeWidth: 2,
                   ),
                 ),
@@ -2057,14 +1875,14 @@ class _LinkedGoalChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.forestGreen.withValues(alpha: 0.30),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.lightLeaf.withValues(alpha: 0.55)),
+        border: Border.all(color: AppColors.forestGreen.withValues(alpha: 0.55)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             GoalIcons.forKey(goal.iconKey),
-            color: AppColors.lightLeaf,
+            color: AppColors.forestGreen,
             size: 14,
           ),
           const SizedBox(width: 6),
@@ -2085,7 +1903,7 @@ class _LinkedGoalChip extends StatelessWidget {
           Text(
             '${(goal.progress * 100).toStringAsFixed(0)}%',
             style: GoogleFonts.nunito(
-              color: AppColors.lightLeaf,
+              color: AppColors.forestGreen,
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -2139,7 +1957,7 @@ class _GoalLinkTile extends StatelessWidget {
               ),
               child: Icon(
                 GoalIcons.forKey(goal.iconKey),
-                color: AppColors.lightLeaf,
+                color: AppColors.forestGreen,
                 size: 18,
               ),
             ),
@@ -2175,10 +1993,10 @@ class _GoalLinkTile extends StatelessWidget {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: linked ? AppColors.lightLeaf : Colors.transparent,
+                color: linked ? AppColors.forestGreen : Colors.transparent,
                 border: Border.all(
                   color: linked
-                      ? AppColors.lightLeaf
+                      ? AppColors.forestGreen
                       : AppColors.mossGreen.withValues(alpha: 0.55),
                   width: 1.6,
                 ),
@@ -2261,24 +2079,26 @@ class _ClockAndNextPayState extends State<_ClockAndNextPay> {
       padding: const EdgeInsets.only(top: 2),
       child: Row(
         children: [
-          const Icon(Icons.schedule, size: 11, color: Colors.white70),
+          Icon(Icons.schedule,
+              size: 11, color: AppTokens.current.textSecondary),
           const SizedBox(width: 4),
           Text(
             _localTime,
             style: GoogleFonts.nunito(
-              color: Colors.white.withValues(alpha: 0.78),
+              color: AppTokens.current.textSecondary,
               fontSize: 11,
             ),
           ),
           if (nextPay != null) ...[
             const SizedBox(width: 10),
-            const Icon(Icons.event, size: 11, color: Colors.white70),
+            Icon(Icons.event,
+                size: 11, color: AppTokens.current.textSecondary),
             const SizedBox(width: 4),
             Flexible(
               child: Text(
                 l.nextPayLine(nextPay),
                 style: GoogleFonts.nunito(
-                  color: Colors.white.withValues(alpha: 0.78),
+                  color: AppTokens.current.textSecondary,
                   fontSize: 11,
                 ),
                 overflow: TextOverflow.ellipsis,
