@@ -39,18 +39,47 @@ class ExpenseCategory {
   String emoji;
   List<String> linkedGoalIds;
 
+  /// How often this expense is charged (e.g. monthly rent). Null means it
+  /// simply recurs once per budget cycle — the legacy behaviour, and what
+  /// old persisted records decode to.
+  PayFrequency? frequency;
+
   ExpenseCategory({
     required this.name,
     required this.allocated,
     required this.emoji,
     List<String>? linkedGoalIds,
+    this.frequency,
   }) : linkedGoalIds = linkedGoalIds ?? [];
+
+  /// This expense expressed per one budget [cycle]: $1200 rent charged
+  /// monthly asks for ~$277 in a weekly budget — the amount to set aside
+  /// each cycle so the bill is covered when it lands. When either side is
+  /// unknown (or they match) the raw amount passes through unchanged.
+  double allocatedPerCycle(PayFrequency? cycle) {
+    final f = frequency;
+    if (f == null || cycle == null || f == cycle) return allocated;
+    return allocated * f.periodsPerMonth / cycle.periodsPerMonth;
+  }
+
+  /// Set the allocation from a per-[cycle] figure (the inverse of
+  /// [allocatedPerCycle]) — used when an AI plan hands back per-cycle
+  /// amounts for an expense that carries its own rhythm.
+  void setAllocatedPerCycle(double perCycle, PayFrequency? cycle) {
+    final f = frequency;
+    if (f == null || cycle == null || f == cycle) {
+      allocated = perCycle;
+    } else {
+      allocated = perCycle * cycle.periodsPerMonth / f.periodsPerMonth;
+    }
+  }
 
   Map<String, dynamic> toJson() => {
         'name': name,
         'allocated': allocated,
         'emoji': emoji,
         'linkedGoalIds': linkedGoalIds,
+        'frequency': frequency?.index,
       };
 
   factory ExpenseCategory.fromJson(Map<String, dynamic> j) => ExpenseCategory(
@@ -61,6 +90,7 @@ class ExpenseCategory {
                 ?.map((e) => e as String)
                 .toList() ??
             const [],
+        frequency: payFrequencyFromIndex(j['frequency'] as int?),
       );
 }
 
@@ -96,12 +126,18 @@ class BudgetModel {
   /// always compare against a like-for-like number.
   double get totalIncome =>
       incomeSources.fold(0.0, (s, e) => s + e.amountPerCycle(payFrequency));
-  double get totalAllocated => expenses.fold(0.0, (s, e) => s + e.allocated);
+
+  /// Total allocated per budget cycle: each expense is normalised from its
+  /// own charge rhythm into [payFrequency], mirroring [totalIncome], so the
+  /// two always compare like-for-like.
+  double get totalAllocated =>
+      expenses.fold(0.0, (s, e) => s + e.allocatedPerCycle(payFrequency));
   double get remaining => totalIncome - totalAllocated;
 
   double percentageFor(ExpenseCategory category) {
     if (totalIncome == 0) return 0;
-    return (category.allocated / totalIncome).clamp(0.0, 1.0);
+    return (category.allocatedPerCycle(payFrequency) / totalIncome)
+        .clamp(0.0, 1.0);
   }
 
   Map<String, dynamic> toJson() => {

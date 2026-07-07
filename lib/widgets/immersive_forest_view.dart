@@ -484,8 +484,9 @@ class _BudgetInfoSheet extends StatelessWidget {
                 )),
             const SizedBox(height: 8),
             ...budget.expenses.map((cat) {
+              final perCycle = cat.allocatedPerCycle(budget.payFrequency);
               final pct = budget.totalIncome > 0
-                  ? (cat.allocated / budget.totalIncome).clamp(0.0, 1.0)
+                  ? (perCycle / budget.totalIncome).clamp(0.0, 1.0)
                   : 0.0;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -506,7 +507,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                                       color: AppColors.stoneBeigeColor,
                                       fontSize: 12.5)),
                               Text(
-                                '\$${cat.allocated.toStringAsFixed(2)}',
+                                '\$${perCycle.toStringAsFixed(2)}',
                                 style: GoogleFonts.nunito(
                                     color: AppColors.lightLeaf,
                                     fontSize: 12.5,

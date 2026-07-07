@@ -77,7 +77,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
             _LinkedBranchInfo(
               budgetName: b.budgetName,
               category: cat,
-              monthlyAllocated: cat.allocated,
+              monthlyAllocated: cat.allocatedPerCycle(b.payFrequency),
             ),
           );
         }

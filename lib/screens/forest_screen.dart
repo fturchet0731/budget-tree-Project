@@ -578,8 +578,10 @@ class _BudgetCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 10),
                               ...budget.expenses.map((cat) {
+                                final perCycle =
+                                    cat.allocatedPerCycle(budget.payFrequency);
                                 final pct = budget.totalIncome > 0
-                                    ? (cat.allocated / budget.totalIncome).clamp(0.0, 1.0)
+                                    ? (perCycle / budget.totalIncome).clamp(0.0, 1.0)
                                     : 0.0;
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 9),
@@ -600,7 +602,7 @@ class _BudgetCard extends StatelessWidget {
                                                         color: AppColors.stoneBeigeColor,
                                                         fontSize: 12)),
                                                 Text(
-                                                  '\$${cat.allocated.toStringAsFixed(2)}',
+                                                  '\$${perCycle.toStringAsFixed(2)}',
                                                   style: GoogleFonts.nunito(
                                                     color: AppColors.forestGreen,
                                                     fontSize: 12,
@@ -958,6 +960,8 @@ class _EditSheet extends StatefulWidget {
 class _EditSheetState extends State<_EditSheet> {
   late TextEditingController _nameCtrl;
   late List<TextEditingController> _amountCtrls;
+  // Each branch's charge rhythm, editable alongside its amount.
+  late List<PayFrequency?> _expFreqs;
   // Editable copy of the roots feeding this tree: name + amount + rhythm.
   late List<(TextEditingController, TextEditingController, PayFrequency?)>
       _incomes;
@@ -972,6 +976,7 @@ class _EditSheetState extends State<_EditSheet> {
     _amountCtrls = widget.budget.expenses
         .map((e) => TextEditingController(text: e.allocated.toStringAsFixed(2)))
         .toList();
+    _expFreqs = widget.budget.expenses.map((e) => e.frequency).toList();
     _incomes = widget.budget.incomeSources
         .map((inc) => (
               TextEditingController(text: inc.name),
@@ -994,8 +999,23 @@ class _EditSheetState extends State<_EditSheet> {
     super.dispose();
   }
 
-  double get _allocatedNow =>
-      _amountCtrls.fold(0.0, (s, c) => s + (double.tryParse(c.text) ?? 0.0));
+  /// What each cycle the edited amounts convert to (a monthly rent edited in
+  /// a weekly budget counts its per-cycle share), so the summary row always
+  /// compares like-for-like against the per-cycle income.
+  double _perCycle(double amount, PayFrequency? freq) {
+    final cycle = widget.budget.payFrequency;
+    if (freq == null || cycle == null || freq == cycle) return amount;
+    return amount * freq.periodsPerMonth / cycle.periodsPerMonth;
+  }
+
+  double get _allocatedNow {
+    var sum = 0.0;
+    for (var i = 0; i < _amountCtrls.length; i++) {
+      sum += _perCycle(
+          double.tryParse(_amountCtrls[i].text) ?? 0.0, _expFreqs[i]);
+    }
+    return sum;
+  }
 
   List<IncomeSource> get _editedIncomes => [
         for (final (n, a, f) in _incomes)
@@ -1045,7 +1065,8 @@ class _EditSheetState extends State<_EditSheet> {
             name: cat.name,
             allocated: amount,
             emoji: cat.emoji,
-            linkedGoalIds: List<String>.from(cat.linkedGoalIds));
+            linkedGoalIds: List<String>.from(cat.linkedGoalIds),
+            frequency: _expFreqs[entry.key]);
       }).toList(),
       age: widget.budget.age,
       location: widget.budget.location,
@@ -1258,43 +1279,84 @@ class _EditSheetState extends State<_EditSheet> {
                   ...widget.budget.expenses.asMap().entries.map((entry) {
                   final i = entry.key;
                   final cat = entry.value;
+                  final freq = _expFreqs[i];
+                  final cycle = widget.budget.payFrequency;
+                  final differs =
+                      freq != null && cycle != null && freq != cycle;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Icon(CategoryIcons.forKey(cat.emoji),
-                            color: AppColors.forestGreen, size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(cat.name,
-                              style: GoogleFonts.nunito(
-                                  color: AppColors.stoneBeigeColor,
-                                  fontSize: 13)),
+                        Row(
+                          children: [
+                            Icon(CategoryIcons.forKey(cat.emoji),
+                                color: AppColors.forestGreen, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(cat.name,
+                                  style: GoogleFonts.nunito(
+                                      color: AppColors.stoneBeigeColor,
+                                      fontSize: 13)),
+                            ),
+                            SizedBox(
+                              width: 94,
+                              child: TextField(
+                                controller: _amountCtrls[i],
+                                style: TextStyle(
+                                    color: AppColors.forestGreen, fontSize: 14),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9.]'))
+                                ],
+                                onChanged: (_) => setState(() {}),
+                                textAlign: TextAlign.right,
+                                decoration: InputDecoration(
+                                  prefixText: '\$  ',
+                                  prefixStyle:
+                                      TextStyle(color: AppColors.mossGreen),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 10),
+                                ),
+                              ),
+                            ),
+                            // Same rhythm picker the income rows carry: how
+                            // often this bill is charged.
+                            PopupMenuButton<PayFrequency>(
+                              tooltip: l.expenseCharged,
+                              initialValue: freq ?? cycle,
+                              onSelected: (f) =>
+                                  setState(() => _expFreqs[i] = f),
+                              itemBuilder: (ctx) => [
+                                for (final f in PayFrequency.values)
+                                  PopupMenuItem(
+                                      value: f,
+                                      child: Text(f.localizedLabel(l))),
+                              ],
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 2, vertical: 6),
+                                child: Icon(Icons.event_repeat_outlined,
+                                    size: 18, color: AppColors.mossGreen),
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(
-                          width: 94,
-                          child: TextField(
-                            controller: _amountCtrls[i],
-                            style: TextStyle(
-                                color: AppColors.forestGreen, fontSize: 14),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9.]'))
-                            ],
-                            onChanged: (_) => setState(() {}),
-                            textAlign: TextAlign.right,
-                            decoration: InputDecoration(
-                              prefixText: '\$  ',
-                              prefixStyle:
-                                  TextStyle(color: AppColors.mossGreen),
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 10),
+                        if (differs)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2, right: 26),
+                            child: Text(
+                              l.approxEachCycle(
+                                '\$${_perCycle(double.tryParse(_amountCtrls[i].text) ?? 0.0, freq).toStringAsFixed(0)}',
+                              ),
+                              style: GoogleFonts.nunito(
+                                  color: AppColors.mossGreen, fontSize: 11),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   );

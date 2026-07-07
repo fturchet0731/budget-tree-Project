@@ -63,9 +63,18 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final _expNameCtrl = TextEditingController();
   final _expAmountCtrl = TextEditingController();
   String _selectedIconKey = 'other';
+  PayFrequency? _newExpenseFreq; // null = charged once per budget cycle
   // Same reveal pattern: the budget-standing summary appears once the user
   // confirms they're done adding expense branches.
   bool _expensesConfirmed = false;
+
+  // Scroll-through gate: Next stays disabled until the user has scrolled to
+  // the end of the current step, so nothing below the fold gets missed. A
+  // step whose content fits on screen passes immediately (its first metrics
+  // notification reports nothing left below), and freshly revealed content
+  // that extends past the fold re-arms the gate.
+  final Map<int, bool> _seenEnd = {};
+  final Map<int, double> _lastMaxExtent = {};
 
   // Step 3 – Survey (questionnaire answers keyed by question key -> option key)
   // plus an optional free-text note the coach folds into its reasoning.
@@ -146,8 +155,25 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
   double get _totalIncome =>
       _incomeSources.fold(0.0, (s, e) => s + e.amountPerCycle(_payFrequency));
-  double get _totalAllocated => _expenses.fold(0.0, (s, e) => s + e.allocated);
+  double get _totalAllocated =>
+      _expenses.fold(0.0, (s, e) => s + e.allocatedPerCycle(_payFrequency));
   bool get _overBudget => _totalAllocated > _totalIncome + 0.005;
+
+  /// Feed every scroll/metrics report from the current step into the
+  /// scroll-through gate. Reaching (or starting at) the end opens it; content
+  /// growing past the fold re-arms it.
+  void _noteScrollMetrics(ScrollMetrics m) {
+    if (!m.hasContentDimensions || m.axis != Axis.vertical) return;
+    const eps = 40.0;
+    final atEnd = m.extentAfter <= eps;
+    final grew =
+        m.maxScrollExtent > (_lastMaxExtent[_step] ?? 0) + eps;
+    _lastMaxExtent[_step] = m.maxScrollExtent;
+    final next = atEnd ? true : (grew ? false : _seenEnd[_step]);
+    if (next != _seenEnd[_step] && next != null) {
+      setState(() => _seenEnd[_step] = next);
+    }
+  }
 
   /// Acorn steps in and refuses to move on while the branches ask for more
   /// than the income brings in, telling the user what to trim. Runs for every
@@ -194,6 +220,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
           name: name,
           allocated: amount < 0 ? 0 : amount,
           emoji: _selectedIconKey,
+          frequency: _newExpenseFreq ?? _payFrequency,
         ),
       );
       _expNameCtrl.clear();
@@ -211,13 +238,15 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
   /// Apply a chosen AI plan: write each plan item's amount onto the matching
   /// expense (by name), leaving any leftover unallocated as savings headroom.
+  /// Plan amounts are per budget cycle, so an expense with its own charge
+  /// rhythm converts them back into its raw amount.
   void _applyPlan(AllocationPlan plan) => setState(() {
     for (final cat in _expenses) {
       final match = plan.items.cast<PlanItem?>().firstWhere(
         (it) => it!.name.toLowerCase().trim() == cat.name.toLowerCase().trim(),
         orElse: () => null,
       );
-      if (match != null) cat.allocated = match.amount;
+      if (match != null) cat.setAllocatedPerCycle(match.amount, _payFrequency);
     }
     _planSettled = true;
   });
@@ -294,7 +323,21 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 ),
                 const SizedBox(height: 4),
                 Expanded(
-                  child: AnimatedSwitcher(
+                  // Both listeners feed the scroll-through gate: metrics
+                  // notifications cover steps whose content already fits (and
+                  // content growing on reveal), scroll notifications cover the
+                  // user actually reaching the end.
+                  child: NotificationListener<ScrollMetricsNotification>(
+                    onNotification: (n) {
+                      _noteScrollMetrics(n.metrics);
+                      return false;
+                    },
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        _noteScrollMetrics(n.metrics);
+                        return false;
+                      },
+                      child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 380),
                     switchInCurve: Curves.easeOutCubic,
                     switchOutCurve: Curves.easeInCubic,
@@ -348,6 +391,10 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             totalIncome: _totalIncome,
                             totalAllocated: _totalAllocated,
                             presets: _presets,
+                            cycle: _payFrequency,
+                            newExpenseFreq: _newExpenseFreq ?? _payFrequency,
+                            onExpenseFreqChanged: (f) =>
+                                setState(() => _newExpenseFreq = f),
                             confirmed: _expensesConfirmed,
                             onConfirm: () =>
                                 setState(() => _expensesConfirmed = true),
@@ -396,19 +443,30 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             onFirstPayDateChanged: (d) =>
                                 setState(() => _firstPayDate = d),
                           ),
+                      ),
+                    ),
                   ),
                 ),
-                _BottomBar(
-                  step: _step,
-                  lastStep: 3,
-                  buttonKey: _coachTargets[CoachTargets.next],
-                  canAdvance: _step == 0
+                Builder(builder: (context) {
+                  final stepReady = _step == 0
                       ? _incomeConfirmed
                       : _step == 1
                       ? _expensesConfirmed
                       : _step == 2
                       ? true // questionnaire is optional
-                      : _planSettled,
+                      : _planSettled;
+                  final seenAll = _seenEnd[_step] == true;
+                  return _BottomBar(
+                  step: _step,
+                  lastStep: 3,
+                  buttonKey: _coachTargets[CoachTargets.next],
+                  canAdvance: stepReady && seenAll,
+                  // Everything on the step is settled but something below the
+                  // fold hasn't been seen yet: say so instead of leaving a
+                  // silently disabled button.
+                  hint: stepReady && !seenAll
+                      ? AppLocalizations.of(context).scrollToContinue
+                      : null,
                   onNext: () {
                     // Never move past a step whose branches outgrow the
                     // income; Acorn explains what to fix instead.
@@ -422,7 +480,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                       _plantTree();
                     }
                   },
-                ),
+                );
+                }),
               ],
             ),
           ),
@@ -1028,6 +1087,14 @@ class _ExpenseStep extends StatelessWidget {
   final double totalAllocated;
   final List<(String, String)> presets;
 
+  /// The budget's cycle, so a branch charged on a different rhythm can show
+  /// its per-cycle set-aside.
+  final PayFrequency cycle;
+
+  /// Charge rhythm for the expense being typed into the hero input.
+  final PayFrequency newExpenseFreq;
+  final ValueChanged<PayFrequency> onExpenseFreqChanged;
+
   /// True once the user confirms they've listed all their branches — reveals
   /// the "where you stand" budget summary.
   final bool confirmed;
@@ -1047,6 +1114,9 @@ class _ExpenseStep extends StatelessWidget {
     required this.totalIncome,
     required this.totalAllocated,
     required this.presets,
+    required this.cycle,
+    required this.newExpenseFreq,
+    required this.onExpenseFreqChanged,
     required this.confirmed,
     required this.onConfirm,
     required this.onAdd,
@@ -1137,7 +1207,31 @@ class _ExpenseStep extends StatelessWidget {
                     fontStyle: FontStyle.italic,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
+                // The bill's own rhythm; monthly rent in a weekly budget gets
+                // converted into a per-cycle set-aside automatically.
+                Text(
+                  l.expenseCharged,
+                  style: GoogleFonts.nunito(
+                    color: AppColors.mossGreen,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final f in PayFrequency.values)
+                      _SurveyChip(
+                        label: f.localizedLabel(l),
+                        selected: newExpenseFreq == f,
+                        onTap: () => onExpenseFreqChanged(f),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -1225,22 +1319,54 @@ class _ExpenseStep extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            exp.name,
-                            style: GoogleFonts.nunito(
-                              color: AppColors.stoneBeigeColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                exp.name,
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.stoneBeigeColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              if (exp.frequency != null)
+                                Text(
+                                  exp.frequency!.localizedLabel(l),
+                                  style: GoogleFonts.nunito(
+                                    color: AppColors.mossGreen,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                        Text(
-                          '\$${exp.allocated.toStringAsFixed(2)}',
-                          style: GoogleFonts.nunito(
-                            color: AppColors.forestGreen,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '\$${exp.allocated.toStringAsFixed(2)}',
+                              style: GoogleFonts.nunito(
+                                color: AppColors.forestGreen,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            // The set-aside advice: what this bill asks of
+                            // each budget cycle when its rhythm differs.
+                            if (exp.allocated > 0 &&
+                                exp.frequency != null &&
+                                exp.frequency != cycle)
+                              Text(
+                                l.approxEachCycle(
+                                  '\$${exp.allocatedPerCycle(cycle).toStringAsFixed(0)}',
+                                ),
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.mossGreen,
+                                  fontSize: 11,
+                                ),
+                              ),
+                          ],
                         ),
                         IconButton(
                           icon: Icon(
@@ -1845,9 +1971,14 @@ class _PlanStepState extends State<_PlanStep> {
       _error = null;
     });
     try {
+      // Amounts go to the coach per budget cycle, whatever rhythm each bill
+      // is charged on, so its plans stay like-for-like with the income.
       final inputs = [
         for (final cat in widget.expenses)
-          BudgetExpenseInput(name: cat.name, amount: cat.allocated),
+          BudgetExpenseInput(
+            name: cat.name,
+            amount: cat.allocatedPerCycle(widget.payFrequency),
+          ),
       ];
       final plans = await AiCoachService.instance.budgetPlans(
         income: widget.income,
@@ -1882,8 +2013,8 @@ class _PlanStepState extends State<_PlanStep> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final aiAvailable = AiCoachService.instance.isAvailable;
-    final totalAllocated =
-        widget.expenses.fold(0.0, (s, e) => s + e.allocated);
+    final totalAllocated = widget.expenses
+        .fold(0.0, (s, e) => s + e.allocatedPerCycle(widget.payFrequency));
     return Column(
       children: [
         // Same always-visible meter as the Expenses step: allocations settle
@@ -1934,7 +2065,10 @@ class _PlanStepState extends State<_PlanStep> {
                         const SizedBox(width: 6),
                         Text(
                           cat.allocated > 0
-                              ? '${cat.name}  \$${cat.allocated.toStringAsFixed(0)}'
+                              ? (cat.frequency != null &&
+                                        cat.frequency != widget.payFrequency
+                                    ? '${cat.name}  \$${cat.allocated.toStringAsFixed(0)} (${cat.frequency!.localizedLabel(l)})'
+                                    : '${cat.name}  \$${cat.allocated.toStringAsFixed(0)}')
                               : cat.name,
                           style: GoogleFonts.nunito(
                             color: AppColors.stoneBeigeColor,
@@ -2024,12 +2158,29 @@ class _PlanStepState extends State<_PlanStep> {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              cat.name,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13.5,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  cat.name,
+                                  style: GoogleFonts.nunito(
+                                    color: AppColors.stoneBeigeColor,
+                                    fontSize: 13.5,
+                                  ),
+                                ),
+                                // Manual amounts are entered in the bill's own
+                                // rhythm; make that rhythm visible when it
+                                // differs from the cycle the meter reads in.
+                                if (cat.frequency != null &&
+                                    cat.frequency != widget.payFrequency)
+                                  Text(
+                                    cat.frequency!.localizedLabel(l),
+                                    style: GoogleFonts.nunito(
+                                      color: AppColors.mossGreen,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                           SizedBox(
@@ -2271,7 +2422,9 @@ class _PlanStepState extends State<_PlanStep> {
   }
 
   double get _leftover =>
-      widget.income - widget.expenses.fold(0.0, (s, e) => s + e.allocated);
+      widget.income -
+      widget.expenses
+          .fold(0.0, (s, e) => s + e.allocatedPerCycle(widget.payFrequency));
 
   Widget _buildLeftoverCard(BuildContext context, AppLocalizations l) {
     return AppCard(
@@ -2505,6 +2658,10 @@ class _BottomBar extends StatelessWidget {
   final bool canAdvance;
   final VoidCallback onNext;
 
+  /// Shown above the button when the only thing holding Next back is content
+  /// below the fold the user hasn't scrolled through yet.
+  final String? hint;
+
   /// Ring anchor for the tutorial coach ("tap Next" lines).
   final GlobalKey? buttonKey;
 
@@ -2513,6 +2670,7 @@ class _BottomBar extends StatelessWidget {
     required this.lastStep,
     required this.canAdvance,
     required this.onNext,
+    this.hint,
     this.buttonKey,
   });
 
@@ -2522,11 +2680,43 @@ class _BottomBar extends StatelessWidget {
     final isLast = step == lastStep;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
-      child: AppPrimaryButton(
-        key: buttonKey,
-        label: isLast ? l.plantMyBudgetTree : l.next,
-        icon: isLast ? Icons.park : Icons.arrow_forward,
-        onPressed: canAdvance ? onNext : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (hint != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.keyboard_double_arrow_down,
+                    size: 15,
+                    color: AppColors.mossGreen,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      hint!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.nunito(
+                        color: AppColors.mossGreen,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          AppPrimaryButton(
+            key: buttonKey,
+            label: isLast ? l.plantMyBudgetTree : l.next,
+            icon: isLast ? Icons.park : Icons.arrow_forward,
+            onPressed: canAdvance ? onNext : null,
+          ),
+        ],
       ),
     );
   }

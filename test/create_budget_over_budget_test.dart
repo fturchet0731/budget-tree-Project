@@ -33,6 +33,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
     }
 
+    // Next is gated on having scrolled through everything on the step, so
+    // reaching the end (like a user would) is part of advancing.
+    Future<void> scrollToEnd() async {
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -1600));
+      await settle();
+    }
+
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [
@@ -62,6 +69,9 @@ void main() {
     await tester.pump();
     await tester.tap(find.text("That's all my income"));
     await settle();
+    // Confirming reveals the budget-cycle card below; scroll through it so
+    // the scroll-through gate opens Next.
+    await scrollToEnd();
     await tester.tap(find.text('Next'));
     await settle();
 
@@ -85,6 +95,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.text("That's all my expenses"));
     await settle();
+    await scrollToEnd();
     await tester.tap(find.text('Next'));
     await settle();
 

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/pay_frequency_labels.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
@@ -1727,16 +1728,47 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                           fontSize: 14,
                         ),
                       ),
-                      Text(
-                        '\$${cat.allocated.toStringAsFixed(2)}',
-                        style: GoogleFonts.fredoka(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.forestGreen,
-                          fontSize: 28,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '\$${cat.allocated.toStringAsFixed(2)}',
+                            style: GoogleFonts.fredoka(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.forestGreen,
+                              fontSize: 28,
+                            ),
+                          ),
+                          if (cat.frequency != null)
+                            Text(
+                              cat.frequency!.localizedLabel(l),
+                              style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen,
+                                fontSize: 12,
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
+                  // The saving advice this feature exists for: when the bill's
+                  // rhythm differs from the budget cycle, spell out how much
+                  // to put away each cycle so the money is ready when it lands.
+                  if (cat.frequency != null &&
+                      widget.budget.payFrequency != null &&
+                      cat.frequency != widget.budget.payFrequency) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l.setAsideEachCycle(
+                        '\$${cat.allocatedPerCycle(widget.budget.payFrequency).toStringAsFixed(0)}',
+                      ),
+                      style: GoogleFonts.nunito(
+                        color: AppColors.mossGreen,
+                        fontSize: 11.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),

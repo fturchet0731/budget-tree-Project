@@ -4042,6 +4042,24 @@ abstract class AppLocalizations {
   /// **'≈ {amount} each cycle'**
   String approxEachCycle(String amount);
 
+  /// No description provided for @expenseCharged.
+  ///
+  /// In en, this message translates to:
+  /// **'How often is it charged?'**
+  String get expenseCharged;
+
+  /// No description provided for @setAsideEachCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside about {amount} each cycle so the money is ready when this bill lands.'**
+  String setAsideEachCycle(String amount);
+
+  /// No description provided for @scrollToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to the end to continue'**
+  String get scrollToContinue;
+
   /// No description provided for @totalIncomeCycle.
   ///
   /// In en, this message translates to:

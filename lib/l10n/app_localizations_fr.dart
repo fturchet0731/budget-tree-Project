@@ -2337,6 +2337,18 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get expenseCharged => 'À quelle fréquence est-elle facturée ?';
+
+  @override
+  String setAsideEachCycle(String amount) {
+    return 'Mettez de côté environ $amount par cycle pour que l\'argent soit prêt quand cette facture arrive.';
+  }
+
+  @override
+  String get scrollToContinue =>
+      'Faites défiler jusqu\'à la fin pour continuer';
+
+  @override
   String totalIncomeCycle(String cycle) {
     return 'Revenu total ($cycle)';
   }

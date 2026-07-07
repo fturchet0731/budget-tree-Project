@@ -22,7 +22,7 @@ class PayCycleResult {
 
 /// Manages scheduled pay processing: works out how many pay periods have
 /// elapsed since the last run, then credits every goal linked to a branch
-/// with the per-period share of that branch's monthly allocation.
+/// with that branch's per-cycle allocation for each elapsed period.
 class PayScheduler {
   PayScheduler._();
 
@@ -84,14 +84,16 @@ class PayScheduler {
     final allGoals = await GoalRepository.loadAll();
     final goalsById = {for (final g in allGoals) g.id: g};
 
-    final perMonth = freq.periodsPerMonth;
     final touchedGoals = <String>{};
     double totalDeposited = 0;
 
     for (final cat in budget.expenses) {
       if (cat.linkedGoalIds.isEmpty) continue;
+      // Allocations are per budget cycle (one pay period), normalised from
+      // the expense's own charge rhythm, so each elapsed period credits the
+      // full per-cycle share.
       final perPeriodPerGoal =
-          (cat.allocated / perMonth) / cat.linkedGoalIds.length;
+          cat.allocatedPerCycle(freq) / cat.linkedGoalIds.length;
       final perPeriodPerGoalForCycle = perPeriodPerGoal * periods;
 
       for (final goalId in cat.linkedGoalIds) {

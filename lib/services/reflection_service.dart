@@ -162,7 +162,8 @@ class ReflectionService {
     for (final b in budgets) {
       for (final cat in b.expenses) {
         if (cat.linkedGoalIds.isEmpty || cat.allocated <= 0) continue;
-        final share = cat.allocated / cat.linkedGoalIds.length;
+        final share =
+            cat.allocatedPerCycle(b.payFrequency) / cat.linkedGoalIds.length;
         for (final gid in cat.linkedGoalIds) {
           recommended[gid] = (recommended[gid] ?? 0) + share;
         }

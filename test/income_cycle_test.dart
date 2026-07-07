@@ -61,6 +61,71 @@ void main() {
     });
   });
 
+  group('ExpenseCategory.allocatedPerCycle', () {
+    test('monthly rent in a weekly budget asks for ~12/52 each cycle', () {
+      final e = ExpenseCategory(
+          name: 'Rent',
+          allocated: 1200,
+          emoji: 'home',
+          frequency: PayFrequency.monthly);
+      expect(e.allocatedPerCycle(PayFrequency.weekly),
+          closeTo(1200 * 12 / 52, 0.01));
+    });
+
+    test('legacy expense without a frequency passes through', () {
+      final e = ExpenseCategory(name: 'Old', allocated: 300, emoji: 'food');
+      expect(e.allocatedPerCycle(PayFrequency.weekly), 300);
+      expect(e.allocatedPerCycle(null), 300);
+    });
+
+    test('setAllocatedPerCycle inverts the conversion', () {
+      final e = ExpenseCategory(
+          name: 'Rent',
+          allocated: 0,
+          emoji: 'home',
+          frequency: PayFrequency.monthly);
+      e.setAllocatedPerCycle(300, PayFrequency.weekly);
+      expect(e.allocatedPerCycle(PayFrequency.weekly), closeTo(300, 0.01));
+      expect(e.allocated, closeTo(300 * 52 / 12, 0.01));
+    });
+
+    test('totalAllocated and remaining normalise into the budget cycle', () {
+      final b = BudgetModel(
+        budgetName: 'B',
+        incomeSources: [
+          IncomeSource(
+              name: 'Wage', amount: 500, frequency: PayFrequency.weekly),
+        ],
+        expenses: [
+          ExpenseCategory(
+              name: 'Rent',
+              allocated: 1300,
+              emoji: 'home',
+              frequency: PayFrequency.monthly),
+          ExpenseCategory(name: 'Food', allocated: 100, emoji: 'food'),
+        ],
+        payFrequency: PayFrequency.weekly,
+      );
+      expect(b.totalAllocated, closeTo(1300 * 12 / 52 + 100, 0.01));
+      expect(b.remaining, closeTo(500 - (1300 * 12 / 52 + 100), 0.01));
+    });
+
+    test('json round-trips the frequency and legacy decodes to null', () {
+      final e = ExpenseCategory(
+          name: 'Rent',
+          allocated: 1200,
+          emoji: 'home',
+          frequency: PayFrequency.monthly);
+      final back = ExpenseCategory.fromJson(e.toJson());
+      expect(back.frequency, PayFrequency.monthly);
+      expect(back.allocated, 1200);
+
+      final legacy = ExpenseCategory.fromJson(
+          {'name': 'Old', 'allocated': 300.0, 'emoji': 'food'});
+      expect(legacy.frequency, isNull);
+    });
+  });
+
   group('IncomeSource json', () {
     test('round-trips the frequency', () {
       final s = IncomeSource(

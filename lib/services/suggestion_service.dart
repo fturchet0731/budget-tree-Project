@@ -91,7 +91,7 @@ class SuggestionService {
           reason: l.sugPruneReason,
         ));
       } else {
-        final share = cat.allocated / income;
+        final share = cat.allocatedPerCycle(budget.payFrequency) / income;
         if (share > 0.35) {
           warns.add(BudgetSuggestion(
             tone: SuggestionTone.warn,
