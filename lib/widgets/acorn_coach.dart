@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_content.dart';
+import '../tutorial/tutorial_overlay.dart' show TapContinueHint;
 import 'acorn_mascot.dart';
 
 /// An in-screen Acorn coach that lives *on* a real screen and explains the
@@ -31,11 +33,18 @@ class AcornCoach extends StatefulWidget {
   /// Where the panel first appears before the user drags it.
   final Alignment initialAlignment;
 
+  /// The widgets Acorn can point at, keyed by [TutorialStep.highlightId].
+  /// While a line with a highlight id is on screen, the coach draws a pulsing
+  /// ring around the matching widget so the user knows what he's talking
+  /// about. Ids without a live widget (e.g. scrolled away) are just skipped.
+  final Map<String, GlobalKey>? targets;
+
   const AcornCoach({
     super.key,
     required this.lessonKey,
     required this.lines,
     this.initialAlignment = const Alignment(-0.85, 0.62),
+    this.targets,
   });
 
   @override
@@ -197,8 +206,16 @@ class _AcornCoachState extends State<AcornCoach>
             Size(area.width.clamp(0, 340).toDouble() - 24, 150);
         final pos = _pos ??= _seedPos(area, estimate);
         if (_hidden) return _buildHiddenHandle(area);
+        final highlightKey = _line.highlightId == null
+            ? null
+            : widget.targets?[_line.highlightId];
         return Stack(
           children: [
+            // Ring around whatever the current line is talking about.
+            if (_expanded && highlightKey != null)
+              Positioned.fill(
+                child: TargetHighlightRing(targetKey: highlightKey),
+              ),
             Positioned(
               left: pos.dx,
               top: pos.dy,
@@ -290,7 +307,7 @@ class _AcornCoachState extends State<AcornCoach>
           const AcornMascot(size: 34, sway: true),
           const SizedBox(width: 6),
           Text(
-            "Acorn's tip",
+            AppLocalizations.of(context).coachAcornTip,
             style: GoogleFonts.fredoka(
               fontWeight: FontWeight.w600,
               fontSize: 13,
@@ -337,7 +354,7 @@ class _AcornCoachState extends State<AcornCoach>
                         size: 15, color: AppColors.barkBrown),
                     const SizedBox(width: 3),
                     Text(
-                      'Acorn',
+                      _line.speaker,
                       style: GoogleFonts.fredoka(
                         fontWeight: FontWeight.w600,
                         fontSize: 12.5,
@@ -379,16 +396,14 @@ class _AcornCoachState extends State<AcornCoach>
                 const SizedBox(height: 4),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Text(
-                    _typing
-                        ? ''
-                        : _isLast
-                            ? 'Got it! ▸'
-                            : 'Tap ▸',
-                    style: GoogleFonts.nunito(
+                  child: AnimatedOpacity(
+                    opacity: _typing ? 0 : 1,
+                    duration: const Duration(milliseconds: 200),
+                    child: TapContinueHint(
+                      hint: _isLast
+                          ? AppLocalizations.of(context).coachGotIt
+                          : AppLocalizations.of(context).tourTapContinue,
                       fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.forestGreen,
                     ),
                   ),
                 ),
@@ -396,6 +411,94 @@ class _AcornCoachState extends State<AcornCoach>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A pulsing ring drawn around the widget a [TutorialStep.highlightId] points
+/// at, so the user can see exactly what Acorn is talking about. Hosted inside
+/// the coach's stack (which fills the screen area); it ignores pointers so
+/// the highlighted widget stays fully usable.
+class TargetHighlightRing extends StatefulWidget {
+  final GlobalKey targetKey;
+  const TargetHighlightRing({super.key, required this.targetKey});
+
+  @override
+  State<TargetHighlightRing> createState() => _TargetHighlightRingState();
+}
+
+class _TargetHighlightRingState extends State<TargetHighlightRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    // The controller both pulses the ring and keeps its position tracking the
+    // target (which can move as the list scrolls). With reduced motion the
+    // ring is drawn static; the ticker only re-syncs position.
+    _pulse = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1100))
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  /// The target's rect translated into this widget's coordinate space, or
+  /// null when the target isn't laid out right now (e.g. scrolled away).
+  Rect? _targetRect() {
+    final targetBox =
+        widget.targetKey.currentContext?.findRenderObject() as RenderBox?;
+    final myBox = context.findRenderObject() as RenderBox?;
+    if (targetBox == null || myBox == null) return null;
+    if (!targetBox.attached || !myBox.attached || !targetBox.hasSize) {
+      return null;
+    }
+    final topLeft = myBox.globalToLocal(targetBox.localToGlobal(Offset.zero));
+    return topLeft & targetBox.size;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: _pulse,
+        builder: (context, _) {
+          final rect = _targetRect();
+          if (rect == null) return const SizedBox.shrink();
+          final motion = AppSettings.instance.motionFull;
+          final v = motion ? _pulse.value : 0.5;
+          final ring = rect.inflate(4 + 4 * v);
+          final t = AppTokens.current;
+          return Stack(
+            children: [
+              Positioned.fromRect(
+                rect: ring,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: t.accentStrong.withValues(alpha: 0.55 + 0.45 * v),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: t.accent.withValues(alpha: 0.25 + 0.2 * v),
+                        blurRadius: 14,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

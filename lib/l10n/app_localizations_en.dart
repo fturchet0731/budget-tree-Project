@@ -1601,6 +1601,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add your main costs, then tap Next to set your roots.';
 
   @override
+  String get tutStep1d =>
+      'This meter always shows how much is left to allocate. If it turns red you are promising more than you earn, so trim a branch before moving on.';
+
+  @override
   String get tutStep2a => '🪵 The Roots: the details that ground your tree.';
 
   @override
@@ -1648,6 +1652,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tourTapFinish => 'Tap to finish';
+
+  @override
+  String get coachAcornTip => 'Acorn\'s tip';
+
+  @override
+  String get coachGotIt => 'Got it!';
+
+  @override
+  String get howThisWorks => 'How this works';
+
+  @override
+  String get tutIntroHelp =>
+      'One more thing: see the little question mark near the top of a screen? Tap it any time and I will explain that part again.';
+
+  @override
+  String get tutOverBudget1 =>
+      'Hold on! Your branches are asking for more money than your income brings in.';
+
+  @override
+  String tutOverBudget2(String amount) {
+    return 'You are over budget by $amount. Trim some expense amounts until they fit, then we can keep going.';
+  }
+
+  @override
+  String get overBudgetFixHint => 'I will fix it';
 
   @override
   String notifOverBudgetTitle(String name) {

@@ -1609,6 +1609,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Añade tus gastos principales y luego toca Siguiente para fijar tus raíces.';
 
   @override
+  String get tutStep1d =>
+      'Este medidor muestra en todo momento cuánto queda por asignar. Si se pone rojo estás prometiendo más de lo que ganas, así que recorta una rama antes de seguir.';
+
+  @override
   String get tutStep2a => '🪵 Las Raíces: los detalles que afianzan tu árbol.';
 
   @override
@@ -1656,6 +1660,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tourTapFinish => 'Toca para terminar';
+
+  @override
+  String get coachAcornTip => 'El consejo de Acorn';
+
+  @override
+  String get coachGotIt => '¡Entendido!';
+
+  @override
+  String get howThisWorks => 'Cómo funciona';
+
+  @override
+  String get tutIntroHelp =>
+      'Una cosa más: ¿ves el pequeño signo de interrogación en la parte de arriba de la pantalla? Tócalo en cualquier momento y te explicaré esa parte de nuevo.';
+
+  @override
+  String get tutOverBudget1 =>
+      '¡Espera! Tus ramas piden más dinero del que traen tus ingresos.';
+
+  @override
+  String tutOverBudget2(String amount) {
+    return 'Te pasas del presupuesto por $amount. Reduce algunos gastos hasta que encajen y así podremos seguir.';
+  }
+
+  @override
+  String get overBudgetFixHint => 'Voy a arreglarlo';
 
   @override
   String notifOverBudgetTitle(String name) {

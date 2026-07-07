@@ -22,15 +22,20 @@ extension TutorialSectionLabel on TutorialSection {
 }
 
 /// One line of dialogue from the acorn, plus the face it should pull while
-/// the line is on screen.
+/// the line is on screen. [highlightId] optionally names the on-screen widget
+/// the line is talking about (see [AcornCoach.targets]); while the line shows,
+/// the coach draws a pulsing ring around that widget so the user knows where
+/// to look.
 class TutorialStep {
   final String text;
   final String speaker;
   final AcornExpression expression;
+  final String? highlightId;
   const TutorialStep(
     this.text, {
     this.speaker = 'Acorn',
     this.expression = AcornExpression.idle,
+    this.highlightId,
   });
 }
 
@@ -38,12 +43,14 @@ class TutorialStep {
 List<TutorialStep> introSteps(AppLocalizations l) => [
   TutorialStep(l.tutIntro1, expression: AcornExpression.happy),
   TutorialStep(l.tutIntro2),
+  TutorialStep(l.tutIntroHelp),
   TutorialStep(l.tutIntro3, expression: AcornExpression.happy),
 ];
 
 /// Acorn's friendly sign-off once the tour has visited every section.
 List<TutorialStep> closingSteps(AppLocalizations l) => [
   TutorialStep(l.tutClosing1),
+  TutorialStep(l.tutIntroHelp),
   TutorialStep(l.tutClosing2, expression: AcornExpression.happy),
 ];
 
@@ -191,6 +198,21 @@ List<TutorialStep> skippedSteps(TutorialSection section, AppLocalizations l) {
 // In-screen step coaching for the Create budget flow.
 // ──────────────────────────────────────────────
 
+/// Ids for the widgets the create-flow coach can point at. The Create screen
+/// registers a GlobalKey for each id and hands the map to [AcornCoach];
+/// a [TutorialStep.highlightId] naming one of these gets a pulsing ring
+/// around that widget while the line is on screen.
+class CoachTargets {
+  CoachTargets._();
+  static const incomeAdd = 'incomeAdd';
+  static const expenseAdd = 'expenseAdd';
+  static const remaining = 'remaining';
+  static const survey = 'survey';
+  static const plans = 'plans';
+  static const finishing = 'finishing';
+  static const next = 'next';
+}
+
 /// The three phases of building a budget, matching the Create screen's steps:
 /// 0 = Seed (income), 1 = Branches (expenses), 2 = Survey, 3 = Plan (which
 /// also carries the finishing touches: name + pay schedule + plant).
@@ -199,18 +221,23 @@ List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
     case 0:
       return [
         TutorialStep(l.tutStep0a, expression: AcornExpression.happy),
-        TutorialStep(l.tutStep0b),
-        TutorialStep(l.tutStep0c),
+        TutorialStep(l.tutStep0b, highlightId: CoachTargets.incomeAdd),
+        TutorialStep(l.tutStep0c, highlightId: CoachTargets.next),
       ];
     case 1:
       return [
         TutorialStep(l.tutStep1a),
-        TutorialStep(l.tutStep1b),
-        TutorialStep(l.tutStep1c),
+        TutorialStep(l.tutStep1b, highlightId: CoachTargets.expenseAdd),
+        TutorialStep(l.tutStep1d, highlightId: CoachTargets.remaining),
+        TutorialStep(l.tutStep1c, highlightId: CoachTargets.next),
       ];
     case 2:
       return [
-        TutorialStep(l.tutStepSurveyA, expression: AcornExpression.happy),
+        TutorialStep(
+          l.tutStepSurveyA,
+          expression: AcornExpression.happy,
+          highlightId: CoachTargets.survey,
+        ),
         TutorialStep(l.tutStepSurveyB),
         TutorialStep(l.tutStepSurveyC),
       ];
@@ -218,10 +245,14 @@ List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
     default:
       return [
         TutorialStep(l.tutStepPlanA, expression: AcornExpression.happy),
-        TutorialStep(l.tutStepPlanB),
-        TutorialStep(l.tutStepPlanC),
-        TutorialStep(l.tutStep2b),
-        TutorialStep(l.tutStep2c, expression: AcornExpression.happy),
+        TutorialStep(l.tutStepPlanB, highlightId: CoachTargets.plans),
+        TutorialStep(l.tutStepPlanC, highlightId: CoachTargets.plans),
+        TutorialStep(l.tutStep2b, highlightId: CoachTargets.finishing),
+        TutorialStep(
+          l.tutStep2c,
+          expression: AcornExpression.happy,
+          highlightId: CoachTargets.next,
+        ),
       ];
   }
 }

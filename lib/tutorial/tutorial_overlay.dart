@@ -188,7 +188,9 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                           speaker: speakerLabel,
                           text: shown,
                           showContinue: !_typing,
-                          hint: _isLast ? widget.lastStepHint : 'Tap to continue',
+                          hint: _isLast
+                              ? widget.lastStepHint
+                              : AppLocalizations.of(context).tourTapContinue,
                           progress: '${_index + 1} / ${widget.steps.length}',
                         );
                       },
@@ -302,21 +304,7 @@ class _SpeechBubble extends StatelessWidget {
               child: AnimatedOpacity(
                 opacity: showContinue ? 1 : 0,
                 duration: const Duration(milliseconds: 200),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      hint,
-                      style: GoogleFonts.nunito(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.forestGreen,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const _BlinkingChevron(),
-                  ],
-                ),
+                child: TapContinueHint(hint: hint),
               ),
             ),
           ],
@@ -350,8 +338,37 @@ class _BubbleTailPainter extends CustomPainter {
   bool shouldRepaint(_BubbleTailPainter old) => false;
 }
 
+/// The "tap to continue" affordance: hint text + blinking chevron. Shared by
+/// every Acorn dialogue surface (the full-screen overlay and the in-screen
+/// [AcornCoach] tips) so advancing always looks the same.
+class TapContinueHint extends StatelessWidget {
+  final String hint;
+  final double fontSize;
+  const TapContinueHint({super.key, required this.hint, this.fontSize = 12});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          hint,
+          style: GoogleFonts.nunito(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            color: AppColors.forestGreen,
+          ),
+        ),
+        const SizedBox(width: 4),
+        _BlinkingChevron(size: fontSize + 6),
+      ],
+    );
+  }
+}
+
 class _BlinkingChevron extends StatefulWidget {
-  const _BlinkingChevron();
+  final double size;
+  const _BlinkingChevron({this.size = 18});
   @override
   State<_BlinkingChevron> createState() => _BlinkingChevronState();
 }
@@ -378,7 +395,7 @@ class _BlinkingChevronState extends State<_BlinkingChevron>
     return FadeTransition(
       opacity: Tween<double>(begin: 0.3, end: 1).animate(_c),
       child: Icon(Icons.play_arrow_rounded,
-          size: 18, color: AppColors.forestGreen),
+          size: widget.size, color: AppColors.forestGreen),
     );
   }
 }

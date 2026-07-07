@@ -1617,6 +1617,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ajoutez vos principaux frais, puis touchez Suivant pour fixer vos racines.';
 
   @override
+  String get tutStep1d =>
+      'Cette jauge montre en permanence ce qu\'il reste à répartir. Si elle devient rouge, vous promettez plus que vous ne gagnez : réduisez une branche avant de continuer.';
+
+  @override
   String get tutStep2a =>
       '🪵 Les Racines : les détails qui ancrent votre arbre.';
 
@@ -1665,6 +1669,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tourTapFinish => 'Touchez pour terminer';
+
+  @override
+  String get coachAcornTip => 'Le conseil d\'Acorn';
+
+  @override
+  String get coachGotIt => 'Compris !';
+
+  @override
+  String get howThisWorks => 'Comment ça marche';
+
+  @override
+  String get tutIntroHelp =>
+      'Encore une chose : vous voyez le petit point d\'interrogation en haut de l\'écran ? Touchez-le à tout moment et je vous réexpliquerai cette partie.';
+
+  @override
+  String get tutOverBudget1 =>
+      'Attendez ! Vos branches demandent plus d\'argent que vos revenus n\'en apportent.';
+
+  @override
+  String tutOverBudget2(String amount) {
+    return 'Vous dépassez le budget de $amount. Réduisez certaines dépenses pour rétablir l\'équilibre, puis nous pourrons continuer.';
+  }
+
+  @override
+  String get overBudgetFixHint => 'Je corrige ça';
 
   @override
   String notifOverBudgetTitle(String name) {

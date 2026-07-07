@@ -23,6 +23,7 @@ import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/app_card.dart' show AppCard;
 import '../widgets/ui/step_progress.dart';
 import '../tutorial/tutorial_content.dart';
+import '../tutorial/tutorial_overlay.dart';
 import 'budget_tree_screen.dart';
 
 /// Deep amber used for small labels on white cards (the shared warm accent,
@@ -80,6 +81,19 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   PayFrequency _payFrequency = PayFrequency.monthly;
   DateTime? _firstPayDate;
 
+  // The widgets Acorn's coach can ring while he talks about them (tutorial
+  // mode). Keys are attached unconditionally — each lives in at most one
+  // place in the tree at a time — so the map can stay simple.
+  final Map<String, GlobalKey> _coachTargets = {
+    CoachTargets.incomeAdd: GlobalKey(),
+    CoachTargets.expenseAdd: GlobalKey(),
+    CoachTargets.remaining: GlobalKey(),
+    CoachTargets.survey: GlobalKey(),
+    CoachTargets.plans: GlobalKey(),
+    CoachTargets.finishing: GlobalKey(),
+    CoachTargets.next: GlobalKey(),
+  };
+
   // icon key + display name
   static const _presets = [
     ('home', 'Housing'),
@@ -133,6 +147,24 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   double get _totalIncome =>
       _incomeSources.fold(0.0, (s, e) => s + e.amountPerCycle(_payFrequency));
   double get _totalAllocated => _expenses.fold(0.0, (s, e) => s + e.allocated);
+  bool get _overBudget => _totalAllocated > _totalIncome + 0.005;
+
+  /// Acorn steps in and refuses to move on while the branches ask for more
+  /// than the income brings in, telling the user what to trim. Runs for every
+  /// user, tutorial or not.
+  void _warnOverBudget() {
+    final l = AppLocalizations.of(context);
+    final over = _totalAllocated - _totalIncome;
+    showTutorialDialog(
+      context,
+      steps: [
+        TutorialStep(l.tutOverBudget1),
+        TutorialStep(l.tutOverBudget2('\$${over.toStringAsFixed(2)}')),
+      ],
+      lastStepHint: l.overBudgetFixHint,
+      skipLabel: l.tourClose,
+    );
+  }
 
   void _addIncome() {
     final name = _incomeNameCtrl.text.trim();
@@ -279,6 +311,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                     child: _step == 0
                         ? _IncomeStep(
                             key: const ValueKey(0),
+                            addBoxKey: _coachTargets[CoachTargets.incomeAdd]!,
                             sources: _incomeSources,
                             nameCtrl: _incomeNameCtrl,
                             amountCtrl: _incomeAmountCtrl,
@@ -306,6 +339,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                         : _step == 1
                         ? _ExpenseStep(
                             key: const ValueKey(1),
+                            addBoxKey: _coachTargets[CoachTargets.expenseAdd]!,
+                            summaryKey: _coachTargets[CoachTargets.remaining]!,
                             expenses: _expenses,
                             nameCtrl: _expNameCtrl,
                             amountCtrl: _expAmountCtrl,
@@ -328,6 +363,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                         : _step == 2
                         ? _SurveyStep(
                             key: const ValueKey(2),
+                            highlightKey: _coachTargets[CoachTargets.survey]!,
                             answers: _surveyAnswers,
                             skipped: _surveySkipped,
                             noteCtrl: _noteCtrl,
@@ -341,6 +377,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                           )
                         : _PlanStep(
                             key: const ValueKey(3),
+                            plansKey: _coachTargets[CoachTargets.plans]!,
+                            finishingKey:
+                                _coachTargets[CoachTargets.finishing]!,
                             income: _totalIncome,
                             expenses: _expenses,
                             settled: _planSettled,
@@ -362,6 +401,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 _BottomBar(
                   step: _step,
                   lastStep: 3,
+                  buttonKey: _coachTargets[CoachTargets.next],
                   canAdvance: _step == 0
                       ? _incomeConfirmed
                       : _step == 1
@@ -370,6 +410,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                       ? true // questionnaire is optional
                       : _planSettled,
                   onNext: () {
+                    // Never move past a step whose branches outgrow the
+                    // income; Acorn explains what to fix instead.
+                    if ((_step == 1 || _step == 3) && _overBudget) {
+                      _warnOverBudget();
+                      return;
+                    }
                     if (_step < 3) {
                       setState(() => _step++);
                     } else {
@@ -388,6 +434,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 child: AcornCoach(
                   lessonKey: _step,
                   lines: createStepSteps(_step, l),
+                  targets: _coachTargets,
                 ),
               ),
             ),
@@ -569,6 +616,8 @@ class _ContinueButton extends StatelessWidget {
 // ──────────────────────────────────────────────
 
 class _IncomeStep extends StatefulWidget {
+  /// Ring anchor for the tutorial coach (the add-a-source box).
+  final GlobalKey addBoxKey;
   final List<IncomeSource> sources;
   final TextEditingController nameCtrl;
   final TextEditingController amountCtrl;
@@ -592,6 +641,7 @@ class _IncomeStep extends StatefulWidget {
 
   const _IncomeStep({
     super.key,
+    required this.addBoxKey,
     required this.sources,
     required this.nameCtrl,
     required this.amountCtrl,
@@ -661,6 +711,7 @@ class _IncomeStepState extends State<_IncomeStep> {
           // One clear hero input: type a source + amount, tap to add. The
           // quick-picks sit quietly beneath so the screen stays uncluttered.
           AppCard(
+            key: widget.addBoxKey,
             label: l.addASource,
             icon: Icons.add_circle_outline,
             accent: AppColors.riverBlue,
@@ -869,15 +920,19 @@ class _IncomeStepState extends State<_IncomeStep> {
                     height: 22,
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        l.totalIncomeCycle(cycle.localizedLabel(l)),
-                        style: GoogleFonts.nunito(
-                          color: AppColors.mossGreen,
-                          fontSize: 12.5,
+                      // Flexible so a long label (or wide test font) wraps
+                      // instead of overflowing; the amount always shows whole.
+                      Expanded(
+                        child: Text(
+                          l.totalIncomeCycle(cycle.localizedLabel(l)),
+                          style: GoogleFonts.nunito(
+                            color: AppColors.mossGreen,
+                            fontSize: 12.5,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 10),
                       Text(
                         '\$${total.toStringAsFixed(2)}',
                         style: GoogleFonts.fredoka(
@@ -961,6 +1016,10 @@ class _IncomeStepState extends State<_IncomeStep> {
 // ──────────────────────────────────────────────
 
 class _ExpenseStep extends StatelessWidget {
+  /// Ring anchors for the tutorial coach: the add-a-branch box and the
+  /// always-visible allocation meter.
+  final GlobalKey addBoxKey;
+  final GlobalKey summaryKey;
   final List<ExpenseCategory> expenses;
   final TextEditingController nameCtrl;
   final TextEditingController amountCtrl;
@@ -979,6 +1038,8 @@ class _ExpenseStep extends StatelessWidget {
 
   const _ExpenseStep({
     super.key,
+    required this.addBoxKey,
+    required this.summaryKey,
     required this.expenses,
     required this.nameCtrl,
     required this.amountCtrl,
@@ -997,16 +1058,30 @@ class _ExpenseStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
 
-    return AppScrollbar(
+    return Column(
+      children: [
+        // Pinned "where you stand" meter: always in view while branches are
+        // added or removed, so the user never loses track of what's left to
+        // allocate (it flips red the moment they go over).
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: _AllocationStrip(
+            key: summaryKey,
+            totalIncome: totalIncome,
+            totalAllocated: totalAllocated,
+          ),
+        ),
+        Expanded(
+          child: AppScrollbar(
       builder: (controller) => ListView(
         controller: controller,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         children: [
-          // The "add a branch" box comes first; the budget summary reveals
-          // itself once the user confirms they've listed all their expenses.
-          // The amount is optional (the survey and plan steps fill it in), and
-          // the presets sit quietly beneath.
+          // The "add a branch" box comes first. The amount is optional (the
+          // survey and plan steps fill it in), and the presets sit quietly
+          // beneath.
           AppCard(
+            key: addBoxKey,
             label: l.addABranch,
             icon: Icons.add_circle_outline,
             child: Column(
@@ -1185,7 +1260,8 @@ class _ExpenseStep extends StatelessWidget {
             ),
             ),
           ],
-          // Confirm the branch list, then reveal where the budget stands.
+          // Confirm the branch list to unlock the step's Next button (the
+          // meter above already shows where the budget stands at all times).
           if (expenses.isNotEmpty && !confirmed) ...[
             const SizedBox(height: 14),
             _Reveal(
@@ -1195,48 +1271,84 @@ class _ExpenseStep extends StatelessWidget {
               ),
             ),
           ],
-          if (confirmed) ...[
-            const SizedBox(height: 14),
-            _Reveal(child: _summaryCard(l)),
-          ],
         ],
       ),
+          ),
+        ),
+      ],
     );
   }
+}
 
-  /// The "where you stand" card: an allocation meter plus allocated / remaining
-  /// figures, revealed only after the user confirms the branch list.
-  Widget _summaryCard(AppLocalizations l) {
+/// The always-visible "where you stand" strip: the allocation meter plus
+/// allocated / remaining figures, pinned above the scrolling content of the
+/// Expenses and Plan steps so what's left to allocate is never out of sight.
+/// Amounts are wrapped in [FittedBox]es so the full number always shows, no
+/// matter how large it gets. Goes red the moment allocations exceed income.
+class _AllocationStrip extends StatelessWidget {
+  final double totalIncome;
+  final double totalAllocated;
+  const _AllocationStrip({
+    super.key,
+    required this.totalIncome,
+    required this.totalAllocated,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.current;
     final remaining = totalIncome - totalAllocated;
-    final overBudget = remaining < 0;
-    return AppCard(
-      label: l.expenseSummaryTitle,
-      icon: Icons.balance_outlined,
-      accent: _amber,
+    final overBudget = remaining < -0.005;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+      decoration: BoxDecoration(
+        color: t.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: overBudget
+              ? AppColors.dangerRed.withValues(alpha: 0.65)
+              : t.cardBorder,
+          width: overBudget ? 1.5 : 1,
+        ),
+        boxShadow: AppShadows.card,
+      ),
       child: Column(
         children: [
           _BudgetBar(totalIncome: totalIncome, totalAllocated: totalAllocated),
-          const SizedBox(height: 8),
+          const SizedBox(height: 7),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                l.allocatedAmount('\$${totalAllocated.toStringAsFixed(0)}'),
-                style: GoogleFonts.nunito(
-                  color: AppColors.mossGreen,
-                  fontSize: 12,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l.allocatedAmount('\$${totalAllocated.toStringAsFixed(0)}'),
+                    style: GoogleFonts.nunito(
+                      color: AppColors.mossGreen,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               ),
-              Text(
-                overBudget
-                    ? l.overByAmount('\$${(-remaining).toStringAsFixed(0)}')
-                    : l.remainingAmount('\$${remaining.toStringAsFixed(0)}'),
-                style: GoogleFonts.nunito(
-                  color: overBudget
-                      ? AppColors.dangerRed
-                      : AppColors.forestGreen,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    overBudget
+                        ? l.overByAmount('\$${(-remaining).toStringAsFixed(0)}')
+                        : l.remainingAmount('\$${remaining.toStringAsFixed(0)}'),
+                    style: GoogleFonts.nunito(
+                      color: overBudget
+                          ? AppColors.dangerRed
+                          : AppColors.forestGreen,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -1256,6 +1368,8 @@ class _ExpenseStep extends StatelessWidget {
 /// rows. When every question is answered or skipped it settles on a summary
 /// view with the optional free-text note.
 class _SurveyStep extends StatefulWidget {
+  /// Ring anchor for the tutorial coach (the question area).
+  final GlobalKey highlightKey;
   final Map<String, String> answers;
   final Set<String> skipped;
   final TextEditingController noteCtrl;
@@ -1264,6 +1378,7 @@ class _SurveyStep extends StatefulWidget {
 
   const _SurveyStep({
     super.key,
+    required this.highlightKey,
     required this.answers,
     required this.skipped,
     required this.noteCtrl,
@@ -1328,23 +1443,28 @@ class _SurveyStepState extends State<_SurveyStep> {
                 : l.surveyProgress(_index + 1, _questions.length),
           ),
           const SizedBox(height: 12),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, anim) => FadeTransition(
-              opacity: anim,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.08, 0),
-                  end: Offset.zero,
-                ).animate(anim),
-                child: child,
+          // The coach's ring anchors here, outside the switcher, so the key
+          // never exists twice while a question transition is mid-flight.
+          KeyedSubtree(
+            key: widget.highlightKey,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 260),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.08, 0),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
+                ),
               ),
+              child: done
+                  ? _summaryView(l)
+                  : _questionView(l, _questions[_index]),
             ),
-            child: done
-                ? _summaryView(l)
-                : _questionView(l, _questions[_index]),
           ),
         ],
       ),
@@ -1645,6 +1765,10 @@ class _SurveyChip extends StatelessWidget {
 // ──────────────────────────────────────────────
 
 class _PlanStep extends StatefulWidget {
+  /// Ring anchors for the tutorial coach: the plan-picking area and the
+  /// finishing-touch cards (name + pay schedule).
+  final GlobalKey plansKey;
+  final GlobalKey finishingKey;
   final double income;
   final List<ExpenseCategory> expenses;
   final bool settled;
@@ -1662,6 +1786,8 @@ class _PlanStep extends StatefulWidget {
 
   const _PlanStep({
     super.key,
+    required this.plansKey,
+    required this.finishingKey,
     required this.income,
     required this.expenses,
     required this.settled,
@@ -1756,10 +1882,24 @@ class _PlanStepState extends State<_PlanStep> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final aiAvailable = AiCoachService.instance.isAvailable;
-    return AppScrollbar(
+    final totalAllocated =
+        widget.expenses.fold(0.0, (s, e) => s + e.allocated);
+    return Column(
+      children: [
+        // Same always-visible meter as the Expenses step: allocations settle
+        // here, so what's left (or how far over) must stay in sight too.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: _AllocationStrip(
+            totalIncome: widget.income,
+            totalAllocated: totalAllocated,
+          ),
+        ),
+        Expanded(
+          child: AppScrollbar(
       builder: (controller) => ListView(
         controller: controller,
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         children: [
           // The expenses the user declared (read-only here). A "$X" tag means
           // they fixed that amount; the rest are left for the coach to choose.
@@ -1808,6 +1948,14 @@ class _PlanStepState extends State<_PlanStep> {
             ),
           ),
           const SizedBox(height: 14),
+          // The coach's "pick a plan" ring anchors around the whole plan
+          // area, whichever mode (AI plans or manual amounts) it's in.
+          KeyedSubtree(
+            key: widget.plansKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
           if (!_manual) ...[
             if (_plans == null)
               _GenerateButton(loading: _loading, onTap: _generate)
@@ -1885,7 +2033,10 @@ class _PlanStepState extends State<_PlanStep> {
                             ),
                           ),
                           SizedBox(
-                            width: 90,
+                            // Wide enough that a 5-digit amount shows whole:
+                            // at 90px the theme's 18px content padding plus
+                            // the "$ " prefix clipped "1200" to "120".
+                            width: 132,
                             child: TextField(
                               controller: _ctrlFor(cat),
                               style: TextStyle(
@@ -1933,6 +2084,9 @@ class _PlanStepState extends State<_PlanStep> {
               ),
             ],
           ],
+              ],
+            ),
+          ),
           if (widget.settled) ...[
             Padding(
               padding: const EdgeInsets.only(top: 12),
@@ -1964,12 +2118,24 @@ class _PlanStepState extends State<_PlanStep> {
             // step stays one decision at a time: name the tree, set the pay
             // schedule, then the bottom bar plants it.
             const SizedBox(height: 14),
-            _Reveal(child: _buildNameCard(l)),
-            const SizedBox(height: 14),
-            _Reveal(child: _buildPayCard(context, l)),
+            KeyedSubtree(
+              key: widget.finishingKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Reveal(child: _buildNameCard(l)),
+                  const SizedBox(height: 14),
+                  _Reveal(child: _buildPayCard(context, l)),
+                ],
+              ),
+            ),
           ],
         ],
       ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -2339,11 +2505,15 @@ class _BottomBar extends StatelessWidget {
   final bool canAdvance;
   final VoidCallback onNext;
 
+  /// Ring anchor for the tutorial coach ("tap Next" lines).
+  final GlobalKey? buttonKey;
+
   const _BottomBar({
     required this.step,
     required this.lastStep,
     required this.canAdvance,
     required this.onNext,
+    this.buttonKey,
   });
 
   @override
@@ -2353,6 +2523,7 @@ class _BottomBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
       child: AppPrimaryButton(
+        key: buttonKey,
         label: isLast ? l.plantMyBudgetTree : l.next,
         icon: isLast ? Icons.park : Icons.arrow_forward,
         onPressed: canAdvance ? onNext : null,

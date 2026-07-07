@@ -2812,6 +2812,12 @@ abstract class AppLocalizations {
   /// **'Add your main costs, then tap Next to set your roots.'**
   String get tutStep1c;
 
+  /// No description provided for @tutStep1d.
+  ///
+  /// In en, this message translates to:
+  /// **'This meter always shows how much is left to allocate. If it turns red you are promising more than you earn, so trim a branch before moving on.'**
+  String get tutStep1d;
+
   /// No description provided for @tutStep2a.
   ///
   /// In en, this message translates to:
@@ -2901,6 +2907,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to finish'**
   String get tourTapFinish;
+
+  /// No description provided for @coachAcornTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Acorn\'s tip'**
+  String get coachAcornTip;
+
+  /// No description provided for @coachGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it!'**
+  String get coachGotIt;
+
+  /// No description provided for @howThisWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How this works'**
+  String get howThisWorks;
+
+  /// No description provided for @tutIntroHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'One more thing: see the little question mark near the top of a screen? Tap it any time and I will explain that part again.'**
+  String get tutIntroHelp;
+
+  /// No description provided for @tutOverBudget1.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold on! Your branches are asking for more money than your income brings in.'**
+  String get tutOverBudget1;
+
+  /// No description provided for @tutOverBudget2.
+  ///
+  /// In en, this message translates to:
+  /// **'You are over budget by {amount}. Trim some expense amounts until they fit, then we can keep going.'**
+  String tutOverBudget2(String amount);
+
+  /// No description provided for @overBudgetFixHint.
+  ///
+  /// In en, this message translates to:
+  /// **'I will fix it'**
+  String get overBudgetFixHint;
 
   /// No description provided for @notifOverBudgetTitle.
   ///
