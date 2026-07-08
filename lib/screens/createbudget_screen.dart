@@ -75,6 +75,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   // that extends past the fold re-arms the gate.
   final Map<int, bool> _seenEnd = {};
   final Map<int, double> _lastMaxExtent = {};
+  // Guards against piling up post-frame callbacks when many scroll/metrics
+  // notifications fire within one frame (see [_noteScrollMetrics]).
+  bool _gateRebuildScheduled = false;
 
   // Step 3 – Survey (questionnaire answers keyed by question key -> option key)
   // plus an optional free-text note the coach folds into its reasoning.
@@ -163,16 +166,27 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   /// scroll-through gate. Reaching (or starting at) the end opens it; content
   /// growing past the fold re-arms it.
   void _noteScrollMetrics(ScrollMetrics m) {
-    if (!m.hasContentDimensions || m.axis != Axis.vertical) return;
-    const eps = 40.0;
-    final atEnd = m.extentAfter <= eps;
-    final grew =
-        m.maxScrollExtent > (_lastMaxExtent[_step] ?? 0) + eps;
-    _lastMaxExtent[_step] = m.maxScrollExtent;
-    final next = atEnd ? true : (grew ? false : _seenEnd[_step]);
-    if (next != _seenEnd[_step] && next != null) {
-      setState(() => _seenEnd[_step] = next);
+    if (!m.hasContentDimensions || !m.hasPixels || m.axis != Axis.vertical) {
+      return;
     }
+    const eps = 40.0;
+    final step = _step;
+    final atEnd = m.extentAfter <= eps;
+    final grew = m.maxScrollExtent > (_lastMaxExtent[step] ?? 0) + eps;
+    _lastMaxExtent[step] = m.maxScrollExtent;
+    final next = atEnd ? true : (grew ? false : _seenEnd[step]);
+    if (next == null || next == _seenEnd[step]) return;
+    // These notifications arrive DURING layout (a viewport/scroll correction
+    // as revealed content or the keyboard resizes the view). Calling setState
+    // synchronously here throws "Build scheduled during frame", so record the
+    // flag now and coalesce a single rebuild once the frame has finished.
+    _seenEnd[step] = next;
+    if (_gateRebuildScheduled) return;
+    _gateRebuildScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _gateRebuildScheduled = false;
+      if (mounted) setState(() {});
+    });
   }
 
   /// Acorn steps in and refuses to move on while the branches ask for more
