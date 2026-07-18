@@ -38,7 +38,20 @@
       "Bash(python3 -c \"import json;print\\(json.load\\(open\\('env.json'\\)\\)['SUPABASE_ANON_KEY']\\)\")",
       "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' -X POST __TRACKED_VAR__/rest/v1/rpc/check_ai_quota -H 'apikey: __TRACKED_VAR__' -H 'authorization: Bearer __TRACKED_VAR__' -H 'content-type: application/json' -d '{\"max_calls\":30}')",
       "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' __TRACKED_VAR__/rest/v1/ai_usage?select=* -H 'apikey: __TRACKED_VAR__' -H 'authorization: Bearer __TRACKED_VAR__')",
-      "Bash(flutter build *)"
+      "Bash(flutter build *)",
+      "Bash(python3 -)",
+      "Bash(git -C /Users/fabianturchetti/Developer/Projects/BudgetApp-CSProject/budget_app_project status --short)",
+      "Bash(git -C /Users/fabianturchetti/Developer/Projects/BudgetApp-CSProject/budget_app_project stash list)",
+      "Bash(command -v adb)",
+      "Bash(adb devices *)",
+      "Bash(xcrun devicectl *)",
+      "Read(//Users/fabianturchetti/Library/Logs/CrashReporter/MobileDevice/**)",
+      "Bash(dart run *)",
+      "Bash(supabase inspect *)",
+      "Bash(grep -v \"SMTP\\\\|Initialising\\\\|Connecting\\\\|new version\\\\|We recommend\\\\|^$\")",
+      "Bash(PGPASSWORD=sZKixOXUTCuSxsEFMWYUxNvTxmJWBPaK psql 'host=db.uxfmisgzrprdzagfhcke.supabase.co port=5432 user=cli_login_postgres dbname=postgres sslmode=require' -c 'select tablename from pg_tables where schemaname='\\\\''public'\\\\'' order by tablename;' -c 'select version from supabase_migrations.schema_migrations order by version;')",
+      "Read(//opt/homebrew/opt/libpq/bin/**)",
+      "Read(//opt/homebrew/**)"
     ]
   }
 }

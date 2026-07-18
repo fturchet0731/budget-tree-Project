@@ -140,7 +140,6 @@ class _AcornPainter extends CustomPainter {
   // Palette — warm acorn browns and a soft tan nut.
   static const _capDark = Color(0xFF6B4226);
   static const _capLight = Color(0xFF8A5A33);
-  static const _nutDark = Color(0xFFB9803F);
   static const _nutLight = Color(0xFFE2A85C);
   static const _stem = Color(0xFF4E3320);
   static const _cheek = Color(0xFFE8836B);
@@ -176,16 +175,8 @@ class _AcornPainter extends CustomPainter {
       ..quadraticBezierTo(nutRect.left, nutRect.bottom - nutRect.height * 0.06,
           nutRect.left, nutRect.top + nutRect.height * 0.16)
       ..close();
-    // Flat modern fill: one warm tan, with a single flat highlight crescent
-    // instead of a gradient.
+    // Flat modern fill: one warm tan, no shading crescent on the face.
     canvas.drawPath(nut, Paint()..color = _nutLight);
-    canvas.save();
-    canvas.clipPath(nut);
-    canvas.drawOval(
-      Rect.fromLTRB(w * 0.42, h * 0.40, w * 0.92, h * 0.95),
-      Paint()..color = _nutDark.withValues(alpha: 0.35),
-    );
-    canvas.restore();
 
     // ── CAP — wide dome that sits down onto the nut, with a little stem ──
     final capRect = Rect.fromLTRB(w * 0.07, h * 0.05, w * 0.93, capBottom);
