@@ -221,12 +221,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
             const ReflectionBanner(),
-            // The friends strip travels with the menu grid (centered as one
-            // block) so the circles sit right on top of the four leaves.
+            // The friends strip travels with the menu grid as one block,
+            // anchored to the top of the remaining space (right under the
+            // banners) rather than floating centered, and scrollable so a
+            // short screen never overflows.
             Expanded(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    const EdgeInsets.fromLTRB(20, 12, 20, 16),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 460),
@@ -249,16 +251,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
-                ),
-              ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: AppTextButton(
-                  icon: Icons.arrow_downward,
-                  label: l.dashboardBackToGround,
-                  onPressed: () => Navigator.pop(context),
                 ),
               ),
             ),
