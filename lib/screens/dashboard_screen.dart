@@ -221,9 +221,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
             const ReflectionBanner(),
-            const SizedBox(height: 14),
-            // Swipeable Roblox-style friends row; first circle adds friends.
-            FriendsStrip(key: _friendsKey),
+            // The friends strip travels with the menu grid (centered as one
+            // block) so the circles sit right on top of the four leaves.
             Expanded(
               child: Padding(
                 padding:
@@ -231,14 +230,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 460),
-                    child: _MenuGrid(
-                      onTapCreate: _openCreate,
-                      onTapModify: () =>
-                          _navigate(context, const ForestScreen()),
-                      onTapGoals: () =>
-                          _navigate(context, const GoalsScreen()),
-                      onTapSettings: () =>
-                          _navigate(context, const SettingsScreen()),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Swipeable Roblox-style friends row; first circle
+                        // adds friends.
+                        FriendsStrip(key: _friendsKey),
+                        const SizedBox(height: AppDims.s12),
+                        _MenuGrid(
+                          onTapCreate: _openCreate,
+                          onTapModify: () =>
+                              _navigate(context, const ForestScreen()),
+                          onTapGoals: () =>
+                              _navigate(context, const GoalsScreen()),
+                          onTapSettings: () =>
+                              _navigate(context, const SettingsScreen()),
+                        ),
+                      ],
                     ),
                   ),
                 ),

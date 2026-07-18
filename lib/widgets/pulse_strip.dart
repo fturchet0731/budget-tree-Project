@@ -119,14 +119,12 @@ class PulseStripState extends State<PulseStrip> {
         return const SizedBox.shrink();
     }
 
-    // Kept deliberately slim (one-line body, small icon) so the nudges never
-    // crowd the friends strip and menu grid below them.
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
       child: PressableScale(
         onTap: _open,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           decoration: BoxDecoration(
             color: t.card,
             borderRadius: BorderRadius.circular(AppDims.rInner),
@@ -136,15 +134,15 @@ class PulseStripState extends State<PulseStrip> {
           child: Row(
             children: [
               Container(
-                width: 26,
-                height: 26,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: accent, size: 15),
+                child: Icon(icon, color: accent, size: 17),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,25 +151,26 @@ class PulseStripState extends State<PulseStrip> {
                       title,
                       style: GoogleFonts.nunito(
                         color: accent,
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       body,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
                         color: t.textPrimary,
-                        fontSize: 11.5,
-                        height: 1.25,
+                        fontSize: 12.5,
+                        height: 1.3,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: t.textTertiary, size: 16),
+              Icon(Icons.chevron_right, color: t.textTertiary, size: 18),
             ],
           ),
         ),

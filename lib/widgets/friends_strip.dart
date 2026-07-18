@@ -84,10 +84,10 @@ class FriendsStripState extends State<FriendsStrip> {
     final active = _friends.where((f) => f.profile.isActive).length;
     final total = _friends.length;
     return SizedBox(
-      height: 96,
+      height: 118,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 2),
         children: [
           Entrance(
             child: _AddFriendsBubble(
@@ -111,7 +111,7 @@ class FriendsStripState extends State<FriendsStrip> {
   }
 }
 
-const double _circle = 56;
+const double _circle = 72;
 
 /// The leading "Add friends" circle with the tally badge over its top right.
 class _AddFriendsBubble extends StatelessWidget {
@@ -143,7 +143,7 @@ class _AddFriendsBubble extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: t.cardBorder, width: 1.5),
             ),
-            child: Icon(Icons.person_add_alt_1, color: t.textSecondary, size: 24),
+            child: Icon(Icons.person_add_alt_1, color: t.textSecondary, size: 30),
           ),
           if (badge != null)
             Positioned(
@@ -160,7 +160,7 @@ class _AddFriendsBubble extends StatelessWidget {
                   badge!,
                   style: GoogleFonts.nunito(
                     color: t.onAccent,
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -174,7 +174,7 @@ class _AddFriendsBubble extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: GoogleFonts.nunito(
           color: AppTokens.of(context).textSecondary,
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -213,8 +213,8 @@ class _FriendBubble extends StatelessWidget {
             Semantics(
               label: AppLocalizations.of(context).activeNow,
               child: Container(
-                width: 7,
-                height: 7,
+                width: 8,
+                height: 8,
                 decoration: const BoxDecoration(
                   color: Color(0xFF3BA55D),
                   shape: BoxShape.circle,
@@ -230,14 +230,14 @@ class _FriendBubble extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.nunito(
                 color: t.textPrimary,
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
           if (summary.statusEmoji.isNotEmpty) ...[
             const SizedBox(width: 4),
-            Text(summary.statusEmoji, style: const TextStyle(fontSize: 11)),
+            Text(summary.statusEmoji, style: const TextStyle(fontSize: 12)),
           ],
         ],
       ),
@@ -260,16 +260,16 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 14),
+      padding: const EdgeInsets.only(right: 16),
       child: PressableScale(
         onTap: onTap,
         child: SizedBox(
-          width: 68,
+          width: 86,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               circle,
-              const SizedBox(height: 5),
+              const SizedBox(height: 6),
               caption,
             ],
           ),
