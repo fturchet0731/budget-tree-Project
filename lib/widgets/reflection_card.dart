@@ -73,12 +73,14 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
     if (r == null) return const SizedBox.shrink();
     final l = AppLocalizations.of(context);
     final t = AppTokens.of(context);
+    // Slim banner (one-line preview, small icon): the full text lives in the
+    // tap-through dialog, so the dashboard row stays compact.
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: PressableScale(
         onTap: _open,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: t.accentTint,
             borderRadius: BorderRadius.circular(AppDims.rInner),
@@ -86,16 +88,16 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
           child: Row(
             children: [
               Container(
-                width: 34,
-                height: 34,
+                width: 26,
+                height: 26,
                 decoration: BoxDecoration(
                   color: t.accentSoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(Icons.auto_awesome,
-                    color: t.accentStrong, size: 18),
+                    color: t.accentStrong, size: 15),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,26 +108,25 @@ class _ReflectionBannerState extends State<ReflectionBanner> {
                           : l.reflectionWeeklyTitle,
                       style: GoogleFonts.nunito(
                         color: t.accentStrong,
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 2),
                     Text(
                       r.text,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
                         color: t.textPrimary,
-                        fontSize: 12.5,
-                        height: 1.3,
+                        fontSize: 11.5,
+                        height: 1.25,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: t.textTertiary, size: 20),
+              Icon(Icons.chevron_right, color: t.textTertiary, size: 16),
             ],
           ),
         ),

@@ -60,6 +60,11 @@ class Profile {
   /// or null when the user hasn't picked one.
   final String? avatarB64;
 
+  /// Last time this user was seen active in the app (stamped by the client,
+  /// throttled). Null for users who predate presence or have never opened
+  /// the dashboard since.
+  final DateTime? lastSeenAt;
+
   const Profile({
     required this.id,
     required this.username,
@@ -68,7 +73,13 @@ class Profile {
     this.statusMode = FriendStatusMode.best,
     this.statusGoalId,
     this.avatarB64,
+    this.lastSeenAt,
   });
+
+  /// Considered "active now" when seen within the last five minutes.
+  bool get isActive =>
+      lastSeenAt != null &&
+      DateTime.now().toUtc().difference(lastSeenAt!.toUtc()).inMinutes < 5;
 
   /// Name to show in the UI — the display name if set, else the @username.
   String get label =>
@@ -84,6 +95,9 @@ class Profile {
         statusMode: FriendStatusModeWire.fromWire(r['status_mode'] as String?),
         statusGoalId: r['status_goal_id'] as String?,
         avatarB64: r['avatar_b64'] as String?,
+        lastSeenAt: r['last_seen_at'] == null
+            ? null
+            : DateTime.tryParse(r['last_seen_at'] as String),
       );
 
   /// Columns to insert/update. `id` is set by the service from `auth.uid()`.

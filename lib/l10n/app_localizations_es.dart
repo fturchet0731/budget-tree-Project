@@ -27,6 +27,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get friends => 'Amigos';
 
   @override
+  String get addFriends => 'Agregar amigos';
+
+  @override
+  String get activeNow => 'Activo ahora';
+
+  @override
   String get social => 'Social';
 
   @override

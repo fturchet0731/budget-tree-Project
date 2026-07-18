@@ -1,12 +1,16 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import '../models/profile_model.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
+import '../services/profile_service.dart';
 import '../theme/app_dims.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_tour.dart';
+import '../widgets/friends_strip.dart';
+import '../widgets/profile_avatar.dart';
 import '../widgets/pulse_strip.dart';
 import '../widgets/reflection_card.dart';
 import '../widgets/ui/app_buttons.dart';
@@ -16,8 +20,8 @@ import 'auth/login_screen.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
 import 'goals_screen.dart';
+import 'profile_screen.dart';
 import 'settings_screen.dart';
-import 'social_drawer.dart';
 
 class DashboardScreen extends StatefulWidget {
   /// First launch only: play the guided tour once this menu appears, so Acorn
@@ -31,8 +35,12 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _pulseKey = GlobalKey<PulseStripState>();
+  final _friendsKey = GlobalKey<FriendsStripState>();
+
+  /// The signed-in user's profile, for the top-right avatar button. Null while
+  /// loading, signed out, or offline (the button falls back to a glyph).
+  Profile? _me;
 
   @override
   void initState() {
@@ -40,6 +48,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (widget.runTour) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _runTour());
     }
+    _loadMe();
+    // Best-effort presence heartbeat so friends see the active dot.
+    ProfileService.instance.touchPresence();
+  }
+
+  Future<void> _loadMe() async {
+    final me = await ProfileService.instance.myProfile().catchError((_) => null);
+    if (mounted) setState(() => _me = me);
+  }
+
+  /// Opens the user's own profile from the top-right avatar button.
+  Future<void> _openProfile() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+    );
+    // Avatar or shared goals may have changed in there.
+    await _loadMe();
+    _friendsKey.currentState?.refresh();
   }
 
   /// Plays the guided tour over the four-leaf menu on first launch, then marks
@@ -52,8 +79,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _navigate(BuildContext context, Widget screen) async {
     await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
-    // Anything the user did in there may change what the pulse strip says.
+    // Anything the user did in there may change what the pulse strip says
+    // (and shared goals feed the friends strip's status emojis). Returning
+    // here also proves the user is still around, so re-stamp presence
+    // (throttled inside the service).
     _pulseKey.currentState?.refresh();
+    _friendsKey.currentState?.refresh();
+    ProfileService.instance.touchPresence();
   }
 
   /// Opens the Create flow. When a tree is actually planted the flow pops back
@@ -159,158 +191,113 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     return Scaffold(
-      key: _scaffoldKey,
-      // Friends live in a swipe-in sidebar (swipe from the right edge or tap
-      // the handle) rather than a separate screen — keeps the app shallow.
-      endDrawer: Drawer(
-        backgroundColor: Colors.transparent,
-        width: MediaQuery.of(context).size.width * 0.86,
-        child: SocialDrawer(
-          onClose: () => _scaffoldKey.currentState?.closeEndDrawer(),
-        ),
-      ),
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                  child: Entrance(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Budget Tree', style: text.headlineLarge),
-                        const SizedBox(height: 2),
-                        Text(l.dashboardChooseBranch, style: text.bodyMedium),
-                      ],
-                    ),
-                  ),
-                ),
-                PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
-                const ReflectionBanner(),
-                Expanded(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 460),
-                        child: _MenuGrid(
-                          onTapCreate: _openCreate,
-                          onTapModify: () =>
-                              _navigate(context, const ForestScreen()),
-                          onTapGoals: () =>
-                              _navigate(context, const GoalsScreen()),
-                          onTapSettings: () =>
-                              _navigate(context, const SettingsScreen()),
-                        ),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 20, 0),
+              child: Entrance(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Budget Tree', style: text.headlineLarge),
+                          const SizedBox(height: 2),
+                          Text(l.dashboardChooseBranch,
+                              style: text.bodyMedium),
+                        ],
                       ),
                     ),
-                  ),
+                    // Top-right profile button: the user's avatar with a
+                    // clear "Profile" label so there's no guessing.
+                    _ProfileButton(profile: _me, onTap: _openProfile),
+                  ],
                 ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: AppTextButton(
-                      icon: Icons.arrow_downward,
-                      label: l.dashboardBackToGround,
-                      onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
+            const ReflectionBanner(),
+            const SizedBox(height: 14),
+            // Swipeable Roblox-style friends row; first circle adds friends.
+            FriendsStrip(key: _friendsKey),
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: _MenuGrid(
+                      onTapCreate: _openCreate,
+                      onTapModify: () =>
+                          _navigate(context, const ForestScreen()),
+                      onTapGoals: () =>
+                          _navigate(context, const GoalsScreen()),
+                      onTapSettings: () =>
+                          _navigate(context, const SettingsScreen()),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          // Right-edge handle hinting the swipe-in Social sidebar.
-          Positioned.fill(
-            child: Align(
-              alignment: const Alignment(1.0, -0.05),
-              child: _SocialHandle(
-                onTap: () => _scaffoldKey.currentState?.openEndDrawer(),
               ),
             ),
-          ),
-        ],
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: AppTextButton(
+                  icon: Icons.arrow_downward,
+                  label: l.dashboardBackToGround,
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 // ──────────────────────────────────────────────
-// Social sidebar handle (swipe hint)
+// Top-right profile button (avatar + label)
 // ──────────────────────────────────────────────
 
-class _SocialHandle extends StatefulWidget {
+class _ProfileButton extends StatelessWidget {
+  final Profile? profile;
   final VoidCallback onTap;
-  const _SocialHandle({required this.onTap});
-
-  @override
-  State<_SocialHandle> createState() => _SocialHandleState();
-}
-
-class _SocialHandleState extends State<_SocialHandle>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _bob;
-
-  @override
-  void initState() {
-    super.initState();
-    _bob = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2600),
-    );
-    if (AppSettings.instance.motionFull) _bob.repeat();
-    AppSettings.instance.addListener(_onSettings);
-  }
-
-  void _onSettings() {
-    if (!mounted) return;
-    final motion = AppSettings.instance.motionFull;
-    if (motion && !_bob.isAnimating) {
-      _bob.repeat();
-    } else if (!motion && _bob.isAnimating) {
-      _bob.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    AppSettings.instance.removeListener(_onSettings);
-    _bob.dispose();
-    super.dispose();
-  }
+  const _ProfileButton({required this.profile, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final t = AppTokens.of(context);
-    return AnimatedBuilder(
-      animation: _bob,
-      builder: (context, child) => Transform.translate(
-        offset: Offset(math.sin(_bob.value * math.pi * 2) * 2, 0),
-        child: child,
-      ),
-      child: PressableScale(
-        onTap: widget.onTap,
-        child: Container(
-          width: 26,
-          height: 92,
-          decoration: BoxDecoration(
-            color: t.accent,
-            borderRadius:
-                const BorderRadius.horizontal(left: Radius.circular(14)),
-            boxShadow: AppShadows.pill,
+    return PressableScale(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2.5),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: t.accent, width: 2),
+              boxShadow: AppShadows.pill,
+            ),
+            child: ProfileAvatar(profile: profile, size: 40),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.chevron_left, color: t.onAccent, size: 18),
-              const SizedBox(height: 6),
-              Icon(Icons.people_alt_rounded, color: t.onAccent, size: 15),
-            ],
+          const SizedBox(height: 3),
+          Text(
+            l.profile,
+            style: GoogleFonts.nunito(
+              color: t.textSecondary,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

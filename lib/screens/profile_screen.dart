@@ -17,23 +17,19 @@ import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
 import '../widgets/skeleton.dart';
 import '../widgets/profile_avatar.dart';
-import '../widgets/social_tab_bar.dart';
 import 'auth/login_screen.dart';
 import 'goal_detail_screen.dart';
 
-/// The signed-in user's own profile, shown in the dashboard's social sidebar:
-/// their username, an editable bio, and the goals they've shared drawn as
-/// saplings in a grid. The shared goals here are exactly what a friend sees when
-/// they open this user's profile, so the user controls visibility per goal via
-/// each goal's "visible to friends" toggle.
+/// The signed-in user's own profile, opened from the dashboard's top-right
+/// avatar button: their username, an editable bio, and the goals they've
+/// shared drawn as saplings in a grid. The shared goals here are exactly what
+/// a friend sees when they open this user's profile, so the user controls
+/// visibility per goal via each goal's "visible to friends" toggle.
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, this.onClose, required this.onSelectTab});
+  const ProfileScreen({super.key, this.onClose});
 
-  /// Closes the sidebar drawer (shows an X instead of a back button).
+  /// Optional close callback (shows an X instead of a back button).
   final VoidCallback? onClose;
-
-  /// Switch the sidebar to another tab (e.g. Friends).
-  final ValueChanged<SocialTab> onSelectTab;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -188,17 +184,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: widget.onClose == null,
         leading: widget.onClose == null
             ? null
             : IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: widget.onClose,
               ),
-        title: SocialTabBar(
-          active: SocialTab.profile,
-          onSelect: widget.onSelectTab,
-        ),
+        title: Text(l.profile),
         centerTitle: true,
         foregroundColor: AppColors.stoneBeigeColor,
       ),

@@ -136,6 +136,18 @@ abstract class AppLocalizations {
   /// **'Friends'**
   String get friends;
 
+  /// No description provided for @addFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Add friends'**
+  String get addFriends;
+
+  /// No description provided for @activeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Active now'**
+  String get activeNow;
+
   /// No description provided for @social.
   ///
   /// In en, this message translates to:

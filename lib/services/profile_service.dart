@@ -98,6 +98,27 @@ class ProfileService {
     }
   }
 
+  /// Stamp "seen just now" on the signed-in user's profile so friends' strips
+  /// can show an active dot. Throttled in memory (at most once every 2 minutes)
+  /// and fire-and-forget safe: failures are swallowed, presence is best-effort.
+  DateTime? _lastPresenceTouch;
+  Future<void> touchPresence() async {
+    if (!isAvailable) return;
+    final now = DateTime.now();
+    if (_lastPresenceTouch != null &&
+        now.difference(_lastPresenceTouch!).inMinutes < 2) {
+      return;
+    }
+    _lastPresenceTouch = now;
+    try {
+      await SupabaseConfig.client.from(_table).update({
+        'last_seen_at': now.toUtc().toIso8601String(),
+      }).eq('id', _uid!);
+    } catch (_) {
+      // Best-effort: a failed heartbeat never surfaces to the user.
+    }
+  }
+
   /// Update how this user's status emoji is computed.
   Future<void> setStatusMode(FriendStatusMode mode, {String? goalId}) async {
     if (!isAvailable) return;

@@ -14,25 +14,19 @@ import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/skeleton.dart';
 import '../widgets/profile_avatar.dart';
-import '../widgets/social_tab_bar.dart';
 import 'auth/login_screen.dart';
 import 'friend_garden_screen.dart';
 
 /// The social hub: claim a username (first time), set how your status emoji is
 /// computed, add friends by username, respond to requests, and open a friend's
-/// garden. Online-only — when the social layer is unavailable it shows a
+/// garden. Opened from the dashboard's friends strip (its "Add friends"
+/// circle). Online-only — when the social layer is unavailable it shows a
 /// sign-in / connectivity notice instead of crashing.
 class FriendsScreen extends StatefulWidget {
-  /// When hosted in the dashboard's swipe-in sidebar, [onClose] closes the
-  /// drawer (and replaces the AppBar's automatic back button with an X). Null
-  /// when shown as a standalone screen.
-  const FriendsScreen({super.key, this.onClose, this.onSelectTab});
+  const FriendsScreen({super.key, this.onClose});
 
+  /// Optional close callback (replaces the automatic back button with an X).
   final VoidCallback? onClose;
-
-  /// When hosted in the social sidebar, switches to another tab (e.g. Profile).
-  /// Null when shown standalone, in which case the app bar shows a plain title.
-  final ValueChanged<SocialTab>? onSelectTab;
 
   @override
   State<FriendsScreen> createState() => _FriendsScreenState();
@@ -258,13 +252,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 icon: const Icon(Icons.close),
                 onPressed: widget.onClose,
               ),
-        centerTitle: widget.onSelectTab != null,
-        title: widget.onSelectTab == null
-            ? Text(AppLocalizations.of(context).friends)
-            : SocialTabBar(
-                active: SocialTab.friends,
-                onSelect: widget.onSelectTab!,
-              ),
+        title: Text(AppLocalizations.of(context).friends),
         foregroundColor: AppColors.stoneBeigeColor,
       ),
       body: SafeArea(child: _body()),

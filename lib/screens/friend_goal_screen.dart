@@ -38,76 +38,16 @@ class FriendGoalScreen extends StatelessWidget {
     final progress = goal.progress;
     final complete = goal.isCompleted;
     return Scaffold(
-      body: Stack(
-        children: [
-          // Sapling lives inside the clipped tinted panel, centered, matching
-          // the owner view. Uncapped goals scale up per tier.
-          Positioned(
-            left: 16,
-            right: 16,
-            top: 88,
-            bottom: 250,
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppTokens.current.accentTint,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Transform.scale(
-                  scale: goal.isUncapped ? goal.tierScale : 1.0,
-                  child: SaplingView(
-                    progress: progress,
-                    size: Size.infinite,
-                    leafPalette: _leafPalette,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Thermometer gauge mirroring the sapling growth.
-          Positioned(
-            right: 16,
-            top: 150,
-            child: Column(
-              children: [
-                SavingsThermometer(
-                  fill: progress,
-                  color: complete
-                      ? const Color(0xFFBA8514)
-                      : (goal.leafColorValue != null
-                            ? Color(goal.leafColorValue!)
-                            : AppColors.forestGreen),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTokens.current.card,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTokens.current.cardBorder),
-                  ),
-                  child: Text(
-                    goal.isUncapped
-                        ? 'T${goal.tier}'
-                        : '${(progress * 100).round()}%',
-                    style: GoogleFonts.nunito(
-                      color: AppTokens.current.textPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Header — back button + name + owner, no action icons.
-          SafeArea(
-            child: Padding(
+      // Laid out as a Column (mirroring the owner's GoalDetailScreen): header,
+      // then the hero fills whatever space is left, then the info panel. No
+      // absolute offsets — the old Positioned layout let the header/panel
+      // overlap the sapling on smaller screens so only its lower half showed.
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // Header — back button + name + owner, no action icons.
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
@@ -170,13 +110,79 @@ class FriendGoalScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          // Bottom info panel — read-only stats, no buttons.
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
+            // Hero: sapling centered in the clipped tinted card, thermometer
+            // overlaid, exactly like the owner's view.
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppTokens.current.accentTint,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Transform.scale(
+                            scale: goal.isUncapped ? goal.tierScale : 1.0,
+                            child: SaplingView(
+                              progress: progress,
+                              size: Size.infinite,
+                              leafPalette: _leafPalette,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 12,
+                      top: 16,
+                      child: Column(
+                        children: [
+                          SavingsThermometer(
+                            fill: progress,
+                            color: complete
+                                ? const Color(0xFFBA8514)
+                                : (goal.leafColorValue != null
+                                      ? Color(goal.leafColorValue!)
+                                      : AppColors.forestGreen),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTokens.current.card,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppTokens.current.cardBorder,
+                              ),
+                            ),
+                            child: Text(
+                              goal.isUncapped
+                                  ? 'T${goal.tier}'
+                                  : '${(progress * 100).round()}%',
+                              style: GoogleFonts.nunito(
+                                color: AppTokens.current.textPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom info panel — read-only stats, no buttons.
+            Container(
               padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
               decoration: BoxDecoration(
                 color: AppTokens.current.card,
@@ -302,8 +308,8 @@ class FriendGoalScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
