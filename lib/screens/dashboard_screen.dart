@@ -228,7 +228,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding:
-                    const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                    const EdgeInsets.fromLTRB(20, 12, 20, 8),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 460),
@@ -251,6 +251,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
+                ),
+              ),
+            ),
+            // Pinned under the scrollable block so it's always reachable.
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2, bottom: 10),
+                child: AppTextButton(
+                  icon: Icons.arrow_downward,
+                  label: l.dashboardBackToGround,
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
             ),

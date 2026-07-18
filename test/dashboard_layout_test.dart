@@ -55,5 +55,9 @@ void main() {
     expect(find.text(l.dashboardSettings), findsOneWidget);
     expect(find.text(l.addFriends), findsOneWidget);
     expect(find.text(l.profile), findsOneWidget);
+    // Back to ground stays pinned at the bottom, on screen.
+    final back = find.text(l.dashboardBackToGround);
+    expect(back, findsOneWidget);
+    expect(tester.getRect(back).bottom, lessThanOrEqualTo(844));
   });
 }
