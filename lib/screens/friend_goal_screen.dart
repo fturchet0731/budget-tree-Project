@@ -4,29 +4,98 @@ import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/goal_labels.dart';
 import '../models/goal_model.dart';
+import '../services/app_settings.dart';
+import '../services/goal_likes_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import '../widgets/sapling_view.dart';
 import '../widgets/savings_thermometer.dart';
+import '../widgets/ui/pressable.dart';
 
 /// Read-only view of a friend's shared goal. It mirrors the layout of the
 /// owner's [GoalDetailScreen] but has no deposit, edit, delete, or sharing
 /// controls — a friend can watch the tree grow, never change it. (The Supabase
 /// RLS policy also blocks writes server-side; this screen just never offers
-/// them.) The sapling is drawn in the goal's saved tree colour.
-class FriendGoalScreen extends StatelessWidget {
+/// them.) The sapling is drawn in the goal's saved tree colour. The one thing
+/// a friend CAN do is cheer: the heart pill on the hero toggles their like and
+/// shows the goal's like tally.
+class FriendGoalScreen extends StatefulWidget {
   const FriendGoalScreen({
     super.key,
     required this.goal,
     required this.ownerLabel,
+    this.ownerId,
   });
 
   final Goal goal;
 
   /// The friend's display name / username, shown in the header subtitle.
   final String ownerLabel;
+
+  /// The goal owner's user id — needed for likes. Null (legacy caller) just
+  /// hides the heart.
+  final String? ownerId;
+
+  @override
+  State<FriendGoalScreen> createState() => _FriendGoalScreenState();
+}
+
+class _FriendGoalScreenState extends State<FriendGoalScreen> {
+  Goal get goal => widget.goal;
+
+  int _likeCount = 0;
+  bool _liked = false;
+  bool _likesReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLikes();
+  }
+
+  Future<void> _loadLikes() async {
+    final owner = widget.ownerId;
+    if (owner == null || !GoalLikesService.instance.isAvailable) return;
+    try {
+      final s = await GoalLikesService.instance.summary(owner, goal.id);
+      if (!mounted) return;
+      setState(() {
+        _likeCount = s.count;
+        _liked = s.mine;
+        _likesReady = true;
+      });
+    } catch (_) {
+      // Likes stay hidden; the goal view still works offline.
+    }
+  }
+
+  /// Optimistic toggle: flip the heart instantly, then let the server catch
+  /// up; reload (or roll back) if the write fails.
+  Future<void> _toggleLike() async {
+    final owner = widget.ownerId;
+    if (owner == null || !_likesReady) return;
+    final wasLiked = _liked;
+    setState(() {
+      _liked = !wasLiked;
+      _likeCount += wasLiked ? -1 : 1;
+    });
+    try {
+      if (wasLiked) {
+        await GoalLikesService.instance.unlike(owner, goal.id);
+      } else {
+        await GoalLikesService.instance.like(owner, goal.id);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _liked = wasLiked;
+          _likeCount += wasLiked ? 1 : -1;
+        });
+      }
+    }
+  }
 
   LeafPalette get _leafPalette => goal.leafColorValue != null
       ? LeafPalette.fromAccent(Color(goal.leafColorValue!))
@@ -37,6 +106,7 @@ class FriendGoalScreen extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final progress = goal.progress;
     final complete = goal.isCompleted;
+    final ownerLabel = widget.ownerLabel;
     return Scaffold(
       // Laid out as a Column (mirroring the owner's GoalDetailScreen): header,
       // then the hero fills whatever space is left, then the info panel. No
@@ -137,6 +207,17 @@ class FriendGoalScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    // Heart pill: like toggle + tally, top-left of the hero.
+                    if (_likesReady)
+                      Positioned(
+                        left: 12,
+                        top: 16,
+                        child: _LikePill(
+                          liked: _liked,
+                          count: _likeCount,
+                          onTap: _toggleLike,
+                        ),
+                      ),
                     Positioned(
                       right: 12,
                       top: 16,
@@ -309,6 +390,66 @@ class FriendGoalScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The heart button + like tally. The heart pops (scale bounce) when toggled,
+/// gated on reduced motion like every other micro-animation.
+class _LikePill extends StatelessWidget {
+  const _LikePill({
+    required this.liked,
+    required this.count,
+    required this.onTap,
+  });
+
+  final bool liked;
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final motion = AppSettings.instance.motionFull;
+    return Semantics(
+      button: true,
+      label: liked ? l.unlikeGoal : l.likeGoal,
+      child: PressableScale(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: t.card,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: t.cardBorder),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedScale(
+                scale: liked ? 1.15 : 1.0,
+                duration: Duration(milliseconds: motion ? 240 : 0),
+                curve: Curves.elasticOut,
+                child: Icon(
+                  liked ? Icons.favorite : Icons.favorite_border,
+                  color: liked ? const Color(0xFFE0524D) : t.textSecondary,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '$count',
+                style: GoogleFonts.nunito(
+                  color: t.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -148,6 +148,42 @@ abstract class AppLocalizations {
   /// **'Active now'**
   String get activeNow;
 
+  /// No description provided for @likeGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Like this goal'**
+  String get likeGoal;
+
+  /// No description provided for @unlikeGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove your like'**
+  String get unlikeGoal;
+
+  /// No description provided for @messageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get messageAction;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Say hi to start the conversation.'**
+  String get chatEmpty;
+
+  /// No description provided for @chatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a message'**
+  String get chatHint;
+
+  /// No description provided for @chatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get chatSend;
+
   /// No description provided for @social.
   ///
   /// In en, this message translates to:

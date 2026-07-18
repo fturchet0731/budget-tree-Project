@@ -33,6 +33,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activeNow => 'Active now';
 
   @override
+  String get likeGoal => 'Like this goal';
+
+  @override
+  String get unlikeGoal => 'Remove your like';
+
+  @override
+  String get messageAction => 'Message';
+
+  @override
+  String get chatEmpty => 'Say hi to start the conversation.';
+
+  @override
+  String get chatHint => 'Write a message';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
   String get social => 'Social';
 
   @override

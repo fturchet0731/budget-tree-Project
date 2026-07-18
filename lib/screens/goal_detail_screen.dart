@@ -7,9 +7,11 @@ import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
 import '../services/achievement_service.dart';
+import '../services/auth_service.dart';
 import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
 import '../data/water_cadence.dart';
+import '../services/goal_likes_service.dart';
 import '../services/goal_repository.dart';
 import '../services/notification_scheduler.dart';
 import '../services/profile_service.dart';
@@ -53,6 +55,9 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
   List<_LinkedBranchInfo> _linkedBranches = [];
   TreeCategory? _category;
 
+  /// Like tally from friends (shown when the goal is shared and has hearts).
+  int _likeCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -65,6 +70,23 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
     _growAnim.addListener(_onGrowTick);
     _growCtrl.animateTo(_goal.progress);
     _loadLinkedBranches();
+    _loadLikes();
+  }
+
+  /// Fetch how many friends liked this goal (best-effort, online-only).
+  Future<void> _loadLikes() async {
+    final me = AuthService.instance.userId;
+    if (me == null ||
+        !_goal.sharedWithFriends ||
+        !GoalLikesService.instance.isAvailable) {
+      return;
+    }
+    try {
+      final s = await GoalLikesService.instance.summary(me, _goal.id);
+      if (mounted) setState(() => _likeCount = s.count);
+    } catch (_) {
+      // Tally stays hidden offline.
+    }
   }
 
   Future<void> _loadLinkedBranches() async {
@@ -699,6 +721,45 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                           ),
                         ),
                       ),
+                      // Friends' hearts on this goal (only when shared and
+                      // someone has actually liked it).
+                      if (_likeCount > 0)
+                        Positioned(
+                          left: 12,
+                          top: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTokens.current.card,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: AppTokens.current.cardBorder,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.favorite,
+                                  color: Color(0xFFE0524D),
+                                  size: 17,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '$_likeCount',
+                                  style: GoogleFonts.nunito(
+                                    color: AppTokens.current.textPrimary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       // Savings thermometer — fills as money accumulates
                       // toward the target, mirroring the sapling's growth on a
                       // precise gauge.

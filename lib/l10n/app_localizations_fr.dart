@@ -33,6 +33,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get activeNow => 'En ligne';
 
   @override
+  String get likeGoal => 'Aimer cet objectif';
+
+  @override
+  String get unlikeGoal => 'Retirer votre mention J\'aime';
+
+  @override
+  String get messageAction => 'Message';
+
+  @override
+  String get chatEmpty => 'Dites bonjour pour lancer la conversation.';
+
+  @override
+  String get chatHint => 'Écrivez un message';
+
+  @override
+  String get chatSend => 'Envoyer';
+
+  @override
   String get social => 'Social';
 
   @override

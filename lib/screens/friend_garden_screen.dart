@@ -8,6 +8,7 @@ import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
 import '../widgets/profile_avatar.dart';
+import 'friend_chat_screen.dart';
 import 'friend_goal_screen.dart';
 
 /// Read-only view of a friend's profile: their name + bio, and the goals they
@@ -48,6 +49,19 @@ class FriendGardenScreen extends StatelessWidget {
           ],
         ),
         foregroundColor: AppColors.stoneBeigeColor,
+        actions: [
+          // Open the 1:1 chat with this friend.
+          IconButton(
+            tooltip: l.messageAction,
+            icon: const Icon(Icons.chat_bubble_outline),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FriendChatScreen(friend: profile),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Container(
         color: AppTokens.current.canvas,
@@ -103,6 +117,7 @@ class FriendGardenScreen extends StatelessWidget {
                               builder: (_) => FriendGoalScreen(
                                 goal: sharedGoals[i],
                                 ownerLabel: profile.label,
+                                ownerId: profile.id,
                               ),
                             ),
                           ),

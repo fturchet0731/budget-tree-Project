@@ -83,29 +83,39 @@ class FriendsStripState extends State<FriendsStrip> {
     final l = AppLocalizations.of(context);
     final active = _friends.where((f) => f.profile.isActive).length;
     final total = _friends.length;
+    final bubbles = [
+      Entrance(
+        child: _AddFriendsBubble(
+          label: l.addFriends,
+          badge: total == 0 ? null : (active > 0 ? '$active/$total' : '$total'),
+          badgeIsActive: active > 0,
+          onTap: _openFriends,
+        ),
+      ),
+      for (var i = 0; i < _friends.length; i++)
+        Entrance(
+          delay: Duration(milliseconds: 60 * (i + 1)),
+          child: _FriendBubble(
+            summary: _friends[i],
+            onTap: () => _openGarden(_friends[i]),
+          ),
+        ),
+    ];
+    // Centered while the circles fit the row; swipeable once they overflow.
     return SizedBox(
       height: 118,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 2),
-        children: [
-          Entrance(
-            child: _AddFriendsBubble(
-              label: l.addFriends,
-              badge: total == 0 ? null : (active > 0 ? '$active/$total' : '$total'),
-              badgeIsActive: active > 0,
-              onTap: _openFriends,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth - 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: bubbles,
             ),
           ),
-          for (var i = 0; i < _friends.length; i++)
-            Entrance(
-              delay: Duration(milliseconds: 60 * (i + 1)),
-              child: _FriendBubble(
-                summary: _friends[i],
-                onTap: () => _openGarden(_friends[i]),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -260,7 +270,7 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: PressableScale(
         onTap: onTap,
         child: SizedBox(
