@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
-import '../l10n/pay_frequency_labels.dart';
+import '../l10n/rhythm_labels.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';

@@ -1,20 +1,20 @@
-import '../data/pay_frequency.dart';
+import '../data/rhythm.dart';
 
 class IncomeSource {
   String name;
   double amount;
 
-  /// How often this income arrives (e.g. a bi-weekly salary). Null means it
-  /// simply arrives once per budget cycle — the legacy behaviour, and what
-  /// old persisted records decode to.
-  PayFrequency? frequency;
+  /// How often this income arrives (e.g. a bi-weekly salary, or a custom
+  /// "every 3 weeks"). Null means it simply arrives once per budget cycle —
+  /// the legacy behaviour, and what old persisted records decode to.
+  Rhythm? frequency;
 
   IncomeSource({required this.name, required this.amount, this.frequency});
 
   /// This income expressed per one budget [cycle]: a $2000 salary arriving
   /// every 2 weeks counts as ~$4333 in a monthly budget. When either side is
   /// unknown (or they match) the raw amount passes through unchanged.
-  double amountPerCycle(PayFrequency? cycle) {
+  double amountPerCycle(Rhythm? cycle) {
     final f = frequency;
     if (f == null || cycle == null || f == cycle) return amount;
     return amount * f.periodsPerMonth / cycle.periodsPerMonth;
@@ -23,13 +23,13 @@ class IncomeSource {
   Map<String, dynamic> toJson() => {
         'name': name,
         'amount': amount,
-        'frequency': frequency?.index,
+        'frequency': frequency?.toJson(),
       };
 
   factory IncomeSource.fromJson(Map<String, dynamic> j) => IncomeSource(
         name: j['name'] as String,
         amount: (j['amount'] as num).toDouble(),
-        frequency: payFrequencyFromIndex(j['frequency'] as int?),
+        frequency: rhythmFromJson(j['frequency']),
       );
 }
 
@@ -39,10 +39,10 @@ class ExpenseCategory {
   String emoji;
   List<String> linkedGoalIds;
 
-  /// How often this expense is charged (e.g. monthly rent). Null means it
-  /// simply recurs once per budget cycle — the legacy behaviour, and what
-  /// old persisted records decode to.
-  PayFrequency? frequency;
+  /// How often this expense is charged (e.g. monthly rent, or a custom
+  /// "every 3 weeks"). Null means it simply recurs once per budget cycle —
+  /// the legacy behaviour, and what old persisted records decode to.
+  Rhythm? frequency;
 
   ExpenseCategory({
     required this.name,
@@ -56,7 +56,7 @@ class ExpenseCategory {
   /// monthly asks for ~$277 in a weekly budget — the amount to set aside
   /// each cycle so the bill is covered when it lands. When either side is
   /// unknown (or they match) the raw amount passes through unchanged.
-  double allocatedPerCycle(PayFrequency? cycle) {
+  double allocatedPerCycle(Rhythm? cycle) {
     final f = frequency;
     if (f == null || cycle == null || f == cycle) return allocated;
     return allocated * f.periodsPerMonth / cycle.periodsPerMonth;
@@ -65,7 +65,7 @@ class ExpenseCategory {
   /// Set the allocation from a per-[cycle] figure (the inverse of
   /// [allocatedPerCycle]) — used when an AI plan hands back per-cycle
   /// amounts for an expense that carries its own rhythm.
-  void setAllocatedPerCycle(double perCycle, PayFrequency? cycle) {
+  void setAllocatedPerCycle(double perCycle, Rhythm? cycle) {
     final f = frequency;
     if (f == null || cycle == null || f == cycle) {
       allocated = perCycle;
@@ -79,7 +79,7 @@ class ExpenseCategory {
         'allocated': allocated,
         'emoji': emoji,
         'linkedGoalIds': linkedGoalIds,
-        'frequency': frequency?.index,
+        'frequency': frequency?.toJson(),
       };
 
   factory ExpenseCategory.fromJson(Map<String, dynamic> j) => ExpenseCategory(
@@ -90,7 +90,7 @@ class ExpenseCategory {
                 ?.map((e) => e as String)
                 .toList() ??
             const [],
-        frequency: payFrequencyFromIndex(j['frequency'] as int?),
+        frequency: rhythmFromJson(j['frequency']),
       );
 }
 
@@ -103,7 +103,10 @@ class BudgetModel {
   final String id;
   DateTime? savedAt;
   String? categoryId;
-  PayFrequency? payFrequency;
+
+  /// The budget's own cycle: every allocation and income figure is expressed
+  /// per one of these periods. May be a preset or a custom interval.
+  Rhythm? payFrequency;
   DateTime? firstPayDate;
   DateTime? lastProcessedAt;
 
@@ -149,7 +152,7 @@ class BudgetModel {
         'id': id,
         'savedAt': savedAt?.millisecondsSinceEpoch,
         'categoryId': categoryId,
-        'payFrequency': payFrequency?.index,
+        'payFrequency': payFrequency?.toJson(),
         'firstPayDate': firstPayDate?.millisecondsSinceEpoch,
         'lastProcessedAt': lastProcessedAt?.millisecondsSinceEpoch,
       };
@@ -169,7 +172,7 @@ class BudgetModel {
             ? DateTime.fromMillisecondsSinceEpoch(json['savedAt'] as int)
             : null,
         categoryId: json['categoryId'] as String?,
-        payFrequency: payFrequencyFromIndex(json['payFrequency'] as int?),
+        payFrequency: rhythmFromJson(json['payFrequency']),
         firstPayDate: json['firstPayDate'] != null
             ? DateTime.fromMillisecondsSinceEpoch(json['firstPayDate'] as int)
             : null,

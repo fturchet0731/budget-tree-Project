@@ -69,7 +69,7 @@ class AiCoachService {
     String synopsis = '',
     Map<String, String> survey = const {},
     String currency = '\$',
-    // The budget's cycle (PayFrequency.wire): income and every amount are per
+    // The budget's cycle (Rhythm.wire): income and every amount are per
     // this period, so the coach scales estimates (a weekly food budget is not
     // a monthly one).
     String cycle = 'monthly',

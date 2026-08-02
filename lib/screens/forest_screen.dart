@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../data/pay_frequency.dart';
+import '../data/rhythm.dart';
 import '../l10n/app_localizations.dart';
-import '../l10n/pay_frequency_labels.dart';
+import '../l10n/rhythm_labels.dart';
+import '../widgets/rhythm_picker.dart';
 import '../l10n/preset_labels.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
@@ -961,9 +962,9 @@ class _EditSheetState extends State<_EditSheet> {
   late TextEditingController _nameCtrl;
   late List<TextEditingController> _amountCtrls;
   // Each branch's charge rhythm, editable alongside its amount.
-  late List<PayFrequency?> _expFreqs;
+  late List<Rhythm?> _expFreqs;
   // Editable copy of the roots feeding this tree: name + amount + rhythm.
-  late List<(TextEditingController, TextEditingController, PayFrequency?)>
+  late List<(TextEditingController, TextEditingController, Rhythm?)>
       _incomes;
   String? _categoryId;
   bool _saving = false;
@@ -1002,7 +1003,7 @@ class _EditSheetState extends State<_EditSheet> {
   /// What each cycle the edited amounts convert to (a monthly rent edited in
   /// a weekly budget counts its per-cycle share), so the summary row always
   /// compares like-for-like against the per-cycle income.
-  double _perCycle(double amount, PayFrequency? freq) {
+  double _perCycle(double amount, Rhythm? freq) {
     final cycle = widget.budget.payFrequency;
     if (freq == null || cycle == null || freq == cycle) return amount;
     return amount * freq.periodsPerMonth / cycle.periodsPerMonth;
@@ -1120,15 +1121,26 @@ class _EditSheetState extends State<_EditSheet> {
             ),
           ),
           const SizedBox(width: 4),
-          PopupMenuButton<PayFrequency>(
+          PopupMenuButton<Rhythm?>(
             tooltip: l.incomeArrives,
             initialValue: freq ?? widget.budget.payFrequency,
-            onSelected: (f) => setState(() {
-              _incomes[i] = (nameCtrl, amountCtrl, f);
-            }),
+            onSelected: (f) async {
+              // A null selection is the "Custom" entry: open the interval
+              // picker rather than setting a preset.
+              final chosen = f ??
+                  await showRhythmDialog(
+                    context,
+                    freq ?? widget.budget.payFrequency ?? Rhythm.monthly,
+                  );
+              if (chosen == null || !mounted) return;
+              setState(() => _incomes[i] = (nameCtrl, amountCtrl, chosen));
+            },
             itemBuilder: (ctx) => [
-              for (final f in PayFrequency.values)
+              for (final f in Rhythm.presets)
                 PopupMenuItem(value: f, child: Text(f.localizedLabel(l))),
+              if (freq != null && freq.isCustom)
+                PopupMenuItem(value: freq, child: Text(freq.localizedLabel(l))),
+              PopupMenuItem(value: null, child: Text(l.rhythmCustom)),
             ],
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
@@ -1326,16 +1338,28 @@ class _EditSheetState extends State<_EditSheet> {
                             ),
                             // Same rhythm picker the income rows carry: how
                             // often this bill is charged.
-                            PopupMenuButton<PayFrequency>(
+                            PopupMenuButton<Rhythm?>(
                               tooltip: l.expenseCharged,
                               initialValue: freq ?? cycle,
-                              onSelected: (f) =>
-                                  setState(() => _expFreqs[i] = f),
+                              onSelected: (f) async {
+                                // Null is the "Custom" entry.
+                                final chosen = f ??
+                                    await showRhythmDialog(
+                                        context, freq ?? cycle ?? Rhythm.monthly);
+                                if (chosen == null || !mounted) return;
+                                setState(() => _expFreqs[i] = chosen);
+                              },
                               itemBuilder: (ctx) => [
-                                for (final f in PayFrequency.values)
+                                for (final f in Rhythm.presets)
                                   PopupMenuItem(
                                       value: f,
                                       child: Text(f.localizedLabel(l))),
+                                if (freq != null && freq.isCustom)
+                                  PopupMenuItem(
+                                      value: freq,
+                                      child: Text(freq.localizedLabel(l))),
+                                PopupMenuItem(
+                                    value: null, child: Text(l.rhythmCustom)),
                               ],
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(

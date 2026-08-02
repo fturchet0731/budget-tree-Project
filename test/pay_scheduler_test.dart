@@ -7,7 +7,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:budget_app_project/data/pay_frequency.dart';
+import 'package:budget_app_project/data/rhythm.dart';
 import 'package:budget_app_project/models/budget_model.dart';
 import 'package:budget_app_project/models/goal_model.dart';
 import 'package:budget_app_project/services/budget_repository.dart';
@@ -35,7 +35,7 @@ BudgetModel weeklyBudget({
       ),
     ],
     savedAt: DateTime.now(),
-    payFrequency: PayFrequency.weekly,
+    payFrequency: Rhythm.weekly,
     firstPayDate: start,
     lastProcessedAt: start,
   );
@@ -88,7 +88,7 @@ void main() {
             ),
           ],
           savedAt: DateTime.now(),
-          payFrequency: PayFrequency.weekly,
+          payFrequency: Rhythm.weekly,
           firstPayDate: start,
           lastProcessedAt: start,
         );

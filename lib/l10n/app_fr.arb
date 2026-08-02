@@ -720,5 +720,14 @@
   "notifChannelWeeklyName": "Bilan hebdomadaire",
   "notifChannelWeeklyDesc": "Un récapitulatif hebdomadaire de la croissance de votre forêt",
   "notifChannelWateringName": "Arrosage des objectifs",
-  "notifChannelWateringDesc": "Rappels pour arroser vos objectifs d'épargne à temps"
+  "notifChannelWateringDesc": "Rappels pour arroser vos objectifs d'épargne à temps",
+  "rhythmCustom": "Personnalisé",
+  "rhythmEvery": "Tous les",
+  "rhythmEveryDays": "{count, plural, =1{Chaque jour} other{Tous les {count} jours}}",
+  "rhythmEveryWeeks": "{count, plural, =1{Chaque semaine} other{Toutes les {count} semaines}}",
+  "rhythmEveryMonths": "{count, plural, =1{Chaque mois} other{Tous les {count} mois}}",
+  "rhythmUnitDays": "jours",
+  "rhythmUnitWeeks": "semaines",
+  "rhythmUnitMonths": "mois",
+  "rhythmCustomHint": "Combien ?"
 }

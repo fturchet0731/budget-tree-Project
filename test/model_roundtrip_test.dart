@@ -11,7 +11,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:budget_app_project/data/pay_frequency.dart';
+import 'package:budget_app_project/data/rhythm.dart';
 import 'package:budget_app_project/data/water_cadence.dart';
 import 'package:budget_app_project/models/budget_model.dart';
 import 'package:budget_app_project/models/category_model.dart';
@@ -121,7 +121,7 @@ void main() {
           IncomeSource(
             name: 'Salary',
             amount: 2000,
-            frequency: PayFrequency.biWeekly,
+            frequency: Rhythm.biWeekly,
           ),
         ],
         expenses: [
@@ -130,13 +130,13 @@ void main() {
             allocated: 1200,
             emoji: 'home',
             linkedGoalIds: ['g1', 'g2'],
-            frequency: PayFrequency.monthly,
+            frequency: Rhythm.monthly,
           ),
         ],
         id: 'budget-1',
         savedAt: saved,
         categoryId: 'cat-3',
-        payFrequency: PayFrequency.weekly,
+        payFrequency: Rhythm.weekly,
         firstPayDate: firstPay,
         lastProcessedAt: processed,
       );
@@ -147,21 +147,21 @@ void main() {
       expect(back.id, 'budget-1');
       expect(back.savedAt, saved);
       expect(back.categoryId, 'cat-3');
-      expect(back.payFrequency, PayFrequency.weekly);
+      expect(back.payFrequency, Rhythm.weekly);
       expect(back.firstPayDate, firstPay);
       expect(back.lastProcessedAt, processed);
 
       expect(back.incomeSources, hasLength(1));
       expect(back.incomeSources.first.name, 'Salary');
       expect(back.incomeSources.first.amount, 2000);
-      expect(back.incomeSources.first.frequency, PayFrequency.biWeekly);
+      expect(back.incomeSources.first.frequency, Rhythm.biWeekly);
 
       expect(back.expenses, hasLength(1));
       expect(back.expenses.first.name, 'Rent');
       expect(back.expenses.first.allocated, 1200);
       expect(back.expenses.first.emoji, 'home');
       expect(back.expenses.first.linkedGoalIds, ['g1', 'g2']);
-      expect(back.expenses.first.frequency, PayFrequency.monthly);
+      expect(back.expenses.first.frequency, Rhythm.monthly);
     });
 
     test('a legacy record decodes with safe defaults', () {

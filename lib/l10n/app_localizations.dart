@@ -4191,6 +4191,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reminders to water your savings goals on schedule'**
   String get notifChannelWateringDesc;
+
+  /// No description provided for @rhythmCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get rhythmCustom;
+
+  /// No description provided for @rhythmEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get rhythmEvery;
+
+  /// No description provided for @rhythmEveryDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Every day} other{Every {count} days}}'**
+  String rhythmEveryDays(int count);
+
+  /// No description provided for @rhythmEveryWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Every week} other{Every {count} weeks}}'**
+  String rhythmEveryWeeks(int count);
+
+  /// No description provided for @rhythmEveryMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Every month} other{Every {count} months}}'**
+  String rhythmEveryMonths(int count);
+
+  /// No description provided for @rhythmUnitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get rhythmUnitDays;
+
+  /// No description provided for @rhythmUnitWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'weeks'**
+  String get rhythmUnitWeeks;
+
+  /// No description provided for @rhythmUnitMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get rhythmUnitMonths;
+
+  /// No description provided for @rhythmCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How many?'**
+  String get rhythmCustomHint;
 }
 
 class _AppLocalizationsDelegate

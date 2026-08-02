@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../data/pay_frequency.dart';
+import '../data/rhythm.dart';
 import '../l10n/app_localizations.dart';
-import '../l10n/pay_frequency_labels.dart';
+import '../l10n/rhythm_labels.dart';
 import '../l10n/preset_labels.dart';
 import '../l10n/survey_labels.dart';
 import '../models/ai_plan.dart';
@@ -16,6 +16,7 @@ import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../widgets/acorn_coach.dart';
 import '../widgets/allocation_plan_card.dart';
+import '../widgets/rhythm_picker.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/info_button.dart';
 import '../theme/app_shadows.dart';
@@ -53,7 +54,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final List<IncomeSource> _incomeSources = [];
   final _incomeNameCtrl = TextEditingController();
   final _incomeAmountCtrl = TextEditingController();
-  PayFrequency? _newIncomeFreq; // null = arrives once per budget cycle
+  Rhythm? _newIncomeFreq; // null = arrives once per budget cycle
   // Progressive reveal: the budget cycle card only appears once the user has
   // confirmed they're done listing income, so the step opens uncluttered.
   bool _incomeConfirmed = false;
@@ -63,7 +64,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final _expNameCtrl = TextEditingController();
   final _expAmountCtrl = TextEditingController();
   String _selectedIconKey = 'other';
-  PayFrequency? _newExpenseFreq; // null = charged once per budget cycle
+  Rhythm? _newExpenseFreq; // null = charged once per budget cycle
   // Same reveal pattern: the budget-standing summary appears once the user
   // confirms they're done adding expense branches.
   bool _expensesConfirmed = false;
@@ -93,7 +94,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   // field initialiser runs before there's a context to read strings from.
   final _budgetNameCtrl = TextEditingController();
   bool _nameSeeded = false;
-  PayFrequency _payFrequency = PayFrequency.monthly;
+  Rhythm _payFrequency = Rhythm.monthly;
   DateTime? _firstPayDate;
 
   // The widgets Acorn's coach can ring while he talks about them (tutorial
@@ -712,17 +713,17 @@ class _IncomeStep extends StatefulWidget {
 
   /// The budget's own rhythm, chosen here at the top of the wizard. Every
   /// amount on later steps reads "per cycle".
-  final PayFrequency cycle;
+  final Rhythm cycle;
 
   /// Arrival rhythm for the income being typed into the hero input.
-  final PayFrequency newIncomeFreq;
+  final Rhythm newIncomeFreq;
 
   /// True once the user has said they've listed all their income — reveals the
   /// budget-cycle card.
   final bool confirmed;
   final VoidCallback onConfirm;
-  final ValueChanged<PayFrequency> onCycleChanged;
-  final ValueChanged<PayFrequency> onIncomeFreqChanged;
+  final ValueChanged<Rhythm> onCycleChanged;
+  final ValueChanged<Rhythm> onIncomeFreqChanged;
   final VoidCallback onAdd;
   final void Function(int) onRemove;
 
@@ -755,12 +756,12 @@ class _IncomeStepState extends State<_IncomeStep> {
   TextEditingController get nameCtrl => widget.nameCtrl;
   TextEditingController get amountCtrl => widget.amountCtrl;
   List<String> get suggestions => widget.suggestions;
-  PayFrequency get cycle => widget.cycle;
-  PayFrequency get newIncomeFreq => widget.newIncomeFreq;
+  Rhythm get cycle => widget.cycle;
+  Rhythm get newIncomeFreq => widget.newIncomeFreq;
   bool get confirmed => widget.confirmed;
   VoidCallback get onConfirm => widget.onConfirm;
-  ValueChanged<PayFrequency> get onCycleChanged => widget.onCycleChanged;
-  ValueChanged<PayFrequency> get onIncomeFreqChanged =>
+  ValueChanged<Rhythm> get onCycleChanged => widget.onCycleChanged;
+  ValueChanged<Rhythm> get onIncomeFreqChanged =>
       widget.onIncomeFreqChanged;
   VoidCallback get onAdd => widget.onAdd;
   void Function(int) get onRemove => widget.onRemove;
@@ -862,17 +863,9 @@ class _IncomeStepState extends State<_IncomeStep> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final f in PayFrequency.values)
-                      _SurveyChip(
-                        label: f.localizedLabel(l),
-                        selected: newIncomeFreq == f,
-                        onTap: () => onIncomeFreqChanged(f),
-                      ),
-                  ],
+                RhythmPicker(
+                  value: newIncomeFreq,
+                  onChanged: onIncomeFreqChanged,
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -1055,18 +1048,7 @@ class _IncomeStepState extends State<_IncomeStep> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final f in PayFrequency.values)
-                          _SurveyChip(
-                            label: f.localizedLabel(l),
-                            selected: cycle == f,
-                            onTap: () => onCycleChanged(f),
-                          ),
-                      ],
-                    ),
+                    RhythmPicker(value: cycle, onChanged: onCycleChanged),
                     const SizedBox(height: 8),
                     Text(
                       l.budgetCycleBody,
@@ -1117,11 +1099,11 @@ class _ExpenseStep extends StatelessWidget {
 
   /// The budget's cycle, so a branch charged on a different rhythm can show
   /// its per-cycle set-aside.
-  final PayFrequency cycle;
+  final Rhythm cycle;
 
   /// Charge rhythm for the expense being typed into the hero input.
-  final PayFrequency newExpenseFreq;
-  final ValueChanged<PayFrequency> onExpenseFreqChanged;
+  final Rhythm newExpenseFreq;
+  final ValueChanged<Rhythm> onExpenseFreqChanged;
 
   /// True once the user confirms they've listed all their branches — reveals
   /// the "where you stand" budget summary.
@@ -1247,17 +1229,9 @@ class _ExpenseStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final f in PayFrequency.values)
-                      _SurveyChip(
-                        label: f.localizedLabel(l),
-                        selected: newExpenseFreq == f,
-                        onTap: () => onExpenseFreqChanged(f),
-                      ),
-                  ],
+                RhythmPicker(
+                  value: newExpenseFreq,
+                  onChanged: onExpenseFreqChanged,
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -1933,9 +1907,9 @@ class _PlanStep extends StatefulWidget {
   final void Function(String name, double amount, String goalId)
   onAddGoalBranch;
   final TextEditingController nameCtrl;
-  final PayFrequency payFrequency;
+  final Rhythm payFrequency;
   final DateTime? firstPayDate;
-  final ValueChanged<PayFrequency> onFrequencyChanged;
+  final ValueChanged<Rhythm> onFrequencyChanged;
   final ValueChanged<DateTime?> onFirstPayDateChanged;
 
   const _PlanStep({
@@ -2345,17 +2319,9 @@ class _PlanStepState extends State<_PlanStep> {
         children: [
           // The cycle was picked on the Income step; it stays adjustable here
           // as the same chips, right where the pay date is set.
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final f in PayFrequency.values)
-                _SurveyChip(
-                  label: f.localizedLabel(l),
-                  selected: widget.payFrequency == f,
-                  onTap: () => widget.onFrequencyChanged(f),
-                ),
-            ],
+          RhythmPicker(
+            value: widget.payFrequency,
+            onChanged: widget.onFrequencyChanged,
           ),
           const SizedBox(height: 14),
           InkWell(

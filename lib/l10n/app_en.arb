@@ -794,5 +794,17 @@
   "notifChannelWeeklyName": "Weekly summary",
   "notifChannelWeeklyDesc": "A weekly recap of how your forest is growing",
   "notifChannelWateringName": "Goal watering",
-  "notifChannelWateringDesc": "Reminders to water your savings goals on schedule"
+  "notifChannelWateringDesc": "Reminders to water your savings goals on schedule",
+  "rhythmCustom": "Custom",
+  "rhythmEvery": "Every",
+  "rhythmEveryDays": "{count, plural, =1{Every day} other{Every {count} days}}",
+  "@rhythmEveryDays": { "placeholders": { "count": { "type": "int" } } },
+  "rhythmEveryWeeks": "{count, plural, =1{Every week} other{Every {count} weeks}}",
+  "@rhythmEveryWeeks": { "placeholders": { "count": { "type": "int" } } },
+  "rhythmEveryMonths": "{count, plural, =1{Every month} other{Every {count} months}}",
+  "@rhythmEveryMonths": { "placeholders": { "count": { "type": "int" } } },
+  "rhythmUnitDays": "days",
+  "rhythmUnitWeeks": "weeks",
+  "rhythmUnitMonths": "months",
+  "rhythmCustomHint": "How many?"
 }

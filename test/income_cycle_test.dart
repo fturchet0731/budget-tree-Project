@@ -1,33 +1,33 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:budget_app_project/data/pay_frequency.dart';
+import 'package:budget_app_project/data/rhythm.dart';
 import 'package:budget_app_project/models/budget_model.dart';
 
 void main() {
   group('IncomeSource.amountPerCycle', () {
     test('same frequency passes through unchanged', () {
       final s = IncomeSource(
-          name: 'Salary', amount: 2000, frequency: PayFrequency.monthly);
-      expect(s.amountPerCycle(PayFrequency.monthly), 2000);
+          name: 'Salary', amount: 2000, frequency: Rhythm.monthly);
+      expect(s.amountPerCycle(Rhythm.monthly), 2000);
     });
 
     test('bi-weekly salary in a monthly budget is ~26/12 of the amount', () {
       final s = IncomeSource(
-          name: 'Salary', amount: 2000, frequency: PayFrequency.biWeekly);
-      expect(s.amountPerCycle(PayFrequency.monthly),
+          name: 'Salary', amount: 2000, frequency: Rhythm.biWeekly);
+      expect(s.amountPerCycle(Rhythm.monthly),
           closeTo(2000 * 26 / 12, 0.01));
     });
 
     test('monthly income in a weekly budget shrinks by 12/52', () {
       final s = IncomeSource(
-          name: 'Rent income', amount: 1300, frequency: PayFrequency.monthly);
-      expect(s.amountPerCycle(PayFrequency.weekly),
+          name: 'Rent income', amount: 1300, frequency: Rhythm.monthly);
+      expect(s.amountPerCycle(Rhythm.weekly),
           closeTo(1300 * 12 / 52, 0.01));
     });
 
     test('legacy income without a frequency passes through', () {
       final s = IncomeSource(name: 'Old', amount: 500);
-      expect(s.amountPerCycle(PayFrequency.weekly), 500);
+      expect(s.amountPerCycle(Rhythm.weekly), 500);
       expect(s.amountPerCycle(null), 500);
     });
   });
@@ -38,12 +38,12 @@ void main() {
         budgetName: 'B',
         incomeSources: [
           IncomeSource(
-              name: 'Salary', amount: 1000, frequency: PayFrequency.biWeekly),
+              name: 'Salary', amount: 1000, frequency: Rhythm.biWeekly),
           IncomeSource(
-              name: 'Side', amount: 200, frequency: PayFrequency.monthly),
+              name: 'Side', amount: 200, frequency: Rhythm.monthly),
         ],
         expenses: [],
-        payFrequency: PayFrequency.monthly,
+        payFrequency: Rhythm.monthly,
       );
       expect(b.totalIncome, closeTo(1000 * 26 / 12 + 200, 0.01));
     });
@@ -53,7 +53,7 @@ void main() {
         budgetName: 'B',
         incomeSources: [
           IncomeSource(
-              name: 'Salary', amount: 1000, frequency: PayFrequency.weekly),
+              name: 'Salary', amount: 1000, frequency: Rhythm.weekly),
         ],
         expenses: [],
       );
@@ -67,14 +67,14 @@ void main() {
           name: 'Rent',
           allocated: 1200,
           emoji: 'home',
-          frequency: PayFrequency.monthly);
-      expect(e.allocatedPerCycle(PayFrequency.weekly),
+          frequency: Rhythm.monthly);
+      expect(e.allocatedPerCycle(Rhythm.weekly),
           closeTo(1200 * 12 / 52, 0.01));
     });
 
     test('legacy expense without a frequency passes through', () {
       final e = ExpenseCategory(name: 'Old', allocated: 300, emoji: 'food');
-      expect(e.allocatedPerCycle(PayFrequency.weekly), 300);
+      expect(e.allocatedPerCycle(Rhythm.weekly), 300);
       expect(e.allocatedPerCycle(null), 300);
     });
 
@@ -83,9 +83,9 @@ void main() {
           name: 'Rent',
           allocated: 0,
           emoji: 'home',
-          frequency: PayFrequency.monthly);
-      e.setAllocatedPerCycle(300, PayFrequency.weekly);
-      expect(e.allocatedPerCycle(PayFrequency.weekly), closeTo(300, 0.01));
+          frequency: Rhythm.monthly);
+      e.setAllocatedPerCycle(300, Rhythm.weekly);
+      expect(e.allocatedPerCycle(Rhythm.weekly), closeTo(300, 0.01));
       expect(e.allocated, closeTo(300 * 52 / 12, 0.01));
     });
 
@@ -94,17 +94,17 @@ void main() {
         budgetName: 'B',
         incomeSources: [
           IncomeSource(
-              name: 'Wage', amount: 500, frequency: PayFrequency.weekly),
+              name: 'Wage', amount: 500, frequency: Rhythm.weekly),
         ],
         expenses: [
           ExpenseCategory(
               name: 'Rent',
               allocated: 1300,
               emoji: 'home',
-              frequency: PayFrequency.monthly),
+              frequency: Rhythm.monthly),
           ExpenseCategory(name: 'Food', allocated: 100, emoji: 'food'),
         ],
-        payFrequency: PayFrequency.weekly,
+        payFrequency: Rhythm.weekly,
       );
       expect(b.totalAllocated, closeTo(1300 * 12 / 52 + 100, 0.01));
       expect(b.remaining, closeTo(500 - (1300 * 12 / 52 + 100), 0.01));
@@ -115,9 +115,9 @@ void main() {
           name: 'Rent',
           allocated: 1200,
           emoji: 'home',
-          frequency: PayFrequency.monthly);
+          frequency: Rhythm.monthly);
       final back = ExpenseCategory.fromJson(e.toJson());
-      expect(back.frequency, PayFrequency.monthly);
+      expect(back.frequency, Rhythm.monthly);
       expect(back.allocated, 1200);
 
       final legacy = ExpenseCategory.fromJson(
@@ -129,9 +129,9 @@ void main() {
   group('IncomeSource json', () {
     test('round-trips the frequency', () {
       final s = IncomeSource(
-          name: 'Salary', amount: 2000, frequency: PayFrequency.biWeekly);
+          name: 'Salary', amount: 2000, frequency: Rhythm.biWeekly);
       final back = IncomeSource.fromJson(s.toJson());
-      expect(back.frequency, PayFrequency.biWeekly);
+      expect(back.frequency, Rhythm.biWeekly);
       expect(back.amount, 2000);
     });
 

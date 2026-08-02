@@ -2396,4 +2396,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notifChannelWateringDesc =>
       'Reminders to water your savings goals on schedule';
+
+  @override
+  String get rhythmCustom => 'Custom';
+
+  @override
+  String get rhythmEvery => 'Every';
+
+  @override
+  String rhythmEveryDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count days',
+      one: 'Every day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rhythmEveryWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count weeks',
+      one: 'Every week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rhythmEveryMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count months',
+      one: 'Every month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rhythmUnitDays => 'days';
+
+  @override
+  String get rhythmUnitWeeks => 'weeks';
+
+  @override
+  String get rhythmUnitMonths => 'months';
+
+  @override
+  String get rhythmCustomHint => 'How many?';
 }

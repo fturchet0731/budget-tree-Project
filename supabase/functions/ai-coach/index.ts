@@ -130,7 +130,13 @@ async function budgetPlans(body: Record<string, unknown>) {
     semimonthly: "half month",
     monthly: "month",
   };
-  const cycle = CYCLES[String(body.cycle ?? "monthly")] ?? "month";
+  // A custom rhythm arrives as `every:3:weeks` (Rhythm.wire). Render it in
+  // words for the prompt; anything unrecognised falls back to a month.
+  const cycleToken = str(body.cycle || "monthly", 24);
+  const custom = /^every:(\d{1,3}):(days|weeks|months)$/.exec(cycleToken);
+  const cycle = custom
+    ? `${custom[1]} ${custom[1] === "1" ? custom[2].slice(0, -1) : custom[2]}`
+    : (CYCLES[cycleToken] ?? "month");
   const synopsisCapped = synopsis.slice(0, MAX_SYNOPSIS_LEN);
   // A small lifestyle questionnaire (question -> chosen answer) the user filled
   // in so the coach can estimate the amounts of expenses left blank. Bounded so

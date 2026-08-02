@@ -720,5 +720,14 @@
   "notifChannelWeeklyName": "Resumen semanal",
   "notifChannelWeeklyDesc": "Un resumen semanal de cómo crece tu bosque",
   "notifChannelWateringName": "Riego de metas",
-  "notifChannelWateringDesc": "Recordatorios para regar tus metas de ahorro a tiempo"
+  "notifChannelWateringDesc": "Recordatorios para regar tus metas de ahorro a tiempo",
+  "rhythmCustom": "Personalizado",
+  "rhythmEvery": "Cada",
+  "rhythmEveryDays": "{count, plural, =1{Cada día} other{Cada {count} días}}",
+  "rhythmEveryWeeks": "{count, plural, =1{Cada semana} other{Cada {count} semanas}}",
+  "rhythmEveryMonths": "{count, plural, =1{Cada mes} other{Cada {count} meses}}",
+  "rhythmUnitDays": "días",
+  "rhythmUnitWeeks": "semanas",
+  "rhythmUnitMonths": "meses",
+  "rhythmCustomHint": "¿Cuántos?"
 }
