@@ -55,9 +55,14 @@ void main() {
     await settle();
 
     // ── Income step: add a $100 source, confirm, move on. ──
+    // The add box reveals itself in stages: the rhythm question and the "add
+    // this source" button only appear once the name and amount are filled in,
+    // so settle after typing before reaching for the button. (enterText alone
+    // doesn't pump a frame, so without this the reveal isn't in the tree yet.)
     await tester.enterText(find.byType(TextField).at(0), 'Salary');
     await tester.enterText(find.byType(TextField).at(1), '100');
-    await tester.tap(find.byIcon(Icons.add).first);
+    await settle();
+    await tester.tap(find.text('Add this source'));
     await settle();
 
     await tester.scrollUntilVisible(
@@ -79,9 +84,13 @@ void main() {
     expect(find.text('Remaining: \$100'), findsOneWidget);
 
     // Add a $250 branch: the pinned meter flips to "over budget" live.
+    // Same staged reveal as the income box, so settle before the button.
     await tester.enterText(find.byType(TextField).at(0), 'Rent');
     await tester.enterText(find.byType(TextField).at(1), '250');
-    await tester.tap(find.byIcon(Icons.add).first);
+    await settle();
+    await tester.ensureVisible(find.text('Add this branch'));
+    await tester.pump();
+    await tester.tap(find.text('Add this branch'));
     await settle();
     expect(find.text('Over by \$150'), findsOneWidget);
 

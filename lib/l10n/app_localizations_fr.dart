@@ -2470,4 +2470,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rhythmCustomHint => 'Combien ?';
+
+  @override
+  String get addThisSource => 'Ajouter cette source';
+
+  @override
+  String get addThisExpense => 'Ajouter cette branche';
+
+  @override
+  String get savedIncomeSources => 'Sources de revenu enregistrées';
+
+  @override
+  String get savedIncomeSourcesHint =>
+      'Touchez-en une pour la réutiliser d\'un arbre précédent.';
+
+  @override
+  String get expenseBelongsTo => 'À quelle branche appartient cette dépense ?';
+
+  @override
+  String get savedExpenseBranches => 'Branches enregistrées';
+
+  @override
+  String get savedExpenseBranchesHint =>
+      'Touchez-en une pour la réutiliser d\'un arbre précédent.';
+
+  @override
+  String get chooseBranchToContinue =>
+      'Choisissez une branche pour ajouter cette dépense.';
 }

@@ -11,6 +11,7 @@ import '../models/budget_model.dart';
 import '../models/goal_model.dart';
 import '../services/ai_coach_service.dart';
 import '../services/goal_repository.dart';
+import '../services/saved_entries.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
@@ -58,6 +59,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   // Progressive reveal: the budget cycle card only appears once the user has
   // confirmed they're done listing income, so the step opens uncluttered.
   bool _incomeConfirmed = false;
+
+  // Roots and branches the user entered on earlier trees, offered for one-tap
+  // reuse. Loaded once on init; empty for a first-time user, in which case the
+  // sections simply don't render.
+  List<IncomeSource> _savedIncomes = [];
+  List<ExpenseCategory> _savedExpenses = [];
 
   // Step 2 – Expenses
   final List<ExpenseCategory> _expenses = [];
@@ -122,6 +129,50 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     ('personal', 'Personal'),
     ('other', 'Other'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEntries();
+  }
+
+  /// Pull the roots and branches from earlier trees so they can be reused with
+  /// one tap. Best effort: a failure just means the sections don't appear.
+  Future<void> _loadSavedEntries() async {
+    final incomes = await SavedEntries.incomes();
+    final expenses = await SavedEntries.expenses();
+    if (!mounted) return;
+    setState(() {
+      _savedIncomes = incomes;
+      _savedExpenses = expenses;
+    });
+  }
+
+  /// Reuse a saved income: drop it straight into the running list.
+  void _useSavedIncome(IncomeSource s) {
+    setState(() {
+      _incomeSources.add(IncomeSource(
+        name: s.name,
+        amount: s.amount,
+        frequency: s.frequency ?? _payFrequency,
+      ));
+      _planSettled = false;
+    });
+  }
+
+  /// Reuse a saved branch. The amount comes along, but the plan step can still
+  /// re-allocate it like any other branch.
+  void _useSavedExpense(ExpenseCategory e) {
+    setState(() {
+      _expenses.add(ExpenseCategory(
+        name: e.name,
+        allocated: e.allocated,
+        emoji: e.emoji,
+        frequency: e.frequency ?? _payFrequency,
+      ));
+      _planSettled = false;
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -388,6 +439,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             nameCtrl: _incomeNameCtrl,
                             amountCtrl: _incomeAmountCtrl,
                             suggestions: incomeSuggestionKeys,
+                            saved: _savedIncomes,
+                            onUseSaved: _useSavedIncome,
                             cycle: _payFrequency,
                             newIncomeFreq: _newIncomeFreq ?? _payFrequency,
                             confirmed: _incomeConfirmed,
@@ -429,11 +482,18 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                                 setState(() => _expensesConfirmed = true),
                             onAdd: _addExpense,
                             onRemove: _removeExpense,
+                            saved: _savedExpenses,
+                            onUseSaved: _useSavedExpense,
+                            // Picking a branch sets the category. It only
+                            // fills the name when the user hasn't typed one,
+                            // so choosing a branch never overwrites "Netflix"
+                            // with "Subscriptions".
                             onPresetTap: (name, iconKey) => setState(() {
-                              _expNameCtrl.text = iconKey == 'other'
-                                  ? ''
-                                  : name;
                               _selectedIconKey = iconKey;
+                              if (_expNameCtrl.text.trim().isEmpty &&
+                                  iconKey != 'other') {
+                                _expNameCtrl.text = name;
+                              }
                             }),
                           )
                         : _step == 2
@@ -711,6 +771,11 @@ class _IncomeStep extends StatefulWidget {
   final TextEditingController amountCtrl;
   final List<String> suggestions;
 
+  /// Income sources from the user's earlier trees, offered for one-tap reuse.
+  /// Empty for a first-time user, in which case the section isn't drawn.
+  final List<IncomeSource> saved;
+  final ValueChanged<IncomeSource> onUseSaved;
+
   /// The budget's own rhythm, chosen here at the top of the wizard. Every
   /// amount on later steps reads "per cycle".
   final Rhythm cycle;
@@ -734,6 +799,8 @@ class _IncomeStep extends StatefulWidget {
     required this.nameCtrl,
     required this.amountCtrl,
     required this.suggestions,
+    required this.saved,
+    required this.onUseSaved,
     required this.cycle,
     required this.newIncomeFreq,
     required this.confirmed,
@@ -752,6 +819,25 @@ class _IncomeStepState extends State<_IncomeStep> {
   final _nameFocus = FocusNode();
   ScrollController? _scrollCtrl;
 
+  @override
+  void initState() {
+    super.initState();
+    // The rhythm question only appears once there's a source and an amount, so
+    // the card has to rebuild as the user types.
+    widget.nameCtrl.addListener(_onEntryChanged);
+    widget.amountCtrl.addListener(_onEntryChanged);
+  }
+
+  void _onEntryChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// True once the user has given this source a name and an amount — that's
+  /// what unlocks the "how often does it arrive" question below.
+  bool get _entryReady =>
+      widget.nameCtrl.text.trim().isNotEmpty &&
+      (double.tryParse(widget.amountCtrl.text) ?? 0) > 0;
+
   List<IncomeSource> get sources => widget.sources;
   TextEditingController get nameCtrl => widget.nameCtrl;
   TextEditingController get amountCtrl => widget.amountCtrl;
@@ -768,6 +854,8 @@ class _IncomeStepState extends State<_IncomeStep> {
 
   @override
   void dispose() {
+    widget.nameCtrl.removeListener(_onEntryChanged);
+    widget.amountCtrl.removeListener(_onEntryChanged);
     _nameFocus.dispose();
     super.dispose();
   }
@@ -844,29 +932,45 @@ class _IncomeStepState extends State<_IncomeStep> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: _AddButton(onTap: onAdd),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                // The income's own rhythm; a bi-weekly salary in a monthly
-                // budget gets converted automatically.
-                Text(
-                  l.incomeArrives,
-                  style: GoogleFonts.nunito(
-                    color: AppColors.mossGreen,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.bold,
+                // Step two of this box: the rhythm question only appears once
+                // the source has a name and an amount, so the user answers one
+                // thing at a time instead of meeting the whole form at once.
+                if (_entryReady) ...[
+                  const SizedBox(height: 16),
+                  _Reveal(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // The income's own rhythm; a bi-weekly salary in a
+                        // monthly budget gets converted automatically.
+                        Text(
+                          l.incomeArrives,
+                          style: GoogleFonts.nunito(
+                            color: AppColors.mossGreen,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        RhythmPicker(
+                          value: newIncomeFreq,
+                          onChanged: onIncomeFreqChanged,
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: AppPrimaryButton(
+                            label: l.addThisSource,
+                            icon: Icons.add,
+                            onPressed: onAdd,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                RhythmPicker(
-                  value: newIncomeFreq,
-                  onChanged: onIncomeFreqChanged,
-                ),
+                ],
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -902,6 +1006,26 @@ class _IncomeStepState extends State<_IncomeStep> {
               ],
             ),
           ),
+          // Roots the user has entered on an earlier tree. Shown right under
+          // the add box so reusing last month's salary is one tap rather than
+          // retyping it, and hidden entirely for a first-time user.
+          if (widget.saved.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            _SavedEntriesCard(
+              title: l.savedIncomeSources,
+              hint: l.savedIncomeSourcesHint,
+              icon: Icons.history,
+              entries: [
+                for (final s in widget.saved)
+                  (
+                    label: s.name,
+                    detail: '\$${s.amount.toStringAsFixed(0)}'
+                        '${s.frequency != null ? ' · ${s.frequency!.localizedLabel(l)}' : ''}',
+                    onTap: () => widget.onUseSaved(s),
+                  ),
+              ],
+            ),
+          ],
           if (sources.isNotEmpty) ...[
             const SizedBox(height: 14),
             _Reveal(
@@ -1084,7 +1208,7 @@ class _IncomeStepState extends State<_IncomeStep> {
 // Step 2 – Expenses
 // ──────────────────────────────────────────────
 
-class _ExpenseStep extends StatelessWidget {
+class _ExpenseStep extends StatefulWidget {
   /// Ring anchors for the tutorial coach: the add-a-branch box and the
   /// always-visible allocation meter.
   final GlobalKey addBoxKey;
@@ -1111,7 +1235,13 @@ class _ExpenseStep extends StatelessWidget {
   final VoidCallback onConfirm;
   final VoidCallback onAdd;
   final void Function(int) onRemove;
+
+  /// Picking a branch selects the category (and fills a blank name with it).
   final void Function(String name, String iconKey) onPresetTap;
+
+  /// Branches from the user's earlier trees, offered for one-tap reuse.
+  final List<ExpenseCategory> saved;
+  final ValueChanged<ExpenseCategory> onUseSaved;
 
   const _ExpenseStep({
     super.key,
@@ -1132,7 +1262,107 @@ class _ExpenseStep extends StatelessWidget {
     required this.onAdd,
     required this.onRemove,
     required this.onPresetTap,
+    required this.saved,
+    required this.onUseSaved,
   });
+
+  @override
+  State<_ExpenseStep> createState() => _ExpenseStepState();
+}
+
+class _ExpenseStepState extends State<_ExpenseStep> {
+  GlobalKey get addBoxKey => widget.addBoxKey;
+  GlobalKey get summaryKey => widget.summaryKey;
+  List<ExpenseCategory> get expenses => widget.expenses;
+  TextEditingController get nameCtrl => widget.nameCtrl;
+  TextEditingController get amountCtrl => widget.amountCtrl;
+  String get selectedIconKey => widget.selectedIconKey;
+  double get totalIncome => widget.totalIncome;
+  double get totalAllocated => widget.totalAllocated;
+  List<(String, String)> get presets => widget.presets;
+  Rhythm get cycle => widget.cycle;
+  Rhythm get newExpenseFreq => widget.newExpenseFreq;
+  ValueChanged<Rhythm> get onExpenseFreqChanged => widget.onExpenseFreqChanged;
+  bool get confirmed => widget.confirmed;
+  VoidCallback get onConfirm => widget.onConfirm;
+  VoidCallback get onAdd => widget.onAdd;
+  void Function(int) get onRemove => widget.onRemove;
+  void Function(String, String) get onPresetTap => widget.onPresetTap;
+  List<ExpenseCategory> get saved => widget.saved;
+  ValueChanged<ExpenseCategory> get onUseSaved => widget.onUseSaved;
+
+  @override
+  void initState() {
+    super.initState();
+    // The rhythm and branch questions appear once the expense has a name, so
+    // the card rebuilds as the user types.
+    widget.nameCtrl.addListener(_onEntryChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.nameCtrl.removeListener(_onEntryChanged);
+    super.dispose();
+  }
+
+  void _onEntryChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// The amount stays optional here (the plan step fills it in), so naming the
+  /// expense is what opens the rest of the box.
+  bool get _entryReady => widget.nameCtrl.text.trim().isNotEmpty;
+
+  /// The branch (category) chips: which part of the tree this expense hangs
+  /// off. Tapping one selects the icon and, if the name is still blank, fills
+  /// it in with the branch name.
+  Widget _buildBranchChips(BuildContext context, AppLocalizations l) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: presets.map((p) {
+        final iconKey = p.$1;
+        final name = expensePresetLabel(l, iconKey);
+        final isSelected = selectedIconKey == iconKey;
+        final t = AppTokens.current;
+        return GestureDetector(
+          onTap: () => onPresetTap(name, iconKey),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+            decoration: BoxDecoration(
+              color: isSelected ? t.accentSoft : t.canvasSoft,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isSelected ? t.accentStrong : t.cardBorder,
+                width: isSelected ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  CategoryIcons.forKey(iconKey),
+                  size: 14,
+                  color: isSelected ? t.accentStrong : t.textSecondary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  name,
+                  style: GoogleFonts.nunito(
+                    color: isSelected ? t.accentStrong : t.textPrimary,
+                    fontSize: 12,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1200,11 +1430,6 @@ class _ExpenseStep extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: _AddButton(onTap: onAdd),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -1217,80 +1442,77 @@ class _ExpenseStep extends StatelessWidget {
                     fontStyle: FontStyle.italic,
                   ),
                 ),
-                const SizedBox(height: 12),
-                // The bill's own rhythm; monthly rent in a weekly budget gets
-                // converted into a per-cycle set-aside automatically.
-                Text(
-                  l.expenseCharged,
-                  style: GoogleFonts.nunito(
-                    color: AppColors.mossGreen,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                RhythmPicker(
-                  value: newExpenseFreq,
-                  onChanged: onExpenseFreqChanged,
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: presets.map((p) {
-                    final iconKey = p.$1;
-                    final name = expensePresetLabel(l, iconKey);
-                    final isSelected = selectedIconKey == iconKey;
-                    final t = AppTokens.current;
-                    return GestureDetector(
-                      onTap: () => onPresetTap(name, iconKey),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 11,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected ? t.accentSoft : t.canvasSoft,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color:
-                                isSelected ? t.accentStrong : t.cardBorder,
-                            width: isSelected ? 1.5 : 1,
+                // Everything past the name reveals in order, mirroring the
+                // income step: what it is, then how often it's charged, then
+                // which branch it hangs off. The amount stays optional, so the
+                // name alone opens the rest.
+                if (_entryReady) ...[
+                  const SizedBox(height: 16),
+                  _Reveal(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // The bill's own rhythm; monthly rent in a weekly
+                        // budget becomes a per-cycle set-aside automatically.
+                        Text(
+                          l.expenseCharged,
+                          style: GoogleFonts.nunito(
+                            color: AppColors.mossGreen,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CategoryIcons.forKey(iconKey),
-                              size: 14,
-                              color: isSelected
-                                  ? t.accentStrong
-                                  : t.textSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              name,
-                              style: GoogleFonts.nunito(
-                                color: isSelected
-                                    ? t.accentStrong
-                                    : t.textPrimary,
-                                fontSize: 12,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 8),
+                        RhythmPicker(
+                          value: newExpenseFreq,
+                          onChanged: onExpenseFreqChanged,
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+                        const SizedBox(height: 16),
+                        Text(
+                          l.expenseBelongsTo,
+                          style: GoogleFonts.nunito(
+                            color: AppColors.mossGreen,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildBranchChips(context, l),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: AppPrimaryButton(
+                            label: l.addThisExpense,
+                            icon: Icons.add,
+                            onPressed: onAdd,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
+          // Branches carried over from the user's earlier trees.
+          if (saved.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            _SavedEntriesCard(
+              title: l.savedExpenseBranches,
+              hint: l.savedExpenseBranchesHint,
+              icon: Icons.history,
+              entries: [
+                for (final e in saved)
+                  (
+                    label: e.name,
+                    detail: e.frequency != null
+                        ? e.frequency!.localizedLabel(l)
+                        : '',
+                    onTap: () => onUseSaved(e),
+                  ),
+              ],
+            ),
+          ],
           if (expenses.isNotEmpty) ...[
             const SizedBox(height: 14),
             _Reveal(
@@ -2616,26 +2838,89 @@ class _BudgetBar extends StatelessWidget {
 // Vibrant circular "add" button
 // ──────────────────────────────────────────────
 
-class _AddButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddButton({required this.onTap});
+/// A card of one-tap entries carried over from the user's earlier trees.
+/// Shared by the income and expense steps; renders nothing when [entries] is
+/// empty, so a first-time user never sees it.
+class _SavedEntriesCard extends StatelessWidget {
+  const _SavedEntriesCard({
+    required this.title,
+    required this.hint,
+    required this.icon,
+    required this.entries,
+  });
+
+  final String title;
+  final String hint;
+  final IconData icon;
+  final List<({String label, String detail, VoidCallback onTap})> entries;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppTokens.current.accent,
-            boxShadow: AppShadows.pill,
-          ),
-          child: Icon(Icons.add, color: AppTokens.current.onAccent, size: 22),
+    if (entries.isEmpty) return const SizedBox.shrink();
+    final t = AppTokens.current;
+    return _Reveal(
+      child: AppCard(
+        label: title,
+        icon: icon,
+        accent: AppColors.riverBlue,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              hint,
+              style: GoogleFonts.nunito(
+                color: t.textSecondary,
+                fontSize: 11.5,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final e in entries)
+                  GestureDetector(
+                    onTap: e.onTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: t.canvasSoft,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: t.cardBorder),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, size: 14, color: t.accentStrong),
+                          const SizedBox(width: 6),
+                          Text(
+                            e.label,
+                            style: GoogleFonts.nunito(
+                              color: t.textPrimary,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (e.detail.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              e.detail,
+                              style: GoogleFonts.nunito(
+                                color: t.textSecondary,
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );

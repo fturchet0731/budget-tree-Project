@@ -806,5 +806,13 @@
   "rhythmUnitDays": "days",
   "rhythmUnitWeeks": "weeks",
   "rhythmUnitMonths": "months",
-  "rhythmCustomHint": "How many?"
+  "rhythmCustomHint": "How many?",
+  "addThisSource": "Add this source",
+  "addThisExpense": "Add this branch",
+  "savedIncomeSources": "Saved income sources",
+  "savedIncomeSourcesHint": "Tap one to reuse it from an earlier tree.",
+  "expenseBelongsTo": "Which branch does it belong to?",
+  "savedExpenseBranches": "Saved branches",
+  "savedExpenseBranchesHint": "Tap one to reuse it from an earlier tree.",
+  "chooseBranchToContinue": "Pick a branch to add this expense."
 }

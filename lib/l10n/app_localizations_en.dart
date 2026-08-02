@@ -2447,4 +2447,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rhythmCustomHint => 'How many?';
+
+  @override
+  String get addThisSource => 'Add this source';
+
+  @override
+  String get addThisExpense => 'Add this branch';
+
+  @override
+  String get savedIncomeSources => 'Saved income sources';
+
+  @override
+  String get savedIncomeSourcesHint =>
+      'Tap one to reuse it from an earlier tree.';
+
+  @override
+  String get expenseBelongsTo => 'Which branch does it belong to?';
+
+  @override
+  String get savedExpenseBranches => 'Saved branches';
+
+  @override
+  String get savedExpenseBranchesHint =>
+      'Tap one to reuse it from an earlier tree.';
+
+  @override
+  String get chooseBranchToContinue => 'Pick a branch to add this expense.';
 }

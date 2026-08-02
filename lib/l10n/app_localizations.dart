@@ -4245,6 +4245,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How many?'**
   String get rhythmCustomHint;
+
+  /// No description provided for @addThisSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this source'**
+  String get addThisSource;
+
+  /// No description provided for @addThisExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this branch'**
+  String get addThisExpense;
+
+  /// No description provided for @savedIncomeSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved income sources'**
+  String get savedIncomeSources;
+
+  /// No description provided for @savedIncomeSourcesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap one to reuse it from an earlier tree.'**
+  String get savedIncomeSourcesHint;
+
+  /// No description provided for @expenseBelongsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Which branch does it belong to?'**
+  String get expenseBelongsTo;
+
+  /// No description provided for @savedExpenseBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved branches'**
+  String get savedExpenseBranches;
+
+  /// No description provided for @savedExpenseBranchesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap one to reuse it from an earlier tree.'**
+  String get savedExpenseBranchesHint;
+
+  /// No description provided for @chooseBranchToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a branch to add this expense.'**
+  String get chooseBranchToContinue;
 }
 
 class _AppLocalizationsDelegate

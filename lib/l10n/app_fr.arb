@@ -729,5 +729,13 @@
   "rhythmUnitDays": "jours",
   "rhythmUnitWeeks": "semaines",
   "rhythmUnitMonths": "mois",
-  "rhythmCustomHint": "Combien ?"
+  "rhythmCustomHint": "Combien ?",
+  "addThisSource": "Ajouter cette source",
+  "addThisExpense": "Ajouter cette branche",
+  "savedIncomeSources": "Sources de revenu enregistrées",
+  "savedIncomeSourcesHint": "Touchez-en une pour la réutiliser d'un arbre précédent.",
+  "expenseBelongsTo": "À quelle branche appartient cette dépense ?",
+  "savedExpenseBranches": "Branches enregistrées",
+  "savedExpenseBranchesHint": "Touchez-en une pour la réutiliser d'un arbre précédent.",
+  "chooseBranchToContinue": "Choisissez une branche pour ajouter cette dépense."
 }

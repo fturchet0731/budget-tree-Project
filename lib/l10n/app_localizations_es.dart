@@ -2458,4 +2458,30 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rhythmCustomHint => '¿Cuántos?';
+
+  @override
+  String get addThisSource => 'Añadir esta fuente';
+
+  @override
+  String get addThisExpense => 'Añadir esta rama';
+
+  @override
+  String get savedIncomeSources => 'Fuentes de ingreso guardadas';
+
+  @override
+  String get savedIncomeSourcesHint =>
+      'Toca una para reutilizarla de un árbol anterior.';
+
+  @override
+  String get expenseBelongsTo => '¿A qué rama pertenece este gasto?';
+
+  @override
+  String get savedExpenseBranches => 'Ramas guardadas';
+
+  @override
+  String get savedExpenseBranchesHint =>
+      'Toca una para reutilizarla de un árbol anterior.';
+
+  @override
+  String get chooseBranchToContinue => 'Elige una rama para añadir este gasto.';
 }
