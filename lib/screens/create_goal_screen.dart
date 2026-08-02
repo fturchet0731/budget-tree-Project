@@ -97,12 +97,33 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     }
   }
 
+  /// What to water at [cadence] to actually land the goal on its target date.
+  ///
+  /// Prefers the coach's own number (its plans all imply the same monthly
+  /// commitment for a fixed date, so any of them can be re-expressed in another
+  /// rhythm), and falls back to the local maths when there's no AI result.
+  /// Returns 0 when there's nothing left to save or no date to aim at.
+  double _suggestedPerWatering(WaterCadence cadence) {
+    final plans = _planResult?.plans;
+    if (plans != null && plans.isNotEmpty) {
+      return plans.first.monthly / cadence.perMonth;
+    }
+    final date = _targetDate;
+    final target = double.tryParse(_targetCtrl.text) ?? 0;
+    if (date == null || target <= 0) return 0;
+    final transient = Goal(name: _nameCtrl.text.trim(), targetAmount: target);
+    return GoalPlanMath.perWateringToReach(transient, date, cadence);
+  }
+
   /// The watering schedule the user settled on, if any: a selected AI plan, a
   /// custom cadence + amount, or the offline monthly fallback. Null when nothing
   /// is set (the goal is then saved without reminders).
   ({WaterCadence cadence, double amount})? get _chosenWatering {
     if (_useCustom) {
-      final amt = double.tryParse(_customAmountCtrl.text) ?? 0;
+      final typed = double.tryParse(_customAmountCtrl.text) ?? 0;
+      // Leaving the amount blank is a request, not an omission: the coach
+      // fills in what it takes to hit the target date at this cadence.
+      final amt = typed > 0 ? typed : _suggestedPerWatering(_customCadence);
       return amt > 0 ? (cadence: _customCadence, amount: amt) : null;
     }
     final plans = _planResult?.plans;
@@ -586,6 +607,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                             useCustom: _useCustom,
                             customCadence: _customCadence,
                             customAmountCtrl: _customAmountCtrl,
+                            suggestedPerWatering:
+                                _suggestedPerWatering(_customCadence),
                             onPickCustomCadence: (c) => setState(() {
                               _customCadence = c;
                               _useCustom = true;
@@ -1060,6 +1083,9 @@ class _WateringStep extends StatelessWidget {
   final bool useCustom;
   final WaterCadence customCadence;
   final TextEditingController customAmountCtrl;
+
+  /// Coach's per-watering figure for the currently selected custom cadence.
+  final double suggestedPerWatering;
   final ValueChanged<WaterCadence> onPickCustomCadence;
   final VoidCallback onCustomFocus;
   final bool remind;
@@ -1084,6 +1110,7 @@ class _WateringStep extends StatelessWidget {
     required this.useCustom,
     required this.customCadence,
     required this.customAmountCtrl,
+    required this.suggestedPerWatering,
     required this.onPickCustomCadence,
     required this.onCustomFocus,
     required this.remind,
@@ -1212,6 +1239,7 @@ class _WateringStep extends StatelessWidget {
                   amountCtrl: customAmountCtrl,
                   onPickCadence: onPickCustomCadence,
                   onFocus: onCustomFocus,
+                  suggested: suggestedPerWatering,
                 ),
               ],
             ],
@@ -1304,8 +1332,13 @@ class _WaterPlanCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
+                    // Every plan hits the same target date, so they all work
+                    // out to the same monthly commitment. Saying so turns what
+                    // looks like duplicate options into a real choice of
+                    // rhythm.
                     Text(
-                      l.planAboutMonths(plan.monthsToTarget),
+                      '${l.planAboutMonths(plan.monthsToTarget)} · '
+                      '${l.sameMonthlyAs('\$${plan.monthly.toStringAsFixed(0)}')}',
                       style: GoogleFonts.nunito(
                         color: AppColors.forestGreen,
                         fontSize: 11.5,
@@ -1340,12 +1373,18 @@ class _CustomWaterCard extends StatelessWidget {
   final TextEditingController amountCtrl;
   final ValueChanged<WaterCadence> onPickCadence;
   final VoidCallback onFocus;
+
+  /// What the coach would put in each watering at the selected cadence, used
+  /// when the user leaves the field blank. 0 when it can't be worked out yet.
+  final double suggested;
+
   const _CustomWaterCard({
     required this.active,
     required this.cadence,
     required this.amountCtrl,
     required this.onPickCadence,
     required this.onFocus,
+    required this.suggested,
   });
 
   @override
@@ -1432,6 +1471,15 @@ class _CustomWaterCard extends StatelessWidget {
               labelText: l.amountPerWatering,
               prefixText: '\$ ',
               isDense: true,
+              // Leaving it blank isn't an error: the coach's own number for
+              // this cadence is used instead, so say what that number is.
+              hintText: suggested > 0 ? suggested.toStringAsFixed(0) : null,
+              helperText: suggested > 0
+                  ? l.leaveBlankForSuggested(
+                      '\$${suggested.toStringAsFixed(0)}',
+                    )
+                  : null,
+              helperMaxLines: 2,
             ),
           ),
         ],

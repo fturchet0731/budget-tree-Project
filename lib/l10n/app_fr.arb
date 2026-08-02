@@ -553,6 +553,8 @@
   "stepPlanTitle": "Plan intelligent",
   "stepPlanSub": "Laissez le coach répartir vos revenus",
   "vinePlan": "Plan",
+  "leaveBlankForSuggested": "Laissez vide et le coach utilisera {amount} à chaque fois.",
+  "sameMonthlyAs": "environ {amount} par mois",
   "tourCancelTour": "Annuler la visite",
   "tourSkipSection": "Passer cette section",
   "stepFinishTitle": "Touches finales",

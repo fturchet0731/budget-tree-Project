@@ -3238,6 +3238,18 @@ abstract class AppLocalizations {
   /// **'Plan'**
   String get vinePlan;
 
+  /// No description provided for @leaveBlankForSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank and the coach uses {amount} each time.'**
+  String leaveBlankForSuggested(String amount);
+
+  /// No description provided for @sameMonthlyAs.
+  ///
+  /// In en, this message translates to:
+  /// **'about {amount} a month'**
+  String sameMonthlyAs(String amount);
+
   /// No description provided for @tourCancelTour.
   ///
   /// In en, this message translates to:

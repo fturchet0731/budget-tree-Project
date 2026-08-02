@@ -1857,6 +1857,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vinePlan => 'Plan';
 
   @override
+  String leaveBlankForSuggested(String amount) {
+    return 'Déjalo vacío y el coach usará $amount cada vez.';
+  }
+
+  @override
+  String sameMonthlyAs(String amount) {
+    return 'unos $amount al mes';
+  }
+
+  @override
   String get tourCancelTour => 'Cancelar el recorrido';
 
   @override

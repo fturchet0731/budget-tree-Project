@@ -1847,6 +1847,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vinePlan => 'Plan';
 
   @override
+  String leaveBlankForSuggested(String amount) {
+    return 'Leave blank and the coach uses $amount each time.';
+  }
+
+  @override
+  String sameMonthlyAs(String amount) {
+    return 'about $amount a month';
+  }
+
+  @override
   String get tourCancelTour => 'Cancel tour';
 
   @override
