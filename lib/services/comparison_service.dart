@@ -1,4 +1,5 @@
 import '../models/goal_model.dart';
+import '../data/calendar.dart';
 
 /// A "this period vs last period" saving comparison.
 class PeriodComparison {
@@ -41,15 +42,12 @@ class ComparisonService {
   }
 
   /// Monday 00:00 of the week containing [d].
-  static DateTime _weekStart(DateTime d) {
-    final midnight = DateTime(d.year, d.month, d.day);
-    return midnight.subtract(Duration(days: midnight.weekday - 1));
-  }
+  static DateTime _weekStart(DateTime d) => startOfWeek(d);
 
   static PeriodComparison weekOverWeek(List<Goal> goals, {DateTime? now}) {
     final n = now ?? DateTime.now();
     final thisStart = _weekStart(n);
-    final lastStart = thisStart.subtract(const Duration(days: 7));
+    final lastStart = addDays(thisStart, -7);
     return PeriodComparison(
       unit: 'week',
       current: _depositsBetween(goals, thisStart, n),

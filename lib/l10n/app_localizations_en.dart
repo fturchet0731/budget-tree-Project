@@ -79,6 +79,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageSubtitle => 'Choose your language';
 
   @override
+  String get settingsTimeZoneTitle => 'Time zone';
+
+  @override
+  String get settingsTimeZoneSubtitle => 'When your reminders go off';
+
+  @override
+  String get searchTimeZones => 'Search time zones';
+
+  @override
   String get systemDefault => 'System default';
 
   @override

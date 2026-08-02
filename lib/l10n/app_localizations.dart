@@ -238,6 +238,24 @@ abstract class AppLocalizations {
   /// **'Choose your language'**
   String get settingsLanguageSubtitle;
 
+  /// No description provided for @settingsTimeZoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get settingsTimeZoneTitle;
+
+  /// No description provided for @settingsTimeZoneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When your reminders go off'**
+  String get settingsTimeZoneSubtitle;
+
+  /// No description provided for @searchTimeZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Search time zones'**
+  String get searchTimeZones;
+
   /// No description provided for @systemDefault.
   ///
   /// In en, this message translates to:

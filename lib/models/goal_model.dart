@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../data/calendar.dart';
 
 import '../data/water_cadence.dart';
 
@@ -123,7 +124,7 @@ class Goal {
     final now = from ?? DateTime.now();
     var next = nextWaterDate!;
     while (!next.isAfter(now)) {
-      next = next.add(Duration(days: cadence.days));
+      next = addDays(next, cadence.days);
     }
     nextWaterDate = next;
   }

@@ -25,6 +25,9 @@
 
   "settingsLanguageTitle": "Langue",
   "settingsLanguageSubtitle": "Choisissez votre langue",
+  "settingsTimeZoneTitle": "Fuseau horaire",
+  "settingsTimeZoneSubtitle": "Quand vos rappels se déclenchent",
+  "searchTimeZones": "Rechercher un fuseau horaire",
   "systemDefault": "Paramètre du système",
 
   "dashboardChooseBranch": "Choisissez une branche",

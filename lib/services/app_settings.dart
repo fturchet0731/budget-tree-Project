@@ -26,6 +26,7 @@ class AppSettings extends ChangeNotifier {
   static const _kNotifWatering = 'settings_notif_watering_v1';
   static const _kWaterHour = 'settings_water_hour_v1';
   static const _kLocale = 'settings_locale_v1';
+  static const _kTimeZone = 'settings_timezone_v1';
   static const _kAiCoach = 'settings_ai_coach_v1';
   static const _kNotifPermissionAsked = 'settings_notif_perm_asked_v1';
 
@@ -34,7 +35,8 @@ class AppSettings extends ChangeNotifier {
 
   AppPalette _palette = AppPalette.light;
   AppTextScale _scale = AppTextScale.normal;
-  Locale? _locale; // null = follow the device language
+  Locale? _locale;
+  String? _timeZone; // null = follow the device time zone
   bool _motionFull = true;
   bool _soundEnabled = true;
   bool _tutorialSeen = false;
@@ -67,6 +69,12 @@ class AppSettings extends ChangeNotifier {
 
   /// The user's chosen app language, or null to follow the device setting.
   Locale? get locale => _locale;
+
+  /// IANA zone name the app schedules reminders in (e.g. `Europe/Paris`), or
+  /// null to follow whatever the device reports. Overriding matters when the
+  /// device zone is wrong or unavailable: reminders are wall-clock times, so a
+  /// mis-detected zone fires them hours out.
+  String? get timeZone => _timeZone;
 
   /// The two-letter code of the active choice, or 'system' when following the
   /// device. Used by the Settings language picker.
@@ -153,6 +161,7 @@ class AppSettings extends ChangeNotifier {
     _waterHour = prefs.getInt(_kWaterHour) ?? 9;
     _aiCoachEnabled = prefs.getBool(_kAiCoach) ?? true;
     _notifPermissionAsked = prefs.getBool(_kNotifPermissionAsked) ?? false;
+    _timeZone = prefs.getString(_kTimeZone);
     final lc = prefs.getString(_kLocale);
     _locale = (lc != null && supportedLanguageCodes.contains(lc))
         ? Locale(lc)
@@ -170,6 +179,21 @@ class AppSettings extends ChangeNotifier {
       await prefs.remove(_kLocale);
     } else {
       await prefs.setString(_kLocale, locale.languageCode);
+    }
+  }
+
+  /// Set the scheduling time zone. Pass null to follow the device. Callers
+  /// should re-run `NotificationScheduler.rescheduleAll()` afterwards so the
+  /// pending reminders move with it.
+  Future<void> setTimeZone(String? name) async {
+    if (_timeZone == name) return;
+    _timeZone = name;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    if (name == null) {
+      await prefs.remove(_kTimeZone);
+    } else {
+      await prefs.setString(_kTimeZone, name);
     }
   }
 

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../data/calendar.dart';
 
 import '../data/water_cadence.dart';
 import '../models/goal_model.dart';
@@ -91,7 +92,7 @@ class GoalPlanMath {
     DateTime? now,
   }) {
     final from = now ?? DateTime.now();
-    final days = targetDate.difference(from).inDays;
+    final days = daysBetween(from, targetDate);
     if (days <= 0) return 0;
     return math.max(1, days ~/ cadence.days);
   }
@@ -125,7 +126,7 @@ class GoalPlanMath {
     final remaining = goal.targetAmount - goal.currentAmount;
     if (remaining <= 0) return from;
     final waterings = (remaining / perWatering).ceil();
-    return from.add(Duration(days: waterings * cadence.days));
+    return addDays(from, waterings * cadence.days);
   }
 
   /// The three paces a goal can be approached at when there's no deadline.

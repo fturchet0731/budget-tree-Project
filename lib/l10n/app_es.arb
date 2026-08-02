@@ -25,6 +25,9 @@
 
   "settingsLanguageTitle": "Idioma",
   "settingsLanguageSubtitle": "Elige tu idioma",
+  "settingsTimeZoneTitle": "Zona horaria",
+  "settingsTimeZoneSubtitle": "Cuándo suenan tus recordatorios",
+  "searchTimeZones": "Buscar zonas horarias",
   "systemDefault": "Predeterminado del sistema",
 
   "dashboardChooseBranch": "Elige una rama",

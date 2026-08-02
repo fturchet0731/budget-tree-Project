@@ -1,4 +1,5 @@
 import '../models/budget_model.dart';
+import '../data/calendar.dart';
 import '../models/goal_model.dart';
 import 'streak_service.dart';
 
@@ -42,8 +43,8 @@ class PulseService {
     DateTime? now,
   }) {
     final n = now ?? DateTime.now();
-    final today = DateTime(n.year, n.month, n.day);
-    final tomorrow = today.add(const Duration(days: 1));
+    final today = dateOnly(n);
+    final tomorrow = addDays(today, 1);
 
     // 1) A watering that's due today or missed: the week's habit, actionable
     // right now. Earliest due goal wins so backlogs drain oldest-first.

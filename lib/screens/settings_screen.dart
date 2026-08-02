@@ -7,6 +7,7 @@ import '../theme/app_tokens.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
 import '../services/notification_scheduler.dart';
+import '../services/notification_service.dart';
 import '../services/supabase_config.dart';
 import '../services/sync_engine.dart';
 import '../tutorial/tutorial_content.dart';
@@ -63,6 +64,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (ok != true) return;
     await AuthService.instance.signOut();
     // AuthGate listens to AuthService and will swap back to the login screen.
+  }
+
+  /// Apply a new scheduling zone, then move every pending reminder onto it.
+  /// Without the reschedule the change wouldn't take effect until the next
+  /// boot, since the reminders already sitting with the OS keep their old
+  /// absolute firing times.
+  Future<void> _setTimeZone(String? name) async {
+    await AppSettings.instance.setTimeZone(name);
+    await NotificationService.applyTimeZone();
+    await NotificationScheduler.rescheduleAll();
   }
 
   Future<void> _confirmEraseAllData() async {
@@ -273,6 +284,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             current: settings.languageSelection,
                             systemLabel: l.systemDefault,
                             onChanged: settings.setLocale,
+                          ),
+                          const SizedBox(height: 16),
+                          _TileLabel(text: l.settingsTimeZoneSubtitle),
+                          const SizedBox(height: 8),
+                          _TimeZoneTile(
+                            current: settings.timeZone,
+                            onChanged: _setTimeZone,
                           ),
                         ],
                       ),
@@ -893,6 +911,211 @@ class _TapRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Shows the active scheduling zone and opens a searchable list of every zone
+/// the timezone database knows about.
+///
+/// Reminders are wall-clock times, so a device reporting the wrong zone fires
+/// them hours out; this is the escape hatch. "System default" keeps following
+/// the device, which is right for nearly everyone.
+class _TimeZoneTile extends StatelessWidget {
+  const _TimeZoneTile({required this.current, required this.onChanged});
+
+  final String? current;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.current;
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () async {
+        final picked = await showModalBottomSheet<String>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => _TimeZoneSheet(current: current),
+        );
+        // The sheet pops the sentinel for "follow the device".
+        if (picked == null) return;
+        onChanged(picked == _TimeZoneSheet.systemSentinel ? null : picked);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: t.canvasSoft,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: t.cardBorder),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.public, size: 18, color: t.textSecondary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                current ?? l.systemDefault,
+                style: GoogleFonts.nunito(
+                  color: t.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right, size: 18, color: t.textTertiary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeZoneSheet extends StatefulWidget {
+  const _TimeZoneSheet({required this.current});
+
+  final String? current;
+
+  /// Popped in place of a zone name to mean "follow the device".
+  static const systemSentinel = '__system__';
+
+  @override
+  State<_TimeZoneSheet> createState() => _TimeZoneSheetState();
+}
+
+class _TimeZoneSheetState extends State<_TimeZoneSheet> {
+  final _searchCtrl = TextEditingController();
+  late final List<String> _all = NotificationService.availableTimeZones();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<String> get _filtered {
+    if (_query.isEmpty) return _all;
+    // Match on any part of the path so "paris", "europe" and "eur/par" all work.
+    final q = _query.toLowerCase().replaceAll(' ', '_');
+    return _all.where((z) => z.toLowerCase().contains(q)).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.current;
+    final zones = _filtered;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, controller) => Container(
+        decoration: BoxDecoration(
+          color: t.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 14,
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: t.cardBorder,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              l.settingsTimeZoneTitle,
+              style: GoogleFonts.fredoka(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: t.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _searchCtrl,
+              onChanged: (v) => setState(() => _query = v.trim()),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: l.searchTimeZones,
+                prefixIcon: const Icon(Icons.search, size: 18),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                controller: controller,
+                // One extra leading row for the "follow the device" option.
+                itemCount: zones.length + 1,
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return _ZoneRow(
+                      label: l.systemDefault,
+                      selected: widget.current == null,
+                      onTap: () => Navigator.pop(
+                        context,
+                        _TimeZoneSheet.systemSentinel,
+                      ),
+                    );
+                  }
+                  final zone = zones[i - 1];
+                  return _ZoneRow(
+                    label: zone,
+                    selected: widget.current == zone,
+                    onTap: () => Navigator.pop(context, zone),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ZoneRow extends StatelessWidget {
+  const _ZoneRow({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppTokens.current;
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      onTap: onTap,
+      title: Text(
+        label,
+        style: GoogleFonts.nunito(
+          color: selected ? t.accentStrong : t.textPrimary,
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+        ),
+      ),
+      trailing: selected
+          ? Icon(Icons.check, size: 18, color: t.accentStrong)
+          : null,
     );
   }
 }

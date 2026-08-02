@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../data/calendar.dart';
 import '../models/goal_model.dart';
 
 /// Summary of the user's weekly saving streak across all goals.
@@ -45,11 +46,7 @@ class StreakService {
 
   /// Monday-anchored week index. 1970-01-05 was a Monday, so flooring the
   /// day offset from there by 7 gives a stable, timezone-local week number.
-  static int weekIndex(DateTime d) {
-    final midnight = DateTime(d.year, d.month, d.day);
-    final days = midnight.difference(DateTime(1970, 1, 5)).inDays;
-    return (days / 7).floor();
-  }
+  static int weekIndex(DateTime d) => weekIndexOf(d);
 
   static StreakInfo weeklyStreak(List<Goal> goals, {DateTime? now}) {
     final n = now ?? DateTime.now();

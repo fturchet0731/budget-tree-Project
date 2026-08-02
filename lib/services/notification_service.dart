@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
+import 'app_settings.dart';
 
 import '../l10n/app_localizations_resolver.dart';
 
@@ -37,13 +38,7 @@ class NotificationService {
     if (_ready) return;
     try {
       tzdata.initializeTimeZones();
-      try {
-        final info = await FlutterTimezone.getLocalTimezone();
-        tz.setLocalLocation(tz.getLocation(info.identifier));
-      } catch (_) {
-        // Fall back to UTC if the device timezone can't be resolved.
-        tz.setLocalLocation(tz.getLocation('UTC'));
-      }
+      await applyTimeZone();
 
       const android = AndroidInitializationSettings('@mipmap/ic_launcher');
       const darwin = DarwinInitializationSettings(
@@ -64,6 +59,40 @@ class NotificationService {
       debugPrint('NotificationService.init failed: $e');
       _ready = false;
     }
+  }
+
+  /// Point the scheduler at the right zone: the user's override from Settings
+  /// if they set one, otherwise whatever the device reports.
+  ///
+  /// Reminders are wall-clock times ("water at 9am"), so the zone decides when
+  /// they actually fire. UTC is the last resort rather than the fallback it
+  /// used to be, since silently scheduling in UTC moves every reminder by the
+  /// user's whole offset. Call again after changing the setting, then reschedule.
+  static Future<void> applyTimeZone() async {
+    final chosen = AppSettings.instance.timeZone;
+    if (chosen != null) {
+      try {
+        tz.setLocalLocation(tz.getLocation(chosen));
+        return;
+      } catch (e) {
+        // A stored name the database doesn't know: fall through to the device.
+        debugPrint('NotificationService: unknown time zone "$chosen": $e');
+      }
+    }
+    try {
+      final info = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(info.identifier));
+    } catch (e) {
+      debugPrint('NotificationService: device time zone unavailable: $e');
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
+  }
+
+  /// Every zone the bundled database knows about, sorted. Backs the Settings
+  /// picker, so the user can correct a device that reports the wrong one.
+  static List<String> availableTimeZones() {
+    final names = tz.timeZoneDatabase.locations.keys.toList()..sort();
+    return names;
   }
 
   /// Ask the user for OS permission (Android 13+, iOS, macOS). Safe to call

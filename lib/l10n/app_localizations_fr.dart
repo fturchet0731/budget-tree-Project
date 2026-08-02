@@ -79,6 +79,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLanguageSubtitle => 'Choisissez votre langue';
 
   @override
+  String get settingsTimeZoneTitle => 'Fuseau horaire';
+
+  @override
+  String get settingsTimeZoneSubtitle => 'Quand vos rappels se déclenchent';
+
+  @override
+  String get searchTimeZones => 'Rechercher un fuseau horaire';
+
+  @override
   String get systemDefault => 'Paramètre du système';
 
   @override

@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:budget_app_project/data/calendar.dart';
 import 'package:budget_app_project/data/water_cadence.dart';
 import 'package:budget_app_project/models/goal_model.dart';
 import 'package:budget_app_project/services/goal_plan_math.dart';
@@ -95,7 +96,9 @@ void main() {
       final d = GoalPlanMath.dateForPerWatering(
           goal(target: 1000), 100, WaterCadence.weekly,
           now: now);
-      expect(d, now.add(const Duration(days: 70)));
+      // addDays, not Duration: across the March spring-forward the naive
+      // version lands at 01:00 and this assertion used to encode that drift.
+      expect(d, addDays(now, 70));
     });
 
     test('rounds up to a whole watering', () {
@@ -103,11 +106,11 @@ void main() {
       final d = GoalPlanMath.dateForPerWatering(
           goal(target: 1000), 300, WaterCadence.monthly,
           now: now);
-      expect(d, now.add(const Duration(days: 120)));
+      expect(d, addDays(now, 120));
     });
 
     test('is the inverse of perWateringForDate', () {
-      final target = now.add(const Duration(days: 70));
+      final target = addDays(now, 70);
       final g = goal(target: 1000);
       final per =
           GoalPlanMath.perWateringForDate(g, target, WaterCadence.weekly,

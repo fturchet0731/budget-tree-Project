@@ -25,6 +25,9 @@
 
   "settingsLanguageTitle": "Language",
   "settingsLanguageSubtitle": "Choose your language",
+  "settingsTimeZoneTitle": "Time zone",
+  "settingsTimeZoneSubtitle": "When your reminders go off",
+  "searchTimeZones": "Search time zones",
   "systemDefault": "System default",
 
   "dashboardChooseBranch": "Choose a branch",

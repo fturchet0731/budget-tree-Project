@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/calendar.dart';
 
 import '../l10n/app_localizations_resolver.dart';
 import '../models/goal_model.dart';
@@ -54,10 +55,7 @@ class ReflectionService {
       AppSettings.instance.notifWeeklySummary;
 
   /// Monday 00:00 of [d]'s week.
-  static DateTime _weekStart(DateTime d) {
-    final midnight = DateTime(d.year, d.month, d.day);
-    return midnight.subtract(Duration(days: midnight.weekday - 1));
-  }
+  static DateTime _weekStart(DateTime d) => startOfWeek(d);
 
   static String _dateKey(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -118,7 +116,7 @@ class ReflectionService {
     // Only bother when there's activity worth reflecting on.
     final week = ComparisonService.weekOverWeek(
       goals,
-      now: periodStart.add(const Duration(days: 6)),
+      now: addDays(periodStart, 6),
     ); // representative point in the period
     final month = ComparisonService.monthOverMonth(goals);
     final relevant = period == 'weekly' ? week : month;

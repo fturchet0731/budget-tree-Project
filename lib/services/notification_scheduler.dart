@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/calendar.dart';
 import '../l10n/app_localizations_resolver.dart';
 import '../models/budget_model.dart';
 import 'app_settings.dart';
@@ -96,7 +97,7 @@ class NotificationScheduler {
         due.day,
         settings.waterHour,
       );
-      final soonAt = dueAt.subtract(const Duration(days: 2));
+      final soonAt = addDays(dueAt, -2);
       await NotificationService.scheduleGoalWateringOnce(
         id: dueId,
         when: dueAt,
