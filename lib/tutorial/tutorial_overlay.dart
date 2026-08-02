@@ -21,24 +21,45 @@ class TutorialPlayer {
       steps: sectionSteps(section, l),
       sectionTitle: section.label(l),
       lastStepHint: l.tourTapFinish,
-      skipLabel: l.tourSkip,
+      cancelLabel: l.tourClose,
     );
   }
 }
 
+/// How a tutorial dialog ended.
+///
+/// The two exits are deliberately distinct: **cancelling** ends the whole tour,
+/// while **skipping a section** only drops the current one and carries on. They
+/// get their own buttons so the user never has to guess which one they're
+/// pressing (the single overloaded "Skip" used to mean either, depending on
+/// where in the tour it appeared).
+enum TutorialOutcome {
+  /// Read to the end.
+  completed,
+
+  /// "Skip this section" — move on to the next part of the tour.
+  skippedSection,
+
+  /// "Cancel tour" — stop the walkthrough entirely.
+  cancelledTour,
+}
+
 /// Shows the acorn overlay as a modal dialog over the current screen.
 ///
-/// Returns `true` if the user pressed **Skip**, `false` if they read it to
-/// the end. The guided tour uses the return value to know whether to keep
-/// going or bail out.
-Future<bool> showTutorialDialog(
+/// Set [allowSkipSection] for tour dialogs, which get the blue "skip this
+/// section" control beside the speech bubble. One-off explainers (the info
+/// buttons) leave it off: there's no section to skip, only the popup to close.
+Future<TutorialOutcome> showTutorialDialog(
   BuildContext context, {
   required List<TutorialStep> steps,
   String? sectionTitle,
   String lastStepHint = 'Tap to continue',
-  String skipLabel = 'Skip',
+  String cancelLabel = 'Cancel tour',
+  String skipSectionLabel = 'Skip this section',
+  bool allowSkipSection = false,
+  bool redCancel = false,
 }) async {
-  final skipped = await showGeneralDialog<bool>(
+  final outcome = await showGeneralDialog<TutorialOutcome>(
     context: context,
     barrierDismissible: false,
     barrierLabel: 'Tutorial',
@@ -48,16 +69,22 @@ Future<bool> showTutorialDialog(
       steps: steps,
       sectionTitle: sectionTitle,
       lastStepHint: lastStepHint,
-      skipLabel: skipLabel,
-      onSkip: () => Navigator.of(ctx).pop(true),
-      onComplete: () => Navigator.of(ctx).pop(false),
+      cancelLabel: cancelLabel,
+      skipSectionLabel: skipSectionLabel,
+      allowSkipSection: allowSkipSection,
+      redCancel: redCancel,
+      onCancelTour: () =>
+          Navigator.of(ctx).pop(TutorialOutcome.cancelledTour),
+      onSkipSection: () =>
+          Navigator.of(ctx).pop(TutorialOutcome.skippedSection),
+      onComplete: () => Navigator.of(ctx).pop(TutorialOutcome.completed),
     ),
     transitionBuilder: (ctx, anim, _, child) => FadeTransition(
       opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut),
       child: child,
     ),
   );
-  return skipped ?? false;
+  return outcome ?? TutorialOutcome.completed;
 }
 
 /// The acorn-and-speech-bubble layer. It paints its own dimming scrim so it
@@ -68,10 +95,22 @@ class TutorialOverlay extends StatefulWidget {
   final List<TutorialStep> steps;
   final String? sectionTitle;
   final String lastStepHint;
-  final String skipLabel;
+  final String cancelLabel;
+  final String skipSectionLabel;
 
-  /// User pressed the skip button.
-  final VoidCallback onSkip;
+  /// Whether to offer the blue "skip this section" control by the bubble.
+  final bool allowSkipSection;
+
+  /// Red styling for the top-right exit. On for the guided tour, where it
+  /// abandons the whole walkthrough; off for one-off explainers, where the
+  /// button is just a neutral close.
+  final bool redCancel;
+
+  /// User pressed the red cancel button: end the whole tour.
+  final VoidCallback onCancelTour;
+
+  /// User pressed "skip this section": drop this part, keep the tour going.
+  final VoidCallback onSkipSection;
 
   /// User tapped past the final line.
   final VoidCallback onComplete;
@@ -79,11 +118,15 @@ class TutorialOverlay extends StatefulWidget {
   const TutorialOverlay({
     super.key,
     required this.steps,
-    required this.onSkip,
+    required this.onCancelTour,
+    required this.onSkipSection,
     required this.onComplete,
     this.sectionTitle,
     this.lastStepHint = 'Tap to continue',
-    this.skipLabel = 'Skip',
+    this.cancelLabel = 'Cancel tour',
+    this.skipSectionLabel = 'Skip this section',
+    this.allowSkipSection = false,
+    this.redCancel = false,
   });
 
   @override
@@ -163,11 +206,19 @@ class _TutorialOverlayState extends State<TutorialOverlay>
         child: SafeArea(
           child: Stack(
             children: [
-              // ── Skip, top-right ──
+              // ── Cancel the whole tour, top-right. Red so it reads as the
+              // hard exit and is impossible to miss. ──
               Positioned(
                 top: 8,
                 right: 12,
-                child: _SkipButton(label: widget.skipLabel, onTap: widget.onSkip),
+                child: _TourButton(
+                  label: widget.cancelLabel,
+                  icon: Icons.close,
+                  color: widget.redCancel
+                      ? AppTokens.current.danger
+                      : Colors.black.withValues(alpha: 0.55),
+                  onTap: widget.onCancelTour,
+                ),
               ),
 
               // ── Acorn + speech bubble, anchored to the bottom ──
@@ -195,6 +246,21 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                         );
                       },
                     ),
+                    // ── Skip just this section, right under the bubble where
+                    // the user is already reading. Blue so it reads as "move
+                    // along", not "quit". ──
+                    if (widget.allowSkipSection) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: _TourButton(
+                          label: widget.skipSectionLabel,
+                          icon: Icons.skip_next,
+                          color: AppColors.riverBlue,
+                          onTap: widget.onSkipSection,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 10),
                     // Acorn peeks up from the bottom-left as the guide.
                     ScaleTransition(
@@ -400,21 +466,41 @@ class _BlinkingChevronState extends State<_BlinkingChevron>
   }
 }
 
-class _SkipButton extends StatelessWidget {
+/// A solid, high-contrast pill for the overlay's two exits. Filled rather than
+/// translucent so both read clearly against whatever screen is dimmed behind
+/// them, and colour-coded: red cancels the tour, blue skips a section.
+class _TourButton extends StatelessWidget {
   final String label;
+  final IconData icon;
+  final Color color;
   final VoidCallback onTap;
-  const _SkipButton({required this.label, required this.onTap});
+
+  const _TourButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // The overlay advances on tap anywhere, so swallow this one.
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.45),
+          color: color,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -427,8 +513,8 @@ class _SkipButton extends StatelessWidget {
                 fontSize: 13,
               ),
             ),
-            const SizedBox(width: 4),
-            const Icon(Icons.close, color: Colors.white, size: 15),
+            const SizedBox(width: 5),
+            Icon(icon, color: Colors.white, size: 15),
           ],
         ),
       ),

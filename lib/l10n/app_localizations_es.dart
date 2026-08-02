@@ -1857,6 +1857,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vinePlan => 'Plan';
 
   @override
+  String get tourCancelTour => 'Cancelar el recorrido';
+
+  @override
+  String get tourSkipSection => 'Saltar esta sección';
+
+  @override
   String get stepFinishTitle => 'Toques finales';
 
   @override

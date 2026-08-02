@@ -1847,6 +1847,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vinePlan => 'Plan';
 
   @override
+  String get tourCancelTour => 'Cancel tour';
+
+  @override
+  String get tourSkipSection => 'Skip this section';
+
+  @override
   String get stepFinishTitle => 'Finishing Touches';
 
   @override

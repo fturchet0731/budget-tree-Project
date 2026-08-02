@@ -268,7 +268,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
         TutorialStep(l.tutOverBudget2('\$${over.toStringAsFixed(2)}')),
       ],
       lastStepHint: l.overBudgetFixHint,
-      skipLabel: l.tourClose,
+      cancelLabel: l.tourClose,
     );
   }
 

@@ -3238,6 +3238,18 @@ abstract class AppLocalizations {
   /// **'Plan'**
   String get vinePlan;
 
+  /// No description provided for @tourCancelTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel tour'**
+  String get tourCancelTour;
+
+  /// No description provided for @tourSkipSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this section'**
+  String get tourSkipSection;
+
   /// No description provided for @stepFinishTitle.
   ///
   /// In en, this message translates to:

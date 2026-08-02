@@ -23,9 +23,10 @@ class GuidedTour {
 
   static Future<void> start(BuildContext context) async {
     final l = AppLocalizations.of(context);
-    // 1. Brief self-introduction.
-    if (await _say(context, introSteps(l),
-        hint: l.tourLetsGo, skip: l.tourSkipTour)) {
+    // 1. Brief self-introduction. There's no section to skip yet, so only the
+    // red cancel button is offered here.
+    if (await _say(context, introSteps(l), hint: l.tourLetsGo) ==
+        TutorialOutcome.cancelledTour) {
       return;
     }
 
@@ -33,25 +34,25 @@ class GuidedTour {
     for (final section in tourOrder) {
       if (!context.mounted) return;
       final keepGoing = await _runSection(context, section, l);
-      if (!keepGoing) return; // user skipped the whole tour
+      if (!keepGoing) return; // user cancelled the whole tour
     }
 
     // 3. Friendly sign-off.
     if (!context.mounted) return;
-    await _say(context, closingSteps(l),
-        hint: l.tourLetsGrow, skip: l.tourClose);
+    await _say(context, closingSteps(l), hint: l.tourLetsGrow);
   }
 
-  /// Runs one section. Returns false if the user skipped the entire tour.
+  /// Runs one section. Returns false only if the user cancelled the entire
+  /// tour; skipping this section returns true so the next one still runs.
   static Future<bool> _runSection(
       BuildContext context, TutorialSection section, AppLocalizations l) async {
     // Set up the task.
-    if (await _say(context, taskSteps(section, l),
+    final intro = await _say(context, taskSteps(section, l),
         title: section.label(l),
         hint: openHint(section, l),
-        skip: l.tourSkipTour)) {
-      return false;
-    }
+        canSkipSection: true);
+    if (intro == TutorialOutcome.cancelledTour) return false;
+    if (intro == TutorialOutcome.skippedSection) return true;
 
     if (sectionRequiresAction(section)) {
       var completed = false;
@@ -70,46 +71,53 @@ class GuidedTour {
           completed = true;
           break;
         }
-        // Not done — offer a retry, or let them skip just this step.
+        // Not done — offer a retry, or let them move past this section.
         if (!context.mounted) return false;
-        final skipStep = await _say(context, retrySteps(section, l),
-            title: section.label(l), hint: l.tourTryAgain, skip: l.tourSkipStep);
-        if (skipStep) break;
+        final retry = await _say(context, retrySteps(section, l),
+            title: section.label(l),
+            hint: l.tourTryAgain,
+            canSkipSection: true);
+        if (retry == TutorialOutcome.cancelledTour) return false;
+        if (retry == TutorialOutcome.skippedSection) break;
       }
       if (!context.mounted) return false;
-      final skipped = await _say(
+      final wrap = await _say(
         context,
         completed ? successSteps(section, l) : skippedSteps(section, l),
         title: section.label(l),
         hint: l.tourNextStop,
-        skip: l.tourSkipTour,
+        canSkipSection: true,
       );
-      return !skipped;
+      return wrap != TutorialOutcome.cancelledTour;
     }
 
     // Explore-only section: open it, let them roam, then react.
     if (!context.mounted) return false;
     await _open(context, section);
     if (!context.mounted) return false;
-    final skipped = await _say(context, successSteps(section, l),
-        title: section.label(l), hint: l.tourNextStop, skip: l.tourSkipTour);
-    return !skipped;
+    final wrap = await _say(context, successSteps(section, l),
+        title: section.label(l), hint: l.tourNextStop, canSkipSection: true);
+    return wrap != TutorialOutcome.cancelledTour;
   }
 
-  /// Shows an Acorn dialog. Returns true if the user pressed the skip button.
-  static Future<bool> _say(
+  /// Shows an Acorn dialog and reports how the user left it.
+  static Future<TutorialOutcome> _say(
     BuildContext context,
     List<TutorialStep> steps, {
     String? title,
     String hint = 'Tap to continue',
-    String skip = 'Skip',
+    bool canSkipSection = false,
   }) {
+    final l = AppLocalizations.of(context);
     return showTutorialDialog(
       context,
       steps: steps,
       sectionTitle: title,
       lastStepHint: hint,
-      skipLabel: skip,
+      cancelLabel: l.tourCancelTour,
+      skipSectionLabel: l.tourSkipSection,
+      allowSkipSection: canSkipSection,
+      redCancel: true,
     );
   }
 
