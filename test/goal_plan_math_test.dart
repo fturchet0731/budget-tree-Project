@@ -133,6 +133,52 @@ void main() {
     });
   });
 
+  group('progressionAmounts', () {
+    test('gives floor, midpoint and ceiling, gentlest first', () {
+      final a = GoalPlanMath.progressionAmounts(min: 50, max: 150);
+      expect(a, hasLength(3));
+      expect(a.first, 50);
+      expect(a.last, 150);
+      expect(a[1], greaterThan(a[0]));
+      expect(a[1], lessThan(a[2]));
+    });
+
+    test('the slowest option really is the smallest commitment', () {
+      final a = GoalPlanMath.progressionAmounts(min: 25, max: 200);
+      final g = goal(target: 5000);
+      final dates = [
+        for (final v in a)
+          GoalPlanMath.dateForPerWatering(g, v, WaterCadence.weekly, now: now)!
+      ];
+      // Gentler pace -> later finish, all the way down the list.
+      expect(dates[0].isAfter(dates[1]), isTrue);
+      expect(dates[1].isAfter(dates[2]), isTrue);
+    });
+
+    test('tolerates the two being entered the wrong way round', () {
+      expect(
+        GoalPlanMath.progressionAmounts(min: 150, max: 50),
+        GoalPlanMath.progressionAmounts(min: 50, max: 150),
+      );
+    });
+
+    test('only one figure given is treated as both ends', () {
+      final a = GoalPlanMath.progressionAmounts(min: 80, max: 0);
+      expect(a, [80]);
+      expect(GoalPlanMath.progressionAmounts(min: 0, max: 80), [80]);
+    });
+
+    test('nothing given yields nothing', () {
+      expect(GoalPlanMath.progressionAmounts(min: 0, max: 0), isEmpty);
+    });
+
+    test('collapses duplicates when the range is tiny', () {
+      // 100 and 102 both round to 100, so there is really only one plan.
+      final a = GoalPlanMath.progressionAmounts(min: 100, max: 102);
+      expect(a.toSet().length, a.length);
+    });
+  });
+
   group('suggestedPerWatering', () {
     test('offers a spread of paces, all positive and distinct', () {
       final s = GoalPlanMath.suggestedPerWatering(

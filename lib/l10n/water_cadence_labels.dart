@@ -1,4 +1,5 @@
 import '../data/water_cadence.dart';
+import '../models/ai_plan.dart';
 import 'app_localizations.dart';
 
 /// Localized labels for [WaterCadence]. The enum stays a pure data type; the
@@ -26,5 +27,17 @@ String cadenceEvery(AppLocalizations l, WaterCadence c) {
       return l.cadenceEveryBiweekly;
     case WaterCadence.monthly:
       return l.cadenceEveryMonthly;
+  }
+}
+
+/// Localized name for one of the three no-deadline progressions.
+String goalPaceLabel(AppLocalizations l, GoalPace pace) {
+  switch (pace) {
+    case GoalPace.easy:
+      return l.paceEasy;
+    case GoalPace.steady:
+      return l.paceSteady;
+    case GoalPace.fast:
+      return l.paceFast;
   }
 }

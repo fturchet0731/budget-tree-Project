@@ -4678,6 +4678,48 @@ abstract class AppLocalizations {
   /// **'How many?'**
   String get rhythmCustomHint;
 
+  /// No description provided for @willingRangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much are you willing to put in?'**
+  String get willingRangeTitle;
+
+  /// No description provided for @willingRangeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The least and the most you would part with each time. The plans are built between them.'**
+  String get willingRangeSub;
+
+  /// No description provided for @willingRangeMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Least'**
+  String get willingRangeMin;
+
+  /// No description provided for @willingRangeMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Most'**
+  String get willingRangeMax;
+
+  /// No description provided for @paceEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy pace'**
+  String get paceEasy;
+
+  /// No description provided for @paceSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady pace'**
+  String get paceSteady;
+
+  /// No description provided for @paceFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast track'**
+  String get paceFast;
+
   /// No description provided for @haveADateInMind.
   ///
   /// In en, this message translates to:

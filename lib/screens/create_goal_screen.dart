@@ -69,6 +69,16 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   final _customAmountCtrl = TextEditingController();
   bool _remindToWater = true;
 
+  // The range the user is willing to put in each timeframe. Asked before any
+  // plan is generated, and it's what the three no-deadline progressions are
+  // built from: the floor, the midpoint and the ceiling.
+  final _minCtrl = TextEditingController();
+  final _maxCtrl = TextEditingController();
+
+  double get _willingMin => double.tryParse(_minCtrl.text) ?? 0;
+  double get _willingMax => double.tryParse(_maxCtrl.text) ?? 0;
+  bool get _hasRange => _willingMin > 0 || _willingMax > 0;
+
   @override
   void initState() {
     super.initState();
@@ -81,6 +91,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     _targetCtrl.dispose();
     _descCtrl.dispose();
     _customAmountCtrl.dispose();
+    _minCtrl.dispose();
+    _maxCtrl.dispose();
     super.dispose();
   }
 
@@ -281,26 +293,38 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       ];
     }
 
-    // No deadline. If the user said what they're willing to put in, plan around
-    // exactly that; otherwise offer a spread of paces at their chosen cadence.
-    final typed = double.tryParse(_customAmountCtrl.text) ?? 0;
-    final amounts = typed > 0
-        ? [typed]
+    // No deadline: the three plans are three **paces**, built from the range
+    // the user said they're willing to put in — their floor, the midpoint, and
+    // their ceiling. Each one finishes on a different date, which is the actual
+    // choice being made here. With no range given we fall back to a spread
+    // anchored on their spare income.
+    final amounts = _hasRange
+        ? GoalPlanMath.progressionAmounts(min: _willingMin, max: _willingMax)
         : GoalPlanMath.suggestedPerWatering(goal, _customCadence, freeMonthly);
+
     return [
-      for (final a in amounts)
-        if (GoalPlanMath.dateForPerWatering(goal, a, _customCadence) != null)
+      for (var i = 0; i < amounts.length; i++)
+        if (GoalPlanMath.dateForPerWatering(goal, amounts[i], _customCadence) !=
+            null)
           GoalPlanOption(
             cadence: _customCadence,
-            perWatering: a,
+            perWatering: amounts[i],
             monthsToTarget: GoalPlanMath.monthsForPerWatering(
               goal,
-              a,
+              amounts[i],
               _customCadence,
             ),
             rationale: '',
-            completionDate:
-                GoalPlanMath.dateForPerWatering(goal, a, _customCadence),
+            completionDate: GoalPlanMath.dateForPerWatering(
+              goal,
+              amounts[i],
+              _customCadence,
+            ),
+            // Gentlest first, so the set reads as a progression.
+            pace: amounts.length == 1
+                ? GoalPace.steady
+                : GoalPace.values[(i * (GoalPace.values.length - 1) ~/
+                    (amounts.length - 1))],
           ),
     ];
   }
@@ -728,6 +752,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                             suggestedPerWatering:
                                 _suggestedPerWatering(_customCadence),
                             customProjectedDate: _customProjectedDate(),
+                            minCtrl: _minCtrl,
+                            maxCtrl: _maxCtrl,
+                            onRangeChanged: () => setState(() {}),
                             onPickCustomCadence: (c) => setState(() {
                               _customCadence = c;
                               _useCustom = true;
@@ -1227,6 +1254,123 @@ class _TimeframeStep extends StatelessWidget {
   }
 }
 
+/// "How much are you willing to put in each time?" — the floor and ceiling the
+/// three no-deadline paces are built from, asked before any plan is generated.
+class _WillingRangeCard extends StatelessWidget {
+  const _WillingRangeCard({
+    required this.cadence,
+    required this.minCtrl,
+    required this.maxCtrl,
+    required this.onCadenceChanged,
+    required this.onChanged,
+  });
+
+  final WaterCadence cadence;
+  final TextEditingController minCtrl;
+  final TextEditingController maxCtrl;
+  final ValueChanged<WaterCadence> onCadenceChanged;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.current;
+
+    Widget field(TextEditingController c, String label) => Expanded(
+          child: TextField(
+            controller: c,
+            style: TextStyle(color: AppColors.stoneBeigeColor),
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+            ],
+            onChanged: (_) => onChanged(),
+            decoration: InputDecoration(
+              labelText: label,
+              prefixText: '\$ ',
+              isDense: true,
+            ),
+          ),
+        );
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: t.canvasSoft,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: t.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.willingRangeTitle,
+            style: GoogleFonts.nunito(
+              color: AppColors.stoneBeigeColor,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l.willingRangeSub,
+            style: GoogleFonts.nunito(
+              color: t.textSecondary,
+              fontSize: 11.5,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          // The range is per timeframe, so the timeframe is picked right here.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final c in WaterCadence.values)
+                GestureDetector(
+                  onTap: () => onCadenceChanged(c),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cadence == c ? t.accentSoft : t.card,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: cadence == c ? t.accentStrong : t.cardBorder,
+                        width: cadence == c ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Text(
+                      cadenceLabel(l, c),
+                      style: GoogleFonts.nunito(
+                        color: cadence == c ? t.accentStrong : t.textPrimary,
+                        fontSize: 12.5,
+                        fontWeight:
+                            cadence == c ? FontWeight.bold : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              field(minCtrl, l.willingRangeMin),
+              const SizedBox(width: 10),
+              field(maxCtrl, l.willingRangeMax),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// One of the two planning modes on the timeframe step.
 class _ModeChoice extends StatelessWidget {
   const _ModeChoice({
@@ -1327,6 +1471,11 @@ class _WateringStep extends StatelessWidget {
 
   /// With no deadline, when the typed custom amount would reach the goal.
   final DateTime? customProjectedDate;
+
+  /// The range the user is willing to put in each timeframe.
+  final TextEditingController minCtrl;
+  final TextEditingController maxCtrl;
+  final VoidCallback onRangeChanged;
   final ValueChanged<WaterCadence> onPickCustomCadence;
   final VoidCallback onCustomFocus;
   final bool remind;
@@ -1353,6 +1502,9 @@ class _WateringStep extends StatelessWidget {
     required this.customAmountCtrl,
     required this.suggestedPerWatering,
     this.customProjectedDate,
+    required this.minCtrl,
+    required this.maxCtrl,
+    required this.onRangeChanged,
     required this.onPickCustomCadence,
     required this.onCustomFocus,
     required this.remind,
@@ -1389,6 +1541,20 @@ class _WateringStep extends StatelessWidget {
               if (showAi && useAi == null)
                 _AiPrompt(onAi: onChooseAi, onManual: onChooseManual)
               else ...[
+                // Asked before anything is generated: the three no-deadline
+                // paces are built straight out of this range, and with a
+                // deadline it tells the user whether the required amount is
+                // one they'd actually be happy with.
+                if (!uncapped && hasTarget) ...[
+                  _WillingRangeCard(
+                    cadence: customCadence,
+                    minCtrl: minCtrl,
+                    maxCtrl: maxCtrl,
+                    onCadenceChanged: onPickCustomCadence,
+                    onChanged: onRangeChanged,
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 if (showAi && useAi == true) ...[
                   SizedBox(
                     width: double.infinity,
@@ -1568,6 +1734,21 @@ class _WaterPlanCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Without a deadline the three options are a progression
+                    // from gentlest to quickest, so name the pace: it's the
+                    // difference between them.
+                    if (plan.pace != null) ...[
+                      Text(
+                        goalPaceLabel(l, plan.pace!),
+                        style: GoogleFonts.nunito(
+                          color: AppTokens.current.accentStrong,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                    ],
                     Text(
                       '\$${plan.perWatering.toStringAsFixed(0)} ${cadenceEvery(l, plan.cadence)}',
                       style: GoogleFonts.fredoka(

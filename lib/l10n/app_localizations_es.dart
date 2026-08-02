@@ -2682,6 +2682,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rhythmCustomHint => '¿Cuántos?';
 
   @override
+  String get willingRangeTitle => '¿Cuánto estás dispuesto a poner?';
+
+  @override
+  String get willingRangeSub =>
+      'Lo mínimo y lo máximo que pondrías cada vez. Los planes se construyen entre ambos.';
+
+  @override
+  String get willingRangeMin => 'Mínimo';
+
+  @override
+  String get willingRangeMax => 'Máximo';
+
+  @override
+  String get paceEasy => 'Ritmo tranquilo';
+
+  @override
+  String get paceSteady => 'Ritmo constante';
+
+  @override
+  String get paceFast => 'Ritmo rápido';
+
+  @override
   String get haveADateInMind => '¿Tienes una fecha en mente?';
 
   @override

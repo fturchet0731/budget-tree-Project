@@ -128,6 +128,31 @@ class GoalPlanMath {
     return from.add(Duration(days: waterings * cadence.days));
   }
 
+  /// The three paces a goal can be approached at when there's no deadline.
+  /// They differ in commitment (and therefore in finish date), which is the
+  /// real choice being made here — unlike the fixed-date plans, where every
+  /// option costs the same and only the rhythm changes.
+  ///
+  /// Ordered gentlest first so the cards read as a progression.
+  static List<double> progressionAmounts({
+    required double min,
+    required double max,
+  }) {
+    if (min <= 0 && max <= 0) return const [];
+    // Tolerate them being entered the wrong way round.
+    var lo = math.min(min, max);
+    var hi = math.max(min, max);
+    if (lo <= 0) lo = hi;
+    if (hi <= 0) hi = lo;
+
+    final out = <double>[];
+    for (final v in [lo, (lo + hi) / 2, hi]) {
+      final rounded = _friendly(v);
+      if (rounded > 0 && !out.contains(rounded)) out.add(rounded);
+    }
+    return out;
+  }
+
   /// Sensible per-watering amounts to offer when the user has no date in mind:
   /// a comfortable, a middling and a brisk pace, derived from whatever headroom
   /// they have ([freeMonthly]) and floored so the goal still finishes in a

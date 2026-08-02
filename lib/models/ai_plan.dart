@@ -59,6 +59,20 @@ class AllocationPlan {
           .toList();
 }
 
+/// How hard a no-deadline plan pushes. The three options a user is offered are
+/// one of each, gentlest first, so the set reads as a progression rather than
+/// three arbitrary numbers.
+enum GoalPace {
+  /// The least they said they'd part with. Longest finish date.
+  easy,
+
+  /// Halfway between their floor and ceiling.
+  steady,
+
+  /// The most they said they'd part with. Soonest finish date.
+  fast,
+}
+
 /// Which way round a goal was planned.
 enum GoalPlanMode {
   /// The user named a date. Solve for the amount that lands exactly on it.
@@ -84,12 +98,17 @@ class GoalPlanOption {
   /// the date the user asked for.
   final DateTime? completionDate;
 
+  /// Which of the three progressions this is, when planning without a
+  /// deadline. Null in date mode, where the options differ by rhythm instead.
+  final GoalPace? pace;
+
   const GoalPlanOption({
     required this.cadence,
     required this.perWatering,
     required this.monthsToTarget,
     required this.rationale,
     this.completionDate,
+    this.pace,
   });
 
   GoalPlanOption copyWith({
@@ -97,6 +116,7 @@ class GoalPlanOption {
     int? monthsToTarget,
     String? rationale,
     DateTime? completionDate,
+    GoalPace? pace,
   }) =>
       GoalPlanOption(
         cadence: cadence,
@@ -104,6 +124,7 @@ class GoalPlanOption {
         monthsToTarget: monthsToTarget ?? this.monthsToTarget,
         rationale: rationale ?? this.rationale,
         completionDate: completionDate ?? this.completionDate,
+        pace: pace ?? this.pace,
       );
 
   /// Equivalent monthly contribution this plan implies.

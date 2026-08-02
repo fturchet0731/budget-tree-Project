@@ -2698,6 +2698,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rhythmCustomHint => 'Combien ?';
 
   @override
+  String get willingRangeTitle => 'Combien êtes-vous prêt à verser ?';
+
+  @override
+  String get willingRangeSub =>
+      'Le minimum et le maximum que vous mettriez à chaque fois. Les plans sont construits entre les deux.';
+
+  @override
+  String get willingRangeMin => 'Minimum';
+
+  @override
+  String get willingRangeMax => 'Maximum';
+
+  @override
+  String get paceEasy => 'Rythme tranquille';
+
+  @override
+  String get paceSteady => 'Rythme régulier';
+
+  @override
+  String get paceFast => 'Rythme rapide';
+
+  @override
   String get haveADateInMind => 'Avez-vous une date en tête ?';
 
   @override
