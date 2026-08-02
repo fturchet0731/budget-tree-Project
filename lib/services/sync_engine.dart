@@ -7,6 +7,7 @@ import 'budget_repository.dart';
 import 'category_repository.dart';
 import 'goal_repository.dart';
 import 'notification_scheduler.dart';
+import 'pay_scheduler.dart';
 import 'supabase_config.dart';
 import 'synced_store.dart';
 
@@ -49,6 +50,10 @@ class SyncEngine {
     for (final s in _stores) {
       await s.pull();
     }
+    // Only once the authoritative rows have landed: the sweep writes based on
+    // what it reads, so it must not run against a cache a pull is about to
+    // replace.
+    await PayScheduler.runAllDue();
     unawaited(NotificationScheduler.rescheduleAll());
   }
 
@@ -60,7 +65,8 @@ class SyncEngine {
     }
   }
 
-  /// Replay queued writes then refresh caches (app-resume / back-online).
+  /// Replay queued writes then refresh caches (app-resume / back-online), and
+  /// credit any pay periods that elapsed while the app was away.
   static Future<void> flushAndPull() async {
     for (final s in _stores) {
       await s.flushQueue();
@@ -68,6 +74,7 @@ class SyncEngine {
     for (final s in _stores) {
       await s.pull();
     }
+    await PayScheduler.runAllDue();
   }
 
   /// Erase the signed-in user's rows from every remote table (used by the

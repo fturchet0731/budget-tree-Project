@@ -710,5 +710,15 @@
   "totalIncomeCycle": "Ingreso total ({cycle})",
   "incomeDoneAdding": "Eso es todo mi ingreso",
   "expensesDoneAdding": "Esos son todos mis gastos",
-  "expenseSummaryTitle": "Cómo vas"
+  "expenseSummaryTitle": "Cómo vas",
+  "dataErased": "Todos los datos han sido borrados.",
+  "defaultBudgetName": "Mi presupuesto",
+  "notifChannelBudgetName": "Avisos de presupuesto",
+  "notifChannelBudgetDesc": "Avisos cuando un presupuesto se acerca o supera tus ingresos",
+  "notifChannelStreakName": "Recordatorios de racha",
+  "notifChannelStreakDesc": "Aviso diario para mantener viva tu racha de ahorro",
+  "notifChannelWeeklyName": "Resumen semanal",
+  "notifChannelWeeklyDesc": "Un resumen semanal de cómo crece tu bosque",
+  "notifChannelWateringName": "Riego de metas",
+  "notifChannelWateringDesc": "Recordatorios para regar tus metas de ahorro a tiempo"
 }

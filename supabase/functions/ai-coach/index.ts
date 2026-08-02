@@ -29,6 +29,29 @@ const MAX_NAME_LEN = 60;
 const MAX_SYNOPSIS_LEN = 500;
 const MAX_SURVEY_ENTRIES = 20;
 const MAX_SURVEY_VALUE_LEN = 120;
+// Reflection summaries are assembled by the app from its own rows, but the
+// request body is still attacker-controlled, so the payload is rebuilt here
+// from an allow-list rather than forwarded verbatim.
+const MAX_BUDGETS = 20;
+const MAX_LINKED_GOALS = 40;
+
+// Coerce to a finite number, defaulting to 0. Guards against NaN/Infinity and
+// strings sneaking into the prompt.
+function num(v: unknown): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+// Trim a caller-supplied string to a bounded, single-line value.
+function str(v: unknown, max = MAX_NAME_LEN): string {
+  return String(v ?? "").slice(0, max);
+}
+
+// A bounded array from an unknown value. A non-array (string, object, null)
+// becomes empty rather than throwing part-way through building the prompt.
+function arr(v: unknown, max: number): unknown[] {
+  return Array.isArray(v) ? v.slice(0, max) : [];
+}
 
 interface ClaudeResult {
   text: string;
@@ -93,9 +116,11 @@ const LOCALE_NOTE = (locale: string) =>
 // ---- action: budget_plans -------------------------------------------------
 
 async function budgetPlans(body: Record<string, unknown>) {
-  const income = Number(body.income) || 0;
-  const currency = String(body.currency ?? "$");
-  const locale = String(body.locale ?? "en");
+  const income = num(body.income);
+  // Both of these land in the system prompt, so they get the same bounding as
+  // every other caller-supplied string.
+  const currency = str(body.currency || "$", 8);
+  const locale = str(body.locale || "en", 16);
   const synopsis = String(body.synopsis ?? "").trim();
   // The budget's cycle: income and every amount are per this period, not
   // necessarily monthly, so estimates must be scaled to it.
@@ -123,13 +148,10 @@ async function budgetPlans(body: Record<string, unknown>) {
   }
   // Each expense may carry a fixed amount the user already decided, or 0/absent
   // meaning the coach should choose it. Capped in count and name length.
-  const expenses =
-    ((body.expenses as Array<{ name: string; amount?: number }>) ?? [])
-      .slice(0, MAX_EXPENSES)
-      .map((e) => ({
-        name: String(e?.name ?? "").slice(0, MAX_NAME_LEN),
-        amount: Number(e?.amount) || 0,
-      }));
+  const expenses = arr(body.expenses, MAX_EXPENSES).map((e) => {
+    const o = (e ?? {}) as Record<string, unknown>;
+    return { name: str(o.name), amount: num(o.amount) };
+  });
 
   const system =
     `You are a friendly personal budgeting coach. The user budgets per ${cycle}: their income and every amount below are for one ${cycle}, so scale your estimates to that period. They give that income, a list of expense categories (each with an amount they already decided, or 0 meaning you choose it), answers to a short lifestyle questionnaire, and an optional note on how they want their budget to feel. Produce 2 or 3 distinct allocation plans. ${
@@ -156,15 +178,20 @@ Rules: every input expense MUST appear in every plan's items. If an expense has 
 // ---- action: goal_plans ---------------------------------------------------
 
 async function goalPlans(body: Record<string, unknown>) {
-  const goal = body.goal as {
-    name: string;
-    target: number;
-    current: number;
-    uncapped: boolean;
+  // Rebuilt field by field rather than forwarded: the name is length-capped and
+  // the numbers coerced, so nothing unbounded reaches the prompt.
+  const raw = (body.goal ?? {}) as Record<string, unknown>;
+  const goal = {
+    name: str(raw.name),
+    target: num(raw.target),
+    current: num(raw.current),
+    uncapped: raw.uncapped === true,
   };
-  const targetDate = String(body.targetDate ?? "");
-  const freeMonthly = Number(body.freeMonthly) || 0;
-  const locale = String(body.locale ?? "en");
+  // Only an ISO date is ever sent by the app; anything else is dropped.
+  const rawDate = String(body.targetDate ?? "");
+  const targetDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : "";
+  const freeMonthly = num(body.freeMonthly);
+  const locale = str(body.locale || "en", 16);
 
   const system =
     `You are a savings coach for an app where users "water" a goal by contributing on a repeating cadence. Given a goal (target amount, amount already saved, desired completion date) and the user's estimated free monthly income, produce 2 or 3 distinct watering plans to reach the goal by the target date, plus 1 to 3 alternative completion dates that fit comfortably within the free monthly income. ${
@@ -180,9 +207,45 @@ Rules: cadence is exactly one of "weekly", "biweekly", or "monthly". perWatering
 
 // ---- action: reflection ---------------------------------------------------
 
+// A week/month comparison block, rebuilt with coerced numbers.
+function comparison(v: unknown) {
+  const c = (v ?? {}) as Record<string, unknown>;
+  return {
+    current: num(c.current),
+    previous: num(c.previous),
+    pctChange: c.pctChange == null ? null : num(c.pctChange),
+  };
+}
+
 async function reflection(body: Record<string, unknown>) {
-  const period = String(body.period ?? "weekly");
-  const locale = String(body.locale ?? "en");
+  const period = body.period === "monthly" ? "monthly" : "weekly";
+  const locale = str(body.locale || "en", 16);
+
+  // Allow-listed summary: exactly the shape ReflectionService builds, with
+  // every list bounded and every name truncated. Anything else in the body is
+  // discarded instead of being forwarded into the prompt.
+  const summary = {
+    period,
+    budgets: arr(body.budgets, MAX_BUDGETS).map((b) => {
+      const o = (b ?? {}) as Record<string, unknown>;
+      return {
+        name: str(o.name),
+        income: num(o.income),
+        allocated: num(o.allocated),
+      };
+    }),
+    week: comparison(body.week),
+    month: comparison(body.month),
+    streakWeeks: num(body.streakWeeks),
+    linkedGoals: arr(body.linkedGoals, MAX_LINKED_GOALS).map((g) => {
+      const o = (g ?? {}) as Record<string, unknown>;
+      return {
+        name: str(o.name),
+        recommendedMonthly: num(o.recommendedMonthly),
+        contributedThisPeriod: num(o.contributedThisPeriod),
+      };
+    }),
+  };
 
   const system =
     `You are an encouraging but honest financial accountability coach for a budgeting app themed around growing trees. Given a ${period} summary of the user's budgets, savings activity, streak, and goals, write a short reflection of 2 to 4 sentences. Name one genuine win, one area where they fell short, and one concrete nudge for the coming ${
@@ -191,7 +254,7 @@ async function reflection(body: Record<string, unknown>) {
       LOCALE_NOTE(locale)
     } Keep the tree metaphor light. Respond with ONLY a JSON object of the shape: {"text":string}`;
 
-  const user = JSON.stringify(body);
+  const user = JSON.stringify(summary);
   const { text } = await callClaude(system, user, 400);
   return extractJson<{ text: string }>(text);
 }

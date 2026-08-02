@@ -4131,6 +4131,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Where you stand'**
   String get expenseSummaryTitle;
+
+  /// No description provided for @dataErased.
+  ///
+  /// In en, this message translates to:
+  /// **'All data erased.'**
+  String get dataErased;
+
+  /// No description provided for @defaultBudgetName.
+  ///
+  /// In en, this message translates to:
+  /// **'My Budget'**
+  String get defaultBudgetName;
+
+  /// No description provided for @notifChannelBudgetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget warnings'**
+  String get notifChannelBudgetName;
+
+  /// No description provided for @notifChannelBudgetDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts when a budget nears or exceeds your income'**
+  String get notifChannelBudgetDesc;
+
+  /// No description provided for @notifChannelStreakName.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak reminders'**
+  String get notifChannelStreakName;
+
+  /// No description provided for @notifChannelStreakDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily nudge to keep your saving streak alive'**
+  String get notifChannelStreakDesc;
+
+  /// No description provided for @notifChannelWeeklyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly summary'**
+  String get notifChannelWeeklyName;
+
+  /// No description provided for @notifChannelWeeklyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A weekly recap of how your forest is growing'**
+  String get notifChannelWeeklyDesc;
+
+  /// No description provided for @notifChannelWateringName.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal watering'**
+  String get notifChannelWateringName;
+
+  /// No description provided for @notifChannelWateringDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders to water your savings goals on schedule'**
+  String get notifChannelWateringDesc;
 }
 
 class _AppLocalizationsDelegate

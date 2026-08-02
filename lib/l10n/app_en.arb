@@ -784,5 +784,15 @@
   "@totalIncomeCycle": { "placeholders": { "cycle": { "type": "String" } } },
   "incomeDoneAdding": "That's all my income",
   "expensesDoneAdding": "That's all my expenses",
-  "expenseSummaryTitle": "Where you stand"
+  "expenseSummaryTitle": "Where you stand",
+  "dataErased": "All data erased.",
+  "defaultBudgetName": "My Budget",
+  "notifChannelBudgetName": "Budget warnings",
+  "notifChannelBudgetDesc": "Alerts when a budget nears or exceeds your income",
+  "notifChannelStreakName": "Streak reminders",
+  "notifChannelStreakDesc": "Daily nudge to keep your saving streak alive",
+  "notifChannelWeeklyName": "Weekly summary",
+  "notifChannelWeeklyDesc": "A weekly recap of how your forest is growing",
+  "notifChannelWateringName": "Goal watering",
+  "notifChannelWateringDesc": "Reminders to water your savings goals on schedule"
 }

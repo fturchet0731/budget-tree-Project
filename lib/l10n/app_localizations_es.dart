@@ -2373,4 +2373,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get expenseSummaryTitle => 'Cómo vas';
+
+  @override
+  String get dataErased => 'Todos los datos han sido borrados.';
+
+  @override
+  String get defaultBudgetName => 'Mi presupuesto';
+
+  @override
+  String get notifChannelBudgetName => 'Avisos de presupuesto';
+
+  @override
+  String get notifChannelBudgetDesc =>
+      'Avisos cuando un presupuesto se acerca o supera tus ingresos';
+
+  @override
+  String get notifChannelStreakName => 'Recordatorios de racha';
+
+  @override
+  String get notifChannelStreakDesc =>
+      'Aviso diario para mantener viva tu racha de ahorro';
+
+  @override
+  String get notifChannelWeeklyName => 'Resumen semanal';
+
+  @override
+  String get notifChannelWeeklyDesc =>
+      'Un resumen semanal de cómo crece tu bosque';
+
+  @override
+  String get notifChannelWateringName => 'Riego de metas';
+
+  @override
+  String get notifChannelWateringDesc =>
+      'Recordatorios para regar tus metas de ahorro a tiempo';
 }

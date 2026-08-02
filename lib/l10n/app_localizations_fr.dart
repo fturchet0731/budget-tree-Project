@@ -2385,4 +2385,38 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get expenseSummaryTitle => 'Votre situation';
+
+  @override
+  String get dataErased => 'Toutes les données ont été effacées.';
+
+  @override
+  String get defaultBudgetName => 'Mon budget';
+
+  @override
+  String get notifChannelBudgetName => 'Alertes de budget';
+
+  @override
+  String get notifChannelBudgetDesc =>
+      'Alertes quand un budget approche ou dépasse votre revenu';
+
+  @override
+  String get notifChannelStreakName => 'Rappels de série';
+
+  @override
+  String get notifChannelStreakDesc =>
+      'Rappel quotidien pour garder votre série d\'épargne en vie';
+
+  @override
+  String get notifChannelWeeklyName => 'Bilan hebdomadaire';
+
+  @override
+  String get notifChannelWeeklyDesc =>
+      'Un récapitulatif hebdomadaire de la croissance de votre forêt';
+
+  @override
+  String get notifChannelWateringName => 'Arrosage des objectifs';
+
+  @override
+  String get notifChannelWateringDesc =>
+      'Rappels pour arroser vos objectifs d\'épargne à temps';
 }

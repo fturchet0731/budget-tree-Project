@@ -132,9 +132,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await SyncEngine.clearLocalCaches();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('All data erased.'),
-        duration: Duration(seconds: 3),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).dataErased),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

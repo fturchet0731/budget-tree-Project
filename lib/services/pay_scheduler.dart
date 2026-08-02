@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import '../data/pay_frequency.dart';
 import '../models/budget_model.dart';
 import '../models/goal_model.dart';
@@ -57,7 +58,14 @@ class PayScheduler {
   ///
   /// Caps for goals with a [Goal.targetAmount] are respected — any
   /// overflow is dropped (the goal stays at its target).
-  static Future<PayCycleResult> runUpdate(BudgetModel budget) async {
+  ///
+  /// Set [fromCache] to read goals without triggering a background pull. The
+  /// sweep in [runAllDue] uses it so its own writes can't be overwritten by a
+  /// refresh it started itself.
+  static Future<PayCycleResult> runUpdate(
+    BudgetModel budget, {
+    bool fromCache = false,
+  }) async {
     final freq = budget.payFrequency;
     final first = budget.firstPayDate;
     if (freq == null || first == null) {
@@ -81,7 +89,9 @@ class PayScheduler {
       );
     }
 
-    final allGoals = await GoalRepository.loadAll();
+    final allGoals = fromCache
+        ? await GoalRepository.loadCached()
+        : await GoalRepository.loadAll();
     final goalsById = {for (final g in allGoals) g.id: g};
 
     final touchedGoals = <String>{};
@@ -110,11 +120,8 @@ class PayScheduler {
         final applied = goal.applyContribution(toAdd,
             source: ContributionSource.auto, at: now);
         totalDeposited += applied;
-        if (!goal.isUncapped &&
-            goal.isComplete &&
-            goal.completedAt == null) {
-          goal.completedAt = now;
-        }
+        // Go through the model so the stamping rule lives in exactly one place.
+        goal.stampCompletionIfReached();
         touchedGoals.add(goalId);
       }
     }
@@ -139,6 +146,50 @@ class PayScheduler {
       updatedGoals: touchedGoals.map((id) => goalsById[id]!).toList(),
       nextPayDate: nextPayDate(budget, now) ?? now,
     );
+  }
+
+  /// Guards against two sweeps overlapping (boot and resume can land close
+  /// together), which would read the same `lastProcessedAt` twice.
+  static bool _sweeping = false;
+
+  /// Run [runUpdate] for **every** saved budget that has a pay schedule.
+  ///
+  /// Without this, a budget is only ever processed when the user opens its
+  /// tree, so trees they don't visit never fund their linked goals — and the
+  /// streaks, comparisons and achievements that read the contribution ledger
+  /// all understate as a result.
+  ///
+  /// Safe to call repeatedly: [runUpdate] advances `lastProcessedAt` by exactly
+  /// the periods it credited, so a second sweep inside the same period finds
+  /// nothing to do. One budget failing never stops the rest.
+  ///
+  /// Returns how many budgets actually moved money into a goal. A budget whose
+  /// periods elapsed but whose branches feed nothing (no links, or the linked
+  /// goal was deleted) still advances its clock, but doesn't count here.
+  static Future<int> runAllDue() async {
+    if (_sweeping) return 0;
+    _sweeping = true;
+    try {
+      final budgets = await BudgetRepository.loadCached();
+      var credited = 0;
+      for (final budget in budgets) {
+        // Unsaved drafts and budgets with no schedule have nothing to process.
+        if (budget.savedAt == null ||
+            budget.payFrequency == null ||
+            budget.firstPayDate == null) {
+          continue;
+        }
+        try {
+          final result = await runUpdate(budget, fromCache: true);
+          if (result.totalDeposited > 0) credited++;
+        } catch (e) {
+          debugPrint('PayScheduler.runAllDue(${budget.id}) failed: $e');
+        }
+      }
+      return credited;
+    } finally {
+      _sweeping = false;
+    }
   }
 
   /// Auto-link branches to existing goals by exact-or-prefix name match.

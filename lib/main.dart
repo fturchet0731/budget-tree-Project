@@ -5,6 +5,7 @@ import 'services/app_settings.dart';
 import 'services/auth_service.dart';
 import 'services/notification_scheduler.dart';
 import 'services/notification_service.dart';
+import 'services/pay_scheduler.dart';
 import 'services/reflection_service.dart';
 import 'services/supabase_config.dart';
 import 'services/sync_engine.dart';
@@ -25,7 +26,19 @@ Future<void> main() async {
   // Generate any due AI reflection in the background (no-op when offline /
   // signed out / AI disabled). Never blocks first paint.
   unawaited(ReflectionService.instance.maybeGenerate());
+  _sweepPayCyclesIfLocalOnly();
   runApp(const BudgetTreeApp());
+}
+
+/// Credit any pay periods that elapsed while the app was closed.
+///
+/// For a signed-in user the [SyncEngine] runs the sweep itself, but only after
+/// its pull has landed, so it never works from a cache that is about to be
+/// replaced. This covers the cases the sync engine never touches: guest mode
+/// and a build with no Supabase dart-defines.
+void _sweepPayCyclesIfLocalOnly() {
+  if (SupabaseConfig.isConfigured && AuthService.instance.isSignedIn) return;
+  unawaited(PayScheduler.runAllDue());
 }
 
 class BudgetTreeApp extends StatefulWidget {
@@ -56,6 +69,9 @@ class _BudgetTreeAppState extends State<BudgetTreeApp>
     if (state == AppLifecycleState.resumed) {
       unawaited(ReflectionService.instance.maybeGenerate());
       unawaited(NotificationScheduler.rescheduleAll());
+      // Signed-in users get this from SyncEngine's own resume handler, which
+      // sweeps after pulling; this is the local-only path.
+      _sweepPayCyclesIfLocalOnly();
     }
   }
 

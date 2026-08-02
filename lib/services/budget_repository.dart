@@ -17,6 +17,9 @@ class BudgetRepository {
   );
 
   static Future<List<BudgetModel>> loadAll() => store.loadAll();
+
+  /// Cache-only read (no background refresh) — see [SyncedStore.loadCached].
+  static Future<List<BudgetModel>> loadCached() => store.loadCached();
   static Future<void> saveNew(BudgetModel budget) => store.saveNew(budget);
   static Future<void> update(BudgetModel budget) => store.update(budget);
   static Future<void> delete(String id) => store.delete(id);

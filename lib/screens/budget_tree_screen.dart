@@ -559,30 +559,34 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
           // NOTE: _leafHits.clear() is inside _GrowingTreePainter.paint()
           // so leafHits always reflects what was last painted, even after
           // the animation completes and the builder doesn't clear them.
-          AnimatedBuilder(
-            animation: _growAnimation,
-            builder: (ctx, child) {
-              return GestureDetector(
-                onTapUp: _onTapTree,
-                child: CustomPaint(
-                  size: Size(size.width, size.height),
-                  painter: _GrowingTreePainter(
-                    budget: widget.budget,
-                    progress: _growAnimation.value,
-                    leafHits: _leafHits,
-                    leafPalette: _leafPalette,
-                    totalIncomeLabel: l.totalIncome,
-                    rootLabel: widget.budget.remaining < 0
-                        ? l.overBudgetAmount(
-                            '\$${(-widget.budget.remaining).toStringAsFixed(2)}',
-                          )
-                        : l.unallocatedAmount(
-                            '\$${widget.budget.remaining.toStringAsFixed(2)}',
-                          ),
+          // The grow animation repaints a full-screen scene every frame, so it
+          // gets its own layer and leaves the static background alone.
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _growAnimation,
+              builder: (ctx, child) {
+                return GestureDetector(
+                  onTapUp: _onTapTree,
+                  child: CustomPaint(
+                    size: Size(size.width, size.height),
+                    painter: _GrowingTreePainter(
+                      budget: widget.budget,
+                      progress: _growAnimation.value,
+                      leafHits: _leafHits,
+                      leafPalette: _leafPalette,
+                      totalIncomeLabel: l.totalIncome,
+                      rootLabel: widget.budget.remaining < 0
+                          ? l.overBudgetAmount(
+                              '\$${(-widget.budget.remaining).toStringAsFixed(2)}',
+                            )
+                          : l.unallocatedAmount(
+                              '\$${widget.budget.remaining.toStringAsFixed(2)}',
+                            ),
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           // ── Header bar ───────────────────────
           SafeArea(

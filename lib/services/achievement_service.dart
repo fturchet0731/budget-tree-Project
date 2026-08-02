@@ -68,7 +68,10 @@ class AchievementService {
     int maxTier = 0;
     for (final g in goals) {
       saved += g.currentAmount;
-      if (g.isComplete) completed++;
+      // The durable check, not the live one: completion is a permanent trophy,
+      // so a later withdrawal must not drop the goal back out of the tally and
+      // un-earn a badge the user was part-way to.
+      if (g.isCompleted) completed++;
       if (g.isUncapped && g.tier > maxTier) maxTier = g.tier;
       for (final c in g.contributions) {
         if (c.isDeposit) deposits++;

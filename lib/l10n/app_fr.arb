@@ -710,5 +710,15 @@
   "totalIncomeCycle": "Revenu total ({cycle})",
   "incomeDoneAdding": "C'est tout mon revenu",
   "expensesDoneAdding": "Ce sont toutes mes dépenses",
-  "expenseSummaryTitle": "Votre situation"
+  "expenseSummaryTitle": "Votre situation",
+  "dataErased": "Toutes les données ont été effacées.",
+  "defaultBudgetName": "Mon budget",
+  "notifChannelBudgetName": "Alertes de budget",
+  "notifChannelBudgetDesc": "Alertes quand un budget approche ou dépasse votre revenu",
+  "notifChannelStreakName": "Rappels de série",
+  "notifChannelStreakDesc": "Rappel quotidien pour garder votre série d'épargne en vie",
+  "notifChannelWeeklyName": "Bilan hebdomadaire",
+  "notifChannelWeeklyDesc": "Un récapitulatif hebdomadaire de la croissance de votre forêt",
+  "notifChannelWateringName": "Arrosage des objectifs",
+  "notifChannelWateringDesc": "Rappels pour arroser vos objectifs d'épargne à temps"
 }

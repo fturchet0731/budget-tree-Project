@@ -465,40 +465,46 @@ class _TargetHighlightRingState extends State<TargetHighlightRing>
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: _pulse,
-        builder: (context, _) {
-          final rect = _targetRect();
-          if (rect == null) return const SizedBox.shrink();
-          final motion = AppSettings.instance.motionFull;
-          final v = motion ? _pulse.value : 0.5;
-          final ring = rect.inflate(4 + 4 * v);
-          final t = AppTokens.current;
-          return Stack(
-            children: [
-              Positioned.fromRect(
-                rect: ring,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: t.accentStrong.withValues(alpha: 0.55 + 0.45 * v),
-                      width: 3,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: t.accent.withValues(alpha: 0.25 + 0.2 * v),
-                        blurRadius: 14,
-                        spreadRadius: 1,
+    // The ring repaints a blurred shadow every frame while it pulses, over a
+    // screen that is otherwise still — keep those repaints on their own layer.
+    return RepaintBoundary(
+      child: IgnorePointer(
+        child: AnimatedBuilder(
+          animation: _pulse,
+          builder: (context, _) {
+            final rect = _targetRect();
+            if (rect == null) return const SizedBox.shrink();
+            final motion = AppSettings.instance.motionFull;
+            final v = motion ? _pulse.value : 0.5;
+            final ring = rect.inflate(4 + 4 * v);
+            final t = AppTokens.current;
+            return Stack(
+              children: [
+                Positioned.fromRect(
+                  rect: ring,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: t.accentStrong.withValues(
+                          alpha: 0.55 + 0.45 * v,
+                        ),
+                        width: 3,
                       ),
-                    ],
+                      boxShadow: [
+                        BoxShadow(
+                          color: t.accent.withValues(alpha: 0.25 + 0.2 * v),
+                          blurRadius: 14,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

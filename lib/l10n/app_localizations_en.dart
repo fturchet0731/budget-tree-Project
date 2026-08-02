@@ -2362,4 +2362,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expenseSummaryTitle => 'Where you stand';
+
+  @override
+  String get dataErased => 'All data erased.';
+
+  @override
+  String get defaultBudgetName => 'My Budget';
+
+  @override
+  String get notifChannelBudgetName => 'Budget warnings';
+
+  @override
+  String get notifChannelBudgetDesc =>
+      'Alerts when a budget nears or exceeds your income';
+
+  @override
+  String get notifChannelStreakName => 'Streak reminders';
+
+  @override
+  String get notifChannelStreakDesc =>
+      'Daily nudge to keep your saving streak alive';
+
+  @override
+  String get notifChannelWeeklyName => 'Weekly summary';
+
+  @override
+  String get notifChannelWeeklyDesc =>
+      'A weekly recap of how your forest is growing';
+
+  @override
+  String get notifChannelWateringName => 'Goal watering';
+
+  @override
+  String get notifChannelWateringDesc =>
+      'Reminders to water your savings goals on schedule';
 }

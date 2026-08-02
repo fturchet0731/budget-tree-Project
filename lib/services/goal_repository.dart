@@ -15,6 +15,9 @@ class GoalRepository {
   );
 
   static Future<List<Goal>> loadAll() => store.loadAll();
+
+  /// Cache-only read (no background refresh) — see [SyncedStore.loadCached].
+  static Future<List<Goal>> loadCached() => store.loadCached();
   static Future<void> saveNew(Goal goal) => store.saveNew(goal);
   static Future<void> update(Goal goal) => store.update(goal);
   static Future<void> delete(String id) => store.delete(id);

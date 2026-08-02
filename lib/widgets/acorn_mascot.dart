@@ -110,25 +110,30 @@ class _AcornMascotState extends State<AcornMascot>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_idle, _talk]),
-      builder: (context, _) {
-        final swaying = widget.sway && AppSettings.instance.motionFull;
-        final phase = _idle.value * math.pi * 2;
-        final angle = swaying ? math.sin(phase) * 0.06 : 0.0;
-        final bob = swaying ? math.sin(phase) * widget.size * 0.025 : 0.0;
-        return Transform.translate(
-          offset: Offset(0, bob),
-          child: Transform.rotate(
-            angle: angle,
-            child: CustomPaint(
-              // A touch wider than tall for a chunkier, friendlier acorn.
-              size: Size(widget.size * 1.12, widget.size * 1.22),
-              painter: _AcornPainter(_currentExpression()),
+    // Acorn sways and blinks continuously and sits on top of otherwise static
+    // screens, so give him his own layer: his repaints stop here instead of
+    // dirtying whatever is behind him.
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_idle, _talk]),
+        builder: (context, _) {
+          final swaying = widget.sway && AppSettings.instance.motionFull;
+          final phase = _idle.value * math.pi * 2;
+          final angle = swaying ? math.sin(phase) * 0.06 : 0.0;
+          final bob = swaying ? math.sin(phase) * widget.size * 0.025 : 0.0;
+          return Transform.translate(
+            offset: Offset(0, bob),
+            child: Transform.rotate(
+              angle: angle,
+              child: CustomPaint(
+                // A touch wider than tall for a chunkier, friendlier acorn.
+                size: Size(widget.size * 1.12, widget.size * 1.22),
+                painter: _AcornPainter(_currentExpression()),
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

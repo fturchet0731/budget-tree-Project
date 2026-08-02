@@ -89,7 +89,10 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
   // Finishing touches (Plan step) – budget name + first pay date. The cycle
   // itself ([_payFrequency]) is picked on the Income step.
-  final _budgetNameCtrl = TextEditingController(text: 'My Budget');
+  // Seeded with the localized default in [didChangeDependencies], since the
+  // field initialiser runs before there's a context to read strings from.
+  final _budgetNameCtrl = TextEditingController();
+  bool _nameSeeded = false;
   PayFrequency _payFrequency = PayFrequency.monthly;
   DateTime? _firstPayDate;
 
@@ -118,6 +121,17 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     ('personal', 'Personal'),
     ('other', 'Other'),
   ];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Seed once so a language change mid-wizard never overwrites what the user
+    // has typed.
+    if (!_nameSeeded) {
+      _nameSeeded = true;
+      _budgetNameCtrl.text = AppLocalizations.of(context).defaultBudgetName;
+    }
+  }
 
   @override
   void dispose() {
@@ -271,7 +285,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   Future<void> _plantTree() async {
     final model = BudgetModel(
       budgetName: _budgetNameCtrl.text.trim().isEmpty
-          ? 'My Budget'
+          ? AppLocalizations.of(context).defaultBudgetName
           : _budgetNameCtrl.text.trim(),
       incomeSources: _incomeSources,
       expenses: _expenses,

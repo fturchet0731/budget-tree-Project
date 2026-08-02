@@ -63,10 +63,18 @@ class SyncedStore<T> {
   /// Returns the cached collection immediately. Kicks off a background refresh
   /// from Supabase so the *next* read reflects remote changes.
   Future<List<T>> loadAll() async {
-    final items = _parse(await _rawCache());
+    final items = await loadCached();
     if (_canSync) unawaited(pull());
     return items;
   }
+
+  /// Cache-only read, with **no** background refresh.
+  ///
+  /// For callers that are about to write based on what they read and must not
+  /// race their own writes against an opportunistic [pull] (which overwrites
+  /// the cache wholesale). The pay-cycle sweep uses this: it runs right after
+  /// the sync engine has pulled, so the cache is already authoritative.
+  Future<List<T>> loadCached() async => _parse(await _rawCache());
 
   Future<void> saveNew(T item) async {
     final raw = await _rawCache();
