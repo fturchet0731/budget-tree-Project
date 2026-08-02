@@ -3826,12 +3826,6 @@ abstract class AppLocalizations {
   /// **'I rent'**
   String get surveyHousingRent;
 
-  /// No description provided for @surveyHousingOwn.
-  ///
-  /// In en, this message translates to:
-  /// **'I own'**
-  String get surveyHousingOwn;
-
   /// No description provided for @surveyHousingFamily.
   ///
   /// In en, this message translates to:
@@ -3915,6 +3909,402 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A lot'**
   String get surveyDebtLots;
+
+  /// No description provided for @surveyKids.
+  ///
+  /// In en, this message translates to:
+  /// **'Any children or dependents at home?'**
+  String get surveyKids;
+
+  /// No description provided for @surveyKidsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get surveyKidsNone;
+
+  /// No description provided for @surveyKidsOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One'**
+  String get surveyKidsOne;
+
+  /// No description provided for @surveyKidsTwoThree.
+  ///
+  /// In en, this message translates to:
+  /// **'2 to 3'**
+  String get surveyKidsTwoThree;
+
+  /// No description provided for @surveyKidsFourPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'4 or more'**
+  String get surveyKidsFourPlus;
+
+  /// No description provided for @surveyChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'What does their care or schooling cost you?'**
+  String get surveyChildcare;
+
+  /// No description provided for @surveyChildcareDaycare.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid daycare'**
+  String get surveyChildcareDaycare;
+
+  /// No description provided for @surveyChildcareSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'School fees or activities'**
+  String get surveyChildcareSchool;
+
+  /// No description provided for @surveyChildcareFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family helps out'**
+  String get surveyChildcareFamily;
+
+  /// No description provided for @surveyChildcareNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing regular'**
+  String get surveyChildcareNone;
+
+  /// No description provided for @surveyHousingMortgage.
+  ///
+  /// In en, this message translates to:
+  /// **'I own with a mortgage'**
+  String get surveyHousingMortgage;
+
+  /// No description provided for @surveyHousingOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'I own outright'**
+  String get surveyHousingOwned;
+
+  /// No description provided for @surveyRentShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you split the rent with anyone?'**
+  String get surveyRentShare;
+
+  /// No description provided for @surveyRentShareAlone.
+  ///
+  /// In en, this message translates to:
+  /// **'I pay it all'**
+  String get surveyRentShareAlone;
+
+  /// No description provided for @surveyRentShareSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'We split it'**
+  String get surveyRentShareSplit;
+
+  /// No description provided for @surveyHomeUpkeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Are property tax and upkeep part of your payment?'**
+  String get surveyHomeUpkeep;
+
+  /// No description provided for @surveyHomeUpkeepIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in it'**
+  String get surveyHomeUpkeepIncluded;
+
+  /// No description provided for @surveyHomeUpkeepSeparate.
+  ///
+  /// In en, this message translates to:
+  /// **'I pay those separately'**
+  String get surveyHomeUpkeepSeparate;
+
+  /// No description provided for @surveyHomeUpkeepUnsure.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure'**
+  String get surveyHomeUpkeepUnsure;
+
+  /// No description provided for @surveyCarCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'What does the car cost you right now?'**
+  String get surveyCarCosts;
+
+  /// No description provided for @surveyCarCostsPaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Still paying it off'**
+  String get surveyCarCostsPaying;
+
+  /// No description provided for @surveyCarCostsOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned, just fuel and upkeep'**
+  String get surveyCarCostsOwned;
+
+  /// No description provided for @surveyCarCostsShared.
+  ///
+  /// In en, this message translates to:
+  /// **'I share or borrow one'**
+  String get surveyCarCostsShared;
+
+  /// No description provided for @surveyGroceries.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you shop for groceries?'**
+  String get surveyGroceries;
+
+  /// No description provided for @surveyGroceriesBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'I hunt for deals'**
+  String get surveyGroceriesBudget;
+
+  /// No description provided for @surveyGroceriesMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whatever is convenient'**
+  String get surveyGroceriesMiddle;
+
+  /// No description provided for @surveyGroceriesPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality over price'**
+  String get surveyGroceriesPremium;
+
+  /// No description provided for @surveySubscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'How many subscriptions are you paying for?'**
+  String get surveySubscriptions;
+
+  /// No description provided for @surveySubscriptionsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Barely any'**
+  String get surveySubscriptionsNone;
+
+  /// No description provided for @surveySubscriptionsFew.
+  ///
+  /// In en, this message translates to:
+  /// **'A few'**
+  String get surveySubscriptionsFew;
+
+  /// No description provided for @surveySubscriptionsMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Quite a lot'**
+  String get surveySubscriptionsMany;
+
+  /// No description provided for @surveyPets.
+  ///
+  /// In en, this message translates to:
+  /// **'Any pets?'**
+  String get surveyPets;
+
+  /// No description provided for @surveyPetsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get surveyPetsNone;
+
+  /// No description provided for @surveyPetsOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One'**
+  String get surveyPetsOne;
+
+  /// No description provided for @surveyPetsSeveral.
+  ///
+  /// In en, this message translates to:
+  /// **'Several'**
+  String get surveyPetsSeveral;
+
+  /// No description provided for @surveyPetCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'What do they usually cost you?'**
+  String get surveyPetCosts;
+
+  /// No description provided for @surveyPetCostsBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Just food and litter'**
+  String get surveyPetCostsBasic;
+
+  /// No description provided for @surveyPetCostsRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Food plus regular vet visits'**
+  String get surveyPetCostsRegular;
+
+  /// No description provided for @surveyPetCostsMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing medication or care'**
+  String get surveyPetCostsMedical;
+
+  /// No description provided for @surveyHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Any regular health costs?'**
+  String get surveyHealth;
+
+  /// No description provided for @surveyHealthMinimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Rarely anything'**
+  String get surveyHealthMinimal;
+
+  /// No description provided for @surveyHealthRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine visits'**
+  String get surveyHealthRegular;
+
+  /// No description provided for @surveyHealthOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing treatment or prescriptions'**
+  String get surveyHealthOngoing;
+
+  /// No description provided for @surveyStability.
+  ///
+  /// In en, this message translates to:
+  /// **'How steady is your income?'**
+  String get surveyStability;
+
+  /// No description provided for @surveyStabilitySteady.
+  ///
+  /// In en, this message translates to:
+  /// **'The same every time'**
+  String get surveyStabilitySteady;
+
+  /// No description provided for @surveyStabilityVaries.
+  ///
+  /// In en, this message translates to:
+  /// **'It moves a little'**
+  String get surveyStabilityVaries;
+
+  /// No description provided for @surveyStabilityUnpredictable.
+  ///
+  /// In en, this message translates to:
+  /// **'It is hard to predict'**
+  String get surveyStabilityUnpredictable;
+
+  /// No description provided for @surveyIncomeFloor.
+  ///
+  /// In en, this message translates to:
+  /// **'How far does it swing?'**
+  String get surveyIncomeFloor;
+
+  /// No description provided for @surveyIncomeFloorClose.
+  ///
+  /// In en, this message translates to:
+  /// **'A small dip at worst'**
+  String get surveyIncomeFloorClose;
+
+  /// No description provided for @surveyIncomeFloorSome.
+  ///
+  /// In en, this message translates to:
+  /// **'Some months are noticeably thinner'**
+  String get surveyIncomeFloorSome;
+
+  /// No description provided for @surveyIncomeFloorWide.
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet month can be half of a good one'**
+  String get surveyIncomeFloorWide;
+
+  /// No description provided for @surveyDebtType.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of debt is it?'**
+  String get surveyDebtType;
+
+  /// No description provided for @surveyDebtTypeCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit cards'**
+  String get surveyDebtTypeCards;
+
+  /// No description provided for @surveyDebtTypeStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student loans'**
+  String get surveyDebtTypeStudent;
+
+  /// No description provided for @surveyDebtTypeVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'A vehicle loan'**
+  String get surveyDebtTypeVehicle;
+
+  /// No description provided for @surveyDebtTypeMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'A mix of things'**
+  String get surveyDebtTypeMixed;
+
+  /// No description provided for @surveyEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'How much of a cushion do you have saved?'**
+  String get surveyEmergency;
+
+  /// No description provided for @surveyEmergencyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet'**
+  String get surveyEmergencyNone;
+
+  /// No description provided for @surveyEmergencyUnderOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Less than a month'**
+  String get surveyEmergencyUnderOne;
+
+  /// No description provided for @surveyEmergencyOneToThree.
+  ///
+  /// In en, this message translates to:
+  /// **'1 to 3 months'**
+  String get surveyEmergencyOneToThree;
+
+  /// No description provided for @surveyEmergencyThreePlus.
+  ///
+  /// In en, this message translates to:
+  /// **'More than 3 months'**
+  String get surveyEmergencyThreePlus;
+
+  /// No description provided for @surveyBudgetFor.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you most want this budget to do?'**
+  String get surveyBudgetFor;
+
+  /// No description provided for @surveyBudgetForCushion.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a safety cushion'**
+  String get surveyBudgetForCushion;
+
+  /// No description provided for @surveyBudgetForDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear my debt faster'**
+  String get surveyBudgetForDebt;
+
+  /// No description provided for @surveyBudgetForBigGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save for something specific'**
+  String get surveyBudgetForBigGoal;
+
+  /// No description provided for @surveyBudgetForControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Just see where it all goes'**
+  String get surveyBudgetForControl;
 
   /// No description provided for @tutStepSurveyA.
   ///

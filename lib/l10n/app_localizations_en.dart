@@ -2178,9 +2178,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get surveyHousingRent => 'I rent';
 
   @override
-  String get surveyHousingOwn => 'I own';
-
-  @override
   String get surveyHousingFamily => 'With family';
 
   @override
@@ -2221,6 +2218,206 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get surveyDebtLots => 'A lot';
+
+  @override
+  String get surveyKids => 'Any children or dependents at home?';
+
+  @override
+  String get surveyKidsNone => 'None';
+
+  @override
+  String get surveyKidsOne => 'One';
+
+  @override
+  String get surveyKidsTwoThree => '2 to 3';
+
+  @override
+  String get surveyKidsFourPlus => '4 or more';
+
+  @override
+  String get surveyChildcare => 'What does their care or schooling cost you?';
+
+  @override
+  String get surveyChildcareDaycare => 'Paid daycare';
+
+  @override
+  String get surveyChildcareSchool => 'School fees or activities';
+
+  @override
+  String get surveyChildcareFamily => 'Family helps out';
+
+  @override
+  String get surveyChildcareNone => 'Nothing regular';
+
+  @override
+  String get surveyHousingMortgage => 'I own with a mortgage';
+
+  @override
+  String get surveyHousingOwned => 'I own outright';
+
+  @override
+  String get surveyRentShare => 'Do you split the rent with anyone?';
+
+  @override
+  String get surveyRentShareAlone => 'I pay it all';
+
+  @override
+  String get surveyRentShareSplit => 'We split it';
+
+  @override
+  String get surveyHomeUpkeep =>
+      'Are property tax and upkeep part of your payment?';
+
+  @override
+  String get surveyHomeUpkeepIncluded => 'Included in it';
+
+  @override
+  String get surveyHomeUpkeepSeparate => 'I pay those separately';
+
+  @override
+  String get surveyHomeUpkeepUnsure => 'Not sure';
+
+  @override
+  String get surveyCarCosts => 'What does the car cost you right now?';
+
+  @override
+  String get surveyCarCostsPaying => 'Still paying it off';
+
+  @override
+  String get surveyCarCostsOwned => 'Owned, just fuel and upkeep';
+
+  @override
+  String get surveyCarCostsShared => 'I share or borrow one';
+
+  @override
+  String get surveyGroceries => 'How do you shop for groceries?';
+
+  @override
+  String get surveyGroceriesBudget => 'I hunt for deals';
+
+  @override
+  String get surveyGroceriesMiddle => 'Whatever is convenient';
+
+  @override
+  String get surveyGroceriesPremium => 'Quality over price';
+
+  @override
+  String get surveySubscriptions =>
+      'How many subscriptions are you paying for?';
+
+  @override
+  String get surveySubscriptionsNone => 'Barely any';
+
+  @override
+  String get surveySubscriptionsFew => 'A few';
+
+  @override
+  String get surveySubscriptionsMany => 'Quite a lot';
+
+  @override
+  String get surveyPets => 'Any pets?';
+
+  @override
+  String get surveyPetsNone => 'None';
+
+  @override
+  String get surveyPetsOne => 'One';
+
+  @override
+  String get surveyPetsSeveral => 'Several';
+
+  @override
+  String get surveyPetCosts => 'What do they usually cost you?';
+
+  @override
+  String get surveyPetCostsBasic => 'Just food and litter';
+
+  @override
+  String get surveyPetCostsRegular => 'Food plus regular vet visits';
+
+  @override
+  String get surveyPetCostsMedical => 'Ongoing medication or care';
+
+  @override
+  String get surveyHealth => 'Any regular health costs?';
+
+  @override
+  String get surveyHealthMinimal => 'Rarely anything';
+
+  @override
+  String get surveyHealthRegular => 'Routine visits';
+
+  @override
+  String get surveyHealthOngoing => 'Ongoing treatment or prescriptions';
+
+  @override
+  String get surveyStability => 'How steady is your income?';
+
+  @override
+  String get surveyStabilitySteady => 'The same every time';
+
+  @override
+  String get surveyStabilityVaries => 'It moves a little';
+
+  @override
+  String get surveyStabilityUnpredictable => 'It is hard to predict';
+
+  @override
+  String get surveyIncomeFloor => 'How far does it swing?';
+
+  @override
+  String get surveyIncomeFloorClose => 'A small dip at worst';
+
+  @override
+  String get surveyIncomeFloorSome => 'Some months are noticeably thinner';
+
+  @override
+  String get surveyIncomeFloorWide => 'A quiet month can be half of a good one';
+
+  @override
+  String get surveyDebtType => 'What kind of debt is it?';
+
+  @override
+  String get surveyDebtTypeCards => 'Credit cards';
+
+  @override
+  String get surveyDebtTypeStudent => 'Student loans';
+
+  @override
+  String get surveyDebtTypeVehicle => 'A vehicle loan';
+
+  @override
+  String get surveyDebtTypeMixed => 'A mix of things';
+
+  @override
+  String get surveyEmergency => 'How much of a cushion do you have saved?';
+
+  @override
+  String get surveyEmergencyNone => 'Nothing yet';
+
+  @override
+  String get surveyEmergencyUnderOne => 'Less than a month';
+
+  @override
+  String get surveyEmergencyOneToThree => '1 to 3 months';
+
+  @override
+  String get surveyEmergencyThreePlus => 'More than 3 months';
+
+  @override
+  String get surveyBudgetFor => 'What do you most want this budget to do?';
+
+  @override
+  String get surveyBudgetForCushion => 'Build a safety cushion';
+
+  @override
+  String get surveyBudgetForDebt => 'Clear my debt faster';
+
+  @override
+  String get surveyBudgetForBigGoal => 'Save for something specific';
+
+  @override
+  String get surveyBudgetForControl => 'Just see where it all goes';
 
   @override
   String get tutStepSurveyA => 'Now a few quick questions about your life.';

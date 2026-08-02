@@ -197,9 +197,11 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   }
 
   /// The questionnaire answers converted to readable "question: answer" pairs
-  /// for the coach. Only answered questions are included.
+  /// for the coach. Only answered questions that still apply are included, so
+  /// a follow-up whose trigger was later changed (children, then back to none)
+  /// doesn't leave a stale answer in the prompt.
   Map<String, String> _surveyForAi(AppLocalizations l) => {
-    for (final q in budgetSurveyQuestions())
+    for (final q in visibleSurveyQuestions(_surveyAnswers))
       if (_surveyAnswers[q.key] != null)
         q.prompt(l): q.options
             .firstWhere((o) => o.key == _surveyAnswers[q.key])
@@ -1753,34 +1755,39 @@ class _SurveyStep extends StatefulWidget {
 }
 
 class _SurveyStepState extends State<_SurveyStep> {
-  final List<SurveyQuestion> _questions = budgetSurveyQuestions();
+  /// Only the questions that apply to this user. Recomputed on every read
+  /// because answering one can reveal or retire a follow-up (saying you have
+  /// children adds the childcare question; changing back to none drops it).
+  List<SurveyQuestion> get _questions => visibleSurveyQuestions(widget.answers);
 
   /// Index of the question on screen; `_questions.length` is the summary view.
-  late int _index = _nextPending(0);
+  late int _index = _nextPending();
 
   bool _seen(SurveyQuestion q) =>
       widget.answers.containsKey(q.key) || widget.skipped.contains(q.key);
 
-  /// First question at or after [from] the user hasn't dealt with yet, or the
-  /// summary index when there is none.
-  int _nextPending(int from) {
-    for (var i = from; i < _questions.length; i++) {
-      if (!_seen(_questions[i])) return i;
+  /// First question the user hasn't dealt with yet, or the summary index when
+  /// there is none. Always scans from the start, since a freshly revealed
+  /// follow-up can sit earlier in the list than where they'd got to.
+  int _nextPending() {
+    final qs = _questions;
+    for (var i = 0; i < qs.length; i++) {
+      if (!_seen(qs[i])) return i;
     }
-    return _questions.length;
+    return qs.length;
   }
 
   void _answer(SurveyQuestion q, String optKey) {
     widget.onAnswer(q.key, optKey);
     // Let the chip's selected state land before sliding to the next question.
     Future.delayed(const Duration(milliseconds: 220), () {
-      if (mounted) setState(() => _index = _nextPending(0));
+      if (mounted) setState(() => _index = _nextPending());
     });
   }
 
   void _skip(SurveyQuestion q) {
     widget.onSkip(q.key);
-    setState(() => _index = _nextPending(0));
+    setState(() => _index = _nextPending());
   }
 
   @override
