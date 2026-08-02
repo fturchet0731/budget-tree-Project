@@ -1857,6 +1857,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vinePlan => 'Plan';
 
   @override
+  String get stepFinishTitle => 'Toques finales';
+
+  @override
+  String get stepFinishSub => 'Nombra tu árbol y fija su calendario de pago';
+
+  @override
+  String get vineFinish => 'Terminar';
+
+  @override
   String get yourExpenses => 'Tus gastos';
 
   @override

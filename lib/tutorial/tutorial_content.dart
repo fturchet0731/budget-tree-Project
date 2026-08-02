@@ -242,11 +242,19 @@ List<TutorialStep> createStepSteps(int step, AppLocalizations l) {
         TutorialStep(l.tutStepSurveyC),
       ];
     case 3:
-    default:
       return [
         TutorialStep(l.tutStepPlanA, expression: AcornExpression.happy),
         TutorialStep(l.tutStepPlanB, highlightId: CoachTargets.plans),
-        TutorialStep(l.tutStepPlanC, highlightId: CoachTargets.plans),
+        TutorialStep(
+          l.tutStepPlanC,
+          highlightId: CoachTargets.plans,
+        ),
+      ];
+    // The finishing touches are their own step now, so their lines moved here
+    // with them; the "plant it" line lands on this step's Next button.
+    case 4:
+    default:
+      return [
         TutorialStep(l.tutStep2b, highlightId: CoachTargets.finishing),
         TutorialStep(
           l.tutStep2c,

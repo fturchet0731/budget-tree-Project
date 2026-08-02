@@ -3238,6 +3238,24 @@ abstract class AppLocalizations {
   /// **'Plan'**
   String get vinePlan;
 
+  /// No description provided for @stepFinishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing Touches'**
+  String get stepFinishTitle;
+
+  /// No description provided for @stepFinishSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your tree and set its pay schedule'**
+  String get stepFinishSub;
+
+  /// No description provided for @vineFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get vineFinish;
+
   /// No description provided for @yourExpenses.
   ///
   /// In en, this message translates to:

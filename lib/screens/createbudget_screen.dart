@@ -368,12 +368,14 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       l.stepExpensesTitle,
       l.stepSurveyTitle,
       l.stepPlanTitle,
+      l.stepFinishTitle,
     ];
     final subtitles = [
       l.stepIncomeSub,
       l.stepExpensesSub,
       l.stepSurveySub,
       l.stepPlanSub,
+      l.stepFinishSub,
     ];
     final stepTitle = titles[_step];
     final stepSubtitle = subtitles[_step];
@@ -399,6 +401,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                     l.vineBranches,
                     l.vineSurvey,
                     l.vinePlan,
+                    l.vineFinish,
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -511,11 +514,10 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             onSkip: (qKey) =>
                                 setState(() => _surveySkipped.add(qKey)),
                           )
-                        : _PlanStep(
+                        : _step == 3
+                        ? _PlanStep(
                             key: const ValueKey(3),
                             plansKey: _coachTargets[CoachTargets.plans]!,
-                            finishingKey:
-                                _coachTargets[CoachTargets.finishing]!,
                             income: _totalIncome,
                             expenses: _expenses,
                             settled: _planSettled,
@@ -523,7 +525,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                             survey: _surveyForAi(l),
                             onApplyPlan: _applyPlan,
                             onSettleManual: _settleManual,
-                            onAddGoalBranch: _addGoalBranch,
+                            payFrequency: _payFrequency,
+                          )
+                        : _FinishStep(
+                            key: const ValueKey(4),
+                            finishingKey:
+                                _coachTargets[CoachTargets.finishing]!,
                             nameCtrl: _budgetNameCtrl,
                             payFrequency: _payFrequency,
                             firstPayDate: _firstPayDate,
@@ -531,6 +538,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                                 setState(() => _payFrequency = f),
                             onFirstPayDateChanged: (d) =>
                                 setState(() => _firstPayDate = d),
+                            leftover: _totalIncome - _totalAllocated,
+                            onAddGoalBranch: _addGoalBranch,
                           ),
                       ),
                     ),
@@ -543,11 +552,13 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                       ? _expensesConfirmed
                       : _step == 2
                       ? true // questionnaire is optional
-                      : _planSettled;
+                      : _step == 3
+                      ? _planSettled
+                      : true; // finishing touches all have defaults
                   final seenAll = _seenEnd[_step] == true;
                   return _BottomBar(
                   step: _step,
-                  lastStep: 3,
+                  lastStep: 4,
                   buttonKey: _coachTargets[CoachTargets.next],
                   canAdvance: stepReady && seenAll,
                   // Everything on the step is settled but something below the
@@ -559,11 +570,12 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                   onNext: () {
                     // Never move past a step whose branches outgrow the
                     // income; Acorn explains what to fix instead.
-                    if ((_step == 1 || _step == 3) && _overBudget) {
+                    if ((_step == 1 || _step == 3 || _step == 4) &&
+                        _overBudget) {
                       _warnOverBudget();
                       return;
                     }
-                    if (_step < 3) {
+                    if (_step < 4) {
                       setState(() => _step++);
                     } else {
                       _plantTree();
@@ -2118,7 +2130,6 @@ class _PlanStep extends StatefulWidget {
   /// Ring anchors for the tutorial coach: the plan-picking area and the
   /// finishing-touch cards (name + pay schedule).
   final GlobalKey plansKey;
-  final GlobalKey finishingKey;
   final double income;
   final List<ExpenseCategory> expenses;
   final bool settled;
@@ -2126,18 +2137,13 @@ class _PlanStep extends StatefulWidget {
   final Map<String, String> survey;
   final void Function(AllocationPlan) onApplyPlan;
   final VoidCallback onSettleManual;
-  final void Function(String name, double amount, String goalId)
-  onAddGoalBranch;
-  final TextEditingController nameCtrl;
+
+  /// The budget's cycle, so per-cycle amounts read correctly here.
   final Rhythm payFrequency;
-  final DateTime? firstPayDate;
-  final ValueChanged<Rhythm> onFrequencyChanged;
-  final ValueChanged<DateTime?> onFirstPayDateChanged;
 
   const _PlanStep({
     super.key,
     required this.plansKey,
-    required this.finishingKey,
     required this.income,
     required this.expenses,
     required this.settled,
@@ -2145,12 +2151,7 @@ class _PlanStep extends StatefulWidget {
     required this.survey,
     required this.onApplyPlan,
     required this.onSettleManual,
-    required this.onAddGoalBranch,
-    required this.nameCtrl,
     required this.payFrequency,
-    required this.firstPayDate,
-    required this.onFrequencyChanged,
-    required this.onFirstPayDateChanged,
   });
 
   @override
@@ -2485,32 +2486,88 @@ class _PlanStepState extends State<_PlanStep> {
                 ],
               ),
             ),
-            if (_leftover > 0.5) ...[
-              const SizedBox(height: 14),
-              _Reveal(child: _buildLeftoverCard(context, l)),
-            ],
-            // Finishing touches, revealed only once the plan is settled so the
-            // step stays one decision at a time: name the tree, set the pay
-            // schedule, then the bottom bar plants it.
-            const SizedBox(height: 14),
-            KeyedSubtree(
-              key: widget.finishingKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _Reveal(child: _buildNameCard(l)),
-                  const SizedBox(height: 14),
-                  _Reveal(child: _buildPayCard(context, l)),
-                ],
-              ),
-            ),
+            // Naming the tree and setting the pay schedule used to sit below
+            // this, where it was easy to miss. They're their own step now, so
+            // settling the plan advances the wizard the same way finishing the
+            // income list does.
           ],
         ],
       ),
           ),
         ),
       ],
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Step 5 – Finish (tree name, pay schedule, leftover)
+// ──────────────────────────────────────────────
+//
+// Everything that used to be revealed underneath a settled plan. Split into
+// its own screen so it reads as the next thing to do rather than something to
+// scroll down and discover.
+
+class _FinishStep extends StatefulWidget {
+  /// Ring anchor for the tutorial coach (the finishing cards).
+  final GlobalKey finishingKey;
+  final TextEditingController nameCtrl;
+  final Rhythm payFrequency;
+  final DateTime? firstPayDate;
+  final ValueChanged<Rhythm> onFrequencyChanged;
+  final ValueChanged<DateTime?> onFirstPayDateChanged;
+
+  /// Money still unallocated after the plan settled, and the hook to route it
+  /// into a goal.
+  final double leftover;
+  final void Function(String name, double amount, String goalId)
+      onAddGoalBranch;
+
+  const _FinishStep({
+    super.key,
+    required this.finishingKey,
+    required this.nameCtrl,
+    required this.payFrequency,
+    required this.firstPayDate,
+    required this.onFrequencyChanged,
+    required this.onFirstPayDateChanged,
+    required this.leftover,
+    required this.onAddGoalBranch,
+  });
+
+  @override
+  State<_FinishStep> createState() => _FinishStepState();
+}
+
+class _FinishStepState extends State<_FinishStep> {
+  double get _leftover => widget.leftover;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AppScrollbar(
+      builder: (controller) => ListView(
+        controller: controller,
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        children: [
+          KeyedSubtree(
+            key: widget.finishingKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Reveal(child: _buildNameCard(l)),
+                const SizedBox(height: 14),
+                _Reveal(child: _buildPayCard(context, l)),
+              ],
+            ),
+          ),
+          if (_leftover > 0.5) ...[
+            const SizedBox(height: 14),
+            _Reveal(child: _buildLeftoverCard(context, l)),
+          ],
+        ],
+      ),
     );
   }
 
@@ -2636,11 +2693,6 @@ class _PlanStepState extends State<_PlanStep> {
     final m = monthAbbrevs(l);
     return '${m[d.month - 1]} ${d.day}, ${d.year}';
   }
-
-  double get _leftover =>
-      widget.income -
-      widget.expenses
-          .fold(0.0, (s, e) => s + e.allocatedPerCycle(widget.payFrequency));
 
   Widget _buildLeftoverCard(BuildContext context, AppLocalizations l) {
     return AppCard(
