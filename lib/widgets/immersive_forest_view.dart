@@ -95,17 +95,35 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return LayoutBuilder(builder: (context, constraints) {
+      // One horizon for the whole scene, so the background band, the distant
+      // trees and the budget tree in front all stand on the same ground rather
+      // than on tiers at different elevations.
+      //
+      // The budget tree defines it and the background follows, not the other
+      // way round: the tree's box is whatever is left once the plaque and
+      // footer have their room, and the painter draws its ground at a fixed
+      // fraction of that box. Deriving the horizon from the same numbers means
+      // the two can't drift apart the way two independent fractions did.
+      final h = constraints.maxHeight;
+      final treeBoxHeight =
+          (h - _kStageTop - _kStageBottom - _kPlaqueRoom).clamp(120.0, h);
+      final groundY = _kStageTop + treeBoxHeight * _kTreeGroundFraction;
+
+      return Stack(
       children: [
         // Continuous sky/forest background
         Positioned.fill(
           child: CustomPaint(
-            painter: _ImmersiveBgPainter(parallax: _page),
+            painter: _ImmersiveBgPainter(parallax: _page, groundY: groundY),
           ),
         ),
         // Trees carousel — sized to leave room for footer dots + caption.
         Padding(
-          padding: const EdgeInsets.only(top: 40, bottom: 110),
+          padding: const EdgeInsets.only(
+            top: _kStageTop,
+            bottom: _kStageBottom,
+          ),
           child: PageView.builder(
             controller: _controller,
             itemCount: widget.budgets.length,
@@ -123,6 +141,7 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
                     budget: budget,
                     category: _categoryFor(budget),
                     leafPalette: _paletteFor(budget),
+                    treeBoxHeight: treeBoxHeight,
                     onTapTree: () => _showInfoSheet(budget),
                   ),
                 ),
@@ -184,11 +203,25 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
         ),
       ],
     );
+    });
   }
 }
 
+/// Padding around the tree carousel (the footer dots and caption live in the
+/// bottom band).
+const double _kStageTop = 40;
+const double _kStageBottom = 110;
+
+/// Vertical room kept below the tree for its name plaque.
+const double _kPlaqueRoom = 132;
+
+/// Where [StaticBudgetTreeView] draws its own ground inside whatever box it is
+/// given. Sizing the box by this is what lands the tree on the shared horizon.
+const double _kTreeGroundFraction = 0.78;
+
 // ──────────────────────────────────────────────
-// One tree page — tree (Expanded) + centred name plaque (auto height)
+// One tree page — tree (fixed height so it stands on the shared horizon)
+// plus a centred name plaque below it
 // ──────────────────────────────────────────────
 
 class _TreeStage extends StatelessWidget {
@@ -197,10 +230,15 @@ class _TreeStage extends StatelessWidget {
   final LeafPalette leafPalette;
   final VoidCallback onTapTree;
 
+  /// Chosen by the parent so the tree's own ground line lands exactly on the
+  /// scene's horizon.
+  final double treeBoxHeight;
+
   const _TreeStage({
     required this.budget,
     required this.category,
     required this.leafPalette,
+    required this.treeBoxHeight,
     required this.onTapTree,
   });
 
@@ -213,10 +251,13 @@ class _TreeStage extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Tree fills available vertical space (the tree painter scales to fit).
-            Expanded(
+            // Fixed height rather than Expanded: the painter's ground sits at a
+            // fraction of its box, so only a known box height puts it on the
+            // scene's horizon.
+            SizedBox(
+              height: treeBoxHeight,
               child: StaticBudgetTreeView(
                 budget: budget,
                 scale: 0.7,
@@ -610,8 +651,13 @@ class _BudgetInfoSheet extends StatelessWidget {
 
 class _ImmersiveBgPainter extends CustomPainter {
   final double parallax;
+
+  /// The scene's horizon, shared with the budget tree in front so the ground
+  /// reads as one continuous field.
+  final double groundY;
   final AppPalette palette;
-  _ImmersiveBgPainter({required this.parallax})
+
+  _ImmersiveBgPainter({required this.parallax, required this.groundY})
       : palette = AppSettings.instance.palette;
 
   @override
@@ -670,14 +716,14 @@ class _ImmersiveBgPainter extends CustomPainter {
       _cloud(canvas, Offset(cx, cy), 0.7 + rng.nextDouble() * 0.4, cloudPaint);
     }
 
+    // Distant trees stand ON the horizon, not on a lower tier of their own,
+    // so they share the ground the budget tree is planted in.
     final offset = parallax * 18;
     for (int i = 0; i < 14; i++) {
       final tx = ((i / 13) * w * 1.2 - offset) % (w + 40);
-      final ty = h * 0.62;
-      _silhouette(canvas, tx, ty);
+      _silhouette(canvas, tx, groundY);
     }
 
-    final groundY = h * 0.78;
     canvas.drawPath(
       Path()
         ..moveTo(0, groundY)
@@ -747,11 +793,14 @@ class _ImmersiveBgPainter extends CustomPainter {
         Rect.fromLTWH(c.dx - r * 1.35, c.dy, r * 2.7, r * 0.5), p);
   }
 
-  void _silhouette(Canvas canvas, double tx, double ty) {
-    // Full tree standing on the horizon line, palette-tinted like before.
+  void _silhouette(Canvas canvas, double tx, double groundY) {
+    // Planted a few pixels into the horizon rather than floating above it: the
+    // ground band is painted afterwards and its top edge undulates by about
+    // 10px, so a small bite keeps every trunk met by ground instead of leaving
+    // gaps under the ones sitting on a rise.
     Scenery.paintTreeSilhouette(
       canvas,
-      Offset(tx, ty + 32),
+      Offset(tx, groundY + 4),
       52,
       _sceneGroundClose().withValues(alpha: 0.7),
       seed: (tx * 3).round(),
@@ -760,7 +809,9 @@ class _ImmersiveBgPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ImmersiveBgPainter old) =>
-      old.parallax != parallax || old.palette != palette;
+      old.parallax != parallax ||
+      old.palette != palette ||
+      old.groundY != groundY;
 }
 
 /// Flat scenery colors for the outdoor illustration scenes, theme-aware.
