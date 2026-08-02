@@ -326,11 +326,25 @@ Deno.serve(async (req) => {
   }
 
   // Per-user hourly quota. The DB function records this call and tells us
-  // whether the caller is still under the limit; it is keyed to auth.uid() so
-  // it can't be spoofed by the request body.
-  const { data: underQuota, error: quotaError } = await supabase.rpc(
+  // whether the caller is still under the limit.
+  //
+  // Called with the **service role** and an explicit user id rather than by the
+  // signed-in user against auth.uid(): that lets the function be revoked from
+  // `authenticated`, so it isn't reachable at /rest/v1/rpc/check_ai_quota where
+  // a user could spend their own quota directly. The id can't be spoofed
+  // because it comes from getUser() above, which validated the access token
+  // against the auth server — never from the request body.
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!serviceKey) {
+    console.error("SUPABASE_SERVICE_ROLE_KEY not available");
+    return json({ error: "server_misconfigured" }, 500);
+  }
+  const admin = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: underQuota, error: quotaError } = await admin.rpc(
     "check_ai_quota",
-    { max_calls: HOURLY_CALL_LIMIT },
+    { uid: user.id, max_calls: HOURLY_CALL_LIMIT },
   );
   if (quotaError) {
     console.error("check_ai_quota failed", quotaError);
