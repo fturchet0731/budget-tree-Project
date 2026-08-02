@@ -108,7 +108,13 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
       final h = constraints.maxHeight;
       final treeBoxHeight =
           (h - _kStageTop - _kStageBottom - _kPlaqueRoom).clamp(120.0, h);
-      final groundY = _kStageTop + treeBoxHeight * _kTreeGroundFraction;
+      final treeGroundY = _kStageTop + treeBoxHeight * _kTreeGroundFraction;
+
+      // The horizon sits *above* where the budget tree is planted, so the tree
+      // stands partway into the grass rather than on the skyline. That gap is
+      // the whole depth cue: the distant trees line the horizon and read as far
+      // off, while the near tree is clearly this side of them.
+      final groundY = treeGroundY - treeBoxHeight * _kHorizonLift;
 
       return Stack(
       children: [
@@ -216,8 +222,14 @@ const double _kStageBottom = 110;
 const double _kPlaqueRoom = 132;
 
 /// Where [StaticBudgetTreeView] draws its own ground inside whatever box it is
-/// given. Sizing the box by this is what lands the tree on the shared horizon.
+/// given. The scene's horizon is derived from this.
 const double _kTreeGroundFraction = 0.78;
+
+/// How far above the budget tree's base the horizon sits, as a fraction of the
+/// tree's box. This is what makes the background trees read as distant: they
+/// line the skyline while the near tree stands well in front of it, its trunk
+/// meeting grass rather than sky.
+const double _kHorizonLift = 0.16;
 
 // ──────────────────────────────────────────────
 // One tree page — tree (fixed height so it stands on the shared horizon)
@@ -411,9 +423,12 @@ class _BudgetInfoSheet extends StatelessWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.78,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0E2110),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      // Theme-aware: this used to be a hardcoded near-black green, so in light
+      // mode the sheet stayed dark while the text inside it followed the light
+      // palette and turned dark too.
+      decoration: BoxDecoration(
+        color: AppTokens.current.card,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
       ),
       padding: const EdgeInsets.fromLTRB(22, 16, 22, 28),
       child: SingleChildScrollView(

@@ -183,14 +183,35 @@ class _StaticTreePainter extends CustomPainter {
       Canvas canvas, double cx, double groundY, double trunkTopY) {
     final cats = budget.expenses;
     final count = cats.length;
+
+    // Branches alternate sides, so each side gets roughly half of them.
+    final leftCount = (count / 2).ceil();
+    final rightCount = count ~/ 2;
+
     for (int i = 0; i < count; i++) {
       final cat = cats[i];
       final pct = budget.percentageFor(cat);
-      final tPos = 0.28 + (i / (count > 1 ? count - 1 : 1)) * 0.57;
+      // Spread the attachment points over more of the trunk than before, so
+      // neighbouring branches start further apart to begin with.
+      final tPos = 0.20 + (i / (count > 1 ? count - 1 : 1)) * 0.68;
       final attachY = trunkTopY + (groundY - trunkTopY) * tPos;
       final goLeft = i.isEven;
-      final angle = goLeft ? math.pi * 0.65 : math.pi * 0.35;
-      final maxLen = (62 + pct * 130) * scale;
+
+      // Fan the branches instead of sending every one out at the same angle,
+      // which used to stack the leaves into two vertical columns with their
+      // labels overlapping. High branches lift toward the crown, low ones
+      // reach out flatter, the way a real canopy opens up.
+      final sideIndex = i ~/ 2;
+      final sideCount = goLeft ? leftCount : rightCount;
+      final t = sideCount > 1 ? sideIndex / (sideCount - 1) : 0.35;
+      final elevation = (0.44 - t * 0.26) * math.pi;
+      final angle = goLeft ? math.pi - elevation : elevation;
+
+      // Lower branches also reach further, widening the canopy toward the
+      // bottom and pulling adjacent leaves apart. Two branches with the same
+      // share no longer land on top of each other.
+      final reach = 1.0 + t * 0.34;
+      final maxLen = (74 + pct * 110) * scale * reach;
       final endX = cx + math.cos(angle) * maxLen;
       final endY = attachY - math.sin(angle) * maxLen;
 
