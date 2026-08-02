@@ -72,6 +72,98 @@ class GoalPlanMath {
     return DateTime(n.year, n.month + months, n.day);
   }
 
+  // ── Day-accurate planning ─────────────────────────────────────────────
+  //
+  // The calendar-month helpers above are fine for rough monthly figures, but a
+  // user who picks a date expects to land ON it. These work in whole waterings
+  // between today and the target, so "every 2 weeks until March 14th" is an
+  // exact count rather than a month approximation. **All amounts and dates the
+  // user is shown come from here, never from the model**, which is what stopped
+  // a chosen date from being honoured.
+
+  /// How many waterings at [cadence] fit between [now] and [targetDate].
+  ///
+  /// At least 1 whenever the date is in the future, so there's always a
+  /// finite amount to divide by. Returns 0 for a date that has already passed.
+  static int wateringsUntil(
+    DateTime targetDate,
+    WaterCadence cadence, {
+    DateTime? now,
+  }) {
+    final from = now ?? DateTime.now();
+    final days = targetDate.difference(from).inDays;
+    if (days <= 0) return 0;
+    return math.max(1, days ~/ cadence.days);
+  }
+
+  /// The per-watering amount that lands [goal] exactly on [targetDate] at
+  /// [cadence]. 0 when the goal is uncapped, already met, or the date has gone.
+  static double perWateringForDate(
+    Goal goal,
+    DateTime targetDate,
+    WaterCadence cadence, {
+    DateTime? now,
+  }) {
+    if (goal.isUncapped) return 0;
+    final remaining = goal.targetAmount - goal.currentAmount;
+    if (remaining <= 0) return 0;
+    final n = wateringsUntil(targetDate, cadence, now: now);
+    if (n <= 0) return 0;
+    return remaining / n;
+  }
+
+  /// The date [goal] is reached by putting in [perWatering] every [cadence].
+  /// Null when the goal is uncapped or the amount is non-positive.
+  static DateTime? dateForPerWatering(
+    Goal goal,
+    double perWatering,
+    WaterCadence cadence, {
+    DateTime? now,
+  }) {
+    if (goal.isUncapped || perWatering <= 0) return null;
+    final from = now ?? DateTime.now();
+    final remaining = goal.targetAmount - goal.currentAmount;
+    if (remaining <= 0) return from;
+    final waterings = (remaining / perWatering).ceil();
+    return from.add(Duration(days: waterings * cadence.days));
+  }
+
+  /// Sensible per-watering amounts to offer when the user has no date in mind:
+  /// a comfortable, a middling and a brisk pace, derived from whatever headroom
+  /// they have ([freeMonthly]) and floored so the goal still finishes in a
+  /// sane time. Rounded to friendly numbers. Never returns duplicates.
+  static List<double> suggestedPerWatering(
+    Goal goal,
+    WaterCadence cadence,
+    double freeMonthly,
+  ) {
+    if (goal.isUncapped) return const [];
+    final remaining = goal.targetAmount - goal.currentAmount;
+    if (remaining <= 0) return const [];
+
+    // Anchor on the user's spare income when we know it; otherwise pace the
+    // goal over a year.
+    final anchorMonthly = freeMonthly > 0 ? freeMonthly : remaining / 12;
+    final perW = anchorMonthly / cadence.perMonth;
+
+    final out = <double>[];
+    for (final factor in [0.25, 0.5, 0.8]) {
+      final raw = perW * factor;
+      if (raw <= 0) continue;
+      final rounded = _friendly(raw);
+      if (rounded > 0 && !out.contains(rounded)) out.add(rounded);
+    }
+    return out;
+  }
+
+  /// Round to a number a person would actually pick: nearest 5 under 100,
+  /// nearest 10 under 500, nearest 25 above that.
+  static double _friendly(double v) {
+    if (v < 100) return math.max(5, (v / 5).round() * 5).toDouble();
+    if (v < 500) return ((v / 10).round() * 10).toDouble();
+    return ((v / 25).round() * 25).toDouble();
+  }
+
   /// Estimate of income not already committed to expenses across all saved
   /// budgets: sum of each budget's `remaining` (income minus allocations),
   /// floored at 0. This is the headroom available to fund a new goal.

@@ -97,22 +97,33 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     }
   }
 
-  /// What to water at [cadence] to actually land the goal on its target date.
-  ///
-  /// Prefers the coach's own number (its plans all imply the same monthly
-  /// commitment for a fixed date, so any of them can be re-expressed in another
-  /// rhythm), and falls back to the local maths when there's no AI result.
-  /// Returns 0 when there's nothing left to save or no date to aim at.
+  /// What to water at [cadence] to land the goal on its target date, computed
+  /// exactly rather than taken from the coach. 0 when there's no date to aim at
+  /// or nothing left to save.
   double _suggestedPerWatering(WaterCadence cadence) {
-    final plans = _planResult?.plans;
-    if (plans != null && plans.isNotEmpty) {
-      return plans.first.monthly / cadence.perMonth;
-    }
     final date = _targetDate;
     final target = double.tryParse(_targetCtrl.text) ?? 0;
     if (date == null || target <= 0) return 0;
-    final transient = Goal(name: _nameCtrl.text.trim(), targetAmount: target);
-    return GoalPlanMath.perWateringToReach(transient, date, cadence);
+    return GoalPlanMath.perWateringForDate(
+      _transientGoal(target),
+      date,
+      cadence,
+    );
+  }
+
+  /// With no deadline set, the date the amount currently typed into the custom
+  /// field would reach the goal on. Null when there's a deadline (the date is
+  /// then a given, not a result) or nothing usable has been typed.
+  DateTime? _customProjectedDate() {
+    if (_targetDate != null) return null;
+    final target = double.tryParse(_targetCtrl.text) ?? 0;
+    final typed = double.tryParse(_customAmountCtrl.text) ?? 0;
+    if (target <= 0 || typed <= 0) return null;
+    return GoalPlanMath.dateForPerWatering(
+      _transientGoal(target),
+      typed,
+      _customCadence,
+    );
   }
 
   /// The watering schedule the user settled on, if any: a selected AI plan, a
@@ -244,36 +255,112 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     });
   }
 
-  /// Build a transient goal and ask the AI for contribution plans + alternative
-  /// dates. Falls back to simple math (still useful offline).
-  Future<void> _generatePlan() async {
-    final date = _targetDate;
-    final target = double.tryParse(_targetCtrl.text) ?? 0;
-    if (date == null || target <= 0) return;
-    final transient = Goal(name: _nameCtrl.text.trim(), targetAmount: target);
+  Goal _transientGoal(double target) =>
+      Goal(name: _nameCtrl.text.trim(), targetAmount: target);
 
-    // Honour the user's choice: manual (or no AI available) just does the
-    // simple offline math; only AI mode hits the coach.
-    if (_useAi != true || !AiCoachService.instance.isAvailable) {
-      setState(
-        () => _fallbackMonthly = GoalPlanMath.monthlyToReach(transient, date),
-      );
-      return;
+  /// The plan options for this goal, **computed locally and exactly**.
+  ///
+  /// With a date: one option per cadence, each the precise amount that lands on
+  /// that date. Without one: a spread of paces (or just the user's own figure
+  /// if they named one), each carrying the date it would finish on. The coach
+  /// never supplies these numbers, only the wording, which is what guarantees a
+  /// date the user picked is actually met.
+  List<GoalPlanOption> _computeOptions(Goal goal, double freeMonthly) {
+    final date = _targetDate;
+    if (date != null) {
+      return [
+        for (final c in WaterCadence.values)
+          if (GoalPlanMath.perWateringForDate(goal, date, c) > 0)
+            GoalPlanOption(
+              cadence: c,
+              perWatering: GoalPlanMath.perWateringForDate(goal, date, c),
+              monthsToTarget: GoalPlanMath.monthsBetween(DateTime.now(), date),
+              rationale: '',
+              completionDate: date,
+            ),
+      ];
     }
+
+    // No deadline. If the user said what they're willing to put in, plan around
+    // exactly that; otherwise offer a spread of paces at their chosen cadence.
+    final typed = double.tryParse(_customAmountCtrl.text) ?? 0;
+    final amounts = typed > 0
+        ? [typed]
+        : GoalPlanMath.suggestedPerWatering(goal, _customCadence, freeMonthly);
+    return [
+      for (final a in amounts)
+        if (GoalPlanMath.dateForPerWatering(goal, a, _customCadence) != null)
+          GoalPlanOption(
+            cadence: _customCadence,
+            perWatering: a,
+            monthsToTarget: GoalPlanMath.monthsForPerWatering(
+              goal,
+              a,
+              _customCadence,
+            ),
+            rationale: '',
+            completionDate:
+                GoalPlanMath.dateForPerWatering(goal, a, _customCadence),
+          ),
+    ];
+  }
+
+  /// Work out the plans, then ask the coach to describe them. The numbers never
+  /// change based on what comes back: an AI failure just leaves them unexplained
+  /// rather than unusable, which is why this still works offline.
+  Future<void> _generatePlan() async {
+    final target = double.tryParse(_targetCtrl.text) ?? 0;
+    if (target <= 0) return;
+    final transient = _transientGoal(target);
+
     setState(() {
       _planLoading = true;
       _planError = null;
     });
+
+    final free = await GoalPlanMath.freeMonthlyIncome();
+    final computed = _computeOptions(transient, free);
+    if (!mounted) return;
+
+    if (computed.isEmpty) {
+      setState(() {
+        _planLoading = false;
+        _planResult = null;
+      });
+      return;
+    }
+
+    // Manual mode (or no coach available) shows the computed plans as they are.
+    if (_useAi != true || !AiCoachService.instance.isAvailable) {
+      setState(() {
+        _planLoading = false;
+        _planResult =
+            GoalPlanResult(plans: computed, alternativeDates: const []);
+      });
+      return;
+    }
+
     try {
-      final free = await GoalPlanMath.freeMonthlyIncome();
-      final result = await AiCoachService.instance.goalPlans(
-        goal: transient,
-        targetDate: date,
-        freeMonthly: free,
-      );
+      final date = _targetDate;
+      final result = date != null
+          ? await AiCoachService.instance.goalPlansByDate(
+              goal: transient,
+              targetDate: date,
+              freeMonthly: free,
+              computed: computed,
+            )
+          : await AiCoachService.instance.goalPlansByAmount(
+              goal: transient,
+              freeMonthly: free,
+              candidates: computed,
+            );
       if (!mounted) return;
       setState(() {
-        _planResult = result;
+        // Keep our figures; take only the coach's words for them.
+        _planResult = GoalPlanResult(
+          plans: _withRationales(computed, result.plans),
+          alternativeDates: result.alternativeDates,
+        );
         _planLoading = false;
       });
     } on AiUnavailable catch (e) {
@@ -281,9 +368,40 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       setState(() {
         _planLoading = false;
         _planError = e.message;
-        _fallbackMonthly = GoalPlanMath.monthlyToReach(transient, date);
+        // The plans are still correct without the prose.
+        _planResult =
+            GoalPlanResult(plans: computed, alternativeDates: const []);
       });
     }
+  }
+
+  /// Graft the coach's rationales onto the computed options, matching on
+  /// cadence and amount. Anything it returns that we didn't ask about is
+  /// dropped, and an option it skipped simply stays unexplained.
+  static List<GoalPlanOption> _withRationales(
+    List<GoalPlanOption> computed,
+    List<GoalPlanOption> described,
+  ) {
+    return [
+      for (var i = 0; i < computed.length; i++)
+        computed[i].copyWith(
+          rationale: described
+                  .firstWhere(
+                    (d) =>
+                        d.cadence == computed[i].cadence &&
+                        (d.perWatering - computed[i].perWatering).abs() <= 1,
+                    orElse: () => i < described.length
+                        ? described[i]
+                        : const GoalPlanOption(
+                            cadence: WaterCadence.monthly,
+                            perWatering: 0,
+                            monthsToTarget: 0,
+                            rationale: '',
+                          ),
+                  )
+                  .rationale,
+        ),
+    ];
   }
 
   /// After saving, let the user pick a budget branch to fund this goal.
@@ -609,6 +727,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                             customAmountCtrl: _customAmountCtrl,
                             suggestedPerWatering:
                                 _suggestedPerWatering(_customCadence),
+                            customProjectedDate: _customProjectedDate(),
                             onPickCustomCadence: (c) => setState(() {
                               _customCadence = c;
                               _useCustom = true;
@@ -982,6 +1101,8 @@ class _TimeframeStep extends StatelessWidget {
     required this.onClear,
   });
 
+  bool get hasDate => targetDate != null;
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -1001,6 +1122,51 @@ class _TimeframeStep extends StatelessWidget {
               height: 1.45,
             ),
           ),
+          const SizedBox(height: 14),
+          // Which way the plan gets solved hangs off this one answer: with a
+          // date we work out the amount, without one we work out the date.
+          Text(
+            l.haveADateInMind,
+            style: GoogleFonts.nunito(
+              color: AppColors.stoneBeigeColor,
+              fontSize: 13.5,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _ModeChoice(
+                  label: l.haveADateYes,
+                  detail: l.haveADateYesDetail,
+                  selected: hasDate,
+                  onTap: onPickDate,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ModeChoice(
+                  label: l.haveADateNo,
+                  detail: l.haveADateNoDetail,
+                  selected: !hasDate,
+                  onTap: onClear,
+                ),
+              ),
+            ],
+          ),
+          if (!hasDate) ...[
+            const SizedBox(height: 12),
+            Text(
+              l.noDateExplainer,
+              style: GoogleFonts.nunito(
+                color: AppColors.mossGreen.withValues(alpha: 0.9),
+                fontSize: 12,
+                height: 1.45,
+              ),
+            ),
+          ],
+          if (hasDate) ...[
           const SizedBox(height: 12),
           InkWell(
             onTap: onPickDate,
@@ -1054,7 +1220,79 @@ class _TimeframeStep extends StatelessWidget {
               ),
             ),
           ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// One of the two planning modes on the timeframe step.
+class _ModeChoice extends StatelessWidget {
+  const _ModeChoice({
+    required this.label,
+    required this.detail,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final String detail;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppTokens.current;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? t.accentSoft : t.canvasSoft,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? t.accentStrong : t.cardBorder,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  selected
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  size: 16,
+                  color: selected ? t.accentStrong : t.textTertiary,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.nunito(
+                      color: selected ? t.accentStrong : t.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(
+              detail,
+              style: GoogleFonts.nunito(
+                color: t.textSecondary,
+                fontSize: 11.5,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1086,6 +1324,9 @@ class _WateringStep extends StatelessWidget {
 
   /// Coach's per-watering figure for the currently selected custom cadence.
   final double suggestedPerWatering;
+
+  /// With no deadline, when the typed custom amount would reach the goal.
+  final DateTime? customProjectedDate;
   final ValueChanged<WaterCadence> onPickCustomCadence;
   final VoidCallback onCustomFocus;
   final bool remind;
@@ -1111,6 +1352,7 @@ class _WateringStep extends StatelessWidget {
     required this.customCadence,
     required this.customAmountCtrl,
     required this.suggestedPerWatering,
+    this.customProjectedDate,
     required this.onPickCustomCadence,
     required this.onCustomFocus,
     required this.remind,
@@ -1121,8 +1363,10 @@ class _WateringStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final mat = MaterialLocalizations.of(context);
-    // AI planning only makes sense for a capped goal with a chosen date.
-    final showAi = aiAvailable && !uncapped && hasTarget && targetDate != null;
+    // AI planning needs a capped goal with an amount, but **not** a date: with
+    // one we solve for the contribution, without one we solve for the date the
+    // goal lands on. Only an uncapped goal has nothing to plan toward.
+    final showAi = aiAvailable && !uncapped && hasTarget;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1240,6 +1484,7 @@ class _WateringStep extends StatelessWidget {
                   onPickCadence: onPickCustomCadence,
                   onFocus: onCustomFocus,
                   suggested: suggestedPerWatering,
+                  projectedDate: customProjectedDate,
                 ),
               ],
             ],
@@ -1332,13 +1577,17 @@ class _WaterPlanCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    // Every plan hits the same target date, so they all work
-                    // out to the same monthly commitment. Saying so turns what
-                    // looks like duplicate options into a real choice of
-                    // rhythm.
+                    // With a deadline every plan hits the same date and so
+                    // costs the same per month; saying so turns what looks
+                    // like duplicate options into a real choice of rhythm.
+                    // Without one, the date IS the differentiator, so lead
+                    // with it.
                     Text(
-                      '${l.planAboutMonths(plan.monthsToTarget)} · '
-                      '${l.sameMonthlyAs('\$${plan.monthly.toStringAsFixed(0)}')}',
+                      plan.completionDate == null
+                          ? '${l.planAboutMonths(plan.monthsToTarget)} · '
+                              '${l.sameMonthlyAs('\$${plan.monthly.toStringAsFixed(0)}')}'
+                          : '${l.reachesGoalBy(MaterialLocalizations.of(context).formatMediumDate(plan.completionDate!))} · '
+                              '${l.sameMonthlyAs('\$${plan.monthly.toStringAsFixed(0)}')}',
                       style: GoogleFonts.nunito(
                         color: AppColors.forestGreen,
                         fontSize: 11.5,
@@ -1378,6 +1627,11 @@ class _CustomWaterCard extends StatelessWidget {
   /// when the user leaves the field blank. 0 when it can't be worked out yet.
   final double suggested;
 
+  /// When the goal has no deadline, the date the entered amount would reach it
+  /// on. Recomputed as the user types, so the pace and its consequence are on
+  /// screen together.
+  final DateTime? projectedDate;
+
   const _CustomWaterCard({
     required this.active,
     required this.cadence,
@@ -1385,6 +1639,7 @@ class _CustomWaterCard extends StatelessWidget {
     required this.onPickCadence,
     required this.onFocus,
     required this.suggested,
+    this.projectedDate,
   });
 
   @override
@@ -1482,6 +1737,30 @@ class _CustomWaterCard extends StatelessWidget {
               helperMaxLines: 2,
             ),
           ),
+          // No deadline: show what this pace actually buys them.
+          if (projectedDate != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(Icons.flag_outlined,
+                    size: 15, color: AppTokens.current.accentStrong),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    l.reachesGoalBy(
+                      MaterialLocalizations.of(context)
+                          .formatMediumDate(projectedDate!),
+                    ),
+                    style: GoogleFonts.nunito(
+                      color: AppTokens.current.accentStrong,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

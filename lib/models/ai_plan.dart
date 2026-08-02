@@ -59,22 +59,52 @@ class AllocationPlan {
           .toList();
 }
 
+/// Which way round a goal was planned.
+enum GoalPlanMode {
+  /// The user named a date. Solve for the amount that lands exactly on it.
+  byDate,
+
+  /// The user has no date. Solve for the date each amount would reach it on.
+  byAmount,
+}
+
 /// One "watering" plan for a goal: contribute [perWatering] every [cadence]
-/// (e.g. $100 every two weeks) for roughly [monthsToTarget] months. The AI may
-/// return either a [perWatering] + cadence directly or just a legacy monthly
-/// figure; parsing fills in whichever is missing so older responses still work.
+/// (e.g. $100 every two weeks), finishing on [completionDate].
+///
+/// **[perWatering] and [completionDate] are always computed locally** by
+/// `GoalPlanMath`, never taken from the model — that's what guarantees a date
+/// the user picked is actually met. The AI only ever contributes [rationale].
 class GoalPlanOption {
   final WaterCadence cadence;
   final double perWatering;
   final int monthsToTarget;
   final String rationale;
 
+  /// When this pace finishes the goal. Set for both modes; in [byDate] it is
+  /// the date the user asked for.
+  final DateTime? completionDate;
+
   const GoalPlanOption({
     required this.cadence,
     required this.perWatering,
     required this.monthsToTarget,
     required this.rationale,
+    this.completionDate,
   });
+
+  GoalPlanOption copyWith({
+    double? perWatering,
+    int? monthsToTarget,
+    String? rationale,
+    DateTime? completionDate,
+  }) =>
+      GoalPlanOption(
+        cadence: cadence,
+        perWatering: perWatering ?? this.perWatering,
+        monthsToTarget: monthsToTarget ?? this.monthsToTarget,
+        rationale: rationale ?? this.rationale,
+        completionDate: completionDate ?? this.completionDate,
+      );
 
   /// Equivalent monthly contribution this plan implies.
   double get monthly => perWatering * cadence.perMonth;
@@ -92,6 +122,7 @@ class GoalPlanOption {
       perWatering: perWatering,
       monthsToTarget: ((j['monthsToTarget'] as num?) ?? 0).round(),
       rationale: (j['rationale'] as String?) ?? '',
+      completionDate: DateTime.tryParse((j['isoDate'] as String?) ?? ''),
     );
   }
 }

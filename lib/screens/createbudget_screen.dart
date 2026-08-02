@@ -833,6 +833,9 @@ class _IncomeStepState extends State<_IncomeStep> {
   final _nameFocus = FocusNode();
   ScrollController? _scrollCtrl;
 
+  /// Example source names stay folded away until asked for.
+  bool _showSuggestions = false;
+
   @override
   void initState() {
     super.initState();
@@ -985,38 +988,54 @@ class _IncomeStepState extends State<_IncomeStep> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final s in suggestions)
-                      GestureDetector(
-                        onTap: () =>
-                            nameCtrl.text = incomeSuggestionLabel(l, s),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 7,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.riverBlue.withValues(alpha: 0.16),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: AppColors.riverBlue.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          child: Text(
-                            incomeSuggestionLabel(l, s),
-                            style: GoogleFonts.nunito(
-                              color: AppColors.stoneBeigeColor,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                // The eleven example sources used to fill most of the card
+                // before the user had typed anything. They're an aid for people
+                // who are stuck, not the main event, so they stay folded away
+                // behind a quiet toggle.
+                const SizedBox(height: 10),
+                _SuggestionToggle(
+                  expanded: _showSuggestions,
+                  onTap: () =>
+                      setState(() => _showSuggestions = !_showSuggestions),
                 ),
+                if (_showSuggestions) ...[
+                  const SizedBox(height: 10),
+                  _Reveal(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final s in suggestions)
+                          GestureDetector(
+                            onTap: () =>
+                                nameCtrl.text = incomeSuggestionLabel(l, s),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.riverBlue.withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color:
+                                      AppColors.riverBlue.withValues(alpha: 0.5),
+                                ),
+                              ),
+                              child: Text(
+                                incomeSuggestionLabel(l, s),
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.stoneBeigeColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -2896,6 +2915,44 @@ class _BudgetBar extends StatelessWidget {
 // ──────────────────────────────────────────────
 // Vibrant circular "add" button
 // ──────────────────────────────────────────────
+
+/// The quiet "view suggestions" row that folds the example chips away until
+/// the user actually wants ideas.
+class _SuggestionToggle extends StatelessWidget {
+  const _SuggestionToggle({required this.expanded, required this.onTap});
+
+  final bool expanded;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.current;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            expanded ? Icons.expand_less : Icons.lightbulb_outline,
+            size: 16,
+            color: t.accentStrong,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            expanded ? l.hideSuggestions : l.viewSuggestions,
+            style: GoogleFonts.nunito(
+              color: t.accentStrong,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// A card of one-tap entries carried over from the user's earlier trees.
 /// Shared by the income and expense steps; renders nothing when [entries] is

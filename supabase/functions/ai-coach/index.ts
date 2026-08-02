@@ -183,9 +183,13 @@ Rules: every input expense MUST appear in every plan's items. If an expense has 
 
 // ---- action: goal_plans ---------------------------------------------------
 
+const MAX_GOAL_OPTIONS = 6;
+
+// The app computes every amount and date with GoalPlanMath and sends them in.
+// The model's job is to explain them, never to recalculate them: its arithmetic
+// used to drift, which meant a date the user had explicitly chosen wasn't
+// actually met. Anything numeric it returns is ignored by the client.
 async function goalPlans(body: Record<string, unknown>) {
-  // Rebuilt field by field rather than forwarded: the name is length-capped and
-  // the numbers coerced, so nothing unbounded reaches the prompt.
   const raw = (body.goal ?? {}) as Record<string, unknown>;
   const goal = {
     name: str(raw.name),
@@ -193,20 +197,41 @@ async function goalPlans(body: Record<string, unknown>) {
     current: num(raw.current),
     uncapped: raw.uncapped === true,
   };
-  // Only an ISO date is ever sent by the app; anything else is dropped.
   const rawDate = String(body.targetDate ?? "");
   const targetDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : "";
   const freeMonthly = num(body.freeMonthly);
   const locale = str(body.locale || "en", 16);
+  const byDate = body.mode !== "byAmount";
 
-  const system =
-    `You are a savings coach for an app where users "water" a goal by contributing on a repeating cadence. Given a goal (target amount, amount already saved, desired completion date) and the user's estimated free monthly income, produce 2 or 3 distinct watering plans to reach the goal by the target date, plus 1 to 3 alternative completion dates that fit comfortably within the free monthly income. ${
+  const options = arr(body.options, MAX_GOAL_OPTIONS).map((o) => {
+    const p = (o ?? {}) as Record<string, unknown>;
+    const iso = String(p.isoDate ?? "");
+    return {
+      cadence: str(p.cadence, 12),
+      perWatering: num(p.perWatering),
+      ...(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? { isoDate: iso } : {}),
+    };
+  });
+
+  const shared =
+    `You are a savings coach for an app where users "water" a goal by contributing on a repeating cadence. The plans have ALREADY been calculated exactly. Do not recalculate, adjust or second-guess any number: copy each cadence and perWatering back verbatim and write only the wording. ${
       LOCALE_NOTE(locale)
-    } Respond with ONLY a JSON object of the shape:
-{"plans":[{"cadence":"weekly|biweekly|monthly","perWatering":number,"monthsToTarget":number,"rationale":string}],"alternativeDates":[{"isoDate":"YYYY-MM-DD","cadence":"weekly|biweekly|monthly","perWatering":number,"note":string}]}
-Rules: cadence is exactly one of "weekly", "biweekly", or "monthly". perWatering is the whole-number amount contributed each time at that cadence. Every plan must use a DIFFERENT cadence, and each one must be the correct per-watering amount for that cadence to hit the same target date, so the plans all add up to the same monthly total. That is expected: the user is choosing a rhythm, not a different level of commitment. Because of that, never justify a plan by saying it saves more, costs less, or is faster than the others, because it is not. Instead each rationale must say who that specific rhythm suits, in a way that is clearly different from the other plans: for example weekly for small frequent amounts that track a weekly paycheck and barely register, biweekly for lining up with a fortnightly payday, monthly for a single transfer to set and forget. If the monthly total needed to hit the target date exceeds the free monthly income, say so in the rationale and lean on the alternative dates, which are the real way to change the size of the commitment. Keep each rationale and note to one sentence.`;
+    }`;
 
-  const user = JSON.stringify({ goal, targetDate, freeMonthly });
+  const system = byDate
+    ? `${shared} The user picked a completion date and each option below is the exact amount that lands on it at that cadence, so every option costs the same per month and differs only in rhythm. Never say one option is cheaper, faster or better value than another, because it is not. Each rationale must say who that rhythm suits, clearly distinct from the others: weekly for small frequent amounts that track a weekly paycheck, biweekly for lining up with a fortnightly payday, monthly for one transfer you can set and forget. If the implied monthly total is more than the user's free monthly income, say so plainly in the rationale of the first option, and offer 1 to 3 alternativeDates that would be easier. Otherwise return an empty alternativeDates array. Respond with ONLY a JSON object of the shape:
+{"plans":[{"cadence":"weekly|biweekly|monthly","perWatering":number,"rationale":string}],"alternativeDates":[{"isoDate":"YYYY-MM-DD","perWatering":number,"note":string}]}
+Keep each rationale and note to one sentence.`
+    : `${shared} The user has NO deadline in mind, so each option is a pace they could keep up and the date it would finish on. Here the options DO differ in commitment: a bigger amount finishes sooner. Each rationale should say what that pace feels like to keep up and roughly when it finishes, for example whether it is an easy habit or a push. If an option's monthly total is more than the user's free monthly income, say so in its rationale. Return an empty alternativeDates array. Respond with ONLY a JSON object of the shape:
+{"plans":[{"cadence":"weekly|biweekly|monthly","perWatering":number,"rationale":string}],"alternativeDates":[]}
+Keep each rationale to one sentence.`;
+
+  const user = JSON.stringify({
+    goal,
+    freeMonthly,
+    options,
+    ...(byDate ? { targetDate } : {}),
+  });
   const { text } = await callClaude(system, user, 768);
   return extractJson<{ plans: unknown[]; alternativeDates: unknown[] }>(text);
 }

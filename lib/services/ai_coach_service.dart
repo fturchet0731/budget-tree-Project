@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' show PlatformDispatcher;
 
+import '../data/water_cadence.dart';
 import '../models/ai_plan.dart';
 import '../models/goal_model.dart';
 import 'app_settings.dart';
@@ -89,25 +90,67 @@ class AiCoachService {
     return plans;
   }
 
-  /// Ask for contribution plans + alternative dates to reach [goal] by
-  /// [targetDate], given the user's estimated [freeMonthly] income.
-  Future<GoalPlanResult> goalPlans({
-    required Goal goal,
-    required DateTime targetDate,
-    required double freeMonthly,
-  }) async {
-    final data = await _invoke({
-      'action': 'goal_plans',
-      'locale': _locale,
-      'goal': {
+  static String _iso(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Map<String, dynamic> _goalJson(Goal goal) => {
         'name': goal.name,
         'target': goal.targetAmount,
         'current': goal.currentAmount,
         'uncapped': goal.isUncapped,
-      },
-      'targetDate':
-          '${targetDate.year.toString().padLeft(4, '0')}-${targetDate.month.toString().padLeft(2, '0')}-${targetDate.day.toString().padLeft(2, '0')}',
+      };
+
+  /// Plans for a goal the user has given a **deadline**.
+  ///
+  /// The per-watering amounts are worked out here by [GoalPlanMath] so the
+  /// chosen date is hit exactly; the coach is sent those figures and asked only
+  /// to explain each one and to flag whether the pace is realistic against
+  /// [freeMonthly]. That split is deliberate — letting the model do the
+  /// arithmetic is what used to make a set date drift.
+  Future<GoalPlanResult> goalPlansByDate({
+    required Goal goal,
+    required DateTime targetDate,
+    required double freeMonthly,
+    required List<GoalPlanOption> computed,
+  }) async {
+    final data = await _invoke({
+      'action': 'goal_plans',
+      'mode': 'byDate',
+      'locale': _locale,
+      'goal': _goalJson(goal),
+      'targetDate': _iso(targetDate),
       'freeMonthly': freeMonthly,
+      'options': [
+        for (final o in computed)
+          {'cadence': o.cadence.wire, 'perWatering': o.perWatering.round()},
+      ],
+    });
+    return GoalPlanResult.fromJson(data);
+  }
+
+  /// Plans for a goal with **no deadline**: the user picks a pace and we tell
+  /// them when it lands. [candidates] are the locally computed options (from
+  /// the user's own figure when they gave one, otherwise a spread from
+  /// [GoalPlanMath.suggestedPerWatering]); the coach explains them.
+  Future<GoalPlanResult> goalPlansByAmount({
+    required Goal goal,
+    required double freeMonthly,
+    required List<GoalPlanOption> candidates,
+  }) async {
+    final data = await _invoke({
+      'action': 'goal_plans',
+      'mode': 'byAmount',
+      'locale': _locale,
+      'goal': _goalJson(goal),
+      'freeMonthly': freeMonthly,
+      'options': [
+        for (final o in candidates)
+          {
+            'cadence': o.cadence.wire,
+            'perWatering': o.perWatering.round(),
+            if (o.completionDate != null) 'isoDate': _iso(o.completionDate!),
+          },
+      ],
     });
     return GoalPlanResult.fromJson(data);
   }

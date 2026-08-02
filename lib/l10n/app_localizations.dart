@@ -4678,6 +4678,72 @@ abstract class AppLocalizations {
   /// **'How many?'**
   String get rhythmCustomHint;
 
+  /// No description provided for @haveADateInMind.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you have a date in mind?'**
+  String get haveADateInMind;
+
+  /// No description provided for @haveADateYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, by a date'**
+  String get haveADateYes;
+
+  /// No description provided for @haveADateYesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'We work out what to put in each time to land on it.'**
+  String get haveADateYesDetail;
+
+  /// No description provided for @haveADateNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, just saving'**
+  String get haveADateNo;
+
+  /// No description provided for @haveADateNoDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'We work out when you would reach it at your pace.'**
+  String get haveADateNoDetail;
+
+  /// No description provided for @noDateExplainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a rhythm and an amount on the next step and the coach will tell you when the goal lands.'**
+  String get noDateExplainer;
+
+  /// No description provided for @reachesGoalBy.
+  ///
+  /// In en, this message translates to:
+  /// **'reaches it by {date}'**
+  String reachesGoalBy(String date);
+
+  /// No description provided for @willingToPut.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you willing to put in each time?'**
+  String get willingToPut;
+
+  /// No description provided for @willingToPutHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank and the coach suggests a few paces.'**
+  String get willingToPutHint;
+
+  /// No description provided for @viewSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'View suggestions'**
+  String get viewSuggestions;
+
+  /// No description provided for @hideSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide suggestions'**
+  String get hideSuggestions;
+
   /// No description provided for @addThisSource.
   ///
   /// In en, this message translates to:

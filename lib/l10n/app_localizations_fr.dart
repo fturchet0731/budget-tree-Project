@@ -2698,6 +2698,45 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rhythmCustomHint => 'Combien ?';
 
   @override
+  String get haveADateInMind => 'Avez-vous une date en tête ?';
+
+  @override
+  String get haveADateYes => 'Oui, pour une date';
+
+  @override
+  String get haveADateYesDetail =>
+      'Nous calculons le montant à verser pour y arriver.';
+
+  @override
+  String get haveADateNo => 'Non, j\'épargne simplement';
+
+  @override
+  String get haveADateNoDetail =>
+      'Nous calculons quand vous y arriverez à votre rythme.';
+
+  @override
+  String get noDateExplainer =>
+      'Choisissez un rythme et un montant à l\'étape suivante et le coach vous dira quand l\'objectif sera atteint.';
+
+  @override
+  String reachesGoalBy(String date) {
+    return 'atteint le $date';
+  }
+
+  @override
+  String get willingToPut => 'Combien êtes-vous prêt à verser à chaque fois ?';
+
+  @override
+  String get willingToPutHint =>
+      'Laissez vide et le coach proposera plusieurs rythmes.';
+
+  @override
+  String get viewSuggestions => 'Voir des suggestions';
+
+  @override
+  String get hideSuggestions => 'Masquer les suggestions';
+
+  @override
   String get addThisSource => 'Ajouter cette source';
 
   @override
