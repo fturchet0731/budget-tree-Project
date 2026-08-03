@@ -66,14 +66,15 @@ class ProfileService {
   }
 
   /// True if [username] is well-formed and not already claimed by someone else.
+  ///
+  /// Goes through a SECURITY DEFINER function rather than reading the table:
+  /// this is a question *about* a row the caller deliberately cannot see, and a
+  /// bare boolean answers it without revealing whose row it is.
   Future<bool> isUsernameAvailable(String username) async {
     if (!isAvailable || !usernamePattern.hasMatch(username)) return false;
-    final row = await SupabaseConfig.client
-        .from(_table)
-        .select('id')
-        .eq('username', username)
-        .maybeSingle();
-    return row == null || row['id'] == _uid;
+    final free = await SupabaseConfig.client
+        .rpc('username_available', params: {'candidate': username});
+    return free == true;
   }
 
   /// Claim [username] for the signed-in user (insert their profile row).
@@ -160,17 +161,24 @@ class ProfileService {
     return row == null ? null : Profile.fromRow(row);
   }
 
-  /// Search other users by (partial) username, excluding self. Empty when the
-  /// query is blank or the social layer is unavailable.
+  /// Shortest query the search will act on. One letter would page most of the
+  /// user table, so the server enforces this too and the client mirrors it to
+  /// avoid a pointless round trip.
+  static const minSearchLength = 2;
+
+  /// Search other users by (partial) username, excluding self.
+  ///
+  /// Strangers' rows aren't readable directly, so this goes through a
+  /// SECURITY DEFINER function that caps the result set and returns only the
+  /// columns a search row renders — no bio, status mode or pinned goal.
+  /// Empty when the query is too short or the social layer is unavailable.
   Future<List<Profile>> searchByUsername(String query) async {
     final q = query.trim();
-    if (!isAvailable || q.isEmpty) return const [];
+    if (!isAvailable || q.length < minSearchLength) return const [];
     final rows = await SupabaseConfig.client
-        .from(_table)
-        .select()
-        .ilike('username', '%$q%')
-        .neq('id', _uid!)
-        .limit(20);
-    return rows.map<Profile>((r) => Profile.fromRow(r)).toList();
+        .rpc('search_profiles', params: {'q': q}) as List<dynamic>;
+    return rows
+        .map<Profile>((r) => Profile.fromRow(r as Map<String, dynamic>))
+        .toList();
   }
 }
