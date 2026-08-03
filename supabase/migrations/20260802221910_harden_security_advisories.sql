@@ -62,8 +62,8 @@ end $$;
 -- leaving anything that legitimately calls it as owner or service_role
 -- untouched, and it is trivially reversible.
 --
--- If you don't recognise the function, dropping it outright is the tidier end
--- state, but that's a call for whoever created it.
+-- UPDATE (20260803): identified. It backs the `ensure_rls` ddl_command_end event
+-- trigger and auto-enables RLS on new public tables. Keep it. See CLAUDE.md.
 -- ─────────────────────────────────────────────────────────────────────────
 
 do $$
