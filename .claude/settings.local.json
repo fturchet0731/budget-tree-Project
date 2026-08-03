@@ -51,7 +51,16 @@
       "Bash(grep -v \"SMTP\\\\|Initialising\\\\|Connecting\\\\|new version\\\\|We recommend\\\\|^$\")",
       "Bash(PGPASSWORD=sZKixOXUTCuSxsEFMWYUxNvTxmJWBPaK psql 'host=db.uxfmisgzrprdzagfhcke.supabase.co port=5432 user=cli_login_postgres dbname=postgres sslmode=require' -c 'select tablename from pg_tables where schemaname='\\\\''public'\\\\'' order by tablename;' -c 'select version from supabase_migrations.schema_migrations order by version;')",
       "Read(//opt/homebrew/opt/libpq/bin/**)",
-      "Read(//opt/homebrew/**)"
+      "Read(//opt/homebrew/**)",
+      "Bash(xcodebuild -version)",
+      "Bash(supabase secrets *)",
+      "Bash(tee /private/tmp/claude-501/-Users-fabianturchetti-Developer-Projects-BudgetApp-CSProject-budget-app-project/24d9f629-d024-4cb9-aef2-f7115082cce8/scratchpad/ios_build.log)",
+      "Bash(open -a Xcode)",
+      "Bash(open ios/Runner.xcworkspace)",
+      "Bash(tee /private/tmp/claude-501/-Users-fabianturchetti-Developer-Projects-BudgetApp-CSProject-budget-app-project/24d9f629-d024-4cb9-aef2-f7115082cce8/scratchpad/ios_build2.log)",
+      "Bash(defaults read *)",
+      "Bash(security find-generic-password *)",
+      "Bash(xcode-select *)"
     ]
   }
 }
