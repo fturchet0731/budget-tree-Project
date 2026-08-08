@@ -72,6 +72,13 @@ void main() {
     expect(find.text(l.dashboardSettings), findsOneWidget);
     expect(find.text(l.addFriends), findsOneWidget);
     expect(find.text(l.profile), findsOneWidget);
+    // Acorn's Hub is the full-width fifth tile *under* the four pillars, not
+    // above them: the four-leaf menu stays the first thing the user sees.
+    expect(
+      tester.getRect(find.byType(HealthTreeHero)).top,
+      greaterThan(tester.getRect(find.text(l.dashboardSettings)).bottom),
+    );
+
     // Back to ground stays pinned at the bottom, on screen.
     final back = find.text(l.dashboardBackToGround);
     expect(back, findsOneWidget);

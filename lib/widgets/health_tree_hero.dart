@@ -17,6 +17,8 @@ import 'ui/pressable.dart';
 /// The dashboard's living tree: how consistent the user has been, at a glance,
 /// and the way into Acorn's Hub.
 ///
+/// Sits as a full-width fifth tile under the four-leaf menu.
+///
 /// Two nested tap targets. The scene itself opens the hub; the strip along the
 /// bottom opens whatever needs doing right now, which is usually a check-in.
 /// The inner target is nested inside the outer one rather than sitting beside
@@ -124,10 +126,7 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
                             _health.isEmpty
                                 ? l.hubTreeFresh
                                 : _health.tier.label(l),
-                            // One line each: on a small phone the hero is only
-                            // ~130px tall, and a two-line tier name plus a
-                            // two-line subtitle overflows the slot.
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context)
                                 .textTheme

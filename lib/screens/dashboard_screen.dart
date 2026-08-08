@@ -223,57 +223,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
-            // Everything below the header scrolls as one block. The hero in
-            // particular must live *inside* the scroll view: as a sibling of
-            // this Expanded it would take its height off the flex child, and
-            // on a short screen (360x640) the column overflows by roughly the
-            // hero's own height. Inside, the page simply scrolls.
-            //
-            // It also sizes off the viewport rather than a fixed height, so a
-            // small phone gets a smaller tree instead of a cropped one.
+            // The friends strip, the four pillars and Acorn's Hub travel as
+            // one scrolling block. The hero must live *inside* the scroll
+            // view: as a sibling of this Expanded it would take its height off
+            // the flex child, and a short screen (360x640) overflows by
+            // roughly the hero's own height.
             Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final heroHeight =
-                      (constraints.maxHeight * 0.28).clamp(132.0, 208.0);
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 460),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // The living tree: how consistent the user has
-                            // been, and the door into Acorn's Hub.
-                            HealthTreeHero(
-                              key: _heroKey,
-                              height: heroHeight,
-                              onOpenHub: () => _navigate(
-                                context,
-                                const AcornHubScreen(),
-                              ),
-                            ),
-                            const SizedBox(height: AppDims.s12),
-                            // Swipeable Roblox-style friends row; first circle
-                            // adds friends.
-                            FriendsStrip(key: _friendsKey),
-                            const SizedBox(height: AppDims.s12),
-                            _MenuGrid(
-                              onTapCreate: _openCreate,
-                              onTapModify: () =>
-                                  _navigate(context, const ForestScreen()),
-                              onTapGoals: () =>
-                                  _navigate(context, const GoalsScreen()),
-                              onTapSettings: () =>
-                                  _navigate(context, const SettingsScreen()),
-                            ),
-                          ],
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Swipeable Roblox-style friends row; first circle
+                        // adds friends.
+                        FriendsStrip(key: _friendsKey),
+                        const SizedBox(height: AppDims.s12),
+                        _MenuGrid(
+                          onTapCreate: _openCreate,
+                          onTapModify: () =>
+                              _navigate(context, const ForestScreen()),
+                          onTapGoals: () =>
+                              _navigate(context, const GoalsScreen()),
+                          onTapSettings: () =>
+                              _navigate(context, const SettingsScreen()),
                         ),
-                      ),
+                        const SizedBox(height: AppDims.s12),
+                        // Acorn's Hub as a full-width fifth tile under the
+                        // four pillars: the living tree, how consistent the
+                        // user has been, and the door into the hub.
+                        //
+                        // A fixed height rather than a fraction of the
+                        // viewport, because sizing off the viewport only
+                        // earned its keep while the hero sat above the fold
+                        // competing for space. Down here it is scrolled to,
+                        // so a consistent size reads better than one that
+                        // shifts with the screen.
+                        HealthTreeHero(
+                          key: _heroKey,
+                          height: 156,
+                          onOpenHub: () => _navigate(
+                            context,
+                            const AcornHubScreen(),
+                          ),
+                        ),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
             // Pinned under the scrollable block so it's always reachable.
