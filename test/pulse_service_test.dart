@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:budget_app_project/models/check_in.dart';
 import 'package:budget_app_project/models/goal_model.dart';
 import 'package:budget_app_project/services/pulse_service.dart';
 
@@ -146,6 +147,52 @@ void main() {
         now: now,
       );
       expect(info.kind, PulseKind.waterDue);
+    });
+
+    test('an unanswered check-in outranks a watering that is due', () {
+      final g = goal(
+        waterAmount: 25,
+        nextWaterDate: DateTime(2026, 7, 1),
+      );
+      final info = PulseService.compute(
+        budgets: const [],
+        goals: [g],
+        pendingCheckIns: [
+          CheckIn(
+            kind: CheckInKind.payday,
+            subjectId: 'b1',
+            subjectName: 'Rent Tree',
+            dueAt: DateTime(2026, 7, 1),
+          ),
+        ],
+        now: now,
+      );
+      expect(info.kind, PulseKind.checkInDue);
+      expect(info.checkIn?.subjectName, 'Rent Tree');
+      expect(info.pendingCheckIns, 1);
+      expect(info.overdue, isFalse);
+    });
+
+    test('the oldest unanswered check-in is the one surfaced', () {
+      CheckIn at(DateTime due, String name) => CheckIn(
+            kind: CheckInKind.payday,
+            subjectId: name,
+            subjectName: name,
+            dueAt: due,
+          );
+      final info = PulseService.compute(
+        budgets: const [],
+        goals: const [],
+        pendingCheckIns: [
+          at(DateTime(2026, 7, 1), 'Newest'),
+          at(DateTime(2026, 6, 17), 'Oldest'),
+          at(DateTime(2026, 6, 24), 'Middle'),
+        ],
+        now: now,
+      );
+      expect(info.checkIn?.subjectName, 'Oldest');
+      expect(info.pendingCheckIns, 3);
+      expect(info.overdue, isTrue);
     });
   });
 }

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/calendar.dart';
 
 import '../l10n/app_localizations_resolver.dart';
 import '../models/goal_model.dart';
+import '../models/reflection_report.dart';
 import 'ai_coach_service.dart';
 import 'app_settings.dart';
 import 'auth_service.dart';
@@ -10,6 +13,7 @@ import 'budget_repository.dart';
 import 'comparison_service.dart';
 import 'goal_repository.dart';
 import 'notification_service.dart';
+import 'reflection_stats.dart';
 import 'streak_service.dart';
 import 'supabase_config.dart';
 
@@ -47,12 +51,17 @@ class ReflectionService {
   static const _kLatestStart = 'reflection_latest_start_v1';
   static const _kWeeklyStart = 'reflection_weekly_start_v1';
   static const _kMonthlyStart = 'reflection_monthly_start_v1';
+  static const _kLatestReport = 'reflection_latest_report_v1';
 
+  /// Note this deliberately does **not** require `notifWeeklySummary`. That
+  /// coupling made sense when a reflection was essentially a notification, but
+  /// Acorn's Hub now owns them: switching off a *notification* must not
+  /// silently stop reflections appearing *in the app*, with no visible cause.
+  /// Only the notification itself is gated on that preference.
   bool get _available =>
       SupabaseConfig.isConfigured &&
       AuthService.instance.isSignedIn &&
-      AppSettings.instance.aiCoachEnabled &&
-      AppSettings.instance.notifWeeklySummary;
+      AppSettings.instance.aiCoachEnabled;
 
   /// Monday 00:00 of [d]'s week.
   static DateTime _weekStart(DateTime d) => startOfWeek(d);
@@ -76,6 +85,29 @@ class ReflectionService {
       createdAt: parsed,
     );
   }
+
+  /// The structured half of the latest reflection, or null when the stored one
+  /// predates it (or the model returned prose only). Callers fall back to
+  /// [latest]'s plain text.
+  ReflectionReport? _cachedReport;
+
+  Future<ReflectionReport?> loadLatestReport() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kLatestReport);
+    if (raw == null) return _cachedReport = null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return _cachedReport = null;
+      final report = ReflectionReport.fromJson(decoded);
+      return _cachedReport = report.isEmpty ? null : report;
+    } catch (_) {
+      return _cachedReport = null;
+    }
+  }
+
+  /// Synchronous read of whatever [loadLatestReport] last resolved, for build
+  /// methods. Null until that has run at least once.
+  ReflectionReport? latestReport() => _cachedReport;
 
   /// Generate any reflections that are now due. Best-effort: any failure is
   /// swallowed so boot never blocks on the network or the model.
@@ -124,16 +156,19 @@ class ReflectionService {
 
     final input = await _buildSummary(period, goals);
     final String text;
+    final ReflectionReport report;
     try {
-      text = await AiCoachService.instance.reflection(input);
+      final result = await AiCoachService.instance.reflection(input);
+      text = result.text;
+      report = result.report;
     } on AiUnavailable {
       return false; // try again next launch
     }
 
-    await _store(period, periodStart, text);
+    await _store(period, periodStart, text, report);
     await prefs.setString(key, _dateKey(periodStart));
 
-    if (notify) {
+    if (notify && AppSettings.instance.notifWeeklySummary) {
       final l = appLocalizations();
       await NotificationService.showReflectionNow(
         id: NotificationService.idReflection,
@@ -193,6 +228,11 @@ class ReflectionService {
       'pctChange': c.percentChange?.round(),
     };
 
+    // The behavioural half: how consistently the user has been checking in,
+    // and the only plan-versus-actual figures the app has. Both are already
+    // aggregated, so the coach never sees a raw row.
+    final stats = await ReflectionStats.load();
+
     return {
       'period': period,
       'budgets': budgets
@@ -208,14 +248,50 @@ class ReflectionService {
       'month': cmp(month),
       'streakWeeks': streak.currentWeeks,
       'linkedGoals': linkedGoals,
+      'health': {
+        'score': stats.health.score.round(),
+        'tier': stats.health.tier.name,
+        'delta': stats.health.delta.round(),
+        'streak': stats.health.currentStreak,
+      },
+      'checkIns': [
+        for (final c in stats.consistency)
+          {
+            'dueAt': _dateKey(c.at),
+            'verdict': c.missed ? 'missed' : (c.verdict?.name ?? 'unknown'),
+          },
+      ],
+      // Empty until the user has volunteered amounts. The prompt must never
+      // infer overspending from an allocation gap: allocation is a plan, not a
+      // record of spending, and the coach would be confidently wrong.
+      'overspend': [
+        for (final o in stats.overspend.where((o) => o.isOver))
+          {
+            'name': o.name,
+            'planned': o.planned.round(),
+            'actual': o.actual.round(),
+          },
+      ],
     };
   }
 
-  Future<void> _store(String period, DateTime periodStart, String text) async {
+  Future<void> _store(
+    String period,
+    DateTime periodStart,
+    String text,
+    ReflectionReport report,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kLatestText, text);
     await prefs.setString(_kLatestPeriod, period);
     await prefs.setString(_kLatestStart, _dateKey(periodStart));
+    if (report.isEmpty) {
+      await prefs.remove(_kLatestReport);
+      _cachedReport = null;
+    } else {
+      await prefs.setString(_kLatestReport, jsonEncode(report.toJson()));
+      _cachedReport = report;
+    }
 
     // Durable cross-device copy. Best-effort: a failure here still leaves the
     // local cache populated.
@@ -227,6 +303,7 @@ class ReflectionService {
           'period': period,
           'period_start': _dateKey(periodStart),
           'text': text,
+          'report': report.isEmpty ? null : report.toJson(),
         }, onConflict: 'user_id,period,period_start');
       }
     } catch (_) {

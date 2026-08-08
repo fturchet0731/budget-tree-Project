@@ -11,11 +11,12 @@ import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/friends_strip.dart';
 import '../widgets/profile_avatar.dart';
+import '../widgets/health_tree_hero.dart';
 import '../widgets/pulse_strip.dart';
-import '../widgets/reflection_card.dart';
 import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/entrance.dart';
 import '../widgets/ui/pressable.dart';
+import 'acorn_hub_screen.dart';
 import 'auth/login_screen.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
@@ -37,6 +38,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final _pulseKey = GlobalKey<PulseStripState>();
   final _friendsKey = GlobalKey<FriendsStripState>();
+  final _heroKey = GlobalKey<HealthTreeHeroState>();
 
   /// The signed-in user's profile, for the top-right avatar button. Null while
   /// loading, signed out, or offline (the button falls back to a glyph).
@@ -85,6 +87,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // (throttled inside the service).
     _pulseKey.currentState?.refresh();
     _friendsKey.currentState?.refresh();
+    _heroKey.currentState?.refresh();
     ProfileService.instance.touchPresence();
   }
 
@@ -220,38 +223,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
-            const ReflectionBanner(),
-            // The friends strip travels with the menu grid as one block,
-            // anchored to the top of the remaining space (right under the
-            // banners) rather than floating centered, and scrollable so a
-            // short screen never overflows.
+            // Everything below the header scrolls as one block. The hero in
+            // particular must live *inside* the scroll view: as a sibling of
+            // this Expanded it would take its height off the flex child, and
+            // on a short screen (360x640) the column overflows by roughly the
+            // hero's own height. Inside, the page simply scrolls.
+            //
+            // It also sizes off the viewport rather than a fixed height, so a
+            // small phone gets a smaller tree instead of a cropped one.
             Expanded(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.fromLTRB(20, 12, 20, 8),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 460),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Swipeable Roblox-style friends row; first circle
-                        // adds friends.
-                        FriendsStrip(key: _friendsKey),
-                        const SizedBox(height: AppDims.s12),
-                        _MenuGrid(
-                          onTapCreate: _openCreate,
-                          onTapModify: () =>
-                              _navigate(context, const ForestScreen()),
-                          onTapGoals: () =>
-                              _navigate(context, const GoalsScreen()),
-                          onTapSettings: () =>
-                              _navigate(context, const SettingsScreen()),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final heroHeight =
+                      (constraints.maxHeight * 0.28).clamp(132.0, 208.0);
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 460),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // The living tree: how consistent the user has
+                            // been, and the door into Acorn's Hub.
+                            HealthTreeHero(
+                              key: _heroKey,
+                              height: heroHeight,
+                              onOpenHub: () => _navigate(
+                                context,
+                                const AcornHubScreen(),
+                              ),
+                            ),
+                            const SizedBox(height: AppDims.s12),
+                            // Swipeable Roblox-style friends row; first circle
+                            // adds friends.
+                            FriendsStrip(key: _friendsKey),
+                            const SizedBox(height: AppDims.s12),
+                            _MenuGrid(
+                              onTapCreate: _openCreate,
+                              onTapModify: () =>
+                                  _navigate(context, const ForestScreen()),
+                              onTapGoals: () =>
+                                  _navigate(context, const GoalsScreen()),
+                              onTapSettings: () =>
+                                  _navigate(context, const SettingsScreen()),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
             // Pinned under the scrollable block so it's always reachable.

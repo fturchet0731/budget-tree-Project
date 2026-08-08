@@ -25,6 +25,7 @@ class NotificationService {
   static const _streakChannel = 'streak_reminders';
   static const _weeklyChannel = 'weekly_summary';
   static const _wateringChannel = 'goal_watering';
+  static const checkInChannel = 'check_ins';
 
   /// Stable notification ids — reusing an id replaces the prior schedule.
   static const int idStreak = 1001;
@@ -33,6 +34,12 @@ class NotificationService {
   static const int budgetIdBase = 2000; // + hash of budget id
   static const int waterIdBase = 3000; // + hash of goal id (due today)
   static const int waterSoonIdBase = 4000; // + hash of goal id (due in 2 days)
+
+  /// Per-entity ids are `base + (id.hashCode & 0xfff)`, i.e. 4096 wide, so the
+  /// three bases above (spaced only 1000 apart) already overlap each other.
+  /// Renumbering them would orphan reminders the OS is already holding, so this
+  /// new family is parked well clear of all of them instead.
+  static const int checkInIdBase = 20000; // + hash of budget id
 
   static Future<void> init() async {
     if (_ready) return;
@@ -133,6 +140,8 @@ class NotificationService {
         return (l.notifChannelWeeklyName, l.notifChannelWeeklyDesc);
       case _wateringChannel:
         return (l.notifChannelWateringName, l.notifChannelWateringDesc);
+      case checkInChannel:
+        return (l.notifChannelCheckInName, l.notifChannelCheckInDesc);
       case _budgetChannel:
       default:
         return (l.notifChannelBudgetName, l.notifChannelBudgetDesc);
@@ -191,15 +200,19 @@ class NotificationService {
     }
   }
 
-  /// Schedule a one-shot watering reminder at the exact moment [when]. No
+  /// Schedule a one-shot reminder at the exact moment [when]. No
   /// `matchDateTimeComponents`, so it fires once; the [NotificationScheduler]
   /// re-seeds the next occurrence on boot/resume/after deposits. A [when] in the
   /// past is ignored.
-  static Future<void> scheduleGoalWateringOnce({
+  ///
+  /// Used by both the goal watering reminders and the pay-day check-in nudge,
+  /// which differ only in their channel.
+  static Future<void> scheduleOnce({
     required int id,
     required DateTime when,
     required String title,
     required String body,
+    String channel = _wateringChannel,
   }) async {
     if (!_ready) return;
     final scheduled = tz.TZDateTime.from(when, tz.local);
@@ -210,11 +223,11 @@ class NotificationService {
         title: title,
         body: body,
         scheduledDate: scheduled,
-        notificationDetails: _details(_wateringChannel),
+        notificationDetails: _details(channel),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     } catch (e) {
-      debugPrint('NotificationService.scheduleGoalWatering($id) failed: $e');
+      debugPrint('NotificationService.scheduleOnce($id) failed: $e');
     }
   }
 

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/tree_health_labels.dart';
 import '../models/goal_model.dart';
 import '../models/profile_model.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
+import '../services/tree_health_service.dart';
 import '../widgets/app_scrollbar.dart';
+import '../widgets/health_tree_view.dart';
 import '../widgets/goal_sapling_card.dart';
 import '../widgets/profile_avatar.dart';
 import 'friend_chat_screen.dart';
@@ -70,6 +73,45 @@ class FriendGardenScreen extends StatelessWidget {
             builder: (controller) => CustomScrollView(
               controller: controller,
               slivers: [
+                // Their tree, in the same state they see it on their own
+                // dashboard. Absent for a friend who has never answered a
+                // check-in, rather than showing a bare trunk.
+                if (profile.healthScore != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: Row(
+                        children: [
+                          HealthTreeView(
+                            health: profile.healthScore! / 100,
+                            size: 84,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  TreeHealthService
+                                      .tierFor(profile.healthScore!.toDouble())
+                                      .label(l),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall,
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  l.hubScoreSub(profile.healthScore!),
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 if (hasBio)
                   SliverToBoxAdapter(
                     child: Padding(

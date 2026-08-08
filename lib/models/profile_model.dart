@@ -65,6 +65,15 @@ class Profile {
   /// the dashboard since.
   final DateTime? lastSeenAt;
 
+  /// The owner's tree-health score, 0 to 100, or null when they have never
+  /// answered a check-in. Published so a friend opening their garden sees the
+  /// same signal the owner sees on their own dashboard.
+  ///
+  /// Deliberately absent from `toRow` and from `search_profiles`: it is
+  /// written by its own targeted update, and a stranger searching a username
+  /// has no business learning how consistent someone has been.
+  final int? healthScore;
+
   const Profile({
     required this.id,
     required this.username,
@@ -74,6 +83,7 @@ class Profile {
     this.statusGoalId,
     this.avatarB64,
     this.lastSeenAt,
+    this.healthScore,
   });
 
   /// Considered "active now" when seen within the last five minutes.
@@ -98,6 +108,7 @@ class Profile {
         lastSeenAt: r['last_seen_at'] == null
             ? null
             : DateTime.tryParse(r['last_seen_at'] as String),
+        healthScore: (r['health_score'] as num?)?.toInt(),
       );
 
   /// Columns to insert/update. `id` is set by the service from `auth.uid()`.

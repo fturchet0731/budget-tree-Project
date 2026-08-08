@@ -17,10 +17,13 @@ import { corsHeaders } from "../_shared/cors.ts";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-4-6";
 
-// Per-user cap on AI calls per rolling hour. Generous for real use (a handful
-// of budget/goal plans and the odd reflection) but low enough that an abuser
-// with the public anon key can't run up the Anthropic bill.
-const HOURLY_CALL_LIMIT = 30;
+// Per-user cap on AI calls per rolling hour, kept in **separate buckets per
+// kind**. One shared bucket would let a long chat cannibalise the budget
+// wizard: a 25-message conversation would leave five calls, and the next plan
+// request would fail as an unexplained "AI unavailable". Chat turns are also
+// much cheaper (512 max_tokens against 1024), so they can afford a looser cap.
+const PLAN_HOURLY_LIMIT = 30;
+const CHAT_HOURLY_LIMIT = 60;
 
 // Hard caps on the free-form inputs that get embedded into the prompt, so a
 // caller can't inflate token cost (and spend) with an enormous payload.
@@ -34,6 +37,14 @@ const MAX_SURVEY_VALUE_LEN = 120;
 // from an allow-list rather than forwarded verbatim.
 const MAX_BUDGETS = 20;
 const MAX_LINKED_GOALS = 40;
+const MAX_CHECKINS = 40;
+const MAX_OVERSPEND = 12;
+
+// Chat. The transcript is read from the database rather than the request body
+// (see acornChat), so these bound cost, not trust.
+const MAX_CHAT_TURNS = 12;
+const MAX_CHAT_MSG_LEN = 600;
+const MAX_REPLY_LEN = 1200;
 
 // Coerce to a finite number, defaulting to 0. Guards against NaN/Infinity and
 // strings sneaking into the prompt.
@@ -80,6 +91,52 @@ async function callClaude(
       temperature: 0.4,
       system,
       messages: [{ role: "user", content: user }],
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(`Anthropic ${res.status}: ${detail}`);
+  }
+
+  const data = await res.json();
+  const text = (data?.content ?? [])
+    .filter((b: { type: string }) => b.type === "text")
+    .map((b: { text: string }) => b.text)
+    .join("")
+    .trim();
+  return { text };
+}
+
+interface Turn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+// Multi-turn sibling of callClaude, for the conversational action. Kept
+// separate rather than widening callClaude's signature, because three existing
+// call sites depend on that shape.
+async function callClaudeTurns(
+  system: string,
+  turns: Turn[],
+  maxTokens: number,
+): Promise<ClaudeResult> {
+  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+
+  const res = await fetch(ANTHROPIC_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: maxTokens,
+      temperature: 0.5,
+      system,
+      messages: turns,
     }),
   });
 
@@ -238,6 +295,36 @@ Keep each rationale to one sentence.`;
 
 // ---- action: reflection ---------------------------------------------------
 
+// A YYYY-MM-DD date, or empty. Same regex guard the goal_plans action uses.
+function isoDate(v: unknown): string {
+  const raw = str(v, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
+}
+
+// Check-in verdicts are a closed set. Anything unrecognised becomes "unknown"
+// rather than being echoed into the prompt.
+function verdictOf(v: unknown): string {
+  const raw = String(v ?? "");
+  return ["onTrack", "slipped", "offPlan", "missed"].includes(raw)
+    ? raw
+    : "unknown";
+}
+
+// Tree-health block, rebuilt from an allow-list.
+function healthOf(v: unknown) {
+  const h = (v ?? {}) as Record<string, unknown>;
+  const tier = String(h.tier ?? "");
+  return {
+    score: num(h.score),
+    tier: ["barren", "wilting", "steady", "flourishing", "radiant"]
+        .includes(tier)
+      ? tier
+      : "steady",
+    delta: num(h.delta),
+    streak: num(h.streak),
+  };
+}
+
 // A week/month comparison block, rebuilt with coerced numbers.
 function comparison(v: unknown) {
   const c = (v ?? {}) as Record<string, unknown>;
@@ -276,18 +363,130 @@ async function reflection(body: Record<string, unknown>) {
         contributedThisPeriod: num(o.contributedThisPeriod),
       };
     }),
+    // How consistently the user confirmed their pay days, and the tree-health
+    // score derived from it. Verdicts are whitelisted literals, never echoed.
+    health: healthOf(body.health),
+    checkIns: arr(body.checkIns, MAX_CHECKINS).map((c) => {
+      const o = (c ?? {}) as Record<string, unknown>;
+      return { dueAt: isoDate(o.dueAt), verdict: verdictOf(o.verdict) };
+    }),
+    // The ONLY plan-versus-actual figures that exist, and only present when
+    // the user volunteered them on a check-in. Frequently empty.
+    overspend: arr(body.overspend, MAX_OVERSPEND).map((o) => {
+      const r = (o ?? {}) as Record<string, unknown>;
+      return {
+        name: str(r.name),
+        planned: num(r.planned),
+        actual: num(r.actual),
+      };
+    }),
   };
 
+  const nextPeriod = period === "monthly" ? "month" : "week";
   const system =
-    `You are an encouraging but honest financial accountability coach for a budgeting app themed around growing trees. Given a ${period} summary of the user's budgets, savings activity, streak, and goals, write a short reflection of 2 to 4 sentences. Name one genuine win, one area where they fell short, and one concrete nudge for the coming ${
-      period === "monthly" ? "month" : "week"
-    }. ${
-      LOCALE_NOTE(locale)
-    } Keep the tree metaphor light. Respond with ONLY a JSON object of the shape: {"text":string}`;
+    `You are an encouraging but honest financial accountability coach for a budgeting app themed around growing trees. You are given a ${period} summary of the user's budgets, savings activity, check-in record, tree-health score and goals. Acorn, a friendly acorn mascot, will read your words aloud to the user as a short slideshow, so write in Acorn's warm second-person voice.
+
+Produce: a one-sentence headline; 1 to 3 strengths; 0 to 3 weaknesses; 1 to 3 concrete suggestions for the coming ${nextPeriod}; and a short closing line. Each strength, weakness and suggestion has a short title of a few words and one or two sentences of detail.
+
+Hard rules. Only discuss overspending if the "overspend" list is non-empty, and only about the branches it names; that list is the only record of what was actually spent, and an allocation is a plan, not a record, so never infer overspending from budgets or allocations. Never invent or restate figures that are not in the summary. A missed check-in means the user did not answer, not that they overspent. If there is little to go on, say so plainly and keep it short rather than padding.
+
+${LOCALE_NOTE(locale)} Keep the tree metaphor light.
+
+Respond with ONLY a JSON object of the shape: {"text":string,"headline":string,"strengths":[{"title":string,"detail":string}],"weaknesses":[{"title":string,"detail":string}],"suggestions":[{"title":string,"detail":string}],"closing":string}
+"text" is a 2 to 4 sentence plain-prose version of the whole thing, used for the notification and for older app builds.`;
 
   const user = JSON.stringify(summary);
-  const { text } = await callClaude(system, user, 400);
-  return extractJson<{ text: string }>(text);
+  const { text } = await callClaude(system, user, 900);
+  return extractJson<Record<string, unknown>>(text);
+}
+
+// ---- action: acorn_chat ---------------------------------------------------
+
+// Free-form conversation with Acorn. Three deliberate differences from the
+// other actions:
+//
+// 1. **The transcript is read from the database, never from the request body.**
+//    A client-supplied [{role:"assistant", ...}] array is the sharpest possible
+//    violation of this function's allow-list contract: forged assistant turns
+//    are the classic way to talk a model out of its instructions, and length
+//    caps would bound the cost of that without bounding the trust. The read
+//    below runs on the *caller's own* client, so RLS scopes it to their rows.
+//
+// 2. **Both turns are written back with the service role.** The table has no
+//    client insert policy at all, so the stored history cannot contain a turn
+//    the user wrote on Acorn's behalf. That is what makes point 1 sound.
+//
+// 3. **No extractJson.** It slices from the first "{" to the last "}", so the
+//    first time Acorn writes "put it in the {savings} branch" the parse throws
+//    and the user sees internal_error. A prose reply is returned as prose.
+async function acornChat(
+  body: Record<string, unknown>,
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
+  userId: string,
+) {
+  const message = str(body.message, MAX_CHAT_MSG_LEN).trim();
+  if (!message) return { reply: "" };
+  const locale = str(body.locale || "en", 16);
+
+  const { data: rows } = await supabase
+    .from("acorn_messages")
+    .select("role, body")
+    .order("created_at", { ascending: false })
+    .limit(MAX_CHAT_TURNS);
+
+  const turns: Turn[] = ((rows ?? []) as Array<Record<string, unknown>>)
+    .reverse()
+    .map((r) => ({
+      role: r.role === "assistant" ? "assistant" as const : "user" as const,
+      content: str(r.body, MAX_CHAT_MSG_LEN),
+    }))
+    .filter((t) => t.content.length > 0);
+
+  // The user's own figures, rebuilt from an allow-list exactly like every
+  // other action, so Acorn answers about their budget rather than in general.
+  const context = {
+    health: num(body.health),
+    healthTier: str(body.healthTier, 16),
+    streakWeeks: num(body.streakWeeks),
+    checkInsAnswered: num(body.checkInsAnswered),
+    checkInsMissed: num(body.checkInsMissed),
+    overspend: arr(body.overspend, MAX_OVERSPEND).map((o) => {
+      const r = (o ?? {}) as Record<string, unknown>;
+      return {
+        name: str(r.name),
+        planned: num(r.planned),
+        actual: num(r.actual),
+      };
+    }),
+  };
+
+  turns.push({
+    role: "user",
+    content: JSON.stringify({ context, message }),
+  });
+
+  const system =
+    `You are Acorn, the friendly acorn mascot of Budget Tree, a budgeting app where budgets are trees and savings goals are saplings. You are talking with the user about their own money. Every turn arrives as JSON with a "context" object holding their current figures and a "message" holding what they said; reply to the message in plain conversational text, never as JSON.
+
+Be practical and specific. Prefer one concrete change they could make this week over a list of general principles. Ask a clarifying question when you genuinely need one. Keep replies under about 150 words unless they asked for detail.
+
+Hard rules. Only discuss overspending using the "overspend" list in the context; it is the only record of what was actually spent, and an allocation is a plan, not a record. Never invent figures. Never claim to have taken an action in the app: you can advise, the user acts. If you do not know something, say so.
+
+${LOCALE_NOTE(locale)} Keep the tree metaphor light and do not overdo the mascot voice.`;
+
+  const { text } = await callClaudeTurns(system, turns, 512);
+  const reply = text.slice(0, MAX_REPLY_LEN);
+  if (!reply) return { reply: "" };
+
+  await admin.from("acorn_messages").insert([
+    { user_id: userId, role: "user", body: message },
+    { user_id: userId, role: "assistant", body: reply },
+  ]);
+
+  return { reply };
 }
 
 // ---- router ---------------------------------------------------------------
@@ -342,9 +541,24 @@ Deno.serve(async (req) => {
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  // The body is parsed before the quota check so the bucket can be chosen by
+  // kind. A malformed body therefore costs nothing, which is the right way
+  // round anyway.
+  let body: Record<string, unknown>;
+  let action: string;
+  try {
+    body = await req.json();
+    action = String(body.action ?? "");
+  } catch (e) {
+    console.error(e);
+    return json({ error: "internal_error" }, 500);
+  }
+
+  const kind = action === "acorn_chat" ? "chat" : "plans";
+  const limit = kind === "chat" ? CHAT_HOURLY_LIMIT : PLAN_HOURLY_LIMIT;
   const { data: underQuota, error: quotaError } = await admin.rpc(
     "check_ai_quota",
-    { uid: user.id, max_calls: HOURLY_CALL_LIMIT },
+    { uid: user.id, max_calls: limit, kind },
   );
   if (quotaError) {
     console.error("check_ai_quota failed", quotaError);
@@ -355,8 +569,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
-    const action = String(body.action ?? "");
     switch (action) {
       case "budget_plans":
         return json(await budgetPlans(body));
@@ -364,6 +576,8 @@ Deno.serve(async (req) => {
         return json(await goalPlans(body));
       case "reflection":
         return json(await reflection(body));
+      case "acorn_chat":
+        return json(await acornChat(body, supabase, admin, user.id));
       default:
         return json({ error: "unknown_action" }, 400);
     }

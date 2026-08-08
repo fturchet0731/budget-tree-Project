@@ -4450,6 +4450,486 @@ abstract class AppLocalizations {
   /// **'Plant your first tree and watch your budget grow.'**
   String get pulsePlantBody;
 
+  /// No description provided for @pulseCheckInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to check in'**
+  String get pulseCheckInTitle;
+
+  /// No description provided for @pulseCheckInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} reached its pay day. Tell Acorn how it went.'**
+  String pulseCheckInBody(String name);
+
+  /// No description provided for @pulseCheckInOverdueBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is still waiting on you. Answer before the window closes.'**
+  String pulseCheckInOverdueBody(String name);
+
+  /// No description provided for @pulseCheckInManyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 answer is waiting.} other{{count} answers are waiting.}} Start with {name}.'**
+  String pulseCheckInManyBody(int count, String name);
+
+  /// No description provided for @checkInPaydayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} pay day'**
+  String checkInPaydayTitle(String name);
+
+  /// No description provided for @checkInWateringTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watering {name}'**
+  String checkInWateringTitle(String name);
+
+  /// No description provided for @checkInQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you stick to the plan?'**
+  String get checkInQuestion;
+
+  /// No description provided for @checkInWateringQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you water it as planned?'**
+  String get checkInWateringQuestion;
+
+  /// No description provided for @checkInOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'On track'**
+  String get checkInOnTrack;
+
+  /// No description provided for @checkInSlipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Slipped'**
+  String get checkInSlipped;
+
+  /// No description provided for @checkInOffPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Off plan'**
+  String get checkInOffPlan;
+
+  /// No description provided for @checkInAddActuals.
+  ///
+  /// In en, this message translates to:
+  /// **'Add what you actually spent'**
+  String get checkInAddActuals;
+
+  /// No description provided for @checkInActualsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. This is how Acorn learns which branches run over.'**
+  String get checkInActualsHelp;
+
+  /// No description provided for @checkInPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned {amount}'**
+  String checkInPlanned(String amount);
+
+  /// No description provided for @checkInActualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual'**
+  String get checkInActualHint;
+
+  /// No description provided for @checkInConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Save my answer'**
+  String get checkInConfirm;
+
+  /// No description provided for @checkInSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Your tree noticed.'**
+  String get checkInSaved;
+
+  /// No description provided for @hubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Acorn\'s Hub'**
+  String get hubTitle;
+
+  /// No description provided for @hubOpenPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'See how you have been doing'**
+  String get hubOpenPrompt;
+
+  /// No description provided for @hubTreeFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'A fresh start'**
+  String get hubTreeFresh;
+
+  /// No description provided for @hubTreeFreshSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tree grows as you keep checking in.'**
+  String get hubTreeFreshSub;
+
+  /// No description provided for @hubScoreSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Health {score} out of 100'**
+  String hubScoreSub(int score);
+
+  /// No description provided for @hubStreakSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 check in a row} other{{count} check ins in a row}}'**
+  String hubStreakSub(int count);
+
+  /// No description provided for @hubMissedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 missed lately} other{{count} missed lately}}'**
+  String hubMissedSub(int count);
+
+  /// No description provided for @hubDeltaUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Up {points} lately'**
+  String hubDeltaUp(int points);
+
+  /// No description provided for @hubDeltaDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down {points} lately'**
+  String hubDeltaDown(int points);
+
+  /// No description provided for @hubAnswerOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell Acorn how {name} went'**
+  String hubAnswerOne(String name);
+
+  /// No description provided for @hubAnswerMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} answers waiting'**
+  String hubAnswerMany(int count);
+
+  /// No description provided for @hubStatStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'In a row'**
+  String get hubStatStreak;
+
+  /// No description provided for @hubStatAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get hubStatAnswered;
+
+  /// No description provided for @hubStatBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best run'**
+  String get hubStatBest;
+
+  /// No description provided for @hubPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One thing to answer} other{{count} things to answer}}'**
+  String hubPendingTitle(int count);
+
+  /// No description provided for @hubPendingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Each answer feeds your tree. Skipping one sets it back.'**
+  String get hubPendingSub;
+
+  /// No description provided for @hubReflectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reflection'**
+  String get hubReflectionTitle;
+
+  /// No description provided for @hubReflectionReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Acorn has been watching. Let him walk you through it.'**
+  String get hubReflectionReady;
+
+  /// No description provided for @hubReflectionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to reflect on yet.'**
+  String get hubReflectionEmpty;
+
+  /// No description provided for @hubReflectionEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer a check in or two and Acorn will have something to show you.'**
+  String get hubReflectionEmptySub;
+
+  /// No description provided for @hubReflectionPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Let Acorn present it'**
+  String get hubReflectionPlay;
+
+  /// No description provided for @hubConsistencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your record'**
+  String get hubConsistencyTitle;
+
+  /// No description provided for @hubTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health over time'**
+  String get hubTrendTitle;
+
+  /// No description provided for @hubOverspendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan against reality'**
+  String get hubOverspendTitle;
+
+  /// No description provided for @hubOverspendEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to compare yet. When you answer a check in, add what you actually spent on a branch or two and this fills in.'**
+  String get hubOverspendEmpty;
+
+  /// No description provided for @hubTalkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk it through'**
+  String get hubTalkTitle;
+
+  /// No description provided for @hubTalkSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Acorn what to change, and he will answer with your own numbers in front of him.'**
+  String get hubTalkSub;
+
+  /// No description provided for @hubTalkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with Acorn'**
+  String get hubTalkAction;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @hubStoryDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get hubStoryDone;
+
+  /// No description provided for @hubStoryIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is how you are growing'**
+  String get hubStoryIntroTitle;
+
+  /// No description provided for @hubStoryIntroFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Let us look at how the last stretch went.'**
+  String get hubStoryIntroFallback;
+
+  /// No description provided for @hubStoryConsistencyLine.
+  ///
+  /// In en, this message translates to:
+  /// **'You answered {answered} of {total} times. Every answer is a day your tree grew instead of thinning.'**
+  String hubStoryConsistencyLine(int answered, int total);
+
+  /// No description provided for @hubStoryStrengthsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What went well'**
+  String get hubStoryStrengthsTitle;
+
+  /// No description provided for @hubStoryWeaknessesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it slipped'**
+  String get hubStoryWeaknessesTitle;
+
+  /// No description provided for @hubStoryOverspendFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is where the plan and the spending parted ways.'**
+  String get hubStoryOverspendFallback;
+
+  /// No description provided for @hubStorySuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to try next'**
+  String get hubStorySuggestionsTitle;
+
+  /// No description provided for @hubStorySuggestionsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one of these. One change that sticks beats three that do not.'**
+  String get hubStorySuggestionsLine;
+
+  /// No description provided for @hubStoryNoAdviceLine.
+  ///
+  /// In en, this message translates to:
+  /// **'I do not have enough to go on yet. Ask me anything and we can work it out together.'**
+  String get hubStoryNoAdviceLine;
+
+  /// No description provided for @hubAskAboutThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me about this'**
+  String get hubAskAboutThis;
+
+  /// No description provided for @hubChatGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'What is on your mind?'**
+  String get hubChatGreeting;
+
+  /// No description provided for @hubChatGreetingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'I can see your budgets, your goals and how your check ins have gone.'**
+  String get hubChatGreetingSub;
+
+  /// No description provided for @hubChatPrompt1.
+  ///
+  /// In en, this message translates to:
+  /// **'Where is my money actually going?'**
+  String get hubChatPrompt1;
+
+  /// No description provided for @hubChatPrompt2.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I rebuild my streak?'**
+  String get hubChatPrompt2;
+
+  /// No description provided for @hubChatPrompt3.
+  ///
+  /// In en, this message translates to:
+  /// **'Is my budget realistic?'**
+  String get hubChatPrompt3;
+
+  /// No description provided for @hubChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Acorn something'**
+  String get hubChatHint;
+
+  /// No description provided for @hubChatThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Acorn is thinking'**
+  String get hubChatThinking;
+
+  /// No description provided for @hubChatFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Acorn could not answer just now. Try again in a moment.'**
+  String get hubChatFailed;
+
+  /// No description provided for @hubChatClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear this conversation'**
+  String get hubChatClear;
+
+  /// No description provided for @treeHealthBarren.
+  ///
+  /// In en, this message translates to:
+  /// **'Bare'**
+  String get treeHealthBarren;
+
+  /// No description provided for @treeHealthWilting.
+  ///
+  /// In en, this message translates to:
+  /// **'Wilting'**
+  String get treeHealthWilting;
+
+  /// No description provided for @treeHealthSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Holding steady'**
+  String get treeHealthSteady;
+
+  /// No description provided for @treeHealthFlourishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Flourishing'**
+  String get treeHealthFlourishing;
+
+  /// No description provided for @treeHealthRadiant.
+  ///
+  /// In en, this message translates to:
+  /// **'Thriving'**
+  String get treeHealthRadiant;
+
+  /// No description provided for @checkInMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get checkInMissed;
+
+  /// No description provided for @hubOverBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} over'**
+  String hubOverBy(String amount);
+
+  /// No description provided for @hubWithinPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Within plan'**
+  String get hubWithinPlan;
+
+  /// No description provided for @payDayReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay day check ins'**
+  String get payDayReminders;
+
+  /// No description provided for @payDayRemindersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask how the cycle went each time you get paid'**
+  String get payDayRemindersSub;
+
+  /// No description provided for @notifChannelCheckInName.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay day reminders'**
+  String get notifChannelCheckInName;
+
+  /// No description provided for @notifChannelCheckInDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A nudge on each pay day to say how the cycle went'**
+  String get notifChannelCheckInDesc;
+
+  /// No description provided for @notifCheckInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay day'**
+  String get notifCheckInTitle;
+
+  /// No description provided for @notifCheckInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} reached its pay day. Open Budget Tree and tell Acorn how it went.'**
+  String notifCheckInBody(String name);
+
   /// No description provided for @surveyProgress.
   ///
   /// In en, this message translates to:

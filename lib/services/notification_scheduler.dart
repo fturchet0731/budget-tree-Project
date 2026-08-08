@@ -1,11 +1,16 @@
+import 'dart:math' as math;
+
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/calendar.dart';
+import '../data/rhythm.dart';
 import '../l10n/app_localizations_resolver.dart';
 import '../models/budget_model.dart';
 import 'app_settings.dart';
+import 'budget_repository.dart';
 import 'goal_repository.dart';
 import 'notification_content.dart';
 import 'notification_service.dart';
+import 'pay_scheduler.dart';
 import 'reflection_service.dart';
 import 'streak_service.dart';
 
@@ -98,19 +103,74 @@ class NotificationScheduler {
         settings.waterHour,
       );
       final soonAt = addDays(dueAt, -2);
-      await NotificationService.scheduleGoalWateringOnce(
+      await NotificationService.scheduleOnce(
         id: dueId,
         when: dueAt,
         title: NotificationContent.wateringDueTitle(goal, l),
         body: NotificationContent.wateringDueBody(goal, l),
       );
-      await NotificationService.scheduleGoalWateringOnce(
+      await NotificationService.scheduleOnce(
         id: soonId,
         when: soonAt,
         title: NotificationContent.wateringSoonTitle(goal, l),
         body: NotificationContent.wateringSoonBody(goal, l),
       );
     }
+
+    // Pay-day check-ins. One one-shot per scheduled budget, seeded at its next
+    // pay date, using the calendar-correct enumerator rather than the engine's
+    // period counter so the reminder lands on the day the user actually gets
+    // paid. Re-seeded on every boot, resume and answered check-in.
+    final budgets = await BudgetRepository.loadAll();
+    final now = DateTime.now();
+    for (final budget in budgets) {
+      final id =
+          NotificationService.checkInIdBase + (budget.id.hashCode & 0xfff);
+      final rhythm = budget.payFrequency;
+      final first = budget.firstPayDate;
+      if (!settings.notifPayCheckIn ||
+          budget.savedAt == null ||
+          rhythm == null ||
+          first == null ||
+          !rhythm.isValid) {
+        await NotificationService.cancel(id);
+        continue;
+      }
+      final next = _nextPayDateOnCalendar(budget, rhythm, first, now);
+      if (next == null) {
+        await NotificationService.cancel(id);
+        continue;
+      }
+      await NotificationService.scheduleOnce(
+        id: id,
+        when: DateTime(
+          next.year,
+          next.month,
+          next.day,
+          settings.checkInHour,
+        ),
+        title: l.notifCheckInTitle,
+        body: l.notifCheckInBody(budget.budgetName),
+        channel: NotificationService.checkInChannel,
+      );
+    }
+  }
+
+  /// The first pay date strictly after [now], walked on the calendar.
+  static DateTime? _nextPayDateOnCalendar(
+    BudgetModel budget,
+    Rhythm rhythm,
+    DateTime first,
+    DateTime now,
+  ) {
+    if (first.isAfter(now)) return first;
+    final approx = math.max(1, rhythm.periodLength.inDays);
+    var n = math.max(0, (daysBetween(first, now) / approx).floor() - 2);
+    for (var i = 0; i < 512; i++, n++) {
+      final date = PayScheduler.payDateAt(rhythm, first, n);
+      if (date.isAfter(now)) return date;
+    }
+    return null;
   }
 
   /// Event-driven budget warning. Fires only when a budget *crosses up* into a

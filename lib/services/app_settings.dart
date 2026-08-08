@@ -25,6 +25,8 @@ class AppSettings extends ChangeNotifier {
   static const _kWeeklyHour = 'settings_weekly_hour_v1';
   static const _kNotifWatering = 'settings_notif_watering_v1';
   static const _kWaterHour = 'settings_water_hour_v1';
+  static const _kNotifCheckIn = 'settings_notif_checkin_v1';
+  static const _kCheckInHour = 'settings_checkin_hour_v1';
   static const _kLocale = 'settings_locale_v1';
   static const _kTimeZone = 'settings_timezone_v1';
   static const _kAiCoach = 'settings_ai_coach_v1';
@@ -54,6 +56,8 @@ class AppSettings extends ChangeNotifier {
   // Per-goal watering reminders ("water due in 2 days" / "water due today").
   bool _notifGoalWatering = true;
   int _waterHour = 9; // morning nudge to water due goals
+  bool _notifCheckIn = true;
+  int _checkInHour = 18; // evening of pay day, once the money has landed
 
   // Master switch for the Claude-powered coach (smart budget/goal plans and
   // weekly reflections). On by default; the features still only run when
@@ -97,6 +101,12 @@ class AppSettings extends ChangeNotifier {
   bool get notifGoalWatering => _notifGoalWatering;
   int get waterHour => _waterHour;
 
+  /// Whether the pay-day check-in nudge fires, and the hour of day it does.
+  /// Defaults to the evening rather than the morning: a check-in asks how the
+  /// cycle went, which is only answerable once the day has happened.
+  bool get notifPayCheckIn => _notifCheckIn;
+  int get checkInHour => _checkInHour;
+
   /// Whether the AI coach (smart plans + reflections) is allowed to run.
   bool get aiCoachEnabled => _aiCoachEnabled;
 
@@ -106,7 +116,8 @@ class AppSettings extends ChangeNotifier {
       _notifBudgetWarnings ||
       _notifStreakReminders ||
       _notifWeeklySummary ||
-      _notifGoalWatering;
+      _notifGoalWatering ||
+      _notifCheckIn;
 
   /// True once the user has taken a notification-related action (touched the
   /// notification settings, or asked to be reminded to water a goal). The OS
@@ -159,6 +170,8 @@ class AppSettings extends ChangeNotifier {
     _weeklyHour = prefs.getInt(_kWeeklyHour) ?? 18;
     _notifGoalWatering = prefs.getBool(_kNotifWatering) ?? true;
     _waterHour = prefs.getInt(_kWaterHour) ?? 9;
+    _notifCheckIn = prefs.getBool(_kNotifCheckIn) ?? true;
+    _checkInHour = prefs.getInt(_kCheckInHour) ?? 18;
     _aiCoachEnabled = prefs.getBool(_kAiCoach) ?? true;
     _notifPermissionAsked = prefs.getBool(_kNotifPermissionAsked) ?? false;
     _timeZone = prefs.getString(_kTimeZone);
@@ -255,6 +268,22 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_kWaterHour, hour);
+  }
+
+  Future<void> setNotifPayCheckIn(bool v) async {
+    if (_notifCheckIn == v) return;
+    _notifCheckIn = v;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kNotifCheckIn, v);
+  }
+
+  Future<void> setCheckInHour(int hour) async {
+    if (_checkInHour == hour) return;
+    _checkInHour = hour;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kCheckInHour, hour);
   }
 
   Future<void> setAiCoachEnabled(bool v) async {

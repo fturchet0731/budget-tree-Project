@@ -2529,6 +2529,318 @@ class AppLocalizationsEs extends AppLocalizations {
       'Planta tu primer árbol y mira crecer tu presupuesto.';
 
   @override
+  String get pulseCheckInTitle => 'Hora de hacer balance';
+
+  @override
+  String pulseCheckInBody(String name) {
+    return '$name llegó a su día de pago. Cuéntale a Acorn cómo te fue.';
+  }
+
+  @override
+  String pulseCheckInOverdueBody(String name) {
+    return '$name sigue esperando tu respuesta. Responde antes de que se cierre.';
+  }
+
+  @override
+  String pulseCheckInManyBody(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Hay $count respuestas pendientes.',
+      one: 'Hay 1 respuesta pendiente.',
+    );
+    return '$_temp0 Empieza por $name.';
+  }
+
+  @override
+  String checkInPaydayTitle(String name) {
+    return 'Día de pago de $name';
+  }
+
+  @override
+  String checkInWateringTitle(String name) {
+    return 'Riego de $name';
+  }
+
+  @override
+  String get checkInQuestion => '¿Seguiste tu plan?';
+
+  @override
+  String get checkInWateringQuestion => '¿Lo regaste como habías previsto?';
+
+  @override
+  String get checkInOnTrack => 'Según el plan';
+
+  @override
+  String get checkInSlipped => 'Se me fue un poco';
+
+  @override
+  String get checkInOffPlan => 'Fuera del plan';
+
+  @override
+  String get checkInAddActuals => 'Añade lo que gastaste de verdad';
+
+  @override
+  String get checkInActualsHelp =>
+      'Opcional. Así es como Acorn descubre qué ramas se pasan.';
+
+  @override
+  String checkInPlanned(String amount) {
+    return 'Previsto $amount';
+  }
+
+  @override
+  String get checkInActualHint => 'Real';
+
+  @override
+  String get checkInConfirm => 'Guardar mi respuesta';
+
+  @override
+  String get checkInSaved => 'Guardado. Tu árbol lo ha notado.';
+
+  @override
+  String get hubTitle => 'El rincón de Acorn';
+
+  @override
+  String get hubOpenPrompt => 'Mira cómo te ha ido';
+
+  @override
+  String get hubTreeFresh => 'Un nuevo comienzo';
+
+  @override
+  String get hubTreeFreshSub =>
+      'Tu árbol crece a medida que vas haciendo balance.';
+
+  @override
+  String hubScoreSub(int score) {
+    return 'Salud $score sobre 100';
+  }
+
+  @override
+  String hubStreakSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count balances seguidos',
+      one: '1 balance seguido',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hubMissedSub(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sin responder hace poco',
+      one: '1 sin responder hace poco',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hubDeltaUp(int points) {
+    return '$points más últimamente';
+  }
+
+  @override
+  String hubDeltaDown(int points) {
+    return '$points menos últimamente';
+  }
+
+  @override
+  String hubAnswerOne(String name) {
+    return 'Cuéntale a Acorn cómo fue $name';
+  }
+
+  @override
+  String hubAnswerMany(int count) {
+    return '$count respuestas pendientes';
+  }
+
+  @override
+  String get hubStatStreak => 'Seguidos';
+
+  @override
+  String get hubStatAnswered => 'Respondidos';
+
+  @override
+  String get hubStatBest => 'Mejor racha';
+
+  @override
+  String hubPendingTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cosas por responder',
+      one: 'Una cosa por responder',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hubPendingSub =>
+      'Cada respuesta alimenta tu árbol. Saltarte una lo hace retroceder.';
+
+  @override
+  String get hubReflectionTitle => 'Tu balance';
+
+  @override
+  String get hubReflectionReady =>
+      'Acorn ha estado observando. Deja que te lo cuente.';
+
+  @override
+  String get hubReflectionEmpty => 'Todavía no hay nada que analizar.';
+
+  @override
+  String get hubReflectionEmptySub =>
+      'Responde uno o dos balances y Acorn tendrá algo que enseñarte.';
+
+  @override
+  String get hubReflectionPlay => 'Que lo presente Acorn';
+
+  @override
+  String get hubConsistencyTitle => 'Tu historial';
+
+  @override
+  String get hubTrendTitle => 'La salud con el tiempo';
+
+  @override
+  String get hubOverspendTitle => 'El plan frente a la realidad';
+
+  @override
+  String get hubOverspendEmpty =>
+      'Todavía no hay nada que comparar. Cuando hagas balance, anota lo que gastaste de verdad en una rama o dos y esto se irá llenando.';
+
+  @override
+  String get hubTalkTitle => 'Hablarlo';
+
+  @override
+  String get hubTalkSub =>
+      'Pregúntale a Acorn qué cambiar y te responderá con tus propios números delante.';
+
+  @override
+  String get hubTalkAction => 'Hablar con Acorn';
+
+  @override
+  String get back => 'Atrás';
+
+  @override
+  String get hubStoryDone => 'Listo';
+
+  @override
+  String get hubStoryIntroTitle => 'Así estás creciendo';
+
+  @override
+  String get hubStoryIntroFallback => 'Veamos cómo fue este tramo.';
+
+  @override
+  String hubStoryConsistencyLine(int answered, int total) {
+    return 'Respondiste $answered de $total veces. Cada respuesta es un día en que tu árbol creció en vez de ralear.';
+  }
+
+  @override
+  String get hubStoryStrengthsTitle => 'Lo que fue bien';
+
+  @override
+  String get hubStoryWeaknessesTitle => 'Donde se torció';
+
+  @override
+  String get hubStoryOverspendFallback =>
+      'Aquí es donde el plan y el gasto se separaron.';
+
+  @override
+  String get hubStorySuggestionsTitle => 'Qué probar ahora';
+
+  @override
+  String get hubStorySuggestionsLine =>
+      'Elige solo una. Un cambio que se mantiene vale más que tres que no.';
+
+  @override
+  String get hubStoryNoAdviceLine =>
+      'Todavía no tengo suficiente. Pregúntame lo que quieras y lo vemos juntos.';
+
+  @override
+  String get hubAskAboutThis => 'Cuéntame más de esto';
+
+  @override
+  String get hubChatGreeting => '¿Qué te ronda la cabeza?';
+
+  @override
+  String get hubChatGreetingSub =>
+      'Veo tus presupuestos, tus metas y cómo te han ido los balances.';
+
+  @override
+  String get hubChatPrompt1 => '¿A dónde se va mi dinero de verdad?';
+
+  @override
+  String get hubChatPrompt2 => '¿Cómo recupero mi racha?';
+
+  @override
+  String get hubChatPrompt3 => '¿Mi presupuesto es realista?';
+
+  @override
+  String get hubChatHint => 'Pregúntale algo a Acorn';
+
+  @override
+  String get hubChatThinking => 'Acorn está pensando';
+
+  @override
+  String get hubChatFailed =>
+      'Acorn no ha podido responder ahora. Inténtalo en un momento.';
+
+  @override
+  String get hubChatClear => 'Borrar esta conversación';
+
+  @override
+  String get treeHealthBarren => 'Pelado';
+
+  @override
+  String get treeHealthWilting => 'Marchitándose';
+
+  @override
+  String get treeHealthSteady => 'Estable';
+
+  @override
+  String get treeHealthFlourishing => 'Floreciente';
+
+  @override
+  String get treeHealthRadiant => 'Radiante';
+
+  @override
+  String get checkInMissed => 'Sin responder';
+
+  @override
+  String hubOverBy(String amount) {
+    return '$amount de más';
+  }
+
+  @override
+  String get hubWithinPlan => 'Dentro del plan';
+
+  @override
+  String get payDayReminders => 'Balance del día de pago';
+
+  @override
+  String get payDayRemindersSub =>
+      'Preguntar cómo fue el ciclo cada vez que cobras';
+
+  @override
+  String get notifChannelCheckInName => 'Recordatorios de día de pago';
+
+  @override
+  String get notifChannelCheckInDesc =>
+      'Un aviso cada día de pago para contar cómo fue el ciclo';
+
+  @override
+  String get notifCheckInTitle => 'Día de pago';
+
+  @override
+  String notifCheckInBody(String name) {
+    return '$name llegó a su día de pago. Abre Budget Tree y cuéntale a Acorn cómo te fue.';
+  }
+
+  @override
   String surveyProgress(int current, int total) {
     return 'Pregunta $current de $total';
   }

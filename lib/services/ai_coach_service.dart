@@ -4,6 +4,7 @@ import 'dart:ui' show PlatformDispatcher;
 import '../data/water_cadence.dart';
 import '../models/ai_plan.dart';
 import '../models/goal_model.dart';
+import '../models/reflection_report.dart';
 import 'app_settings.dart';
 import 'auth_service.dart';
 import 'supabase_config.dart';
@@ -155,16 +156,47 @@ class AiCoachService {
     return GoalPlanResult.fromJson(data);
   }
 
-  /// Ask for a short reflection summary. [input] is the compact, already
-  /// computed summary built by the [ReflectionService].
-  Future<String> reflection(Map<String, dynamic> input) async {
+  /// Ask for a reflection. [input] is the compact, already computed summary
+  /// built by the [ReflectionService].
+  ///
+  /// Returns both halves: the prose, which the notification and any older
+  /// surface still use, and the structured report the hub presents. A function
+  /// deployment older than this app build returns only the prose, so an empty
+  /// report is a supported outcome rather than a failure.
+  Future<ReflectionResult> reflection(Map<String, dynamic> input) async {
     final data = await _invoke({
       'action': 'reflection',
       'locale': _locale,
       ...input,
     });
     final text = (data['text'] as String?)?.trim() ?? '';
-    if (text.isEmpty) throw AiUnavailable('Empty reflection');
-    return text;
+    final report = ReflectionReport.fromJson(data);
+    if (text.isEmpty && report.isEmpty) throw AiUnavailable('Empty reflection');
+    return ReflectionResult(text: text, report: report);
   }
+
+  /// Ask Acorn a question. [context] is the allow-listed snapshot of the user's
+  /// own figures; the conversation history is read server-side, never sent
+  /// from here, so a forged assistant turn is not expressible.
+  Future<String> acornChat({
+    required String message,
+    required Map<String, dynamic> context,
+  }) async {
+    final data = await _invoke({
+      'action': 'acorn_chat',
+      'locale': _locale,
+      'message': message,
+      ...context,
+    });
+    final reply = (data['reply'] as String?)?.trim() ?? '';
+    if (reply.isEmpty) throw AiUnavailable('Empty reply');
+    return reply;
+  }
+}
+
+/// Both halves of a reflection response.
+class ReflectionResult {
+  final String text;
+  final ReflectionReport report;
+  const ReflectionResult({required this.text, required this.report});
 }

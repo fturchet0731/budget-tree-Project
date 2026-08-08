@@ -120,6 +120,34 @@ class ProfileService {
     }
   }
 
+  /// Publish the user's tree-health score so friends see it on their garden.
+  ///
+  /// Throttled like [touchPresence] and skipped when the value has not moved,
+  /// so an idle dashboard does not issue an UPDATE on every build. Best-effort
+  /// throughout: this is a social flourish and nothing reads it back.
+  int? _lastPublishedHealth;
+  DateTime? _lastHealthPush;
+
+  Future<void> publishHealthScore(int score) async {
+    if (!isAvailable) return;
+    final clamped = score.clamp(0, 100);
+    if (_lastPublishedHealth == clamped) return;
+    final now = DateTime.now();
+    if (_lastHealthPush != null &&
+        now.difference(_lastHealthPush!).inMinutes < 2) {
+      return;
+    }
+    _lastHealthPush = now;
+    _lastPublishedHealth = clamped;
+    try {
+      await SupabaseConfig.client
+          .from(_table)
+          .update({'health_score': clamped}).eq('id', _uid!);
+    } catch (_) {
+      // Best-effort: the local tree is unaffected.
+    }
+  }
+
   /// Update how this user's status emoji is computed.
   Future<void> setStatusMode(FriendStatusMode mode, {String? goalId}) async {
     if (!isAvailable) return;

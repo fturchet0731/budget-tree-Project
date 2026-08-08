@@ -818,6 +818,27 @@ class _NotificationsCard extends StatelessWidget {
               }
             },
           ),
+        const SizedBox(height: 6),
+        _NotifSwitch(
+          title: l.payDayReminders,
+          subtitle: l.payDayRemindersSub,
+          value: s.notifPayCheckIn,
+          onChanged: (v) => _apply(() => s.setNotifPayCheckIn(v)),
+        ),
+        if (s.notifPayCheckIn)
+          _TapRow(
+            label: l.remindMeAt,
+            value: TimeOfDay(hour: s.checkInHour, minute: 0).format(context),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay(hour: s.checkInHour, minute: 0),
+              );
+              if (picked != null) {
+                await _apply(() => s.setCheckInHour(picked.hour));
+              }
+            },
+          ),
       ],
     );
   }
