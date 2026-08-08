@@ -30,6 +30,24 @@ CheckIn resolved({CheckInVerdict? verdict, bool missed = false}) {
 List<CheckIn> repeat(int n, CheckIn Function() make) =>
     List.generate(n, (_) => make());
 
+/// A resolved check-in on an explicit date, for the prestige-clock tests where
+/// the calendar spacing between check-ins is what matters.
+CheckIn at(DateTime due, {CheckInVerdict? verdict, bool missed = false}) =>
+    CheckIn(
+      kind: CheckInKind.payday,
+      subjectId: 'b1',
+      subjectName: 'Tree',
+      dueAt: due,
+      confirmedAt: missed ? null : due,
+      verdict: missed ? null : verdict,
+      missed: missed,
+    );
+
+final _base = DateTime(2026, 1, 1);
+DateTime _at(int day) => addDays(_base, day);
+List<CheckIn> _onTrack(Iterable<int> days) =>
+    [for (final d in days) at(_at(d), verdict: CheckInVerdict.onTrack)];
+
 void main() {
   setUp(() => _day = 0);
 
@@ -37,7 +55,7 @@ void main() {
     test('an empty ledger sits at the baseline and reads as empty', () {
       final health = TreeHealthService.evaluate(const []);
       expect(health.score, TreeHealthService.baseline);
-      expect(health.tier, TreeHealthTier.steady);
+      expect(health.tier, TreeHealthTier.holding);
       expect(health.isEmpty, isTrue);
     });
 
@@ -65,8 +83,9 @@ void main() {
 
     test('missing check-ins walks the tree backwards', () {
       final health = TreeHealthService.evaluate(repeat(3, () => resolved(missed: true)));
+      // 50 -> 40 -> 30 -> 20, which is the sparse band under the finer scale.
       expect(health.score, lessThan(TreeHealthService.baseline));
-      expect(health.tier, TreeHealthTier.wilting);
+      expect(health.tier, TreeHealthTier.sparse);
       expect(health.currentStreak, 0);
       expect(health.missedRecent, 3);
     });
@@ -100,8 +119,9 @@ void main() {
         ...repeat(6, () => resolved(missed: true)),
         ...repeat(8, () => resolved(verdict: CheckInVerdict.onTrack)),
       ]);
+      // 6 misses bottom out at 0, then 8 answers climb back to the leafing band.
       expect(recovered.tier.index,
-          greaterThanOrEqualTo(TreeHealthTier.flourishing.index));
+          greaterThanOrEqualTo(TreeHealthTier.leafing.index));
       expect(recovered.delta, isPositive);
     });
 
@@ -153,17 +173,90 @@ void main() {
   });
 
   group('TreeHealthService.tierFor', () {
-    test('boundaries land in the expected tier', () {
+    test('the eight bands land in the expected tier', () {
       expect(TreeHealthService.tierFor(0), TreeHealthTier.barren);
-      expect(TreeHealthService.tierFor(19.9), TreeHealthTier.barren);
-      expect(TreeHealthService.tierFor(20), TreeHealthTier.wilting);
-      expect(TreeHealthService.tierFor(39.9), TreeHealthTier.wilting);
-      expect(TreeHealthService.tierFor(40), TreeHealthTier.steady);
-      expect(TreeHealthService.tierFor(59.9), TreeHealthTier.steady);
-      expect(TreeHealthService.tierFor(60), TreeHealthTier.flourishing);
-      expect(TreeHealthService.tierFor(84.9), TreeHealthTier.flourishing);
-      expect(TreeHealthService.tierFor(85), TreeHealthTier.radiant);
+      expect(TreeHealthService.tierFor(12), TreeHealthTier.barren);
+      expect(TreeHealthService.tierFor(13), TreeHealthTier.sparse);
+      expect(TreeHealthService.tierFor(25), TreeHealthTier.sparse);
+      expect(TreeHealthService.tierFor(26), TreeHealthTier.wilting);
+      expect(TreeHealthService.tierFor(38), TreeHealthTier.wilting);
+      expect(TreeHealthService.tierFor(39), TreeHealthTier.holding);
+      expect(TreeHealthService.tierFor(51), TreeHealthTier.holding);
+      expect(TreeHealthService.tierFor(52), TreeHealthTier.leafing);
+      expect(TreeHealthService.tierFor(64), TreeHealthTier.leafing);
+      expect(TreeHealthService.tierFor(65), TreeHealthTier.full);
+      expect(TreeHealthService.tierFor(77), TreeHealthTier.full);
+      expect(TreeHealthService.tierFor(78), TreeHealthTier.flourishing);
+      expect(TreeHealthService.tierFor(89), TreeHealthTier.flourishing);
+      expect(TreeHealthService.tierFor(90), TreeHealthTier.radiant);
       expect(TreeHealthService.tierFor(100), TreeHealthTier.radiant);
+    });
+  });
+
+  group('prestige clock', () {
+    test('never radiant means no prestige days', () {
+      // One answer lifts the score to 58, which never crosses 90.
+      final days = TreeHealthService.prestigeDaysAtRadiant(
+        [at(_at(0), verdict: CheckInVerdict.onTrack)],
+        now: _at(100),
+      );
+      expect(days, 0);
+      expect(TreeHealthService.prestigeFor(days), isNull);
+    });
+
+    test('calendar time held at radiant accrues, and earns a tier', () {
+      // Five answers reach 90 by day 4; a sixth on day 34 keeps it radiant, so
+      // the day 4 to day 34 interval counts for exactly 30 days.
+      final ledger = _onTrack([0, 1, 2, 3, 4, 34]);
+      final days =
+          TreeHealthService.prestigeDaysAtRadiant(ledger, now: _at(34));
+      expect(days, 30);
+      expect(TreeHealthService.prestigeFor(days), PrestigeTier.blossoming);
+    });
+
+    test('dropping below 90 pauses the clock without un-counting', () {
+      // Radiant from day 4, held to day 34 (30 days), then a miss on day 40
+      // drops below 90. The day 34 to 40 stretch is still radiant (six days);
+      // everything after the drop accrues nothing however far "now" is.
+      final ledger = [
+        ..._onTrack([0, 1, 2, 3, 4, 34]),
+        at(_at(40), missed: true),
+      ];
+      final days =
+          TreeHealthService.prestigeDaysAtRadiant(ledger, now: _at(400));
+      expect(days, 36);
+      // Already past the 30 day mark, so the tier is held despite the lapse.
+      expect(TreeHealthService.prestigeFor(days), PrestigeTier.blossoming);
+    });
+
+    test('a radiant streak shows its prestige tree', () {
+      final h = TreeHealthService.evaluate(
+        _onTrack([0, 1, 2, 3, 4, 34, 35]),
+        now: _at(35),
+      );
+      expect(h.earnedPrestige, PrestigeTier.blossoming);
+      expect(h.score, greaterThanOrEqualTo(90));
+      expect(h.showsPrestige, isTrue);
+      expect(h.spriteKey, 'blossoming');
+    });
+
+    test('a lapsed prestige tree keeps its rank but shows the score tier', () {
+      final h = TreeHealthService.evaluate(
+        [
+          ..._onTrack([0, 1, 2, 3, 4, 34, 35]),
+          at(_at(36), missed: true),
+          at(_at(37), missed: true),
+          at(_at(38), missed: true),
+        ],
+        now: _at(38),
+      );
+      // The rank is not lost...
+      expect(h.earnedPrestige, PrestigeTier.blossoming);
+      // ...but with the score below 90 the honest score tier is on show.
+      expect(h.score, lessThan(90));
+      expect(h.showsPrestige, isFalse);
+      expect(h.spriteKey, isNot('blossoming'));
+      expect(h.spriteKey, h.tier.name);
     });
   });
 }

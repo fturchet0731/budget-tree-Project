@@ -20,7 +20,7 @@ import 'package:budget_app_project/screens/acorn_chat_screen.dart';
 import 'package:budget_app_project/screens/acorn_hub_screen.dart';
 import 'package:budget_app_project/screens/reflection_story_screen.dart';
 import 'package:budget_app_project/services/app_settings.dart';
-import 'package:budget_app_project/widgets/health_tree_view.dart';
+import 'package:budget_app_project/widgets/status_tree_view.dart';
 
 Future<void> pumpScreen(
   WidgetTester tester,
@@ -58,7 +58,7 @@ void main() {
     final l = AppLocalizations.of(tester.element(find.byType(AcornHubScreen)));
 
     // The tree is always drawn, even at the baseline.
-    expect(find.byType(HealthTreeView), findsWidgets);
+    expect(find.byType(StatusTreeView), findsWidgets);
     expect(find.text(l.hubTreeFresh), findsWidgets);
 
     // The overspend card says plainly that there is nothing to compare yet.

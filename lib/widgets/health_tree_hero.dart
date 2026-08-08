@@ -11,7 +11,7 @@ import '../theme/app_dims.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_tokens.dart';
 import 'check_in_sheet.dart';
-import 'health_tree_view.dart';
+import 'status_tree_view.dart';
 import 'ui/pressable.dart';
 
 /// The dashboard's living tree: how consistent the user has been, at a glance,
@@ -101,8 +101,8 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
               child: Row(
                 children: [
                   const SizedBox(width: AppDims.s8),
-                  HealthTreeView(
-                    health: _health.fraction,
+                  StatusTreeView(
+                    spriteKey: _health.spriteKey,
                     size: treeSize,
                   ),
                   Expanded(
@@ -125,7 +125,7 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
                           Text(
                             _health.isEmpty
                                 ? l.hubTreeFresh
-                                : _health.tier.label(l),
+                                : _health.statusLabel(l),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context)
@@ -170,6 +170,9 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
 
   String _subtitle(AppLocalizations l) {
     if (_health.isEmpty) return l.hubTreeFreshSub;
+    if (_health.showsPrestige && _health.prestigeDays >= 1) {
+      return l.hubPrestigeDays(_health.prestigeDays.floor());
+    }
     if (_health.currentStreak > 0) {
       return l.hubStreakSub(_health.currentStreak);
     }

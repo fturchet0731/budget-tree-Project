@@ -13,7 +13,7 @@ import '../widgets/acorn_mascot.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/charts/hub_charts.dart';
 import '../widgets/check_in_sheet.dart';
-import '../widgets/health_tree_view.dart';
+import '../widgets/status_tree_view.dart';
 import '../widgets/skeleton.dart';
 import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/app_card.dart';
@@ -156,7 +156,7 @@ class _HealthCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              HealthTreeView(health: health.fraction, size: 96),
+              StatusTreeView(spriteKey: health.spriteKey, size: 96),
               const SizedBox(width: AppDims.s12),
               Expanded(
                 child: Column(
@@ -165,7 +165,7 @@ class _HealthCard extends StatelessWidget {
                     Text(
                       health.isEmpty
                           ? l.hubTreeFresh
-                          : health.tier.label(l),
+                          : health.statusLabel(l),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
@@ -175,6 +175,17 @@ class _HealthCard extends StatelessWidget {
                           : l.hubScoreSub(health.score.round()),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
+                    if (health.showsPrestige && health.prestigeDays >= 1) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        l.hubPrestigeDays(health.prestigeDays.floor()),
+                        style: GoogleFonts.nunito(
+                          color: t.accentStrong,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
                     if (!health.isEmpty) ...[
                       const SizedBox(height: AppDims.s8),
                       AppProgressBar(value: health.fraction),

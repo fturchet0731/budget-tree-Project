@@ -4594,6 +4594,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 missed lately} other{{count} missed lately}}'**
   String hubMissedSub(int count);
 
+  /// No description provided for @hubPrestigeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day at radiant} other{{count} days at radiant}}'**
+  String hubPrestigeDays(int count);
+
   /// No description provided for @hubDeltaUp.
   ///
   /// In en, this message translates to:
@@ -4852,17 +4858,35 @@ abstract class AppLocalizations {
   /// **'Bare'**
   String get treeHealthBarren;
 
+  /// No description provided for @treeHealthSparse.
+  ///
+  /// In en, this message translates to:
+  /// **'Sparse'**
+  String get treeHealthSparse;
+
   /// No description provided for @treeHealthWilting.
   ///
   /// In en, this message translates to:
   /// **'Wilting'**
   String get treeHealthWilting;
 
-  /// No description provided for @treeHealthSteady.
+  /// No description provided for @treeHealthHolding.
   ///
   /// In en, this message translates to:
-  /// **'Holding steady'**
-  String get treeHealthSteady;
+  /// **'Holding on'**
+  String get treeHealthHolding;
+
+  /// No description provided for @treeHealthLeafing.
+  ///
+  /// In en, this message translates to:
+  /// **'Leafing out'**
+  String get treeHealthLeafing;
+
+  /// No description provided for @treeHealthFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get treeHealthFull;
 
   /// No description provided for @treeHealthFlourishing.
   ///
@@ -4873,8 +4897,56 @@ abstract class AppLocalizations {
   /// No description provided for @treeHealthRadiant.
   ///
   /// In en, this message translates to:
-  /// **'Thriving'**
+  /// **'Radiant'**
   String get treeHealthRadiant;
+
+  /// No description provided for @treeHealthBlossoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Blossoming'**
+  String get treeHealthBlossoming;
+
+  /// No description provided for @treeHealthFruiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruiting'**
+  String get treeHealthFruiting;
+
+  /// No description provided for @treeHealthAncient.
+  ///
+  /// In en, this message translates to:
+  /// **'Ancient'**
+  String get treeHealthAncient;
+
+  /// No description provided for @treeHealthSilver.
+  ///
+  /// In en, this message translates to:
+  /// **'Silver'**
+  String get treeHealthSilver;
+
+  /// No description provided for @treeHealthGilded.
+  ///
+  /// In en, this message translates to:
+  /// **'Gilded'**
+  String get treeHealthGilded;
+
+  /// No description provided for @treeHealthDiamond.
+  ///
+  /// In en, this message translates to:
+  /// **'Diamond'**
+  String get treeHealthDiamond;
+
+  /// No description provided for @treeHealthAmethyst.
+  ///
+  /// In en, this message translates to:
+  /// **'Amethyst'**
+  String get treeHealthAmethyst;
+
+  /// No description provided for @treeHealthRuby.
+  ///
+  /// In en, this message translates to:
+  /// **'Ruby'**
+  String get treeHealthRuby;
 
   /// No description provided for @checkInMissed.
   ///

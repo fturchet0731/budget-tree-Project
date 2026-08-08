@@ -2639,6 +2639,17 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String hubPrestigeDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días en la cima',
+      one: '1 día en la cima',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String hubDeltaUp(int points) {
     return '$points más últimamente';
   }
@@ -2796,16 +2807,49 @@ class AppLocalizationsEs extends AppLocalizations {
   String get treeHealthBarren => 'Pelado';
 
   @override
+  String get treeHealthSparse => 'Ralo';
+
+  @override
   String get treeHealthWilting => 'Marchitándose';
 
   @override
-  String get treeHealthSteady => 'Estable';
+  String get treeHealthHolding => 'Aguantando';
+
+  @override
+  String get treeHealthLeafing => 'Echando hojas';
+
+  @override
+  String get treeHealthFull => 'Frondoso';
 
   @override
   String get treeHealthFlourishing => 'Floreciente';
 
   @override
   String get treeHealthRadiant => 'Radiante';
+
+  @override
+  String get treeHealthBlossoming => 'En flor';
+
+  @override
+  String get treeHealthFruiting => 'Con frutos';
+
+  @override
+  String get treeHealthAncient => 'Ancestral';
+
+  @override
+  String get treeHealthSilver => 'Plata';
+
+  @override
+  String get treeHealthGilded => 'Dorado';
+
+  @override
+  String get treeHealthDiamond => 'Diamante';
+
+  @override
+  String get treeHealthAmethyst => 'Amatista';
+
+  @override
+  String get treeHealthRuby => 'Rubí';
 
   @override
   String get checkInMissed => 'Sin responder';

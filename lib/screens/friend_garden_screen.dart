@@ -8,7 +8,7 @@ import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../services/tree_health_service.dart';
 import '../widgets/app_scrollbar.dart';
-import '../widgets/health_tree_view.dart';
+import '../widgets/status_tree_view.dart';
 import '../widgets/goal_sapling_card.dart';
 import '../widgets/profile_avatar.dart';
 import 'friend_chat_screen.dart';
@@ -82,8 +82,10 @@ class FriendGardenScreen extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                       child: Row(
                         children: [
-                          HealthTreeView(
-                            health: profile.healthScore! / 100,
+                          StatusTreeView(
+                            spriteKey: TreeHealthService
+                                .tierFor(profile.healthScore!.toDouble())
+                                .name,
                             size: 84,
                           ),
                           const SizedBox(width: 10),

@@ -316,10 +316,18 @@ function healthOf(v: unknown) {
   const tier = String(h.tier ?? "");
   return {
     score: num(h.score),
-    tier: ["barren", "wilting", "steady", "flourishing", "radiant"]
-        .includes(tier)
+    tier: [
+      "barren",
+      "sparse",
+      "wilting",
+      "holding",
+      "leafing",
+      "full",
+      "flourishing",
+      "radiant",
+    ].includes(tier)
       ? tier
-      : "steady",
+      : "holding",
     delta: num(h.delta),
     streak: num(h.streak),
   };

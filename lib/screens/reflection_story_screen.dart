@@ -12,7 +12,7 @@ import '../theme/app_tokens.dart';
 import '../widgets/acorn_mascot.dart';
 import '../widgets/acorn_says.dart';
 import '../widgets/charts/hub_charts.dart';
-import '../widgets/health_tree_view.dart';
+import '../widgets/status_tree_view.dart';
 import '../widgets/skeleton.dart';
 import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/app_progress_bar.dart';
@@ -189,10 +189,10 @@ class _ReflectionStoryScreenState extends State<ReflectionStoryScreen> {
         title: l.hubStoryIntroTitle,
         child: Column(
           children: [
-            HealthTreeView(health: health.fraction, size: 150),
+            StatusTreeView(spriteKey: health.spriteKey, size: 150),
             const SizedBox(height: AppDims.s12),
             Text(
-              health.isEmpty ? l.hubTreeFresh : health.tier.label(l),
+              health.isEmpty ? l.hubTreeFresh : health.statusLabel(l),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: AppDims.s8),
