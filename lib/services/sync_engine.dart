@@ -5,6 +5,8 @@ import 'achievement_service.dart';
 import 'auth_service.dart';
 import 'budget_repository.dart';
 import 'category_repository.dart';
+import 'check_in_repository.dart';
+import 'check_in_service.dart';
 import 'goal_repository.dart';
 import 'notification_scheduler.dart';
 import 'pay_scheduler.dart';
@@ -23,6 +25,7 @@ class SyncEngine {
         GoalRepository.store,
         CategoryRepository.store,
         AchievementService.store,
+        CheckInRepository.store,
       ];
 
   static final _SyncLifecycle _lifecycle = _SyncLifecycle();
@@ -54,6 +57,9 @@ class SyncEngine {
     // what it reads, so it must not run against a cache a pull is about to
     // replace.
     await PayScheduler.runAllDue();
+    // Strictly after the sweep: a check-in slot is derived from the same
+    // schedule the sweep just advanced.
+    await CheckInService.sync();
     unawaited(NotificationScheduler.rescheduleAll());
   }
 
@@ -75,6 +81,7 @@ class SyncEngine {
       await s.pull();
     }
     await PayScheduler.runAllDue();
+    await CheckInService.sync();
   }
 
   /// Erase the signed-in user's rows from every remote table (used by the

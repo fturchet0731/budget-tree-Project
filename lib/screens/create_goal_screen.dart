@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/calendar.dart';
 import '../data/water_cadence.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/preset_labels.dart';
@@ -228,9 +229,12 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     if (watering != null) {
       goal.waterAmount = watering.amount;
       goal.waterCadenceIndex = watering.cadence.index;
-      goal.nextWaterDate = DateTime.now().add(
-        Duration(days: watering.cadence.days),
-      );
+      final firstWatering = addDays(DateTime.now(), watering.cadence.days);
+      goal.nextWaterDate = firstWatering;
+      // The anchor is set once here and never moved, so the watering slots a
+      // check-in enumerates stay reproducible even as the cursor above is
+      // pushed forward by deposits.
+      goal.waterAnchorDate = firstWatering;
       goal.waterRemindersEnabled = _remindToWater;
     }
     await GoalRepository.saveNew(goal);

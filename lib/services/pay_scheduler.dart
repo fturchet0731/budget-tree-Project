@@ -1,5 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
+import '../data/calendar.dart';
+import '../data/pay_frequency.dart';
+import '../data/rhythm.dart';
 import '../models/budget_model.dart';
 import '../models/goal_model.dart';
 import 'budget_repository.dart';
@@ -37,6 +40,84 @@ class PayScheduler {
     final elapsed = now.millisecondsSinceEpoch - first.millisecondsSinceEpoch;
     final periodsSince = (elapsed / periodMs).floor() + 1;
     return first.add(Duration(milliseconds: periodMs * periodsSince));
+  }
+
+  /// The n-th pay date on the calendar, counting [first] as n = 0.
+  ///
+  /// **Why this exists alongside [nextPayDate].** The engine above only ever
+  /// needs a *count* of elapsed periods, so it does cheap epoch-millisecond
+  /// arithmetic over [Rhythm.periodLength] — which calls a month 30 days and a
+  /// semi-month 15. That's fine for counting and its exact behaviour is pinned
+  /// by the pay-scheduler tests. It is not fine for *naming* a date: a monthly
+  /// budget anchored on 31 January drifts to "27 December" by its twelfth pay
+  /// date, and a check-in asking "how did your 27 December payday go?" is
+  /// simply wrong. So dates that reach the user come from here instead, walking
+  /// the calendar through [addDays] and month arithmetic.
+  ///
+  /// The engine counts periods; the check-in names dates. Keep it that way.
+  static DateTime payDateAt(Rhythm rhythm, DateTime first, int n) {
+    final preset = rhythm.preset;
+    switch (preset) {
+      case PayFrequency.weekly:
+        return addDays(first, 7 * n);
+      case PayFrequency.biWeekly:
+        return addDays(first, 14 * n);
+      case PayFrequency.monthly:
+        return _addMonths(first, n);
+      case PayFrequency.semiMonthly:
+        // Two anchors a month: the original day, then fifteen days later.
+        final base = _addMonths(first, n ~/ 2);
+        return n.isEven ? base : addDays(base, 15);
+      case null:
+        // Custom interval. `Rhythm.every(0, ...)` is constructible and would
+        // otherwise return `first` forever, hanging any enumeration loop.
+        final step = rhythm.count <= 0 ? 1 : rhythm.count;
+        return rhythm.unit == CadenceUnit.months
+            ? _addMonths(first, step * n)
+            : addDays(first, step * rhythm.unit.days * n);
+    }
+  }
+
+  /// [d] moved [months] calendar months, clamped to the target month's last day
+  /// so 31 January plus one month is 28 (or 29) February rather than 3 March.
+  static DateTime _addMonths(DateTime d, int months) {
+    final targetMonth = d.month + months;
+    // Day 0 of the following month is the last day of the target month.
+    final lastDay = DateTime(d.year, targetMonth + 1, 0).day;
+    return DateTime(d.year, targetMonth, math.min(d.day, lastDay), d.hour,
+        d.minute, d.second, d.millisecond, d.microsecond);
+  }
+
+  /// Every pay date for [budget] that falls in `[notBefore, now]`, oldest
+  /// first, keeping at most the [maxCount] most recent.
+  ///
+  /// Seeks near [notBefore] rather than walking from n = 0 because the create
+  /// wizard lets a first pay date sit two years back, and carries a hard
+  /// iteration cap so no combination of inputs can spin.
+  static List<DateTime> elapsedPayDates(
+    BudgetModel budget, {
+    required DateTime now,
+    required DateTime notBefore,
+    int maxCount = 8,
+  }) {
+    final rhythm = budget.payFrequency;
+    final first = budget.firstPayDate;
+    if (rhythm == null || first == null || !rhythm.isValid) return const [];
+
+    final approxDays = math.max(1, rhythm.periodLength.inDays);
+    // Start a couple of periods early: the approximation only has to get us
+    // close, the loop below does the exact filtering.
+    var n = math.max(
+        0, (daysBetween(first, notBefore) / approxDays).floor() - 2);
+
+    final out = <DateTime>[];
+    for (var i = 0; i < 512; i++, n++) {
+      final date = payDateAt(rhythm, first, n);
+      if (date.isAfter(now)) break;
+      if (!date.isBefore(notBefore)) out.add(date);
+    }
+    if (out.length <= maxCount) return out;
+    return out.sublist(out.length - maxCount);
   }
 
   /// Counts how many full pay periods elapsed between [from] (inclusive)

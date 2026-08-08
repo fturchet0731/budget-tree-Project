@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/calendar.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/goal_labels.dart';
 import '../models/budget_model.dart';
@@ -279,9 +280,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                       // reminders track the user's actual rhythm.
                       final cadence = _goal.waterCadence;
                       if (_goal.waterRemindersEnabled && cadence != null) {
-                        _goal.nextWaterDate = DateTime.now().add(
-                          Duration(days: cadence.days),
-                        );
+                        _goal.nextWaterDate =
+                            addDays(DateTime.now(), cadence.days);
                       }
                     });
                     SoundService.fundsAllocated();

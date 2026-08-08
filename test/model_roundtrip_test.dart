@@ -15,6 +15,7 @@ import 'package:budget_app_project/data/rhythm.dart';
 import 'package:budget_app_project/data/water_cadence.dart';
 import 'package:budget_app_project/models/budget_model.dart';
 import 'package:budget_app_project/models/category_model.dart';
+import 'package:budget_app_project/models/check_in.dart';
 import 'package:budget_app_project/models/goal_model.dart';
 import 'package:budget_app_project/services/achievement_service.dart';
 
@@ -25,6 +26,7 @@ void main() {
       final completed = DateTime(2026, 5, 6, 7, 8);
       final target = DateTime(2026, 12, 25);
       final next = DateTime(2026, 8, 9);
+      final anchor = DateTime(2026, 6, 1);
       final contributedAt = DateTime(2026, 3, 4, 5, 6);
 
       final goal = Goal(
@@ -44,6 +46,7 @@ void main() {
         waterCadenceIndex: WaterCadence.biweekly.index,
         nextWaterDate: next,
         waterRemindersEnabled: true,
+        waterAnchorDate: anchor,
         contributions: [
           Contribution(
             amount: 200,
@@ -76,6 +79,7 @@ void main() {
       expect(back.waterCadenceIndex, WaterCadence.biweekly.index);
       expect(back.nextWaterDate, next);
       expect(back.waterRemindersEnabled, isTrue);
+      expect(back.waterAnchorDate, anchor);
 
       expect(back.contributions, hasLength(2));
       expect(back.contributions[0].amount, 200);
@@ -105,7 +109,76 @@ void main() {
       expect(back.waterCadenceIndex, isNull);
       expect(back.nextWaterDate, isNull);
       expect(back.waterRemindersEnabled, isFalse);
+      expect(back.waterAnchorDate, isNull);
       expect(back.contributions, isEmpty);
+    });
+
+    test('a goal saved before anchors existed falls back to its cursor', () {
+      // The anchor was introduced for check-in slot enumeration; a legacy row
+      // has only the moving cursor, which is the best available series start.
+      final cursor = DateTime(2026, 4, 5);
+      final back = Goal.fromJson({
+        'id': 'old',
+        'name': 'Old goal',
+        'targetAmount': 100.0,
+        'currentAmount': 10.0,
+        'createdAt': DateTime(2025, 1, 1).millisecondsSinceEpoch,
+        'nextWaterDate': cursor.millisecondsSinceEpoch,
+      });
+
+      expect(back.waterAnchorDate, cursor);
+    });
+  });
+
+  group('CheckIn', () {
+    test('every field survives toJson -> fromJson', () {
+      final due = DateTime(2026, 7, 3, 9);
+      final confirmed = DateTime(2026, 7, 3, 20, 15);
+
+      final checkIn = CheckIn(
+        kind: CheckInKind.payday,
+        subjectId: 'budget-7',
+        subjectName: 'Rent Tree',
+        dueAt: due,
+        confirmedAt: confirmed,
+        verdict: CheckInVerdict.slipped,
+        actuals: const [
+          BranchActual(name: 'Groceries', planned: 400, actual: 515),
+        ],
+        missed: true,
+      );
+
+      final back = CheckIn.fromJson(checkIn.toJson());
+
+      expect(back.id, 'payday:budget-7:2026-07-03');
+      expect(back.kind, CheckInKind.payday);
+      expect(back.subjectId, 'budget-7');
+      expect(back.subjectName, 'Rent Tree');
+      expect(back.dueAt, due);
+      expect(back.confirmedAt, confirmed);
+      expect(back.verdict, CheckInVerdict.slipped);
+      expect(back.missed, isTrue);
+      expect(back.actuals, hasLength(1));
+      expect(back.actuals.single.name, 'Groceries');
+      expect(back.actuals.single.planned, 400);
+      expect(back.actuals.single.actual, 515);
+      expect(back.actuals.single.overspend, closeTo(115, 0.001));
+    });
+
+    test('an unanswered check-in decodes with safe defaults', () {
+      final back = CheckIn.fromJson({
+        'id': 'watering:g1:2026-07-03',
+        'kind': CheckInKind.watering.index,
+        'subjectId': 'g1',
+        'subjectName': 'Bike',
+        'dueAt': DateTime(2026, 7, 3).millisecondsSinceEpoch,
+      });
+
+      expect(back.confirmedAt, isNull);
+      expect(back.verdict, isNull);
+      expect(back.actuals, isEmpty);
+      expect(back.missed, isFalse);
+      expect(back.isResolved, isFalse);
     });
   });
 

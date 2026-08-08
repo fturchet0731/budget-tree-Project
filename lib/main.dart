@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';
 import 'services/app_settings.dart';
 import 'services/auth_service.dart';
+import 'services/check_in_service.dart';
 import 'services/notification_scheduler.dart';
 import 'services/notification_service.dart';
 import 'services/pay_scheduler.dart';
@@ -26,19 +27,23 @@ Future<void> main() async {
   // Generate any due AI reflection in the background (no-op when offline /
   // signed out / AI disabled). Never blocks first paint.
   unawaited(ReflectionService.instance.maybeGenerate());
-  _sweepPayCyclesIfLocalOnly();
+  _sweepDueWorkIfLocalOnly();
   runApp(const BudgetTreeApp());
 }
 
-/// Credit any pay periods that elapsed while the app was closed.
+/// Credit any pay periods that elapsed while the app was closed, then write off
+/// any check-in whose grace window lapsed in the meantime.
 ///
-/// For a signed-in user the [SyncEngine] runs the sweep itself, but only after
-/// its pull has landed, so it never works from a cache that is about to be
-/// replaced. This covers the cases the sync engine never touches: guest mode
-/// and a build with no Supabase dart-defines.
-void _sweepPayCyclesIfLocalOnly() {
+/// For a signed-in user the [SyncEngine] runs both itself, but only after its
+/// pull has landed, so neither works from a cache that is about to be replaced.
+/// This covers the cases the sync engine never touches: guest mode and a build
+/// with no Supabase dart-defines.
+///
+/// The two are chained rather than fired independently, because a check-in slot
+/// is derived from the same schedule the sweep advances.
+void _sweepDueWorkIfLocalOnly() {
   if (SupabaseConfig.isConfigured && AuthService.instance.isSignedIn) return;
-  unawaited(PayScheduler.runAllDue());
+  unawaited(PayScheduler.runAllDue().then((_) => CheckInService.sync()));
 }
 
 class BudgetTreeApp extends StatefulWidget {
@@ -71,7 +76,7 @@ class _BudgetTreeAppState extends State<BudgetTreeApp>
       unawaited(NotificationScheduler.rescheduleAll());
       // Signed-in users get this from SyncEngine's own resume handler, which
       // sweeps after pulling; this is the local-only path.
-      _sweepPayCyclesIfLocalOnly();
+      _sweepDueWorkIfLocalOnly();
     }
   }
 

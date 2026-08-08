@@ -78,6 +78,16 @@ class Goal {
   DateTime? nextWaterDate;
   bool waterRemindersEnabled;
 
+  /// The immutable start of the watering series, set once when the schedule is
+  /// created and never moved.
+  ///
+  /// [nextWaterDate] cannot serve this purpose: it is a *cursor*, pushed to
+  /// `now + cadence` on every manual deposit and rolled forward in memory by
+  /// [advanceWatering], so the slots it implies change run to run. Check-ins
+  /// need reproducible slots (`anchor + cadence * n`) or their deterministic
+  /// ids stop being deterministic. Legacy rows fall back to [nextWaterDate].
+  DateTime? waterAnchorDate;
+
   /// Dated history of every deposit/withdrawal. Source of truth for
   /// [currentAmount] is still the running field (so legacy records load
   /// unchanged), but new money always also lands here.
@@ -100,6 +110,7 @@ class Goal {
     this.waterCadenceIndex,
     this.nextWaterDate,
     this.waterRemindersEnabled = false,
+    this.waterAnchorDate,
     List<Contribution>? contributions,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
        createdAt = createdAt ?? DateTime.now(),
@@ -276,6 +287,7 @@ class Goal {
     'waterCadenceIndex': waterCadenceIndex,
     'nextWaterDate': nextWaterDate?.millisecondsSinceEpoch,
     'waterRemindersEnabled': waterRemindersEnabled,
+    'waterAnchorDate': waterAnchorDate?.millisecondsSinceEpoch,
     'contributions': contributions.map((c) => c.toJson()).toList(),
   };
 
@@ -302,6 +314,13 @@ class Goal {
         ? DateTime.fromMillisecondsSinceEpoch(j['nextWaterDate'] as int)
         : null,
     waterRemindersEnabled: (j['waterRemindersEnabled'] as bool?) ?? false,
+    // Goals saved before check-ins existed have no anchor; their current
+    // cursor is the best available start for the series.
+    waterAnchorDate: j['waterAnchorDate'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(j['waterAnchorDate'] as int)
+        : (j['nextWaterDate'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(j['nextWaterDate'] as int)
+            : null),
     contributions:
         (j['contributions'] as List?)
             ?.map((e) => Contribution.fromJson(e as Map<String, dynamic>))
