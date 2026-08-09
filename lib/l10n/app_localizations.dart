@@ -4948,6 +4948,102 @@ abstract class AppLocalizations {
   /// **'Ruby'**
   String get treeHealthRuby;
 
+  /// No description provided for @hubHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How Acorn\'s Hub works'**
+  String get hubHowItWorks;
+
+  /// No description provided for @hubSeeAllTrees.
+  ///
+  /// In en, this message translates to:
+  /// **'See all the trees'**
+  String get hubSeeAllTrees;
+
+  /// No description provided for @statusTreesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Status trees'**
+  String get statusTreesTitle;
+
+  /// No description provided for @statusTreesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tree shows how consistently you check in. Stay consistent to grow it; lapse and it slips back.'**
+  String get statusTreesIntro;
+
+  /// No description provided for @statusTreesScoreHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Grown by consistency'**
+  String get statusTreesScoreHeader;
+
+  /// No description provided for @statusTreesScoreSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score runs 0 to 100 with every check in. These eight tiers track it.'**
+  String get statusTreesScoreSub;
+
+  /// No description provided for @statusTreesPrestigeHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Prestige, earned over time'**
+  String get statusTreesPrestigeHeader;
+
+  /// No description provided for @statusTreesPrestigeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold a radiant tree at 90 or more and these unlock by how long you keep it there. Once earned they stay.'**
+  String get statusTreesPrestigeSub;
+
+  /// No description provided for @statusTreeYouAreHere.
+  ///
+  /// In en, this message translates to:
+  /// **'You are here now'**
+  String get statusTreeYouAreHere;
+
+  /// No description provided for @statusTreeScoreBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Score {from} to {to}'**
+  String statusTreeScoreBand(int from, int to);
+
+  /// No description provided for @tutHub1.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Acorn\'s Hub. This is where I keep track of how you are doing.'**
+  String get tutHub1;
+
+  /// No description provided for @tutHub2.
+  ///
+  /// In en, this message translates to:
+  /// **'The tree up top is your status tree. It grows when you check in and stay on plan, and it slips back when you miss.'**
+  String get tutHub2;
+
+  /// No description provided for @tutHub3.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score runs from 0 to 100. Each stage of the tree is a band of that score, from bare all the way to radiant.'**
+  String get tutHub3;
+
+  /// No description provided for @tutHub4.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold a radiant tree over time and you earn prestige tiers. Those are kept for good, even if you dip later.'**
+  String get tutHub4;
+
+  /// No description provided for @tutHub5.
+  ///
+  /// In en, this message translates to:
+  /// **'Below the tree I show your streak, your check ins, and where your plan met reality. Tap See all the trees to view every tier you can reach.'**
+  String get tutHub5;
+
+  /// No description provided for @tutHub6.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep checking in and your tree will thrive. I will be right here.'**
+  String get tutHub6;
+
   /// No description provided for @checkInMissed.
   ///
   /// In en, this message translates to:

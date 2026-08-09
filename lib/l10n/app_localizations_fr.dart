@@ -2868,6 +2868,65 @@ class AppLocalizationsFr extends AppLocalizations {
   String get treeHealthRuby => 'Rubis';
 
   @override
+  String get hubHowItWorks => 'Comment fonctionne le Hub d\'Acorn';
+
+  @override
+  String get hubSeeAllTrees => 'Voir tous les arbres';
+
+  @override
+  String get statusTreesTitle => 'Arbres de statut';
+
+  @override
+  String get statusTreesIntro =>
+      'Votre arbre montre votre régularité. Restez régulier pour le faire grandir; relâchez et il recule.';
+
+  @override
+  String get statusTreesScoreHeader => 'Grandit avec la régularité';
+
+  @override
+  String get statusTreesScoreSub =>
+      'Votre score va de 0 à 100 à chaque point. Ces huit niveaux le suivent.';
+
+  @override
+  String get statusTreesPrestigeHeader => 'Prestige, gagné avec le temps';
+
+  @override
+  String get statusTreesPrestigeSub =>
+      'Gardez un arbre éclatant à 90 ou plus et ceux ci se débloquent selon la durée. Une fois gagnés, ils restent.';
+
+  @override
+  String get statusTreeYouAreHere => 'Vous êtes ici';
+
+  @override
+  String statusTreeScoreBand(int from, int to) {
+    return 'Score $from à $to';
+  }
+
+  @override
+  String get tutHub1 =>
+      'Bienvenue dans le Hub d\'Acorn. C\'est ici que je suis vos progrès.';
+
+  @override
+  String get tutHub2 =>
+      'L\'arbre en haut est votre arbre de statut. Il grandit quand vous faites le point et tenez le plan, et il recule quand vous manquez.';
+
+  @override
+  String get tutHub3 =>
+      'Votre score va de 0 à 100. Chaque stade de l\'arbre est une tranche de ce score, du plus dénudé au plus éclatant.';
+
+  @override
+  String get tutHub4 =>
+      'Gardez un arbre éclatant dans le temps et vous gagnez des niveaux de prestige. Ils sont acquis pour de bon, même si vous baissez ensuite.';
+
+  @override
+  String get tutHub5 =>
+      'Sous l\'arbre je montre votre série, vos points et où votre plan a rencontré la réalité. Touchez Voir tous les arbres pour voir chaque niveau à atteindre.';
+
+  @override
+  String get tutHub6 =>
+      'Continuez à faire le point et votre arbre prospérera. Je serai juste là.';
+
+  @override
   String get checkInMissed => 'Manqué';
 
   @override

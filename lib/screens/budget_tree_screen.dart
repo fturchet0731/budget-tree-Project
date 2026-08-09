@@ -933,7 +933,8 @@ class _GrowingTreePainter extends CustomPainter {
   double get fallProg => ((progress - 0.90) / 0.10).clamp(0.0, 1.0);
 
   static const double _groundY = 0.74;
-  static const double _trunkTopFrac = 0.22;
+  // A shorter trunk than before so the tree reads compact rather than tall.
+  static const double _trunkTopFrac = 0.38;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1016,7 +1017,7 @@ class _GrowingTreePainter extends CustomPainter {
     for (final (lx, ly, lr) in clusters) {
       final animX = cx + (lx - cx) * crownProg;
       final animY = cy + (ly - cy) * crownProg;
-      blobs.add(CanopyBlob(_gx(animX), _gx(animY), _gx(lr * crownProg * 0.5)));
+      blobs.add(CanopyBlob(_gx(animX), _gx(animY), _gx(lr * crownProg * 0.42)));
     }
     PixelTree.canopy(_put, blobs, _leaf, seedBase);
 
@@ -1099,8 +1100,9 @@ class _GrowingTreePainter extends CustomPainter {
       final endX = cx + math.cos(angle) * branchLen;
       final endY = attachY - math.sin(angle) * branchLen;
 
-      final startW = (7.0 + pct * 14).clamp(7.0, 21.0);
-      final endW = (startW * 0.28).clamp(2.0, 6.0);
+      // Thicker, less tapered limbs so branches read as real branches.
+      final startW = (16.0 + pct * 22).clamp(14.0, 40.0);
+      final endW = (startW * 0.5).clamp(7.0, 18.0);
 
       // Pixel branch limb.
       PixelTree.limb(_put, _gx(cx), _gx(attachY), _gx(endX), _gx(endY),
@@ -1141,7 +1143,7 @@ class _GrowingTreePainter extends CustomPainter {
   }) {
     // Pixel leaf blob at the branch tip, growing in with prog.
     final pct = budget.percentageFor(cat);
-    final r = (15 + pct * 12) * prog;
+    final r = (20 + pct * 14) * prog;
     if (r > 0.5) {
       PixelTree.canopy(
         _put,

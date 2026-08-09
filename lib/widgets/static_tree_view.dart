@@ -70,11 +70,12 @@ class _StaticTreePainter extends CustomPainter {
     // Kept at 0.78 of the box: the immersive scene derives its horizon from
     // this exact fraction (see forest_ground_test).
     final groundY = h * 0.78;
-    final trunkTopY = h * 0.30;
+    // A shorter trunk than before, so the tree reads compact rather than tall.
+    final trunkTopY = h * 0.36;
     final cx = w / 2;
 
     // A cell size that gives a chunky-but-legible pixel grid at any box size.
-    final cell = math.max(1.5, h / 68);
+    final cell = math.max(1.5, h / 60);
     final surface = PixelSurface(canvas, cell);
     void put(int x, int y, Color c) => surface.put(x, y, c);
     double gx(double d) => d / cell;
@@ -122,7 +123,7 @@ class _StaticTreePainter extends CustomPainter {
     ];
     final blobs = [
       for (final (lx, ly, lr) in clusters)
-        CanopyBlob(gx(lx), gx(ly), gx(lr * scale * 0.5))
+        CanopyBlob(gx(lx), gx(ly), gx(lr * scale * 0.42))
     ];
     PixelTree.canopy(put, blobs, leaf, budget.id.hashCode & 0x7fffffff);
   }
@@ -165,14 +166,16 @@ class _StaticTreePainter extends CustomPainter {
       final endX = cx + math.cos(angle) * maxLen;
       final endY = attachY - math.sin(angle) * maxLen;
 
-      final startW = ((7.0 + pct * 14) * scale).clamp(7.0, 21.0);
-      final endW = (startW * 0.28).clamp(2.0, 6.0);
+      // Thicker, less tapered limbs so branches read as real branches, not
+      // twigs.
+      final startW = ((16.0 + pct * 22) * scale).clamp(14.0, 40.0);
+      final endW = (startW * 0.5).clamp(7.0, 18.0);
 
       PixelTree.limb(put, gx(cx), gx(attachY), gx(endX), gx(endY),
           gx(startW), gx(endW), bark);
 
-      // Leaf blob at the branch tip.
-      final r = (16 + pct * 12) * scale;
+      // Leaf blob at the branch tip, larger to match the fuller branches.
+      final r = (20 + pct * 14) * scale;
       PixelTree.canopy(
         put,
         [

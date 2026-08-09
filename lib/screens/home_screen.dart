@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
-import '../services/tree_health_service.dart';
 import '../theme/app_dims.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/acorn_mascot.dart';
@@ -16,9 +15,9 @@ import 'auth/login_screen.dart';
 import 'dashboard_screen.dart';
 
 /// Launch screen of the redesign: a calm neutral canvas with one hero
-/// illustration card. The tree in it is the account's **status tree** — the
-/// same living consistency tree the dashboard and Acorn's Hub show — so the
-/// first thing the user sees on opening the app is where they stand right now,
+/// illustration card. The tree in it is the **Ancient** status tree — the app's
+/// brand mark (the same art as the launcher icon) — so the launch screen always
+/// shows the grand, aspirational tree rather than the user's current state,
 /// with Acorn watching from the grass. Start hands off to the dashboard.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,10 +27,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // The account's current status, replayed from the check-in ledger. Drives
-  // which of the sixteen status trees the hero shows. Defaults to the neutral
-  // fresh tier until the ledger loads (and for brand-new accounts).
-  TreeHealth _health = TreeHealth.fresh;
+  /// The launch hero always shows the Ancient prestige tree as the brand mark,
+  /// independent of the account's real status.
+  static const _heroSpriteKey = 'ancient';
 
   // First launch: the dashboard runs the guided tour once we arrive there, so
   // Acorn greets the user at the four-leaf menu and every section pops back to
@@ -41,14 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadHealth();
     AppSettings.instance.addListener(_onSettings);
-  }
-
-  Future<void> _loadHealth() async {
-    final health = await TreeHealthService.current();
-    if (!mounted) return;
-    setState(() => _health = health);
   }
 
   void _onSettings() {
@@ -72,8 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.of(context).push(_dashboardRoute(runTour: _runTour)).then((_) {
       if (!mounted) return;
       _runTour = false;
-      // The user may have answered a check-in in there, so refresh the tree.
-      _loadHealth();
     });
   }
 
@@ -175,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // The account's living status tree, centred.
                         Center(
                           child: StatusTreeView(
-                            spriteKey: _health.spriteKey,
+                            spriteKey: _heroSpriteKey,
                             size: treeSize,
                           ),
                         ),

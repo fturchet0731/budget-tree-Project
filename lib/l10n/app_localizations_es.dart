@@ -2852,6 +2852,65 @@ class AppLocalizationsEs extends AppLocalizations {
   String get treeHealthRuby => 'Rubí';
 
   @override
+  String get hubHowItWorks => 'Cómo funciona el Hub de Acorn';
+
+  @override
+  String get hubSeeAllTrees => 'Ver todos los árboles';
+
+  @override
+  String get statusTreesTitle => 'Árboles de estado';
+
+  @override
+  String get statusTreesIntro =>
+      'Tu árbol muestra tu constancia al hacer balance. Sé constante para que crezca; si lo dejas, retrocede.';
+
+  @override
+  String get statusTreesScoreHeader => 'Crece con la constancia';
+
+  @override
+  String get statusTreesScoreSub =>
+      'Tu puntuación va de 0 a 100 con cada balance. Estos ocho niveles la siguen.';
+
+  @override
+  String get statusTreesPrestigeHeader => 'Prestigio, ganado con el tiempo';
+
+  @override
+  String get statusTreesPrestigeSub =>
+      'Mantén un árbol radiante en 90 o más y estos se desbloquean según el tiempo que lo conserves. Una vez ganados, se quedan.';
+
+  @override
+  String get statusTreeYouAreHere => 'Estás aquí ahora';
+
+  @override
+  String statusTreeScoreBand(int from, int to) {
+    return 'Puntuación $from a $to';
+  }
+
+  @override
+  String get tutHub1 =>
+      'Bienvenido al Hub de Acorn. Aquí llevo el registro de cómo te va.';
+
+  @override
+  String get tutHub2 =>
+      'El árbol de arriba es tu árbol de estado. Crece cuando haces balance y sigues el plan, y retrocede cuando fallas.';
+
+  @override
+  String get tutHub3 =>
+      'Tu puntuación va de 0 a 100. Cada etapa del árbol es un tramo de esa puntuación, del más pelado al más radiante.';
+
+  @override
+  String get tutHub4 =>
+      'Mantén un árbol radiante con el tiempo y ganas niveles de prestigio. Se conservan para siempre, aunque luego bajes.';
+
+  @override
+  String get tutHub5 =>
+      'Bajo el árbol muestro tu racha, tus balances y dónde tu plan se encontró con la realidad. Toca Ver todos los árboles para ver cada nivel que puedes alcanzar.';
+
+  @override
+  String get tutHub6 =>
+      'Sigue haciendo balance y tu árbol prosperará. Estaré aquí mismo.';
+
+  @override
   String get checkInMissed => 'Sin responder';
 
   @override

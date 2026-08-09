@@ -81,8 +81,11 @@ class SaplingPainter extends CustomPainter {
     final s = (rows - 5) / 30;
 
     if (showGround) {
+      // ry is deliberately non-integer: an integer ry makes the ellipse's
+      // extreme row (y = +/- ry) collapse to just the centre column, which
+      // rendered as a lone stray pixel hanging under the seed.
       PixelTree.mound(
-          put, cx, gy, cols * 0.32, 2, PixelTree.ramp(PixelTree.soilBase));
+          put, cx, gy, cols * 0.32, 1.6, PixelTree.ramp(PixelTree.soilBase));
     }
 
     // Category tint drives the whole canopy through the engine's HSL ramp.

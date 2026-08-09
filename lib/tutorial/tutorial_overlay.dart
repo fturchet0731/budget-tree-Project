@@ -203,7 +203,13 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       child: Container(
         // Self-painted scrim so the screen behind reads as "dimmed".
         color: Colors.black.withValues(alpha: 0.5),
-        child: SafeArea(
+        // A transparent Material provides a real DefaultTextStyle for the
+        // overlay. Without it, Text mounted in the Overlay merges onto
+        // Flutter's error-fallback style and every line gets the yellow
+        // double underline.
+        child: Material(
+          type: MaterialType.transparency,
+          child: SafeArea(
           child: Stack(
             children: [
               // ── Cancel the whole tour, top-right. Red so it reads as the
@@ -283,6 +289,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -330,16 +337,22 @@ class _SpeechBubble extends StatelessWidget {
               children: [
                 Icon(Icons.eco, size: 15, color: AppColors.forestGreen),
                 const SizedBox(width: 6),
-                Text(
-                  speaker,
-                  style: GoogleFonts.fredoka(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: AppColors.barkBrown,
-                    letterSpacing: 0.4,
+                // Flexible + ellipsis so a long "Acorn • <section>" never
+                // overflows the name plate on a narrow screen.
+                Expanded(
+                  child: Text(
+                    speaker,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.fredoka(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: AppColors.barkBrown,
+                      letterSpacing: 0.4,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Text(
                   progress,
                   style: GoogleFonts.nunito(

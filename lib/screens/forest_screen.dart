@@ -790,7 +790,7 @@ class _MiniTreePainter extends CustomPainter {
     ];
     PixelTree.canopy(
       put,
-      [for (final (bx, by, br) in crown) CanopyBlob(gx(bx), gx(by), gx(br * 0.5))],
+      [for (final (bx, by, br) in crown) CanopyBlob(gx(bx), gx(by), gx(br * 0.44))],
       leaf,
       budget.id.hashCode & 0x7fffffff,
     );
@@ -805,10 +805,10 @@ class _MiniTreePainter extends CustomPainter {
         final endX = cx + (goLeft ? -24.0 : 24.0);
         final endY = attachY - 12;
         PixelTree.limb(
-            put, gx(cx), gx(attachY), gx(endX), gx(endY), gx(3), gx(1.5), bark);
+            put, gx(cx), gx(attachY), gx(endX), gx(endY), gx(6), gx(3.5), bark);
         PixelTree.canopy(
           put,
-          [CanopyBlob(gx(endX), gx(endY), gx(7), k: 0.95)],
+          [CanopyBlob(gx(endX), gx(endY), gx(8), k: 0.95)],
           leaf,
           (i * 31 + 7),
         );

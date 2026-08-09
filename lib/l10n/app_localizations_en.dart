@@ -2841,6 +2841,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treeHealthRuby => 'Ruby';
 
   @override
+  String get hubHowItWorks => 'How Acorn\'s Hub works';
+
+  @override
+  String get hubSeeAllTrees => 'See all the trees';
+
+  @override
+  String get statusTreesTitle => 'Status trees';
+
+  @override
+  String get statusTreesIntro =>
+      'Your tree shows how consistently you check in. Stay consistent to grow it; lapse and it slips back.';
+
+  @override
+  String get statusTreesScoreHeader => 'Grown by consistency';
+
+  @override
+  String get statusTreesScoreSub =>
+      'Your score runs 0 to 100 with every check in. These eight tiers track it.';
+
+  @override
+  String get statusTreesPrestigeHeader => 'Prestige, earned over time';
+
+  @override
+  String get statusTreesPrestigeSub =>
+      'Hold a radiant tree at 90 or more and these unlock by how long you keep it there. Once earned they stay.';
+
+  @override
+  String get statusTreeYouAreHere => 'You are here now';
+
+  @override
+  String statusTreeScoreBand(int from, int to) {
+    return 'Score $from to $to';
+  }
+
+  @override
+  String get tutHub1 =>
+      'Welcome to Acorn\'s Hub. This is where I keep track of how you are doing.';
+
+  @override
+  String get tutHub2 =>
+      'The tree up top is your status tree. It grows when you check in and stay on plan, and it slips back when you miss.';
+
+  @override
+  String get tutHub3 =>
+      'Your score runs from 0 to 100. Each stage of the tree is a band of that score, from bare all the way to radiant.';
+
+  @override
+  String get tutHub4 =>
+      'Hold a radiant tree over time and you earn prestige tiers. Those are kept for good, even if you dip later.';
+
+  @override
+  String get tutHub5 =>
+      'Below the tree I show your streak, your check ins, and where your plan met reality. Tap See all the trees to view every tier you can reach.';
+
+  @override
+  String get tutHub6 =>
+      'Keep checking in and your tree will thrive. I will be right here.';
+
+  @override
   String get checkInMissed => 'Missed';
 
   @override

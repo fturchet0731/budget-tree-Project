@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/tree_health_labels.dart';
@@ -9,6 +10,8 @@ import '../services/reflection_service.dart';
 import '../services/reflection_stats.dart';
 import '../theme/app_dims.dart';
 import '../theme/app_tokens.dart';
+import '../tutorial/tutorial_content.dart';
+import '../tutorial/tutorial_overlay.dart';
 import '../widgets/acorn_mascot.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/charts/hub_charts.dart';
@@ -23,6 +26,7 @@ import '../widgets/ui/pressable.dart';
 import '../widgets/ui/section_header.dart';
 import 'acorn_chat_screen.dart';
 import 'reflection_story_screen.dart';
+import 'status_trees_screen.dart';
 
 /// Acorn's Hub: the backbone of the AI layer.
 ///
@@ -43,10 +47,13 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
   List<CheckIn> _pending = const [];
   Reflection? _reflection;
 
+  static const _introSeenKey = 'hub_tutorial_seen_v1';
+
   @override
   void initState() {
     super.initState();
     _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowIntro());
   }
 
   Future<void> _load() async {
@@ -59,6 +66,40 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
       _pending = pending;
       _reflection = reflection;
     });
+  }
+
+  /// First time the user opens the hub, Acorn explains what it all means. After
+  /// that it's on demand via the help button.
+  Future<void> _maybeShowIntro() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_introSeenKey) ?? false) return;
+    await prefs.setBool(_introSeenKey, true);
+    if (!mounted) return;
+    await _showTutorial();
+  }
+
+  Future<void> _showTutorial() async {
+    final l = AppLocalizations.of(context);
+    await showTutorialDialog(
+      context,
+      steps: [
+        TutorialStep(l.tutHub1, expression: AcornExpression.happy),
+        TutorialStep(l.tutHub2),
+        TutorialStep(l.tutHub3),
+        TutorialStep(l.tutHub4),
+        TutorialStep(l.tutHub5),
+        TutorialStep(l.tutHub6, expression: AcornExpression.happy),
+      ],
+      sectionTitle: l.hubTitle,
+      lastStepHint: l.tourTapFinish,
+      cancelLabel: l.tourClose,
+    );
+  }
+
+  void _openTrees() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const StatusTreesScreen()),
+    );
   }
 
   Future<void> _answer(CheckIn checkIn) async {
@@ -77,7 +118,16 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
     final stats = _stats;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.hubTitle)),
+      appBar: AppBar(
+        title: Text(l.hubTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: l.hubHowItWorks,
+            onPressed: _showTutorial,
+          ),
+        ],
+      ),
       body: stats == null
           ? const Padding(
               padding: EdgeInsets.all(AppDims.s20),
@@ -94,6 +144,18 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Entrance(child: _HealthCard(stats: stats)),
+                        Entrance(
+                          delay: const Duration(milliseconds: 30),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppDims.s12),
+                            child: AppSecondaryButton(
+                              label: l.hubSeeAllTrees,
+                              icon: Icons.forest_outlined,
+                              onPressed: _openTrees,
+                            ),
+                          ),
+                        ),
                         if (_pending.isNotEmpty)
                           Entrance(
                             delay: const Duration(milliseconds: 60),
