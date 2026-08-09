@@ -23,8 +23,8 @@ import '../theme/leaf_palette.dart';
 import '../widgets/achievements_sheet.dart';
 import '../widgets/acorn_coach.dart';
 import '../widgets/category_picker.dart';
+import '../widgets/pixel_tree_engine.dart';
 import '../widgets/scenery.dart';
-import '../widgets/tree_drawing.dart';
 import '../tutorial/tutorial_content.dart';
 
 class BudgetTreeScreen extends StatefulWidget {
@@ -56,9 +56,11 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   @override
   void initState() {
     super.initState();
+    // One-shot "plant" animation: seed to full tree, ~1.8s ease-in-out per the
+    // design handoff's budgetGrow.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3600),
+      duration: const Duration(milliseconds: 1900),
     );
     _growAnimation = CurvedAnimation(
       parent: _controller,
@@ -908,7 +910,7 @@ class _GrowingTreePainter extends CustomPainter {
   final String totalIncomeLabel;
   final String rootLabel;
 
-  const _GrowingTreePainter({
+  _GrowingTreePainter({
     required this.budget,
     required this.progress,
     required this.leafHits,
@@ -916,6 +918,12 @@ class _GrowingTreePainter extends CustomPainter {
     required this.totalIncomeLabel,
     required this.rootLabel,
   });
+
+  // Pixel drawing surface, set up once per paint() and shared by the helpers.
+  late PutPixel _put;
+  late double Function(double) _gx;
+  late PixelRamp _bark;
+  late PixelRamp _leaf;
 
   double get trunkProg => (progress / 0.30).clamp(0.0, 1.0);
   double get branchProg => ((progress - 0.30) / 0.30).clamp(0.0, 1.0);
@@ -939,6 +947,18 @@ class _GrowingTreePainter extends CustomPainter {
     final trunkTopY = h * _trunkTopFrac;
     final cx = w / 2;
 
+    // Pixel surface: a chunky-but-legible grid at this scene's size.
+    final cell = math.max(2.0, h / 84);
+    final surface = PixelSurface(canvas, cell);
+    _put = surface.put;
+    _gx = (d) => d / cell;
+    _bark = PixelTree.ramp(PixelTree.barkBase);
+    _leaf = PixelTree.ramp(leafPalette.mid);
+
+    if (trunkProg > 0.05) {
+      PixelTree.mound(_put, _gx(cx), _gx(groundY), _gx(w * 0.11),
+          _gx(h * 0.014), PixelTree.ramp(PixelTree.soilBase));
+    }
     if (trunkProg > 0) _drawTrunk(canvas, cx, groundY, trunkTopY);
     if (crownProg > 0) _drawCrown(canvas, cx, trunkTopY, w);
     if (branchProg > 0 && budget.expenses.isNotEmpty) {
@@ -953,16 +973,8 @@ class _GrowingTreePainter extends CustomPainter {
   // ── Trunk ─────────────────────────────────────
   void _drawTrunk(Canvas canvas, double cx, double groundY, double trunkTopY) {
     final currentTop = groundY - (groundY - trunkTopY) * trunkProg;
-    TreeDrawing.paintTrunk(
-      canvas,
-      base: Offset(cx, groundY),
-      height: groundY - currentTop,
-      baseHalfWidth: 22,
-      topHalfWidth: 9,
-      seed: budget.id.hashCode,
-      drawKnot: trunkProg > 0.6,
-      drawRoots: trunkProg > 0.8,
-    );
+    PixelTree.trunk(_put, _gx(cx), _gx(currentTop), _gx(groundY), _gx(18),
+        _gx(44), _bark);
   }
 
   // ── Crown (canopy) with income ─────────────────
@@ -983,10 +995,9 @@ class _GrowingTreePainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
     );
 
-    // Organic foliage clusters — back to front, animated outward from
-    // the trunk top during the grow phase.
-    final lp = leafPalette;
-    final seedBase = budget.id.hashCode;
+    // Organic foliage clusters, drawn as one metaball canopy so the crown
+    // reads as a single shaded mass. Radii grow outward during the grow phase.
+    final seedBase = budget.id.hashCode & 0x7fffffff;
     final clusters = [
       (cx - 50, cy + 28, 50.0),
       (cx + 46, cy + 22, 48.0),
@@ -1001,34 +1012,13 @@ class _GrowingTreePainter extends CustomPainter {
       (cx + 10, cy - 62, 28.0),
     ];
 
-    for (int i = 0; i < clusters.length; i++) {
-      final (lx, ly, lr) = clusters[i];
+    final blobs = <CanopyBlob>[];
+    for (final (lx, ly, lr) in clusters) {
       final animX = cx + (lx - cx) * crownProg;
       final animY = cy + (ly - cy) * crownProg;
-      TreeDrawing.paintCluster(
-        canvas,
-        Offset(animX, animY),
-        lr * crownProg,
-        lp,
-        seed: seedBase + i * 19,
-      );
+      blobs.add(CanopyBlob(_gx(animX), _gx(animY), _gx(lr * crownProg * 0.5)));
     }
-
-    // Leaf-fringe accents at the front-facing clusters
-    if (crownProg > 0.7) {
-      for (int i = 0; i < 3; i++) {
-        final (lx, ly, lr) = clusters[4 + i * 2];
-        TreeDrawing.paintLeafFringe(
-          canvas,
-          Offset(lx, ly),
-          lr * crownProg,
-          lp,
-          seed: seedBase + 800 + i,
-          leafCount: 6,
-          leafSize: 8,
-        );
-      }
-    }
+    PixelTree.canopy(_put, blobs, _leaf, seedBase);
 
     // Income text in crown center
     if (incomeProg > 0) {
@@ -1112,15 +1102,9 @@ class _GrowingTreePainter extends CustomPainter {
       final startW = (7.0 + pct * 14).clamp(7.0, 21.0);
       final endW = (startW * 0.28).clamp(2.0, 6.0);
 
-      // Curved tapered branch with bark highlight (organic, not a straight stick)
-      TreeDrawing.paintBranch(
-        canvas,
-        Offset(cx, attachY),
-        Offset(endX, endY),
-        startW: startW,
-        endW: endW,
-        bowFactor: 0.08,
-      );
+      // Pixel branch limb.
+      PixelTree.limb(_put, _gx(cx), _gx(attachY), _gx(endX), _gx(endY),
+          _gx(startW), _gx(endW), _bark);
 
       // Named leaf at branch tip
       if (leafProg > 0) {
@@ -1155,118 +1139,23 @@ class _GrowingTreePainter extends CustomPainter {
     required ExpenseCategory cat,
     required double prog,
   }) {
-    const leafW = 30.0;
-    const leafH = 50.0;
-
-    final leafAngle = goLeft ? -math.pi / 4 : math.pi / 4;
-
-    canvas.save();
-    canvas.translate(tipX, tipY);
-    canvas.rotate(leafAngle);
-    canvas.scale(prog);
-
-    // Drop shadow
-    canvas.drawPath(
-      Path()
-        ..moveTo(1.5, -leafH + 2)
-        ..cubicTo(
-          leafW * 0.95 + 1.5,
-          -leafH * 0.25 + 2,
-          leafW * 0.95 + 1.5,
-          leafH * 0.55 + 2,
-          1.5,
-          leafH * 0.22 + 2,
-        )
-        ..cubicTo(
-          -leafW * 0.95 + 1.5,
-          leafH * 0.55 + 2,
-          -leafW * 0.95 + 1.5,
-          -leafH * 0.25 + 2,
-          1.5,
-          -leafH + 2,
-        )
-        ..close(),
-      Paint()..color = Colors.black.withValues(alpha: 0.20),
-    );
-
-    // Leaf body — rich gradient
-    final leafPath = Path()
-      ..moveTo(0, -leafH)
-      ..cubicTo(
-        leafW * 0.95,
-        -leafH * 0.25,
-        leafW * 0.95,
-        leafH * 0.55,
-        0,
-        leafH * 0.22,
-      )
-      ..cubicTo(
-        -leafW * 0.95,
-        leafH * 0.55,
-        -leafW * 0.95,
-        -leafH * 0.25,
-        0,
-        -leafH,
-      )
-      ..close();
-
-    final lp = leafPalette;
-    canvas.drawPath(
-      leafPath,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [lp.light, lp.mid, lp.dark],
-          stops: const [0.0, 0.45, 1.0],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ).createShader(Rect.fromLTWH(-leafW, -leafH, leafW * 2, leafH * 1.3)),
-    );
-
-    // Outline
-    canvas.drawPath(
-      leafPath,
-      Paint()
-        ..color = lp.outline
-        ..strokeWidth = 1.4
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Central vein
-    canvas.drawLine(
-      Offset(0, -leafH * 0.85),
-      Offset(0, leafH * 0.18),
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.28)
-        ..strokeWidth = 1.0
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Side veins
-    for (int i = 1; i <= 3; i++) {
-      final t = i / 4.0;
-      final vy = -leafH * 0.75 + leafH * 1.2 * t;
-      final vx = leafW * 0.55 * (1 - t * 0.3);
-      final sidePaint = Paint()
-        ..color = Colors.white.withValues(alpha: 0.14)
-        ..strokeWidth = 0.7
-        ..style = PaintingStyle.stroke;
-      canvas.drawLine(Offset(0, vy), Offset(vx, vy + 6), sidePaint);
-      canvas.drawLine(Offset(0, vy), Offset(-vx, vy + 6), sidePaint);
+    // Pixel leaf blob at the branch tip, growing in with prog.
+    final pct = budget.percentageFor(cat);
+    final r = (15 + pct * 12) * prog;
+    if (r > 0.5) {
+      PixelTree.canopy(
+        _put,
+        [
+          CanopyBlob(_gx(tipX), _gx(tipY), _gx(r), k: 0.95),
+          CanopyBlob(_gx(tipX - (goLeft ? r * 0.5 : -r * 0.5)),
+              _gx(tipY + r * 0.35), _gx(r * 0.6)),
+        ],
+        _leaf,
+        (cat.name.hashCode) & 0x7fffffff,
+      );
     }
 
-    // Sunlit highlight oval (upper portion)
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(-leafW * 0.22, -leafH * 0.42),
-        width: leafW * 0.45,
-        height: leafH * 0.30,
-      ),
-      Paint()..color = Colors.white.withValues(alpha: 0.14),
-    );
-
-    canvas.restore();
-
-    // Label (drawn in screen space, unrotated): icon glyph + category name
+    // Label (drawn in screen space): icon glyph + category name
     if (prog > 0.55) {
       final textAlpha = ((prog - 0.55) / 0.45).clamp(0.0, 1.0);
       final iconData = CategoryIcons.forKey(cat.emoji);

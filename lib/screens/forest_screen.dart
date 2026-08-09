@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +20,7 @@ import '../theme/leaf_palette.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/immersive_forest_view.dart';
 import '../widgets/info_button.dart';
+import '../widgets/pixel_tree_engine.dart';
 import '../tutorial/tutorial_content.dart';
 import 'budget_tree_screen.dart';
 
@@ -759,75 +761,64 @@ class _MiniTreePainter extends CustomPainter {
     final groundY = h * 0.86;
     final trunkTopY = h * 0.36;
 
+    // Chunky pixel grid for the small card preview.
+    final cell = math.max(1.5, h / 44);
+    final surface = PixelSurface(canvas, cell);
+    void put(int x, int y, Color c) => surface.put(x, y, c);
+    double gx(double d) => d / cell;
+
+    final bark = PixelTree.ramp(PixelTree.barkBase);
+    final leaf = PixelTree.ramp(leafPalette.mid);
+
+    // Soil mound
+    PixelTree.mound(put, gx(cx), gx(groundY), gx(w * 0.30), gx(h * 0.03),
+        PixelTree.ramp(PixelTree.soilBase));
+
     // Trunk
-    final trunkPath = Path()
-      ..moveTo(cx - 7, groundY)
-      ..quadraticBezierTo(cx - 7, (groundY + trunkTopY) / 2, cx - 3.5, trunkTopY)
-      ..lineTo(cx + 3.5, trunkTopY)
-      ..quadraticBezierTo(cx + 7, (groundY + trunkTopY) / 2, cx + 7, groundY)
-      ..close();
-    canvas.drawPath(trunkPath, Paint()..color = const Color(0xFF8A6B4F));
+    PixelTree.trunk(
+        put, gx(cx), gx(trunkTopY), gx(groundY), gx(6), gx(14), bark);
 
-    // Crown blobs — palette-tinted
-    final lp = leafPalette;
+    // Crown as one metaball canopy.
     final crownY = trunkTopY - 4;
-    for (final (bx, by, br, bc) in <(double, double, double, Color)>[
-      (cx - 15, crownY + 9, 16.0, lp.outline),
-      (cx + 14, crownY + 7, 15.0, lp.dark),
-      (cx - 5, crownY - 3, 20.0, lp.dark),
-      (cx + 7, crownY - 7, 18.0, lp.mid),
-      (cx, crownY + 5, 22.0, lp.mid),
-      (cx - 2, crownY - 17, 14.0, lp.light),
-      (cx - 18, crownY - 12, 11.0, lp.dark),
-      (cx + 16, crownY - 14, 10.0, lp.mid),
-    ]) {
-      canvas.drawCircle(Offset(bx, by), br, Paint()..color = bc);
-    }
+    final crown = <(double, double, double)>[
+      (cx - 15, crownY + 9, 16.0),
+      (cx + 14, crownY + 7, 15.0),
+      (cx - 5, crownY - 3, 20.0),
+      (cx + 7, crownY - 7, 18.0),
+      (cx, crownY + 5, 22.0),
+      (cx - 2, crownY - 17, 14.0),
+    ];
+    PixelTree.canopy(
+      put,
+      [for (final (bx, by, br) in crown) CanopyBlob(gx(bx), gx(by), gx(br * 0.5))],
+      leaf,
+      budget.id.hashCode & 0x7fffffff,
+    );
 
-    // Branches with tiny leaf clusters
+    // Branches with tiny leaf blobs
     if (budget.expenses.isNotEmpty) {
       final count = budget.expenses.length.clamp(1, 5);
-      final branchPaint = Paint()
-        ..color = const Color(0xFF8A6B4F)
-        ..strokeCap = StrokeCap.round
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.stroke;
-
       for (int i = 0; i < count; i++) {
         final tPos = 0.28 + (i / (count > 1 ? count - 1 : 1)) * 0.58;
         final attachY = trunkTopY + (groundY - trunkTopY) * tPos;
         final goLeft = i.isEven;
         final endX = cx + (goLeft ? -24.0 : 24.0);
         final endY = attachY - 12;
-        canvas.drawLine(Offset(cx, attachY), Offset(endX, endY), branchPaint);
-        // Leaf cluster — palette-tinted
-        canvas.drawCircle(
-          Offset(endX, endY),
-          6.5,
-          Paint()..color = lp.mid,
-        );
-        canvas.drawCircle(
-          Offset(endX, endY),
-          6.5,
-          Paint()
-            ..color = lp.outline
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 0.8,
+        PixelTree.limb(
+            put, gx(cx), gx(attachY), gx(endX), gx(endY), gx(3), gx(1.5), bark);
+        PixelTree.canopy(
+          put,
+          [CanopyBlob(gx(endX), gx(endY), gx(7), k: 0.95)],
+          leaf,
+          (i * 31 + 7),
         );
       }
     }
-
-    // Ground strip
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx, groundY + 1), width: w * 0.75, height: 7),
-      Paint()..color = Conifer.c300,
-    );
   }
 
   @override
   bool shouldRepaint(_MiniTreePainter old) =>
-      old.leafPalette != leafPalette;
+      old.leafPalette.mid != leafPalette.mid;
 }
 
 class _NoMatchInCategory extends StatelessWidget {
