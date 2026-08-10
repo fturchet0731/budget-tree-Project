@@ -136,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.forestGreen,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.zero,
               ),
             ),
             onPressed: () => Navigator.pop(ctx, controller.text),
@@ -317,7 +317,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
                           color: AppTokens.current.accent,
-                          shape: BoxShape.circle,
                           border: Border.all(
                               color: AppTokens.current.card, width: 1.5),
                         ),
@@ -359,13 +358,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Bio block — tap to edit.
           InkWell(
             onTap: _editBio,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.zero,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: AppTokens.current.card,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(color: AppTokens.current.cardBorder),
                 boxShadow: AppShadows.card,
               ),

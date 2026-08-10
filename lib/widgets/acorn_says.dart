@@ -41,7 +41,7 @@ class AcornSays extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: t.card,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.zero,
           border: Border.all(color: t.cardBorder),
           boxShadow: AppShadows.card,
         ),
@@ -55,7 +55,7 @@ class AcornSays extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   'Acorn',
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.pixelifySans(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                     color: t.textSecondary,

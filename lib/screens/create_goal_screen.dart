@@ -623,7 +623,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                 InkWell(
                                   onTap: () =>
                                       setState(() => _uncapped = !_uncapped),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.zero,
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 220),
                                     padding: const EdgeInsets.symmetric(
@@ -634,7 +634,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                       color: _uncapped
                                           ? AppTokens.current.accentSoft
                                           : AppTokens.current.canvasSoft,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.zero,
                                       border: Border.all(
                                         color: _uncapped
                                             ? AppTokens.current.accentStrong
@@ -651,7 +651,6 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                           width: 24,
                                           height: 24,
                                           decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
                                             color: _uncapped
                                                 ? AppColors.forestGreen
                                                 : Colors.transparent,
@@ -800,7 +799,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                               alpha: 0.45,
                                             )
                                           : AppColors.soilMid,
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.zero,
                                       border: Border.all(
                                         color: selected
                                             ? AppColors.forestGreen
@@ -923,7 +922,6 @@ class _Header extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: AppTokens.current.canvasSoft,
-                shape: BoxShape.circle,
                 border: Border.all(color: AppTokens.current.cardBorder),
               ),
               child: Icon(
@@ -940,7 +938,7 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   AppLocalizations.of(context).plantASaplingTitle,
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.pixelifySans(
                     fontWeight: FontWeight.w600,
                     color: AppColors.stoneBeigeColor,
                     fontSize: 22,
@@ -961,7 +959,6 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppTokens.current.accentSoft,
-              shape: BoxShape.circle,
             ),
             child: Icon(Icons.eco,
                 color: AppTokens.current.accentStrong, size: 14),
@@ -998,10 +995,10 @@ class _SaplingPreviewBanner extends StatelessWidget {
       height: 170,
       decoration: BoxDecoration(
         color: AppTokens.current.accentTint,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.zero,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.zero,
         child: Stack(
           children: [
             // The animated sapling
@@ -1027,7 +1024,7 @@ class _SaplingPreviewBanner extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: AppTokens.current.card,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(color: AppTokens.current.cardBorder),
                 ),
                 child: Row(
@@ -1045,7 +1042,7 @@ class _SaplingPreviewBanner extends StatelessWidget {
                         goalName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.pixelifySans(
                           fontWeight: FontWeight.w600,
                           color: AppTokens.current.textPrimary,
                           fontSize: 13,
@@ -1066,7 +1063,6 @@ class _SaplingPreviewBanner extends StatelessWidget {
                   height: 14,
                   decoration: BoxDecoration(
                     color: Color(category!.colorValue),
-                    shape: BoxShape.circle,
                   ),
                 ),
               ),
@@ -1201,12 +1197,12 @@ class _TimeframeStep extends StatelessWidget {
           const SizedBox(height: 12),
           InkWell(
             onTap: onPickDate,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.zero,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
               decoration: BoxDecoration(
                 color: AppColors.soilMid,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
                   color: AppColors.mossGreen.withValues(alpha: 0.40),
                 ),
@@ -1302,7 +1298,7 @@ class _WillingRangeCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: t.canvasSoft,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: t.cardBorder),
       ),
       child: Column(
@@ -1342,7 +1338,7 @@ class _WillingRangeCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: cadence == c ? t.accentSoft : t.card,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.zero,
                       border: Border.all(
                         color: cadence == c ? t.accentStrong : t.cardBorder,
                         width: cadence == c ? 1.5 : 1,
@@ -1399,7 +1395,7 @@ class _ModeChoice extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: selected ? t.accentSoft : t.canvasSoft,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.zero,
           border: Border.all(
             color: selected ? t.accentStrong : t.cardBorder,
             width: selected ? 1.5 : 1,
@@ -1705,7 +1701,7 @@ class _WaterPlanCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(12),
@@ -1713,7 +1709,7 @@ class _WaterPlanCard extends StatelessWidget {
             color: selected
                 ? AppTokens.current.accentSoft
                 : AppTokens.current.canvasSoft,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.zero,
             border: Border.all(
               color: selected
                   ? AppTokens.current.accentStrong
@@ -1755,7 +1751,7 @@ class _WaterPlanCard extends StatelessWidget {
                     ],
                     Text(
                       '\$${plan.perWatering.toStringAsFixed(0)} ${cadenceEvery(l, plan.cadence)}',
-                      style: GoogleFonts.fredoka(
+                      style: GoogleFonts.pixelifySans(
                         fontWeight: FontWeight.w600,
                         color: AppColors.stoneBeigeColor,
                         fontSize: 15,
@@ -1836,7 +1832,7 @@ class _CustomWaterCard extends StatelessWidget {
         color: active
             ? AppTokens.current.accentTint
             : AppTokens.current.canvasSoft,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
         border: Border.all(
           color: active
               ? AppTokens.current.accentStrong
@@ -1873,7 +1869,7 @@ class _CustomWaterCard extends StatelessWidget {
                       color: active && cadence == c
                           ? AppTokens.current.accentSoft
                           : AppTokens.current.card,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.zero,
                       border: Border.all(
                         color: active && cadence == c
                             ? AppTokens.current.accentStrong

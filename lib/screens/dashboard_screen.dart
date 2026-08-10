@@ -163,7 +163,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 height: 72,
                 decoration: BoxDecoration(
                   color: AppTokens.current.accentTint,
-                  shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.park, color: Conifer.c500, size: 36),
               ),

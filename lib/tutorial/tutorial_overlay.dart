@@ -324,7 +324,7 @@ class _SpeechBubble extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: AppTokens.current.card,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.zero,
           border: Border.all(color: AppTokens.current.cardBorder),
           boxShadow: AppShadows.card,
         ),
@@ -344,7 +344,7 @@ class _SpeechBubble extends StatelessWidget {
                     speaker,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.pixelifySans(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: AppColors.barkBrown,
@@ -505,7 +505,7 @@ class _TourButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.zero,
           border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
           boxShadow: [
             BoxShadow(

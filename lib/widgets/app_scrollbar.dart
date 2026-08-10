@@ -33,7 +33,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
       controller: _controller,
       thumbVisibility: true,
       thickness: 5,
-      radius: const Radius.circular(8),
+      radius: Radius.zero,
       child: widget.builder(_controller),
     );
   }

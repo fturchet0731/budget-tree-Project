@@ -175,7 +175,7 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
                       color: isActive
                           ? AppColors.lightLeaf
                           : Colors.white.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.zero,
                     ),
                   );
                 }),
@@ -186,7 +186,7 @@ class _ImmersiveForestViewState extends State<ImmersiveForestView> {
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
                   color: AppTokens.current.card,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(color: AppTokens.current.cardBorder),
                 ),
                 child: Row(
@@ -291,7 +291,7 @@ class _TreeStage extends StatelessWidget {
                       AppTokens.current.card,
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.zero,
                   border:
                       Border.all(color: AppTokens.current.cardBorder),
                   boxShadow: AppShadows.card,
@@ -309,7 +309,7 @@ class _TreeStage extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Color(category!.colorValue)
                                 .withValues(alpha: 0.30),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.zero,
                             border: Border.all(
                                 color: Color(category!.colorValue)
                                     .withValues(alpha: 0.70)),
@@ -330,7 +330,7 @@ class _TreeStage extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.fredoka(
+                      style: GoogleFonts.pixelifySans(
                           fontWeight: FontWeight.w600,
                           color: AppColors.stoneBeigeColor,
                           fontSize: 18),
@@ -428,7 +428,7 @@ class _BudgetInfoSheet extends StatelessWidget {
       // palette and turned dark too.
       decoration: BoxDecoration(
         color: AppTokens.current.card,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+        borderRadius: const BorderRadius.vertical(top: Radius.zero),
       ),
       padding: const EdgeInsets.fromLTRB(22, 16, 22, 28),
       child: SingleChildScrollView(
@@ -443,7 +443,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 18),
                 decoration: BoxDecoration(
                   color: AppColors.mossGreen.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
             ),
@@ -463,7 +463,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Color(category!.colorValue)
                                   .withValues(alpha: 0.30),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.zero,
                               border: Border.all(
                                   color: Color(category!.colorValue)
                                       .withValues(alpha: 0.70)),
@@ -481,7 +481,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                         ),
                       Text(
                         budget.budgetName,
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.pixelifySans(
                             fontWeight: FontWeight.w600,
                             color: AppColors.stoneBeigeColor,
                             fontSize: 22),
@@ -497,7 +497,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                 ),
                 Text(
                   '\$${budget.totalIncome.toStringAsFixed(0)}',
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.pixelifySans(
                       fontWeight: FontWeight.w600,
                       color: AppColors.lightLeaf,
                       fontSize: 26),
@@ -506,7 +506,7 @@ class _BudgetInfoSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ClipRRect(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.zero,
               child: LinearProgressIndicator(
                 value: allocPct,
                 minHeight: 8,
@@ -573,7 +573,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.zero,
                             child: LinearProgressIndicator(
                               value: pct,
                               minHeight: 5,
@@ -597,7 +597,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.forestGreen,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13)),
+                      borderRadius: BorderRadius.zero),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   elevation: 3,
                 ),
@@ -625,7 +625,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                           color: AppColors.riverBlue
                               .withValues(alpha: 0.5)),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(11)),
+                          borderRadius: BorderRadius.zero),
                       padding:
                           const EdgeInsets.symmetric(vertical: 11),
                     ),
@@ -645,7 +645,7 @@ class _BudgetInfoSheet extends StatelessWidget {
                           color: AppColors.dangerRed
                               .withValues(alpha: 0.5)),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(11)),
+                          borderRadius: BorderRadius.zero),
                       padding:
                           const EdgeInsets.symmetric(vertical: 11),
                     ),

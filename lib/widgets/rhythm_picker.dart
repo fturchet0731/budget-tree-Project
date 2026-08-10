@@ -147,7 +147,7 @@ class _RhythmPickerState extends State<RhythmPicker> {
                           child: DropdownButton<CadenceUnit>(
                             value: _unit,
                             isDense: true,
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.zero,
                             style: GoogleFonts.nunito(
                               color: t.textPrimary,
                               fontSize: 13,
@@ -232,7 +232,7 @@ class _Chip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
           color: selected ? t.accentSoft : t.canvasSoft,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.zero,
           border: Border.all(
             color: selected ? t.accentStrong : t.cardBorder,
             width: selected ? 1.5 : 1,

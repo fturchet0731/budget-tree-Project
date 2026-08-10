@@ -635,7 +635,6 @@ class _CreateHeader extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: AppTokens.current.canvasSoft,
-                shape: BoxShape.circle,
                 border: Border.all(color: AppTokens.current.cardBorder),
               ),
               child: Icon(
@@ -665,7 +664,7 @@ class _CreateHeader extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.pixelifySans(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
                       fontSize: 22,
@@ -692,11 +691,10 @@ class _CreateHeader extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppTokens.current.accentSoft,
-              shape: BoxShape.circle,
             ),
             child: Text(
               '${step + 1}',
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.pixelifySans(
                 fontWeight: FontWeight.w600,
                 color: AppTokens.current.accentStrong,
                 fontSize: 14,
@@ -757,7 +755,7 @@ class _ContinueButton extends StatelessWidget {
           side: BorderSide(color: AppColors.forestGreen.withValues(alpha: 0.6)),
           padding: const EdgeInsets.symmetric(vertical: 13),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.zero,
           ),
         ),
         icon: const Icon(Icons.check_circle_outline, size: 18),
@@ -1017,7 +1015,7 @@ class _IncomeStepState extends State<_IncomeStep> {
                               decoration: BoxDecoration(
                                 color:
                                     AppColors.riverBlue.withValues(alpha: 0.16),
-                                borderRadius: BorderRadius.circular(18),
+                                borderRadius: BorderRadius.zero,
                                 border: Border.all(
                                   color:
                                       AppColors.riverBlue.withValues(alpha: 0.5),
@@ -1081,7 +1079,6 @@ class _IncomeStepState extends State<_IncomeStep> {
                               color: AppColors.riverBlue.withValues(
                                 alpha: 0.18,
                               ),
-                              shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.water_drop_outlined,
@@ -1172,7 +1169,7 @@ class _IncomeStepState extends State<_IncomeStep> {
                       const SizedBox(width: 10),
                       Text(
                         '\$${total.toStringAsFixed(2)}',
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.pixelifySans(
                           fontWeight: FontWeight.w600,
                           color: AppColors.forestGreen,
                           fontSize: 20,
@@ -1365,7 +1362,7 @@ class _ExpenseStepState extends State<_ExpenseStep> {
             padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
             decoration: BoxDecoration(
               color: isSelected ? t.accentSoft : t.canvasSoft,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.zero,
               border: Border.all(
                 color: isSelected ? t.accentStrong : t.cardBorder,
                 width: isSelected ? 1.5 : 1,
@@ -1566,7 +1563,6 @@ class _ExpenseStepState extends State<_ExpenseStep> {
                             color: AppColors.forestGreen.withValues(
                               alpha: 0.20,
                             ),
-                            shape: BoxShape.circle,
                           ),
                           child: Icon(
                             CategoryIcons.forKey(exp.emoji),
@@ -1687,7 +1683,7 @@ class _AllocationStrip extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       decoration: BoxDecoration(
         color: t.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.zero,
         border: Border.all(
           color: overBudget
               ? AppColors.dangerRed.withValues(alpha: 0.65)
@@ -2020,7 +2016,7 @@ class _SurveyProgress extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         ClipRRect(
-          borderRadius: BorderRadius.circular(3),
+          borderRadius: BorderRadius.zero,
           child: SizedBox(
             height: 5,
             child: LinearProgressIndicator(
@@ -2057,7 +2053,7 @@ class _AnswerRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.soilMid.withValues(alpha: 0.75),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.zero,
           border: Border.all(
             color: AppColors.mossGreen.withValues(alpha: 0.3),
           ),
@@ -2127,7 +2123,7 @@ class _SurveyChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
           color: selected ? t.accentSoft : t.canvasSoft,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.zero,
           border: Border.all(
             color: selected ? t.accentStrong : t.cardBorder,
             width: selected ? 1.5 : 1,
@@ -2300,7 +2296,7 @@ class _PlanStepState extends State<_PlanStep> {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.soilMid,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.zero,
                       border: Border.all(
                         color: AppColors.mossGreen.withValues(alpha: 0.4),
                       ),
@@ -2347,7 +2343,7 @@ class _PlanStepState extends State<_PlanStep> {
             else ...[
               Text(
                 l.pickAPlan,
-                style: GoogleFonts.fredoka(
+                style: GoogleFonts.pixelifySans(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
                   fontSize: 16,
@@ -2640,7 +2636,7 @@ class _FinishStepState extends State<_FinishStep> {
               );
               if (picked != null) widget.onFirstPayDateChanged(picked);
             },
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.zero,
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 14,
@@ -2648,7 +2644,7 @@ class _FinishStepState extends State<_FinishStep> {
               ),
               decoration: BoxDecoration(
                 color: AppColors.soilMid,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
                   color: AppColors.mossGreen.withValues(alpha: 0.40),
                 ),
@@ -2745,7 +2741,7 @@ class _FinishStepState extends State<_FinishStep> {
                 backgroundColor: AppColors.forestGreen,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
               icon: const Icon(Icons.spa, color: Colors.white, size: 18),
@@ -2872,7 +2868,7 @@ class _GenerateButton extends StatelessWidget {
             : const Icon(Icons.auto_awesome, color: Colors.white),
         label: Text(
           loading ? l.thinkingUp : l.generatePlans,
-          style: GoogleFonts.fredoka(
+          style: GoogleFonts.pixelifySans(
             fontWeight: FontWeight.w600,
             color: Colors.white,
             fontSize: 15,
@@ -2895,7 +2891,7 @@ class _BudgetBar extends StatelessWidget {
         : 0.0;
     final overBudget = totalAllocated > totalIncome;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.zero,
       child: LinearProgressIndicator(
         value: pct,
         minHeight: 10,
@@ -3004,7 +3000,7 @@ class _SavedEntriesCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: t.canvasSoft,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.zero,
                         border: Border.all(color: t.cardBorder),
                       ),
                       child: Row(

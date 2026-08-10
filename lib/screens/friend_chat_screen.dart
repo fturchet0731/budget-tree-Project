@@ -166,7 +166,6 @@ class _FriendChatScreenState extends State<FriendChatScreen> {
                         height: 44,
                         decoration: BoxDecoration(
                           color: t.accent,
-                          shape: BoxShape.circle,
                         ),
                         child: _sending
                             ? Padding(
@@ -212,8 +211,8 @@ class _MessageBubble extends StatelessWidget {
           color: mine ? t.accent : t.card,
           border: mine ? null : Border.all(color: t.cardBorder),
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
+            topLeft: Radius.zero,
+            topRight: Radius.zero,
             bottomLeft: Radius.circular(mine ? 18 : 6),
             bottomRight: Radius.circular(mine ? 6 : 18),
           ),

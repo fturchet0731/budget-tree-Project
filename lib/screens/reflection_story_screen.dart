@@ -130,7 +130,7 @@ class _ReflectionStoryScreenState extends State<ReflectionStoryScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: i <= _index ? t.accent : t.accentSoft,
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                     ),

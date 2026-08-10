@@ -108,7 +108,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         height: 116,
                         decoration: BoxDecoration(
                           color: t.accentTint,
-                          shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: AcornMascot(

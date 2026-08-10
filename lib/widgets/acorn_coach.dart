@@ -268,8 +268,8 @@ class _AcornCoachState extends State<AcornCoach>
               decoration: BoxDecoration(
                 color: AppTokens.current.card,
                 borderRadius: _hiddenOnRight
-                    ? const BorderRadius.horizontal(left: Radius.circular(16))
-                    : const BorderRadius.horizontal(right: Radius.circular(16)),
+                    ? const BorderRadius.horizontal(left: Radius.zero)
+                    : const BorderRadius.horizontal(right: Radius.zero),
                 border: Border.all(color: AppTokens.current.cardBorder),
                 boxShadow: AppShadows.card,
               ),
@@ -297,7 +297,7 @@ class _AcornCoachState extends State<AcornCoach>
       padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
       decoration: BoxDecoration(
         color: AppTokens.current.card,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: AppTokens.current.cardBorder),
         boxShadow: AppShadows.card,
       ),
@@ -308,7 +308,7 @@ class _AcornCoachState extends State<AcornCoach>
           const SizedBox(width: 6),
           Text(
             AppLocalizations.of(context).coachAcornTip,
-            style: GoogleFonts.fredoka(
+            style: GoogleFonts.pixelifySans(
               fontWeight: FontWeight.w600,
               fontSize: 13,
               color: AppColors.barkBrown,
@@ -327,7 +327,7 @@ class _AcornCoachState extends State<AcornCoach>
       padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
       decoration: BoxDecoration(
         color: AppTokens.current.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: AppTokens.current.cardBorder),
         boxShadow: AppShadows.card,
       ),
@@ -355,7 +355,7 @@ class _AcornCoachState extends State<AcornCoach>
                     const SizedBox(width: 3),
                     Text(
                       _line.speaker,
-                      style: GoogleFonts.fredoka(
+                      style: GoogleFonts.pixelifySans(
                         fontWeight: FontWeight.w600,
                         fontSize: 12.5,
                         color: AppColors.barkBrown,
@@ -484,7 +484,7 @@ class _TargetHighlightRingState extends State<TargetHighlightRing>
                   rect: ring,
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.zero,
                       border: Border.all(
                         color: t.accentStrong.withValues(
                           alpha: 0.55 + 0.45 * v,

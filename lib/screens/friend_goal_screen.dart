@@ -127,7 +127,6 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: AppTokens.current.canvasSoft,
-                        shape: BoxShape.circle,
                         border:
                             Border.all(color: AppTokens.current.cardBorder),
                       ),
@@ -143,7 +142,6 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: AppTokens.current.accentSoft,
-                      shape: BoxShape.circle,
                     ),
                     child: Icon(
                       GoalIcons.forKey(goal.iconKey),
@@ -159,7 +157,7 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                       children: [
                         Text(
                           goal.name,
-                          style: GoogleFonts.fredoka(
+                          style: GoogleFonts.pixelifySans(
                             fontWeight: FontWeight.w600,
                             color: AppTokens.current.textPrimary,
                             fontSize: 20,
@@ -191,7 +189,7 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppTokens.current.accentTint,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.zero,
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: Padding(
@@ -239,7 +237,7 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: AppTokens.current.card,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.zero,
                               border: Border.all(
                                 color: AppTokens.current.cardBorder,
                               ),
@@ -268,7 +266,7 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
               decoration: BoxDecoration(
                 color: AppTokens.current.card,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
+                  top: Radius.zero,
                 ),
                 border: Border.all(color: AppTokens.current.cardBorder),
                 boxShadow: [
@@ -302,7 +300,7 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                           const SizedBox(height: 2),
                           Text(
                             '\$${goal.currentAmount.toStringAsFixed(2)}',
-                            style: GoogleFonts.fredoka(
+                            style: GoogleFonts.pixelifySans(
                               fontWeight: FontWeight.w600,
                               color: complete
                                   ? const Color(0xFFBA8514)
@@ -341,7 +339,7 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                   ),
                   const SizedBox(height: 14),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.zero,
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 12,
@@ -423,7 +421,7 @@ class _LikePill extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: t.card,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.zero,
             border: Border.all(color: t.cardBorder),
           ),
           child: Row(

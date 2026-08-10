@@ -127,7 +127,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
     messenger.showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         content: Row(
           children: [
             Icon(
@@ -195,7 +195,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               const SizedBox(width: 10),
               Text(
                 l.saveBudgetTreeQuestion,
-                style: GoogleFonts.fredoka(
+                style: GoogleFonts.pixelifySans(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
                   fontSize: 20,
@@ -234,7 +234,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 const SizedBox(height: 16),
                 InkWell(
                   onTap: () => setSBState(() => autoLink = !autoLink),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.zero,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -242,7 +242,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.soilMid,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.zero,
                       border: Border.all(
                         color: AppColors.mossGreen.withValues(alpha: 0.35),
                       ),
@@ -254,7 +254,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
                             color: autoLink
                                 ? AppColors.forestGreen
                                 : Colors.transparent,
@@ -347,7 +346,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     SnackBar(
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.zero,
                       ),
                       content: Text(
                         l.autoLinkedSnack(autoLinkedCount),
@@ -362,7 +361,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.zero,
                     ),
                     behavior: SnackBarBehavior.floating,
                     content: Row(
@@ -419,7 +418,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
         decoration: BoxDecoration(
           color: AppTokens.current.card,
           borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(26)),
+              const BorderRadius.vertical(top: Radius.zero),
         ),
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
         child: Column(
@@ -432,7 +431,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.mossGreen.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
             ),
@@ -443,7 +442,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 const SizedBox(width: 8),
                 Text(
                   l.gardenersTips,
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.pixelifySans(
                     fontWeight: FontWeight.w600,
                     color: AppColors.stoneBeigeColor,
                     fontSize: 20,
@@ -602,7 +601,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: AppTokens.current.card,
-                        shape: BoxShape.circle,
                         border:
                             Border.all(color: AppTokens.current.cardBorder),
                       ),
@@ -626,7 +624,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                                 widget.budget.budgetName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.fredoka(
+                                style: GoogleFonts.pixelifySans(
                                   fontWeight: FontWeight.w600,
                                   color: AppTokens.current.textPrimary,
                                   fontSize: 20,
@@ -644,7 +642,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                                   color: Color(
                                     _category!.colorValue,
                                   ).withValues(alpha: 0.18),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.zero,
                                 ),
                                 child: Text(
                                   _category!.name.toUpperCase(),
@@ -676,7 +674,6 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFD54F).withValues(alpha: 0.30),
-                        shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.lightbulb_outline,
@@ -707,7 +704,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     ),
                     decoration: BoxDecoration(
                       color: AppTokens.current.card,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.zero,
                       border: Border.all(color: AppTokens.current.cardBorder),
                     ),
                     child: Row(
@@ -1313,7 +1310,7 @@ class _GrowingTreePainter extends CustomPainter {
       height: tp.height + 12,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(pillRect, const Radius.circular(14)),
+      RRect.fromRectAndRadius(pillRect, Radius.zero),
       Paint()..color = Colors.black.withValues(alpha: alpha * 0.32),
     );
 
@@ -1397,7 +1394,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
         return Container(
           decoration: const BoxDecoration(
             color: Color(0xFF0E2110),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+            borderRadius: BorderRadius.vertical(top: Radius.zero),
           ),
           padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
           child: StatefulBuilder(
@@ -1412,14 +1409,14 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       height: 4,
                       decoration: BoxDecoration(
                         color: AppColors.mossGreen.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.zero,
                       ),
                     ),
                   ),
                   const SizedBox(height: 18),
                   Text(
                     l.linkBranchToGoals,
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.pixelifySans(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
                       fontSize: 20,
@@ -1441,7 +1438,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: AppColors.soilMid,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.zero,
                         border: Border.all(
                           color: AppColors.mossGreen.withValues(alpha: 0.3),
                         ),
@@ -1533,7 +1530,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
     return Container(
       decoration: BoxDecoration(
         color: AppTokens.current.card,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+        borderRadius: const BorderRadius.vertical(top: Radius.zero),
       ),
       padding: EdgeInsets.fromLTRB(
         24,
@@ -1553,7 +1550,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 margin: const EdgeInsets.only(bottom: 22),
                 decoration: BoxDecoration(
                   color: AppColors.mossGreen.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
             ),
@@ -1564,7 +1561,6 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   padding: const EdgeInsets.all(13),
                   decoration: BoxDecoration(
                     color: AppColors.forestGreen.withValues(alpha: 0.25),
-                    shape: BoxShape.circle,
                     border: Border.all(
                       color: AppColors.forestGreen.withValues(alpha: 0.4),
                     ),
@@ -1582,7 +1578,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                     children: [
                       Text(
                         cat.name,
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.pixelifySans(
                           fontWeight: FontWeight.w600,
                           color: AppColors.stoneBeigeColor,
                           fontSize: 24,
@@ -1606,7 +1602,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.darkBark.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
                   color: AppColors.forestGreen.withValues(alpha: 0.25),
                 ),
@@ -1628,7 +1624,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                         children: [
                           Text(
                             '\$${cat.allocated.toStringAsFixed(2)}',
-                            style: GoogleFonts.fredoka(
+                            style: GoogleFonts.pixelifySans(
                               fontWeight: FontWeight.w600,
                               color: AppColors.forestGreen,
                               fontSize: 28,
@@ -1666,7 +1662,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   ],
                   const SizedBox(height: 14),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.zero,
                     child: LinearProgressIndicator(
                       value: widget.budget.percentageFor(cat),
                       minHeight: 12,
@@ -1759,7 +1755,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: AppColors.soilMid.withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(
                     color: AppColors.mossGreen.withValues(alpha: 0.2),
                   ),
@@ -1804,7 +1800,7 @@ class _LinkedGoalChip extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
       decoration: BoxDecoration(
         color: AppColors.forestGreen.withValues(alpha: 0.30),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: AppColors.forestGreen.withValues(alpha: 0.55)),
       ),
       child: Row(
@@ -1874,7 +1870,7 @@ class _GoalLinkTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
@@ -1883,7 +1879,6 @@ class _GoalLinkTile extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppColors.forestGreen.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
               ),
               child: Icon(
                 GoalIcons.forKey(goal.iconKey),
@@ -1922,7 +1917,6 @@ class _GoalLinkTile extends StatelessWidget {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
                 color: linked ? AppColors.forestGreen : Colors.transparent,
                 border: Border.all(
                   color: linked
@@ -2057,7 +2051,7 @@ class _SuggestionTile extends StatelessWidget {
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
@@ -2066,7 +2060,6 @@ class _SuggestionTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
               color: color.withValues(alpha: 0.18),
             ),
             child: Icon(suggestion.icon, color: color, size: 18),

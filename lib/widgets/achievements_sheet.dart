@@ -52,7 +52,7 @@ class _AchievementsSheet extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppTokens.current.card,
           borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(26)),
+              const BorderRadius.vertical(top: Radius.zero),
         ),
         child: FutureBuilder<Map<String, DateTime>>(
           future: AchievementService.loadUnlocked(),
@@ -69,12 +69,12 @@ class _AchievementsSheet extends StatelessWidget {
                   height: 4,
                   decoration: BoxDecoration(
                     color: AppColors.mossGreen.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.zero,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(l.badgesTitle,
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.pixelifySans(
                         fontWeight: FontWeight.w600,
                         color: AppColors.stoneBeigeColor,
                         fontSize: 22)),
@@ -128,7 +128,7 @@ class _BadgeTile extends StatelessWidget {
         color: earned
             ? tint.withValues(alpha: 0.12)
             : AppTokens.current.canvasSoft,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.zero,
         border: Border.all(
           color: earned
               ? tint.withValues(alpha: 0.55)
@@ -143,7 +143,6 @@ class _BadgeTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
                   color: earned
                       ? tint.withValues(alpha: 0.2)
                       : AppTokens.current.cardBorder,

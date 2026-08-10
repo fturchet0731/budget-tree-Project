@@ -133,7 +133,7 @@ class _CheckInSheetState extends State<_CheckInSheet> {
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: t.cardBorder,
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.zero,
                   ),
                 ),
               ),

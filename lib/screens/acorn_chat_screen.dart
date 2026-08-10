@@ -332,7 +332,6 @@ class _Composer extends StatelessWidget {
               height: 46,
               decoration: BoxDecoration(
                 color: enabled ? t.accent : t.accentSoft,
-                shape: BoxShape.circle,
                 boxShadow: enabled ? AppShadows.pill : null,
               ),
               child: Icon(

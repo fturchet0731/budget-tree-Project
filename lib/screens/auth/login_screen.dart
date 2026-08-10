@@ -165,7 +165,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 108,
                       decoration: BoxDecoration(
                         color: t.accentTint,
-                        shape: BoxShape.circle,
                       ),
                       child: const Center(
                         child: AcornMascot(size: 64, sway: true),

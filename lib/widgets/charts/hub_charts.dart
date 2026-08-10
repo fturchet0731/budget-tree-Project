@@ -455,7 +455,7 @@ class _BarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final radius = const Radius.circular(4);
+    final radius = Radius.zero;
     final full = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawRRect(
       RRect.fromRectAndRadius(full, radius),

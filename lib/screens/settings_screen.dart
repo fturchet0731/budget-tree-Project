@@ -172,7 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   title: Text(
                     l.settingsTitle,
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.pixelifySans(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
                       fontSize: 22,
@@ -422,7 +422,7 @@ class _SettingsCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: AppTokens.current.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: AppTokens.current.cardBorder),
         boxShadow: AppShadows.card,
       ),
@@ -485,7 +485,7 @@ class _LanguagePicker extends StatelessWidget {
                 color: selected
                     ? AppTokens.current.accentSoft
                     : AppTokens.current.canvasSoft,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
                   color: selected
                       ? AppTokens.current.accentStrong
@@ -545,7 +545,7 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
@@ -554,7 +554,6 @@ class _ActionTile extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.16),
-                shape: BoxShape.circle,
               ),
               child: Icon(icon, color: iconColor, size: 20),
             ),
@@ -833,7 +832,7 @@ class _TapRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         child: Row(
@@ -850,7 +849,7 @@ class _TapRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppTokens.current.accentSoft,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.zero,
               ),
               child: Text(
                 value,
@@ -891,7 +890,7 @@ class _TimeZoneTile extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final t = AppTokens.current;
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.zero,
       onTap: () async {
         final picked = await showModalBottomSheet<String>(
           context: context,
@@ -907,7 +906,7 @@ class _TimeZoneTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           color: t.canvasSoft,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.zero,
           border: Border.all(color: t.cardBorder),
         ),
         child: Row(
@@ -976,7 +975,7 @@ class _TimeZoneSheetState extends State<_TimeZoneSheet> {
       builder: (context, controller) => Container(
         decoration: BoxDecoration(
           color: t.card,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(top: Radius.zero),
         ),
         padding: EdgeInsets.only(
           left: 16,
@@ -991,13 +990,13 @@ class _TimeZoneSheetState extends State<_TimeZoneSheet> {
               height: 4,
               decoration: BoxDecoration(
                 color: t.cardBorder,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.zero,
               ),
             ),
             const SizedBox(height: 14),
             Text(
               l.settingsTimeZoneTitle,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.pixelifySans(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: t.textPrimary,

@@ -29,7 +29,6 @@ class ProfileAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: t.accentSoft,
-        shape: BoxShape.circle,
         image: bytes == null
             ? null
             : DecorationImage(

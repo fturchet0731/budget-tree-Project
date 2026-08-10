@@ -43,7 +43,7 @@ class _ViewModeToggle extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: selected ? AppTokens.current.card : Colors.transparent,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.zero,
               boxShadow: selected ? AppShadows.pill : null,
             ),
             child: Icon(
@@ -62,7 +62,7 @@ class _ViewModeToggle extends StatelessWidget {
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: AppTokens.current.canvasSoft,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: AppTokens.current.cardBorder),
       ),
       child: Row(
@@ -406,7 +406,7 @@ class _BudgetCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Color(category!.colorValue)
                                     .withValues(alpha: 0.30),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.zero,
                                 border: Border.all(
                                     color: Color(category!.colorValue)
                                         .withValues(alpha: 0.7)),
@@ -424,7 +424,7 @@ class _BudgetCard extends StatelessWidget {
                           ),
                         Text(
                           budget.budgetName,
-                          style: GoogleFonts.fredoka(
+                          style: GoogleFonts.pixelifySans(
                             fontWeight: FontWeight.w600,
                             color: AppColors.stoneBeigeColor,
                             fontSize: 18,
@@ -467,7 +467,7 @@ class _BudgetCard extends StatelessWidget {
                         ],
                         const SizedBox(height: 8),
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.zero,
                           child: LinearProgressIndicator(
                             value: allocPct,
                             minHeight: 7,
@@ -578,7 +578,7 @@ class _BudgetCard extends StatelessWidget {
                                             ),
                                             const SizedBox(height: 4),
                                             ClipRRect(
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius: BorderRadius.zero,
                                               child: LinearProgressIndicator(
                                                 value: pct,
                                                 minHeight: 5,
@@ -611,7 +611,7 @@ class _BudgetCard extends StatelessWidget {
                                           .withValues(alpha: 0.55)),
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
-                                          BorderRadius.circular(11)),
+                                          BorderRadius.zero),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 11),
                                 ),
@@ -658,7 +658,7 @@ class _BudgetCard extends StatelessWidget {
                                     side: BorderSide(
                                         color: AppColors.riverBlue.withValues(alpha: 0.5)),
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(11)),
+                                        borderRadius: BorderRadius.zero),
                                     padding: const EdgeInsets.symmetric(vertical: 11),
                                   ),
                                   icon: const Icon(Icons.edit_outlined, size: 15),
@@ -675,7 +675,7 @@ class _BudgetCard extends StatelessWidget {
                                     side: BorderSide(
                                         color: AppColors.dangerRed.withValues(alpha: 0.5)),
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(11)),
+                                        borderRadius: BorderRadius.zero),
                                     padding: const EdgeInsets.symmetric(vertical: 11),
                                   ),
                                   icon: const Icon(Icons.delete_outline, size: 15),
@@ -720,7 +720,7 @@ class _NoMatchInCategory extends StatelessWidget {
             const SizedBox(height: 18),
             Text(
               AppLocalizations.of(context).noTreesCategoryTitle,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.pixelifySans(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
                   fontSize: 18),
@@ -739,7 +739,7 @@ class _NoMatchInCategory extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.forestGreen,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.zero),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 22, vertical: 11),
               ),
@@ -777,7 +777,7 @@ class _EmptyForest extends StatelessWidget {
             const SizedBox(height: 22),
             Text(
               AppLocalizations.of(context).forestEmptyTitle,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.pixelifySans(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
                   fontSize: 22),
@@ -798,7 +798,7 @@ class _EmptyForest extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.zero),
                 elevation: 4,
               ),
               icon: const Icon(Icons.park, color: Colors.white),
@@ -1046,7 +1046,7 @@ class _EditSheetState extends State<_EditSheet> {
       decoration: BoxDecoration(
         color: AppTokens.current.card,
         borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(26)),
+            const BorderRadius.vertical(top: Radius.zero),
       ),
       padding: EdgeInsets.fromLTRB(
           22, 18, 22, MediaQuery.of(context).viewInsets.bottom + 28),
@@ -1059,13 +1059,13 @@ class _EditSheetState extends State<_EditSheet> {
             height: 4,
             decoration: BoxDecoration(
               color: AppColors.mossGreen.withValues(alpha: 0.35),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.zero,
             ),
           ),
           const SizedBox(height: 18),
           Text(
             l.editBudget,
-            style: GoogleFonts.fredoka(
+            style: GoogleFonts.pixelifySans(
                 fontWeight: FontWeight.w600,
                 color: AppColors.stoneBeigeColor,
                 fontSize: 20),
@@ -1104,7 +1104,7 @@ class _EditSheetState extends State<_EditSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: AppColors.soilMid,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.zero,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1271,7 +1271,7 @@ class _EditSheetState extends State<_EditSheet> {
                 backgroundColor: AppColors.forestGreen,
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13)),
+                    borderRadius: BorderRadius.zero),
                 elevation: 3,
               ),
               child: _saving

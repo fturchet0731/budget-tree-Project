@@ -150,7 +150,6 @@ class _AddFriendsBubble extends StatelessWidget {
             height: _circle,
             decoration: BoxDecoration(
               color: t.canvasSoft,
-              shape: BoxShape.circle,
               border: Border.all(color: t.cardBorder, width: 1.5),
             ),
             child: Icon(Icons.person_add_alt_1, color: t.textSecondary, size: 30),
@@ -163,7 +162,7 @@ class _AddFriendsBubble extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: badgeIsActive ? const Color(0xFF3BA55D) : t.accent,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(color: t.canvas, width: 2),
                 ),
                 child: Text(
@@ -208,7 +207,6 @@ class _FriendBubble extends StatelessWidget {
       circle: Container(
         padding: const EdgeInsets.all(2.5),
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
           border: Border.all(
             color: active ? const Color(0xFF3BA55D) : t.accentSoft,
             width: 2,
@@ -227,7 +225,6 @@ class _FriendBubble extends StatelessWidget {
                 height: 8,
                 decoration: const BoxDecoration(
                   color: Color(0xFF3BA55D),
-                  shape: BoxShape.circle,
                 ),
               ),
             ),

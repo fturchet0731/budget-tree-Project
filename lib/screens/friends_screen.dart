@@ -524,7 +524,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
       color: AppTokens.current.card,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.zero,
       border: Border.all(color: AppTokens.current.cardBorder),
       boxShadow: AppShadows.card,
     ),

@@ -18,6 +18,7 @@ import '../services/notification_scheduler.dart';
 import '../services/profile_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/pixel/pixel.dart';
 import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
@@ -184,7 +185,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
         child: Container(
           decoration: const BoxDecoration(
             color: Color(0xFF0D2010),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+            borderRadius: BorderRadius.vertical(top: Radius.zero),
           ),
           padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
           child: Column(
@@ -195,13 +196,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.mossGreen.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
               const SizedBox(height: 18),
               Text(
                 l.waterTheSapling,
-                style: GoogleFonts.fredoka(
+                style: GoogleFonts.pixelifySans(
                   fontWeight: FontWeight.w600,
                   color: AppColors.stoneBeigeColor,
                   fontSize: 20,
@@ -260,53 +261,38 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 }).toList(),
               ),
               const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final amount = double.tryParse(ctrl.text) ?? 0;
-                    if (amount <= 0) return;
-                    Navigator.pop(ctx);
-                    final wasComplete = _goal.isComplete;
-                    final prevStage = _goal.stage;
-                    final prevTier = _goal.tier;
-                    setState(() {
-                      _goal.applyContribution(
-                        amount,
-                        source: ContributionSource.manual,
-                      );
-                      _goal.stampCompletionIfReached();
-                      // Watered: move the next watering one cadence out so the
-                      // reminders track the user's actual rhythm.
-                      final cadence = _goal.waterCadence;
-                      if (_goal.waterRemindersEnabled && cadence != null) {
-                        _goal.nextWaterDate =
-                            addDays(DateTime.now(), cadence.days);
-                      }
-                    });
-                    SoundService.fundsAllocated();
-                    await _persist();
-                    await NotificationScheduler.rescheduleAll();
-                    await _animateTo(_goal.progress);
-                    await _celebrateProgress(wasComplete, prevStage, prevTier);
-                  },
-                  icon: const Icon(Icons.water_drop, color: Colors.white),
-                  label: Text(
-                    l.deposit,
-                    style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.forestGreen,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+              PixelButton(
+                label: l.deposit,
+                icon: PixelIcons.drop,
+                tone: PixelTone.water,
+                fontSize: 12,
+                onPressed: () async {
+                  final amount = double.tryParse(ctrl.text) ?? 0;
+                  if (amount <= 0) return;
+                  Navigator.pop(ctx);
+                  final wasComplete = _goal.isComplete;
+                  final prevStage = _goal.stage;
+                  final prevTier = _goal.tier;
+                  setState(() {
+                    _goal.applyContribution(
+                      amount,
+                      source: ContributionSource.manual,
+                    );
+                    _goal.stampCompletionIfReached();
+                    // Watered: move the next watering one cadence out so the
+                    // reminders track the user's actual rhythm.
+                    final cadence = _goal.waterCadence;
+                    if (_goal.waterRemindersEnabled && cadence != null) {
+                      _goal.nextWaterDate =
+                          addDays(DateTime.now(), cadence.days);
+                    }
+                  });
+                  SoundService.fundsAllocated();
+                  await _persist();
+                  await NotificationScheduler.rescheduleAll();
+                  await _animateTo(_goal.progress);
+                  await _celebrateProgress(wasComplete, prevStage, prevTier);
+                },
               ),
               const SizedBox(height: 10),
               SizedBox(
@@ -341,7 +327,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
                 ),
@@ -488,7 +474,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 const SizedBox(height: 10),
                 InkWell(
                   onTap: () => setSBState(() => uncapped = !uncapped),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.zero,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
@@ -623,7 +609,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: AppTokens.current.canvasSoft,
-                          shape: BoxShape.circle,
                           border:
                               Border.all(color: AppTokens.current.cardBorder),
                         ),
@@ -639,7 +624,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: AppTokens.current.accentSoft,
-                        shape: BoxShape.circle,
                       ),
                       child: Icon(
                         GoalIcons.forKey(_goal.iconKey),
@@ -655,7 +639,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         children: [
                           Text(
                             _goal.name,
-                            style: GoogleFonts.fredoka(
+                            style: GoogleFonts.pixelifySans(
                               fontWeight: FontWeight.w600,
                               color: AppTokens.current.textPrimary,
                               fontSize: 20,
@@ -705,7 +689,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         child: Container(
                           decoration: BoxDecoration(
                             color: AppTokens.current.accentTint,
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.zero,
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: Padding(
@@ -734,7 +718,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                             ),
                             decoration: BoxDecoration(
                               color: AppTokens.current.card,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.zero,
                               border: Border.all(
                                 color: AppTokens.current.cardBorder,
                               ),
@@ -784,7 +768,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                               ),
                               decoration: BoxDecoration(
                                 color: AppTokens.current.card,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.zero,
                                 border: Border.all(
                                   color: AppTokens.current.cardBorder,
                                 ),
@@ -814,7 +798,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 decoration: BoxDecoration(
                   color: AppTokens.current.card,
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
+                    top: Radius.zero,
                   ),
                   border: Border.all(color: AppTokens.current.cardBorder),
                   boxShadow: [
@@ -850,7 +834,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                             const SizedBox(height: 2),
                             Text(
                               '\$${_goal.currentAmount.toStringAsFixed(2)}',
-                              style: GoogleFonts.fredoka(
+                              style: GoogleFonts.pixelifySans(
                                 fontWeight: FontWeight.w600,
                                 color: complete
                                     ? const Color(0xFFBA8514)
@@ -891,7 +875,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     ),
                     const SizedBox(height: 14),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.zero,
                       child: LinearProgressIndicator(
                         value: _displayedProgress,
                         minHeight: 12,
@@ -1003,7 +987,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                             ),
                             decoration: BoxDecoration(
                               color: AppTokens.current.accentSoft,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.zero,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1038,23 +1022,14 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                       ),
                     ],
                     const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _showDeposit,
-                        icon: const Icon(Icons.water_drop, color: Colors.white),
-                        label: Text(
-                          complete ? l.adjust : l.waterTheSapling,
-                          style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                        ),
-                      ),
+                    // Watering is the goal's one big action, so it gets the
+                    // water-blue tone rather than the generic accent.
+                    PixelButton(
+                      label: complete ? l.adjust : l.waterTheSapling,
+                      icon: PixelIcons.drop,
+                      tone: PixelTone.water,
+                      onPressed: _showDeposit,
+                      fontSize: 12,
                     ),
                   ],
                 ),
@@ -1092,7 +1067,6 @@ class _MilestoneRow extends StatelessWidget {
               width: reached ? 11 : 9,
               height: reached ? 11 : 9,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
                 color: reached
                     ? (stops[i] >= 1.0
                           ? const Color(0xFFBA8514)

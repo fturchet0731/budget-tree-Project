@@ -254,7 +254,7 @@ class _GroveStatsBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppTokens.current.card,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: AppTokens.current.cardBorder),
         boxShadow: AppShadows.card,
       ),
@@ -338,7 +338,7 @@ class _MonthComparisonChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: color.withValues(alpha: 0.45)),
       ),
       child: Row(
@@ -492,7 +492,7 @@ class _GoalCardState extends State<_GoalCard> {
           ),
             const SizedBox(height: 5),
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.zero,
               child: LinearProgressIndicator(
                 value: goal.progress,
                 minHeight: 6,
@@ -548,7 +548,7 @@ class _EmptyGrove extends StatelessWidget {
             const SizedBox(height: 22),
             Text(
               l.noSaplingsTitle,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.pixelifySans(
                 fontWeight: FontWeight.w600,
                 color: AppColors.stoneBeigeColor,
                 fontSize: 22,
@@ -575,7 +575,7 @@ class _EmptyGrove extends StatelessWidget {
                   vertical: 14,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.zero,
                 ),
                 elevation: 4,
               ),
@@ -617,7 +617,7 @@ class _NoGoalsInCategory extends StatelessWidget {
             const SizedBox(height: 18),
             Text(
               l.noSaplingsCategoryTitle,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.pixelifySans(
                 fontWeight: FontWeight.w600,
                 color: AppColors.stoneBeigeColor,
                 fontSize: 18,
@@ -640,7 +640,7 @@ class _NoGoalsInCategory extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.forestGreen,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.zero,
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 22,

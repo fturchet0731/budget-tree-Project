@@ -35,7 +35,7 @@ class AllocationPlanCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: selected ? t.accentTint : t.card,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.zero,
           border: Border.all(
             color: selected ? t.accentStrong : t.cardBorder,
             width: selected ? 2 : 1,
@@ -56,7 +56,7 @@ class AllocationPlanCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     plan.name,
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.pixelifySans(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
                       fontSize: 17,
@@ -131,7 +131,7 @@ class AllocationPlanCard extends StatelessWidget {
                 ),
                 Text(
                   '\$${plan.leftover.toStringAsFixed(0)}',
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.pixelifySans(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFFBA8514),
                     fontSize: 16,

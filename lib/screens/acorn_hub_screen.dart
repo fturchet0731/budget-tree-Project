@@ -308,7 +308,7 @@ class _Stat extends StatelessWidget {
         children: [
           Text(
             value,
-            style: GoogleFonts.fredoka(
+            style: GoogleFonts.pixelifySans(
               color: t.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.w600,

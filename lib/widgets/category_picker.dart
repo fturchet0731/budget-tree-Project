@@ -150,7 +150,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: AppTokens.current.accentSoft,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.zero,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -216,7 +216,7 @@ class _PickerChip extends StatelessWidget {
           color: selected
               ? color.withValues(alpha: 0.18)
               : AppTokens.current.canvasSoft,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.zero,
           border: Border.all(
             color: selected ? color : AppTokens.current.cardBorder,
             width: selected ? 1.5 : 1,
@@ -231,7 +231,6 @@ class _PickerChip extends StatelessWidget {
               margin: const EdgeInsets.only(right: 6),
               decoration: BoxDecoration(
                 color: color,
-                shape: BoxShape.circle,
                 boxShadow: selected
                     ? [
                         BoxShadow(
@@ -326,7 +325,6 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
                     height: 34,
                     decoration: BoxDecoration(
                       color: c,
-                      shape: BoxShape.circle,
                       border: Border.all(
                         color: isSel
                             ? AppTokens.current.textPrimary

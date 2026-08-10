@@ -103,7 +103,7 @@ class _CelebrationViewState extends State<_CelebrationView>
             padding: const EdgeInsets.fromLTRB(26, 28, 26, 22),
             decoration: BoxDecoration(
               color: AppTokens.current.card,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.zero,
               border: Border.all(color: widget.color.withValues(alpha: 0.5)),
               boxShadow: [
                 BoxShadow(
@@ -119,7 +119,6 @@ class _CelebrationViewState extends State<_CelebrationView>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
                     color: widget.color.withValues(alpha: 0.18),
                     border:
                         Border.all(color: widget.color.withValues(alpha: 0.6)),
@@ -130,7 +129,7 @@ class _CelebrationViewState extends State<_CelebrationView>
                 Text(
                   widget.title,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.pixelifySans(
                     fontWeight: FontWeight.w600,
                     color: AppTokens.current.textPrimary,
                     fontSize: 23,
@@ -153,7 +152,7 @@ class _CelebrationViewState extends State<_CelebrationView>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTokens.current.accent,
                       padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: const StadiumBorder(),
+                      shape: const RoundedRectangleBorder(),
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
@@ -234,7 +233,7 @@ class _ConfettiPainter extends CustomPainter {
         RRect.fromRectAndRadius(
           Rect.fromCenter(
               center: Offset.zero, width: c.size, height: c.size * 0.6),
-          const Radius.circular(1.5),
+          Radius.zero,
         ),
         paint,
       );

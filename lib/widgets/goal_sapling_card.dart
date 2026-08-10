@@ -34,7 +34,7 @@ class GoalSaplingCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: t.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.zero,
         border: Border.all(
           color: completed ? const Color(0xFFE3B93F) : t.cardBorder,
           width: completed ? 1.6 : 1,

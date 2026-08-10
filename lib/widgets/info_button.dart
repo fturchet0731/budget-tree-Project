@@ -28,7 +28,6 @@ class SectionInfoButton extends StatelessWidget {
           height: size,
           decoration: BoxDecoration(
             color: AppTokens.current.canvasSoft,
-            shape: BoxShape.circle,
             border: Border.all(color: AppTokens.current.cardBorder),
           ),
           child: Icon(Icons.help_outline,

@@ -100,7 +100,7 @@ class _ThermometerPainter extends CustomPainter {
       RRect.fromRectAndRadius(
         Rect.fromLTWH(cx - tubeWidth * 0.34, tubeTop + 4, tubeWidth * 0.18,
             (tubeBottom - tubeTop) * 0.55),
-        const Radius.circular(4),
+        Radius.zero,
       ),
       gloss,
     );
