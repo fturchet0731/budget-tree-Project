@@ -222,50 +222,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 18),
                           _TileLabel(text: l.motion),
                           const SizedBox(height: 6),
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            dense: true,
-                            title: Text(
-                              l.fullAnimations,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13,
-                              ),
-                            ),
-                            subtitle: Text(
-                              l.fullAnimationsSub,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen.withValues(
-                                  alpha: 0.7,
-                                ),
-                                fontSize: 11,
-                              ),
-                            ),
+                          PixelSwitchTile(
+                            title: l.fullAnimations,
+                            subtitle: l.fullAnimationsSub,
                             value: settings.motionFull,
                             onChanged: settings.setMotionFull,
                           ),
                           const SizedBox(height: 12),
                           _TileLabel(text: l.soundHaptics),
                           const SizedBox(height: 6),
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            dense: true,
-                            title: Text(
-                              l.feedbackCues,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13,
-                              ),
-                            ),
-                            subtitle: Text(
-                              l.feedbackCuesSub,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen.withValues(
-                                  alpha: 0.7,
-                                ),
-                                fontSize: 11,
-                              ),
-                            ),
+                          PixelSwitchTile(
+                            title: l.feedbackCues,
+                            subtitle: l.feedbackCuesSub,
                             value: settings.soundEnabled,
                             onChanged: settings.setSoundEnabled,
                           ),
@@ -301,25 +269,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       _SettingsCard(
                         children: [
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            dense: true,
-                            title: Text(
-                              l.aiCoach,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13,
-                              ),
-                            ),
-                            subtitle: Text(
-                              l.aiCoachSub,
-                              style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen.withValues(
-                                  alpha: 0.7,
-                                ),
-                                fontSize: 11,
-                              ),
-                            ),
+                          PixelSwitchTile(
+                            title: l.aiCoach,
+                            subtitle: l.aiCoachSub,
                             value: settings.aiCoachEnabled,
                             onChanged: settings.setAiCoachEnabled,
                           ),
@@ -858,23 +810,9 @@ class _NotifSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile(
-      contentPadding: EdgeInsets.zero,
-      dense: true,
-      title: Text(
-        title,
-        style: GoogleFonts.nunito(
-          color: AppColors.stoneBeigeColor,
-          fontSize: 13,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: GoogleFonts.nunito(
-          color: AppColors.mossGreen.withValues(alpha: 0.7),
-          fontSize: 11,
-        ),
-      ),
+    return PixelSwitchTile(
+      title: title,
+      subtitle: subtitle,
       value: value,
       onChanged: onChanged,
     );

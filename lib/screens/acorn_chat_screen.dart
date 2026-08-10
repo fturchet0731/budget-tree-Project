@@ -6,8 +6,10 @@ import '../services/acorn_chat_service.dart';
 import '../services/ai_coach_service.dart';
 import '../theme/app_dims.dart';
 import '../theme/app_shadows.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/acorn_mascot.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/skeleton.dart';
 import '../widgets/ui/pressable.dart';
 
@@ -248,41 +250,35 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppTokens.of(context);
     final mine = message.fromUser;
+    // Acorn speaks from a dark NPC box on the left with her portrait; the
+    // player answers in a light green box on the right.
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDims.s8),
       child: Row(
         mainAxisAlignment:
             mine ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!mine) ...[
-            const AcornMascot(size: 30, sway: false),
+            const AcornPortrait(size: 34),
             const SizedBox(width: 6),
           ],
           Flexible(
-            child: Container(
+            child: PixelBox(
+              fill: mine ? Conifer.c200 : t.panelDark,
+              border: mine ? t.cardBorder : t.panelDarkBorder,
+              drop: AppDims.dropSmall,
               padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
-              ),
-              decoration: BoxDecoration(
-                color: mine ? t.accent : t.card,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(mine ? 16 : 4),
-                  bottomRight: Radius.circular(mine ? 4 : 16),
-                ),
-                border: mine ? null : Border.all(color: t.cardBorder),
-                boxShadow: mine ? null : AppShadows.card,
+                horizontal: 11,
+                vertical: 9,
               ),
               child: Text(
                 message.body,
-                style: GoogleFonts.nunito(
-                  color: mine ? t.onAccent : t.textPrimary,
-                  fontSize: 14.5,
-                  height: 1.4,
-                ),
+                style: AppTheme.display(
+                  14,
+                  mine ? t.textPrimary : t.panelDarkText,
+                  weight: FontWeight.w400,
+                ).copyWith(height: 1.35),
               ),
             ),
           ),
