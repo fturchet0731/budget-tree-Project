@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,15 +11,15 @@ import '../models/category_model.dart';
 import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
 import '../services/leftover_to_goal.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
-import '../theme/leaf_palette.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/immersive_forest_view.dart';
 import '../widgets/info_button.dart';
-import '../widgets/pixel_tree_engine.dart';
+import '../widgets/pixel/pixel.dart';
 import '../tutorial/tutorial_content.dart';
 import 'budget_tree_screen.dart';
 
@@ -190,53 +189,20 @@ class _ForestScreenState extends State<ForestScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-                  child: Row(
+                PixelHeader(
+                  title: l.yourForest,
+                  strapline: _loading
+                      ? l.loadingEllipsis
+                      : l.budgetTreesPlanted(_budgets.length),
+                  action: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          padding: const EdgeInsets.all(9),
-                          decoration: BoxDecoration(
-                            color: AppTokens.current.canvasSoft,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: AppTokens.current.cardBorder),
-                          ),
-                          child: Icon(Icons.arrow_back,
-                              color: AppColors.stoneBeigeColor, size: 20),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l.yourForest,
-                              style: GoogleFonts.fredoka(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 26,
-                              ),
-                            ),
-                            Text(
-                              _loading
-                                  ? l.loadingEllipsis
-                                  : l.budgetTreesPlanted(_budgets.length),
-                              style: GoogleFonts.nunito(
-                                  color: AppColors.mossGreen, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
                       if (_budgets.isNotEmpty)
                         _ViewModeToggle(
                           mode: _mode,
                           onChange: (m) => setState(() => _mode = m),
                         ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 6),
                       const SectionInfoButton(
                           section: TutorialSection.forest),
                     ],
@@ -390,15 +356,14 @@ class _BudgetCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 340),
         curve: Curves.easeInOut,
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
           color: AppTokens.current.card,
-          borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isExpanded
-                ? AppTokens.current.accentStrong
+                ? AppTokens.current.accent
                 : AppTokens.current.cardBorder,
-            width: isExpanded ? 1.5 : 1.0,
+            width: AppDims.borderThick,
           ),
           boxShadow: AppShadows.card,
         ),
@@ -409,28 +374,25 @@ class _BudgetCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
               child: Row(
                 children: [
-                  // Mini tree preview
-                  Container(
-                    width: 92,
-                    height: 116,
-                    decoration: BoxDecoration(
-                      color: AppTokens.current.accentTint,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: CustomPaint(
-                        painter: _MiniTreePainter(
-                          budget: budget,
-                          leafPalette: category != null
-                              ? LeafPalette.fromAccent(
-                                  Color(category!.colorValue))
-                              : LeafPalette.defaultGreen,
-                        ),
+                  // Tree portrait: one of the four chunky budget-tree sprites,
+                  // picked by how full the tree is. The real per-branch tree
+                  // (with tappable leaves) still lives on the detail screen.
+                  PixelBox(
+                    width: 86,
+                    height: 86,
+                    fill: AppTokens.current.accentTint,
+                    borderWidth: AppDims.borderThin,
+                    drop: 0,
+                    alignment: Alignment.bottomCenter,
+                    child: PixelSprite(
+                      asset: PixelIcons.budgetTree(
+                        branches: budget.expenses.length,
+                        filled: allocPct.toDouble(),
                       ),
+                      size: 82,
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -739,86 +701,6 @@ class _BudgetCard extends StatelessWidget {
     final months = monthAbbrevs(l);
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
-}
-
-// ──────────────────────────────────────────────
-// Mini tree CustomPainter for card preview
-// ──────────────────────────────────────────────
-
-class _MiniTreePainter extends CustomPainter {
-  final BudgetModel budget;
-  final LeafPalette leafPalette;
-  const _MiniTreePainter({
-    required this.budget,
-    this.leafPalette = LeafPalette.defaultGreen,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final cx = w / 2;
-    final groundY = h * 0.86;
-    final trunkTopY = h * 0.36;
-
-    // Chunky pixel grid for the small card preview.
-    final cell = math.max(1.5, h / 44);
-    final surface = PixelSurface(canvas, cell);
-    void put(int x, int y, Color c) => surface.put(x, y, c);
-    double gx(double d) => d / cell;
-
-    final bark = PixelTree.ramp(PixelTree.barkBase);
-    final leaf = PixelTree.ramp(leafPalette.mid);
-
-    // Soil mound
-    PixelTree.mound(put, gx(cx), gx(groundY), gx(w * 0.30), gx(h * 0.03),
-        PixelTree.ramp(PixelTree.soilBase));
-
-    // Trunk
-    PixelTree.trunk(
-        put, gx(cx), gx(trunkTopY), gx(groundY), gx(6), gx(14), bark);
-
-    // Crown as one metaball canopy.
-    final crownY = trunkTopY - 4;
-    final crown = <(double, double, double)>[
-      (cx - 15, crownY + 9, 16.0),
-      (cx + 14, crownY + 7, 15.0),
-      (cx - 5, crownY - 3, 20.0),
-      (cx + 7, crownY - 7, 18.0),
-      (cx, crownY + 5, 22.0),
-      (cx - 2, crownY - 17, 14.0),
-    ];
-    PixelTree.canopy(
-      put,
-      [for (final (bx, by, br) in crown) CanopyBlob(gx(bx), gx(by), gx(br * 0.44))],
-      leaf,
-      budget.id.hashCode & 0x7fffffff,
-    );
-
-    // Branches with tiny leaf blobs
-    if (budget.expenses.isNotEmpty) {
-      final count = budget.expenses.length.clamp(1, 5);
-      for (int i = 0; i < count; i++) {
-        final tPos = 0.28 + (i / (count > 1 ? count - 1 : 1)) * 0.58;
-        final attachY = trunkTopY + (groundY - trunkTopY) * tPos;
-        final goLeft = i.isEven;
-        final endX = cx + (goLeft ? -24.0 : 24.0);
-        final endY = attachY - 12;
-        PixelTree.limb(
-            put, gx(cx), gx(attachY), gx(endX), gx(endY), gx(6), gx(3.5), bark);
-        PixelTree.canopy(
-          put,
-          [CanopyBlob(gx(endX), gx(endY), gx(8), k: 0.95)],
-          leaf,
-          (i * 31 + 7),
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_MiniTreePainter old) =>
-      old.leafPalette.mid != leafPalette.mid;
 }
 
 class _NoMatchInCategory extends StatelessWidget {
