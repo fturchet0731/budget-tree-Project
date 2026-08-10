@@ -4972,6 +4972,18 @@ abstract class AppLocalizations {
   /// **'See all the trees'**
   String get hubSeeAllTrees;
 
+  /// No description provided for @statusTreesUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} unlocked'**
+  String statusTreesUnlocked(int count, int total);
+
+  /// No description provided for @statusTreesAcornHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every check in nudges your tree along. Miss a few and it slips back, so keep the streak alive.'**
+  String get statusTreesAcornHint;
+
   /// No description provided for @statusTreesTitle.
   ///
   /// In en, this message translates to:

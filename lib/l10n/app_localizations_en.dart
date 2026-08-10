@@ -2853,6 +2853,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hubSeeAllTrees => 'See all the trees';
 
   @override
+  String statusTreesUnlocked(int count, int total) {
+    return '$count of $total unlocked';
+  }
+
+  @override
+  String get statusTreesAcornHint =>
+      'Every check in nudges your tree along. Miss a few and it slips back, so keep the streak alive.';
+
+  @override
   String get statusTreesTitle => 'Status trees';
 
   @override

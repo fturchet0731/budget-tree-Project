@@ -2880,6 +2880,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hubSeeAllTrees => 'Voir tous les arbres';
 
   @override
+  String statusTreesUnlocked(int count, int total) {
+    return '$count sur $total debloques';
+  }
+
+  @override
+  String get statusTreesAcornHint =>
+      'Chaque point fait avancer votre arbre. Manquez en quelques uns et il recule, alors gardez la serie vivante.';
+
+  @override
   String get statusTreesTitle => 'Arbres de statut';
 
   @override
