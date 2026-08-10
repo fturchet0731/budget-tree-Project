@@ -8,6 +8,7 @@ import '../services/category_repository.dart';
 import '../services/comparison_service.dart';
 import '../services/goal_repository.dart';
 import '../services/streak_service.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
@@ -17,8 +18,8 @@ import '../widgets/achievements_sheet.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/info_button.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/sapling_view.dart';
-import '../widgets/ui/pressable.dart';
 import '../tutorial/tutorial_content.dart';
 import 'create_goal_screen.dart';
 import 'goal_detail_screen.dart';
@@ -111,71 +112,21 @@ class _GoalsScreenState extends State<GoalsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-                  child: Row(
+                PixelHeader(
+                  title: l.groveTitle,
+                  strapline: _loading
+                      ? l.loadingEllipsis
+                      : l.goalsGrowing(_goals.length),
+                  action: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          padding: const EdgeInsets.all(9),
-                          decoration: BoxDecoration(
-                            color: AppTokens.current.canvasSoft,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppTokens.current.cardBorder,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: AppColors.stoneBeigeColor,
-                            size: 20,
-                          ),
-                        ),
+                      PixelIconButton(
+                        icon: PixelIcons.star,
+                        tone: PixelTone.gold,
+                        semanticLabel: l.badgesTitle,
+                        onPressed: () => showAchievementsSheet(context),
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l.groveTitle,
-                              style: GoogleFonts.fredoka(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 26,
-                              ),
-                            ),
-                            Text(
-                              _loading
-                                  ? l.loadingEllipsis
-                                  : l.goalsGrowing(_goals.length),
-                              style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => showAchievementsSheet(context),
-                        child: Container(
-                          padding: const EdgeInsets.all(9),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFFFD54F,
-                            ).withValues(alpha: 0.22),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.emoji_events,
-                            color: Color(0xFFBA8514),
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 6),
                       const SectionInfoButton(section: TutorialSection.goals),
                     ],
                   ),
@@ -436,127 +387,109 @@ class _GoalCardState extends State<_GoalCard> {
     // Durable completion — a goal that has ever reached its target stays golden
     // (a trophy), even if money was later withdrawn below the line.
     final complete = goal.isCompleted;
-    const gold = Color(0xFFBA8514);
     final palette = widget.category != null
         ? LeafPalette.fromAccent(Color(widget.category!.colorValue))
         : LeafPalette.defaultGreen;
 
-    return PressableScale(
+    return PixelBox(
       onTap: widget.onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: t.card,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: complete
-                ? const Color(0xFFE3B93F)
-                : t.cardBorder,
-            width: complete ? 1.6 : 1,
-          ),
-          boxShadow: AppShadows.card,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Sapling on its tinted square — the visual centerpiece.
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: complete
-                      ? const Color(0xFFFBF3DC)
-                      : t.accentTint,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Transform.scale(
-                          scale: goal.isUncapped ? goal.tierScale : 1.0,
-                          child: SaplingView(
-                            progress: goal.progress,
-                            size: Size.infinite,
-                            leafPalette: palette,
-                          ),
+      semanticLabel: goal.name,
+      padding: const EdgeInsets.all(9),
+      // A finished goal keeps a durable gold frame (the completedAt rule).
+      fill: complete ? const Color(0xFFFFFBE9) : null,
+      border: complete ? t.goldShadow : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Sapling in its sunken well — the visual centerpiece.
+          Expanded(
+            child: PixelBox(
+              width: double.infinity,
+              fill: complete ? const Color(0xFFFBF3DC) : t.accentTint,
+              borderWidth: AppDims.borderThin,
+              drop: 0,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Transform.scale(
+                        scale: goal.isUncapped ? goal.tierScale : 1.0,
+                        child: SaplingView(
+                          progress: goal.progress,
+                          size: Size.infinite,
+                          leafPalette: palette,
                         ),
                       ),
                     ),
-                    if (complete)
-                      const Positioned(
-                        top: 6,
-                        right: 6,
-                        child: Icon(Icons.emoji_events,
-                            size: 16, color: gold),
-                      ),
-                    if (widget.category != null)
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: Color(widget.category!.colorValue),
-                            shape: BoxShape.circle,
-                          ),
+                  ),
+                  // LV badge: the goal's growth stage, read like a level.
+                  Positioned(
+                    top: 3,
+                    left: 3,
+                    child: PixelBadge(
+                      label: complete
+                          ? l.completedCheck.toUpperCase()
+                          : 'LV.${goal.stage + 1}',
+                      fill: complete ? t.gold : t.card,
+                      ink: t.textPrimary,
+                    ),
+                  ),
+                  if (widget.category != null)
+                    Positioned(
+                      top: 3,
+                      right: 3,
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Color(widget.category!.colorValue),
+                          border: Border.all(color: t.cardBorder, width: 2),
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  GoalIcons.forKey(goal.iconKey),
-                  size: 13,
-                  color: t.textSecondary,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                GoalIcons.forKey(goal.iconKey),
+                size: 13,
+                color: t.textSecondary,
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  goal.name.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    goal.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.w600,
-                      color: t.textPrimary,
-                      fontSize: 13.5,
-                    ),
-                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '\$${goal.currentAmount.toStringAsFixed(0)}',
+                style: AppTheme.display(
+                  15,
+                  complete ? t.goldShadow : t.accentStrong,
                 ),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '\$${goal.currentAmount.toStringAsFixed(0)}',
-                  style: GoogleFonts.fredoka(
-                    fontWeight: FontWeight.w600,
-                    color: complete ? gold : t.accentStrong,
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  goal.isUncapped
-                      ? 'T${goal.tier}'
-                      : '/ \$${goal.targetAmount.toStringAsFixed(0)}',
-                  style: GoogleFonts.nunito(
-                    color: t.textSecondary,
-                    fontSize: 11,
-                    fontWeight:
-                        goal.isUncapped ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Text(
+                goal.isUncapped
+                    ? 'T${goal.tier}'
+                    : '/ \$${goal.targetAmount.toStringAsFixed(0)}',
+                style: AppTheme.label(9, t.textSecondary, spacing: 0.5),
+              ),
+            ],
+          ),
             const SizedBox(height: 5),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
@@ -578,14 +511,13 @@ class _GoalCardState extends State<_GoalCard> {
                       : '${(goal.progress * 100).toStringAsFixed(0)}% · ${goal.localizedStageName(l)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.nunito(
-                color: complete ? gold : t.textSecondary,
-                fontSize: 10,
-                fontWeight: complete ? FontWeight.bold : FontWeight.normal,
+              style: AppTheme.label(
+                9,
+                complete ? t.goldShadow : t.textSecondary,
+                spacing: 0.5,
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

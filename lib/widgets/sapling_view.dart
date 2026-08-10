@@ -32,9 +32,10 @@ class SaplingView extends StatelessWidget {
   final Size size;
   final bool showGround;
 
-  /// Accepted for API compatibility. The authored sprites carry their own
-  /// palette, so a goal's category tint no longer recolours the tree — the
-  /// category colour still shows on the goal's card and chips.
+  /// The goal's category colour. The sprite's foliage is palette-swapped to
+  /// this hue (trunk and soil stay brown), so a goal filed under a purple
+  /// "Trips" category grows a purple tree. Defaults to the conifer green,
+  /// which renders the sprite exactly as authored.
   final LeafPalette leafPalette;
 
   const SaplingView({
@@ -52,6 +53,11 @@ class SaplingView extends StatelessWidget {
     return _stages[i];
   }
 
+  /// Null when the palette is the stock green, so the untinted sheet is shared
+  /// across every default sapling instead of caching an identical recolour.
+  Color? get _tint =>
+      leafPalette.mid == LeafPalette.defaultGreen.mid ? null : leafPalette.mid;
+
   @override
   Widget build(BuildContext context) {
     final key = spriteFor(progress);
@@ -61,7 +67,11 @@ class SaplingView extends StatelessWidget {
         builder: (context, c) {
           final side = c.biggest.shortestSide;
           return Center(
-            child: StatusTreeView(spriteKey: key, size: side.isFinite ? side : 120),
+            child: StatusTreeView(
+              spriteKey: key,
+              size: side.isFinite ? side : 120,
+              leafTint: _tint,
+            ),
           );
         },
       );
@@ -73,6 +83,7 @@ class SaplingView extends StatelessWidget {
         child: StatusTreeView(
           spriteKey: key,
           size: size.shortestSide,
+          leafTint: _tint,
         ),
       ),
     );
