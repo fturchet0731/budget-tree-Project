@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../models/profile_model.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
+import '../services/budget_repository.dart';
+import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
 import '../theme/app_dims.dart';
-import '../theme/app_shadows.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_tour.dart';
 import '../widgets/friends_strip.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/profile_avatar.dart';
 import '../widgets/health_tree_hero.dart';
 import '../widgets/pulse_strip.dart';
 import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/entrance.dart';
-import '../widgets/ui/pressable.dart';
 import 'acorn_hub_screen.dart';
 import 'auth/login_screen.dart';
 import 'createbudget_screen.dart';
@@ -44,6 +45,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// loading, signed out, or offline (the button falls back to a glyph).
   Profile? _me;
 
+  /// How many trees and saplings the player has, shown as "x4"/"x3" counters
+  /// on the menu tiles so the collection reads as something that grows.
+  int _trees = 0;
+  int _saplings = 0;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) => _runTour());
     }
     _loadMe();
+    _loadCounts();
     // Best-effort presence heartbeat so friends see the active dot.
     ProfileService.instance.touchPresence();
   }
@@ -58,6 +65,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _loadMe() async {
     final me = await ProfileService.instance.myProfile().catchError((_) => null);
     if (mounted) setState(() => _me = me);
+  }
+
+  Future<void> _loadCounts() async {
+    final budgets = await BudgetRepository.loadAll();
+    final goals = await GoalRepository.loadAll();
+    if (!mounted) return;
+    setState(() {
+      _trees = budgets.where((b) => b.savedAt != null).length;
+      _saplings = goals.length;
+    });
   }
 
   /// Opens the user's own profile from the top-right avatar button.
@@ -199,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 20, 0),
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
               child: Entrance(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,10 +225,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Budget Tree', style: text.headlineLarge),
-                          const SizedBox(height: 2),
-                          Text(l.dashboardChooseBranch,
-                              style: text.bodyMedium),
+                          Text('BUDGET TREE',
+                              style: text.displaySmall),
+                          const SizedBox(height: 5),
+                          Text(
+                            l.dashboardChooseBranch.toUpperCase(),
+                            style: AppTheme.label(
+                                9, AppTokens.of(context).textTertiary,
+                                spacing: 1.5),
+                          ),
                         ],
                       ),
                     ),
@@ -242,6 +264,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         FriendsStrip(key: _friendsKey),
                         const SizedBox(height: AppDims.s12),
                         _MenuGrid(
+                          trees: _trees,
+                          saplings: _saplings,
                           onTapCreate: _openCreate,
                           onTapModify: () =>
                               _navigate(context, const ForestScreen()),
@@ -306,46 +330,50 @@ class _ProfileButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final t = AppTokens.of(context);
-    return PressableScale(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(2.5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: t.accent, width: 2),
-              boxShadow: AppShadows.pill,
-            ),
-            child: ProfileAvatar(profile: profile, size: 40),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            l.profile,
-            style: GoogleFonts.nunito(
-              color: t.textSecondary,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
+    // A square save-file portrait rather than a round avatar: the pixel skin
+    // has no circles.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PixelBox(
+          onTap: onTap,
+          semanticLabel: l.profile,
+          fill: t.accent,
+          drop: AppDims.dropSmall,
+          width: AppDims.tap,
+          height: AppDims.tap,
+          alignment: Alignment.center,
+          child: profile == null
+              ? const PixelSprite(asset: PixelIcons.sprout, size: 26)
+              : ClipRect(child: ProfileAvatar(profile: profile, size: 36)),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          (profile?.username ?? l.profile).toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTheme.label(9, t.textSecondary, spacing: 0.5),
+        ),
+      ],
     );
   }
 }
 
 // ──────────────────────────────────────────────
-// 2×2 menu grid — white cards with flat spot illustrations
+// 2×2 menu grid — pixel tiles with sprite art and collection counters
 // ──────────────────────────────────────────────
 
 class _MenuGrid extends StatelessWidget {
+  final int trees;
+  final int saplings;
   final VoidCallback onTapCreate;
   final VoidCallback onTapModify;
   final VoidCallback onTapGoals;
   final VoidCallback onTapSettings;
 
   const _MenuGrid({
+    required this.trees,
+    required this.saplings,
     required this.onTapCreate,
     required this.onTapModify,
     required this.onTapGoals,
@@ -356,36 +384,38 @@ class _MenuGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final t = AppTokens.of(context);
-    final tiles = [
-      (
-        l.dashboardCreate,
-        l.dashboardCreateSub,
-        _TileArt.sprout,
-        t.accentTint,
-        onTapCreate,
+    final dark = t.brightness == Brightness.dark;
+
+    final tiles = <_TileSpec>[
+      _TileSpec(
+        label: l.dashboardCreate,
+        sublabel: l.dashboardCreateSub,
+        sprite: PixelIcons.plus,
+        tint: dark ? t.accentTint : Conifer.c100,
+        onTap: onTapCreate,
       ),
-      (
-        l.dashboardModify,
-        l.dashboardModifySub,
-        _TileArt.forest,
-        t.brightness == Brightness.light
-            ? Conifer.c100
-            : const Color(0xFF2A3618),
-        onTapModify,
+      _TileSpec(
+        label: l.dashboardModify,
+        sublabel: l.dashboardModifySub,
+        sprite: PixelIcons.forest,
+        tint: dark ? t.accentTint : Conifer.c200,
+        count: trees,
+        onTap: onTapModify,
       ),
-      (
-        l.dashboardGoals,
-        l.dashboardGoalsSub,
-        _TileArt.target,
-        t.skyTint,
-        onTapGoals,
+      _TileSpec(
+        label: l.dashboardGoals,
+        sublabel: l.dashboardGoalsSub,
+        sprite: PixelIcons.star,
+        tint: t.skyTint,
+        count: saplings,
+        onTap: onTapGoals,
       ),
-      (
-        l.dashboardSettings,
-        l.dashboardSettingsSub,
-        _TileArt.tune,
-        t.soilTint,
-        onTapSettings,
+      _TileSpec(
+        label: l.dashboardSettings,
+        sublabel: l.dashboardSettingsSub,
+        sprite: PixelIcons.gear,
+        tint: t.soilTint,
+        onTap: onTapSettings,
       ),
     ];
 
@@ -393,25 +423,22 @@ class _MenuGrid extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (var row = 0; row < 2; row++) ...[
-          if (row > 0) const SizedBox(height: AppDims.s16),
-          Row(
-            children: [
-              for (var col = 0; col < 2; col++) ...[
-                if (col > 0) const SizedBox(width: AppDims.s16),
-                Expanded(
-                  child: Entrance(
-                    delay: Duration(milliseconds: 70 * (row * 2 + col)),
-                    child: _MenuTile(
-                      label: tiles[row * 2 + col].$1,
-                      sublabel: tiles[row * 2 + col].$2,
-                      art: tiles[row * 2 + col].$3,
-                      tint: tiles[row * 2 + col].$4,
-                      onTap: tiles[row * 2 + col].$5,
+          if (row > 0) const SizedBox(height: AppDims.s12),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var col = 0; col < 2; col++) ...[
+                  if (col > 0) const SizedBox(width: AppDims.s12),
+                  Expanded(
+                    child: Entrance(
+                      delay: Duration(milliseconds: 70 * (row * 2 + col)),
+                      child: _MenuTile(spec: tiles[row * 2 + col]),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ],
       ],
@@ -419,194 +446,89 @@ class _MenuGrid extends StatelessWidget {
   }
 }
 
-class _MenuTile extends StatelessWidget {
+/// One menu tile's content — kept as a record-ish class so the grid reads
+/// cleanly and the tile takes a single argument.
+class _TileSpec {
   final String label;
   final String sublabel;
-  final _TileArt art;
+  final String sprite;
   final Color tint;
   final VoidCallback onTap;
 
-  const _MenuTile({
+  /// Collection counter drawn as an "xN" badge; 0 hides it.
+  final int count;
+
+  const _TileSpec({
     required this.label,
     required this.sublabel,
-    required this.art,
+    required this.sprite,
     required this.tint,
     required this.onTap,
+    this.count = 0,
   });
+}
+
+class _MenuTile extends StatelessWidget {
+  final _TileSpec spec;
+  const _MenuTile({required this.spec});
 
   @override
   Widget build(BuildContext context) {
     final t = AppTokens.of(context);
     final text = Theme.of(context).textTheme;
-    return PressableScale(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppDims.s12),
-        decoration: BoxDecoration(
-          color: t.card,
-          borderRadius: BorderRadius.circular(AppDims.rCard),
-          border: Border.all(color: t.cardBorder),
-          boxShadow: AppShadows.card,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AspectRatio(
-              aspectRatio: 1.9,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: tint,
-                  borderRadius: BorderRadius.circular(AppDims.rInner),
-                ),
-                child: CustomPaint(painter: _TileArtPainter(art)),
+    return PixelBox(
+      onTap: spec.onTap,
+      semanticLabel: spec.label,
+      padding: const EdgeInsets.all(9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Sunken art well: 2px inner border on a tinted panel.
+          SizedBox(
+            height: 74,
+            width: double.infinity,
+            child: PixelBox(
+              fill: spec.tint,
+              borderWidth: AppDims.borderThin,
+              drop: 0,
+              child: Stack(
+                children: [
+                  Center(child: PixelSprite(asset: spec.sprite, size: 40)),
+                  if (spec.count > 0)
+                    Positioned(
+                      top: 3,
+                      right: 3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 2),
+                        color: t.textPrimary,
+                        child: Text(
+                          'x${spec.count}',
+                          style: AppTheme.label(9, Conifer.c300, spacing: 0.5),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: AppDims.s12),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: text.titleLarge,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              sublabel,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: text.bodySmall,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 9),
+          Text(
+            spec.label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: text.titleMedium,
+          ),
+          const SizedBox(height: 3),
+          Text(
+            spec.sublabel,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: text.bodySmall,
+          ),
+        ],
       ),
     );
   }
-}
-
-enum _TileArt { sprout, forest, target, tune }
-
-/// Tiny flat spot illustrations for the menu tiles, drawn in the conifer
-/// ramp so each tinted square carries the app's color.
-class _TileArtPainter extends CustomPainter {
-  final _TileArt art;
-  const _TileArtPainter(this.art);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final cx = w / 2;
-
-    switch (art) {
-      case _TileArt.sprout:
-        // Soil mound + stem + two leaves.
-        canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(cx, h * 0.88), width: w * 0.36, height: h * 0.14),
-          Paint()..color = const Color(0xFF8A6B4F),
-        );
-        final stem = Paint()
-          ..color = Conifer.c600
-          ..strokeWidth = 3.5
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke;
-        canvas.drawLine(
-            Offset(cx, h * 0.85), Offset(cx, h * 0.38), stem);
-        final leaf = Paint()..color = Conifer.c400;
-        canvas.save();
-        canvas.translate(cx, h * 0.48);
-        canvas.rotate(-0.7);
-        canvas.drawOval(
-            Rect.fromCenter(
-                center: Offset(-w * 0.09, 0), width: w * 0.20, height: h * 0.16),
-            leaf);
-        canvas.restore();
-        canvas.save();
-        canvas.translate(cx, h * 0.40);
-        canvas.rotate(0.7);
-        canvas.drawOval(
-            Rect.fromCenter(
-                center: Offset(w * 0.09, 0), width: w * 0.20, height: h * 0.16),
-            Paint()..color = Conifer.c500);
-        canvas.restore();
-        break;
-
-      case _TileArt.forest:
-        // Three flat trees at staggered depths.
-        void tree(double x, double s, Color crown) {
-          canvas.drawRect(
-            Rect.fromCenter(
-                center: Offset(x, h * 0.72 * s + h * (1 - s) * 0.72),
-                width: w * 0.035 * s,
-                height: h * 0.28 * s),
-            Paint()..color = const Color(0xFF8A6B4F),
-          );
-          canvas.drawCircle(
-              Offset(x, h * 0.45 * s + h * (1 - s) * 0.60), w * 0.13 * s,
-              Paint()..color = crown);
-        }
-
-        tree(cx - w * 0.24, 0.8, Conifer.c600);
-        tree(cx + w * 0.24, 0.85, Conifer.c500);
-        tree(cx, 1.0, Conifer.c400);
-        canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(cx, h * 0.90), width: w * 0.75, height: h * 0.10),
-          Paint()..color = Conifer.c300.withValues(alpha: 0.6),
-        );
-        break;
-
-      case _TileArt.target:
-        // A sapling reaching for a golden ring (the goal).
-        canvas.drawCircle(
-          Offset(cx + w * 0.16, h * 0.30),
-          w * 0.10,
-          Paint()
-            ..color = const Color(0xFFD4A843)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 4,
-        );
-        final stem = Paint()
-          ..color = Conifer.c600
-          ..strokeWidth = 3.5
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke;
-        final path = Path()
-          ..moveTo(cx - w * 0.10, h * 0.86)
-          ..quadraticBezierTo(
-              cx - w * 0.06, h * 0.55, cx + w * 0.08, h * 0.42);
-        canvas.drawPath(path, stem);
-        canvas.drawCircle(Offset(cx + w * 0.08, h * 0.42), w * 0.055,
-            Paint()..color = Conifer.c400);
-        canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(cx - w * 0.10, h * 0.88),
-              width: w * 0.26,
-              height: h * 0.10),
-          Paint()..color = Conifer.c200,
-        );
-        break;
-
-      case _TileArt.tune:
-        // Three flat slider tracks with knobs.
-        final track = Paint()
-          ..color = Conifer.c200
-          ..strokeWidth = 5
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke;
-        final knob = Paint()..color = Conifer.c500;
-        final xs = [0.30, 0.62, 0.44];
-        for (var i = 0; i < 3; i++) {
-          final y = h * (0.28 + i * 0.22);
-          canvas.drawLine(
-              Offset(w * 0.22, y), Offset(w * 0.78, y), track);
-          canvas.drawCircle(Offset(w * (0.22 + 0.56 * xs[i] / 0.78), y),
-              w * 0.035, knob);
-        }
-        break;
-    }
-  }
-
-  @override
-  bool shouldRepaint(_TileArtPainter old) => old.art != art;
 }

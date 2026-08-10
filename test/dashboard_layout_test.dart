@@ -66,17 +66,21 @@ void main() {
     final l = AppLocalizations.of(
       tester.element(find.byType(DashboardScreen)),
     );
-    expect(find.text(l.dashboardCreate), findsOneWidget);
-    expect(find.text(l.dashboardModify), findsOneWidget);
-    expect(find.text(l.dashboardGoals), findsOneWidget);
-    expect(find.text(l.dashboardSettings), findsOneWidget);
+    // The pixel skin sets every menu label in Silkscreen caps, so the tiles
+    // are asserted in their uppercase presentation.
+    expect(find.text(l.dashboardCreate.toUpperCase()), findsOneWidget);
+    expect(find.text(l.dashboardModify.toUpperCase()), findsOneWidget);
+    expect(find.text(l.dashboardGoals.toUpperCase()), findsOneWidget);
+    expect(find.text(l.dashboardSettings.toUpperCase()), findsOneWidget);
     expect(find.text(l.addFriends), findsOneWidget);
-    expect(find.text(l.profile), findsOneWidget);
+    expect(find.text(l.profile.toUpperCase()), findsOneWidget);
     // Acorn's Hub is the full-width fifth tile *under* the four pillars, not
     // above them: the four-leaf menu stays the first thing the user sees.
     expect(
       tester.getRect(find.byType(HealthTreeHero)).top,
-      greaterThan(tester.getRect(find.text(l.dashboardSettings)).bottom),
+      greaterThan(
+        tester.getRect(find.text(l.dashboardSettings.toUpperCase())).bottom,
+      ),
     );
 
     // Back to ground stays pinned at the bottom, on screen.

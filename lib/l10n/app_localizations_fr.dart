@@ -1707,6 +1707,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coachAcornTip => 'Le conseil d\'Acorn';
 
   @override
+  String get acornName => 'Acorn';
+
+  @override
+  String get pulseAccept => 'Accepter';
+
+  @override
   String get coachGotIt => 'Compris !';
 
   @override

@@ -1,24 +1,23 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
 import '../services/auth_service.dart';
 import '../theme/app_dims.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
-import '../widgets/acorn_mascot.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/status_tree_view.dart';
-import '../widgets/ui/app_buttons.dart';
-import '../widgets/ui/entrance.dart';
-import '../widgets/ui/illustration_card.dart';
 import 'auth/login_screen.dart';
 import 'dashboard_screen.dart';
 
-/// Launch screen of the redesign: a calm neutral canvas with one hero
-/// illustration card. The tree in it is the **Ancient** status tree — the app's
-/// brand mark (the same art as the launcher icon) — so the launch screen always
-/// shows the grand, aspirational tree rather than the user's current state,
-/// with Acorn watching from the grass. Start hands off to the dashboard.
+/// The title screen.
+///
+/// A 16-bit save-file front end: layered sky, a drifting cloud, a repeating
+/// ground tile, the **Ancient** status tree centre stage as the brand mark
+/// (the same art as the launcher icon), Acorn bobbing beside it, and the
+/// wordmark over a big green PRESS START. Start hands off to the dashboard.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -26,10 +25,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   /// The launch hero always shows the Ancient prestige tree as the brand mark,
   /// independent of the account's real status.
   static const _heroSpriteKey = 'ancient';
+
+  /// Acorn's idle bob and the drifting cloud share one clock.
+  late final AnimationController _idle;
 
   // First launch: the dashboard runs the guided tour once we arrive there, so
   // Acorn greets the user at the four-leaf menu and every section pops back to
@@ -39,19 +42,29 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _idle = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    );
+    if (AppSettings.instance.motionFull) _idle.repeat();
     AppSettings.instance.addListener(_onSettings);
   }
 
   void _onSettings() {
     if (!mounted) return;
-    // Rebuild so theme / motion changes take effect (StatusTreeView re-syncs
-    // its own animation on rebuild).
+    final motion = AppSettings.instance.motionFull;
+    if (motion && !_idle.isAnimating) {
+      _idle.repeat();
+    } else if (!motion && _idle.isAnimating) {
+      _idle.stop();
+    }
     setState(() {});
   }
 
   @override
   void dispose() {
     AppSettings.instance.removeListener(_onSettings);
+    _idle.dispose();
     super.dispose();
   }
 
@@ -94,10 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// The launch-screen account controls, reactive to [AuthService]. In
-  /// local-only mode (no backend configured) accounts don't exist, so we hide
-  /// them entirely; otherwise we show Sign In / Register when signed out and a
-  /// Sign Out button when signed in.
+  /// Save-file controls, reactive to [AuthService]. In local-only mode
+  /// (no backend configured) accounts don't exist, so we hide them entirely.
   Widget _accountControls() {
     final auth = AuthService.instance;
     if (!auth.isConfigured) return const SizedBox.shrink();
@@ -112,14 +123,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 auth.currentUser?.email ?? '',
-                style: GoogleFonts.nunito(
-                  color: t.textSecondary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: AppTheme.label(9, t.textTertiary, spacing: 0.8),
               ),
-              const SizedBox(height: 2),
-              AppTextButton(label: l.signOut, onPressed: _signOut),
+              const SizedBox(height: AppDims.s4),
+              _TitleTextButton(label: l.signOut, onTap: _signOut),
             ],
           );
         }
@@ -127,11 +134,11 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppTextButton(label: l.signIn, onPressed: () => _openLogin()),
-            const SizedBox(width: 8),
-            AppTextButton(
+            _TitleTextButton(label: l.signIn, onTap: () => _openLogin()),
+            const SizedBox(width: AppDims.s16),
+            _TitleTextButton(
               label: l.register,
-              onPressed: () => _openLogin(signUp: true),
+              onTap: () => _openLogin(signUp: true),
             ),
           ],
         );
@@ -143,83 +150,185 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final t = AppTokens.of(context);
-    final text = Theme.of(context).textTheme;
-    final heroH = math.min(MediaQuery.of(context).size.height * 0.40, 420.0);
-    final treeSize = math.min(heroH * 0.72, 300.0);
+    final size = MediaQuery.of(context).size;
+    final sceneH = math.min(size.height * 0.48, 420.0);
+    final treeSize = math.min(sceneH * 0.62, 230.0);
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: AppDims.pagePad,
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
-              Entrance(
-                child: IllustrationCard(
-                  height: heroH,
-                  padding: EdgeInsets.zero,
-                  illustration: RepaintBoundary(
-                    child: Stack(
-                      children: [
-                        // The account's living status tree, centred.
-                        Center(
-                          child: StatusTreeView(
-                            spriteKey: _heroSpriteKey,
-                            size: treeSize,
-                          ),
+      body: Column(
+        children: [
+          // ── The scene: sky, cloud, ground, tree, Acorn ──
+          SizedBox(
+            height: sceneH,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                const _SkyBackdrop(),
+                AnimatedBuilder(
+                  animation: _idle,
+                  builder: (context, _) {
+                    final w = size.width;
+                    return Positioned(
+                      top: sceneH * 0.12,
+                      left: -130 + (w + 260) * _idle.value,
+                      child: const Opacity(
+                        opacity: 0.85,
+                        child: PixelSprite(
+                          asset: PixelIcons.cloud,
+                          width: 120,
+                          height: 60,
                         ),
-                        // Acorn watches from the grass, bottom-right.
-                        const Align(
-                          alignment: Alignment(0.82, 0.96),
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 8),
-                            child: AcornMascot(size: 60, sway: true),
-                          ),
+                      ),
+                    );
+                  },
+                ),
+                const Align(
+                  alignment: Alignment.bottomCenter,
+                  child: PixelGround(height: 62),
+                ),
+                // Tree + Acorn seated on the ground line.
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 34,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      StatusTreeView(
+                        spriteKey: _heroSpriteKey,
+                        size: treeSize,
+                      ),
+                      AnimatedBuilder(
+                        animation: _idle,
+                        builder: (context, child) {
+                          final bob = AppSettings.instance.motionFull
+                              ? math.sin(_idle.value * math.pi * 8) * 3
+                              : 0.0;
+                          return Transform.translate(
+                            offset: Offset(0, bob),
+                            child: child,
+                          );
+                        },
+                        child: const PixelSpriteSheet(
+                          asset: PixelIcons.acorn,
+                          size: 56,
+                          frames: 2,
+                          period: Duration(milliseconds: 3400),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: AppDims.s32),
-              Entrance(
-                delay: const Duration(milliseconds: 80),
-                child: Text(
-                  'Budget Tree',
-                  textAlign: TextAlign.center,
-                  style: text.displayLarge,
+                // Hard ink line closing the scene off from the menu below.
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(height: 3, color: t.cardBorder),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Wordmark + save-file menu ──
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: AppDims.pagePad,
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppDims.s20),
+                    Text(
+                      'BUDGET TREE',
+                      textAlign: TextAlign.center,
+                      style: AppTheme.display(
+                        math.min(size.width * 0.115, 44),
+                        t.textPrimary,
+                        spacing: 1,
+                      ).copyWith(
+                        shadows: [
+                          Shadow(
+                            color: t.card,
+                            offset: const Offset(3, 3),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppDims.s4),
+                    Text(
+                      l.homeSlogan.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: AppTheme.label(9, t.textTertiary, spacing: 1.5),
+                    ),
+                    const Spacer(),
+                    PixelButton(
+                      label: l.startButton.toUpperCase(),
+                      icon: PixelIcons.sprout,
+                      onPressed: _start,
+                      fontSize: 13,
+                    ),
+                    const SizedBox(height: AppDims.s12),
+                    _accountControls(),
+                    const SizedBox(height: AppDims.s12),
+                    Text(
+                      'DEVELOPED BY FABIAN TURCHETTI',
+                      style: AppTheme.label(9, t.textTertiary, spacing: 1.2),
+                    ),
+                    const SizedBox(height: AppDims.s12),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppDims.s8),
-              Entrance(
-                delay: const Duration(milliseconds: 160),
-                child: Text(
-                  l.homeSlogan,
-                  textAlign: TextAlign.center,
-                  style: text.bodyLarge?.copyWith(color: t.textSecondary),
-                ),
-              ),
-              const Spacer(flex: 2),
-              Entrance(
-                delay: const Duration(milliseconds: 240),
-                child: AppPrimaryButton(
-                  label: l.startButton,
-                  icon: Icons.play_arrow_rounded,
-                  onPressed: _start,
-                ),
-              ),
-              const SizedBox(height: AppDims.s8),
-              Entrance(
-                delay: const Duration(milliseconds: 300),
-                child: _accountControls(),
-              ),
-              const SizedBox(height: AppDims.s12),
-              Text(
-                'Developed by Fabian Turchetti',
-                style: GoogleFonts.nunito(color: t.textTertiary, fontSize: 11),
-              ),
-              const SizedBox(height: AppDims.s12),
-            ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Banded sky wash — three flat steps rather than a smooth gradient, so it
+/// keeps the limited-palette feel.
+class _SkyBackdrop extends StatelessWidget {
+  const _SkyBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = AppTokens.of(context).brightness == Brightness.dark;
+    final bands = dark
+        ? const [Color(0xFF1D2A38), Color(0xFF243444), Color(0xFF2B3D50)]
+        : const [Color(0xFFBFE3F2), Color(0xFFD3ECF7), Color(0xFFE6F5FB)];
+    return Column(
+      children: [
+        Expanded(flex: 44, child: Container(color: bands[0])),
+        Expanded(flex: 28, child: Container(color: bands[1])),
+        Expanded(flex: 28, child: Container(color: bands[2])),
+      ],
+    );
+  }
+}
+
+/// Underlined Silkscreen text action for the title screen's save-file row.
+class _TitleTextButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _TitleTextButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppTokens.of(context);
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          child: Text(
+            label.toUpperCase(),
+            style: AppTheme.label(10, t.accentStrong, spacing: 1.0),
           ),
         ),
       ),

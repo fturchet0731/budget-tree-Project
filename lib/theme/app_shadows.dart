@@ -1,56 +1,43 @@
 import 'package:flutter/material.dart';
+import 'app_dims.dart';
 import 'app_tokens.dart';
 
-/// Reusable shadow recipes, tuned per theme: soft ambient lift on the light
-/// canvas, deeper contact shadows in dark mode.
+/// Hard offset drop shadows — the pixel skin's depth cue.
+///
+/// **No blur, no spread, y-offset only.** A blurred shadow immediately reads
+/// as "modern app" again and breaks the 16-bit illusion, so every recipe here
+/// is a solid rectangle sitting under the box. Pressing a control collapses
+/// its shadow to zero and translates it down by the same amount (see
+/// [PixelBox]/[PixelButton]) — that pairing is the "button depress".
 class AppShadows {
   AppShadows._();
 
-  static bool get _dark => AppTokens.current.brightness == Brightness.dark;
-
-  /// Standard card lift — a diffuse ambient shadow plus a tight contact
-  /// shadow, kept subtle so white cards float gently on the canvas.
-  static List<BoxShadow> get card => _dark
-      ? [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ]
-      : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-        ];
-
-  /// Smaller variant for chips, small buttons, segmented-control thumbs.
-  static List<BoxShadow> get pill => [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: _dark ? 0.35 : 0.08),
-          blurRadius: 10,
-          offset: const Offset(0, 3),
-        ),
+  static List<BoxShadow> _hard(Color color, double dy) => [
+        BoxShadow(color: color, offset: Offset(0, dy)),
       ];
 
-  /// Soft glow around a featured / active surface (uses [accent]).
-  static List<BoxShadow> accentGlow(Color accent) => [
-        BoxShadow(
-          color: accent.withValues(alpha: _dark ? 0.40 : 0.25),
-          blurRadius: 18,
-          spreadRadius: 1,
-        ),
-        BoxShadow(
-          color: Colors.black.withValues(alpha: _dark ? 0.30 : 0.06),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ];
+  /// Standard card lift.
+  static List<BoxShadow> get card =>
+      _hard(AppTokens.current.boxShadow, AppDims.dropCard);
+
+  /// Smaller variant for chips, icon buttons, segmented-control thumbs.
+  static List<BoxShadow> get pill =>
+      _hard(AppTokens.current.boxShadow, AppDims.dropSmall);
+
+  /// Shadow under a green primary button.
+  static List<BoxShadow> get accentButton =>
+      _hard(AppTokens.current.accentShadow, AppDims.dropButton);
+
+  /// Shadow under a gold (streak / accept / completed) control.
+  static List<BoxShadow> get goldButton =>
+      _hard(AppTokens.current.goldShadow, AppDims.dropSmall);
+
+  /// Shadow under a blue (water) control.
+  static List<BoxShadow> get waterButton =>
+      _hard(AppTokens.current.waterShadow, AppDims.dropCard);
+
+  /// Kept for older call sites that asked for a highlight around an active
+  /// surface. In the pixel skin there is no glow — it resolves to the plain
+  /// hard card shadow so nothing blurs.
+  static List<BoxShadow> accentGlow(Color accent) => card;
 }

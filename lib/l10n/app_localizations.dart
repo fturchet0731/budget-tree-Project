@@ -2980,6 +2980,18 @@ abstract class AppLocalizations {
   /// **'Acorn\'s tip'**
   String get coachAcornTip;
 
+  /// No description provided for @acornName.
+  ///
+  /// In en, this message translates to:
+  /// **'Acorn'**
+  String get acornName;
+
+  /// No description provided for @pulseAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get pulseAccept;
+
   /// No description provided for @coachGotIt.
   ///
   /// In en, this message translates to:

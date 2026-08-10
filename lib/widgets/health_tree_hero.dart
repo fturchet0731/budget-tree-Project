@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/tree_health_labels.dart';
@@ -8,11 +7,11 @@ import '../services/check_in_service.dart';
 import '../services/profile_service.dart';
 import '../services/tree_health_service.dart';
 import '../theme/app_dims.dart';
-import '../theme/app_shadows.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import 'check_in_sheet.dart';
+import 'pixel/pixel.dart';
 import 'status_tree_view.dart';
-import 'ui/pressable.dart';
 
 /// The dashboard's living tree: how consistent the user has been, at a glance,
 /// and the way into Acorn's Hub.
@@ -83,87 +82,77 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
     // The tree takes the room left over once the caption strip has its share.
     final treeSize = (widget.height - 62).clamp(70.0, 150.0);
 
-    return PressableScale(
+    // The save-file summary tile: the living tree, an HP-style score meter,
+    // and the check-in call to action along the bottom edge.
+    return PixelBox(
       onTap: widget.onOpenHub,
-      pressedScale: 0.985,
-      child: Container(
-        height: widget.height,
-        decoration: BoxDecoration(
-          color: t.accentTint,
-          borderRadius: BorderRadius.circular(AppDims.rCard),
-          border: Border.all(color: t.cardBorder),
-          boxShadow: AppShadows.card,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  const SizedBox(width: AppDims.s8),
-                  StatusTreeView(
-                    spriteKey: _health.spriteKey,
-                    size: treeSize,
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: AppDims.s16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l.hubTitle.toUpperCase(),
-                            style: GoogleFonts.nunito(
-                              color: t.accentStrong,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.1,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            _health.isEmpty
-                                ? l.hubTreeFresh
-                                : _health.statusLabel(l),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(height: 1.15),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            _subtitle(l),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            softWrap: true,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
+      fill: t.accentTint,
+      padding: EdgeInsets.zero,
+      height: widget.height,
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                const SizedBox(width: AppDims.s8),
+                StatusTreeView(
+                  spriteKey: _health.spriteKey,
+                  size: treeSize,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 11, 0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _health.isEmpty
+                              ? l.hubTitle.toUpperCase()
+                              : '${l.hubTitle.toUpperCase()} · '
+                                  'LV.${_health.score.round()}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              AppTheme.label(9, t.accentStrong, spacing: 1.5),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          (_health.isEmpty
+                                  ? l.hubTreeFresh
+                                  : _health.statusLabel(l))
+                              .toUpperCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 5),
+                        // The HP bar: consistency score out of 100.
+                        PixelBar(
+                          value: _health.isEmpty ? 0 : _health.score / 100,
+                          height: 12,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _subtitle(l),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: AppDims.s12),
-                    child: Icon(
-                      Icons.chevron_right,
-                      color: t.textTertiary,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            _HeroStrip(
-              pending: _pending.length,
-              subject: _pending.isEmpty ? null : _pending.first.subjectName,
-              onAnswer: _answer,
-              onOpenHub: widget.onOpenHub,
-            ),
-          ],
-        ),
+          ),
+          _HeroStrip(
+            pending: _pending.length,
+            subject: _pending.isEmpty ? null : _pending.first.subjectName,
+            onAnswer: _answer,
+            onOpenHub: widget.onOpenHub,
+          ),
+        ],
       ),
     );
   }
@@ -202,36 +191,47 @@ class _HeroStrip extends StatelessWidget {
     final t = AppTokens.of(context);
     final waiting = pending > 0;
 
-    return PressableScale(
+    // A green quest strip along the bottom edge, separated from the tile body
+    // by a hard ink rule. Nested inside the tile's own tap target, so the
+    // strip answers the check-in and the card opens the hub.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: waiting ? onAnswer : onOpenHub,
-      pressedScale: 0.99,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-        color: waiting ? t.accent : t.canvasSoft,
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+        decoration: BoxDecoration(
+          color: waiting ? t.accent : t.canvasSoft,
+          border: Border(top: BorderSide(color: t.cardBorder, width: 3)),
+        ),
         child: Row(
           children: [
-            Icon(
-              waiting ? Icons.event_available : Icons.auto_awesome,
-              size: 15,
-              color: waiting ? t.onAccent : t.accentStrong,
+            PixelSprite(
+              asset: waiting ? PixelIcons.scroll : PixelIcons.star,
+              size: 16,
             ),
             const SizedBox(width: 7),
             Expanded(
               child: Text(
-                waiting
-                    ? (pending > 1
-                        ? l.hubAnswerMany(pending)
-                        : l.hubAnswerOne(subject ?? ''))
-                    : l.hubOpenPrompt,
+                (waiting
+                        ? (pending > 1
+                            ? l.hubAnswerMany(pending)
+                            : l.hubAnswerOne(subject ?? ''))
+                        : l.hubOpenPrompt)
+                    .toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.nunito(
-                  color: waiting ? t.onAccent : t.textSecondary,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w800,
+                style: AppTheme.label(
+                  9,
+                  waiting ? t.inkDeep : t.textSecondary,
+                  spacing: 0.5,
                 ),
               ),
+            ),
+            Text(
+              '▶',
+              style: AppTheme.label(
+                  10, waiting ? t.inkDeep : t.textTertiary, spacing: 0),
             ),
           ],
         ),

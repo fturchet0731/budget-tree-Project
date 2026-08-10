@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
@@ -12,10 +11,7 @@ import '../services/check_in_service.dart';
 import '../services/goal_repository.dart';
 import '../services/pulse_service.dart';
 import 'check_in_sheet.dart';
-import '../theme/app_dims.dart';
-import '../theme/app_shadows.dart';
-import '../theme/app_tokens.dart';
-import 'ui/pressable.dart';
+import 'pixel/pixel.dart';
 
 /// The dashboard's "one thing right now" strip: surfaces the weekly habit in
 /// the app itself instead of leaving it to notifications. Shows the single
@@ -98,16 +94,11 @@ class PulseStripState extends State<PulseStrip> {
     if (_pulse.kind == PulseKind.none) return const SizedBox.shrink();
     final l = AppLocalizations.of(context);
 
-    final t = AppTokens.of(context);
-    final IconData icon;
-    final Color accent;
     final String title;
     final String body;
     switch (_pulse.kind) {
       case PulseKind.checkInDue:
         final checkIn = _pulse.checkIn!;
-        icon = Icons.event_available;
-        accent = t.accentStrong;
         title = l.pulseCheckInTitle;
         body = _pulse.pendingCheckIns > 1
             ? l.pulseCheckInManyBody(
@@ -119,8 +110,6 @@ class PulseStripState extends State<PulseStrip> {
       case PulseKind.waterDue:
         final goal = _pulse.goal!;
         final amount = goal.waterAmount ?? 0;
-        icon = Icons.water_drop;
-        accent = const Color(0xFF5B8DB8);
         title = l.pulseWaterTitle;
         body = _pulse.overdue
             ? l.pulseWaterOverdueBody(goal.name)
@@ -128,20 +117,14 @@ class PulseStripState extends State<PulseStrip> {
                 goal.name, '\$${amount.toStringAsFixed(0)}');
         break;
       case PulseKind.streakAtRisk:
-        icon = Icons.local_fire_department;
-        accent = t.warning;
         title = l.pulseStreakAtRiskTitle;
         body = l.pulseStreakAtRiskBody(_pulse.streakWeeks);
         break;
       case PulseKind.streakActive:
-        icon = Icons.local_fire_department;
-        accent = t.accentStrong;
         title = l.pulseStreakTitle;
         body = l.pulseStreakBody(_pulse.streakWeeks);
         break;
       case PulseKind.plantFirstTree:
-        icon = Icons.park;
-        accent = t.accentStrong;
         title = l.pulsePlantTitle;
         body = l.pulsePlantBody;
         break;
@@ -149,62 +132,16 @@ class PulseStripState extends State<PulseStrip> {
         return const SizedBox.shrink();
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-      child: PressableScale(
-        onTap: _open,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          decoration: BoxDecoration(
-            color: t.card,
-            borderRadius: BorderRadius.circular(AppDims.rInner),
-            border: Border.all(color: t.cardBorder),
-            boxShadow: AppShadows.card,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: accent, size: 17),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.nunito(
-                        color: accent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      body,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.nunito(
-                        color: t.textPrimary,
-                        fontSize: 12.5,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: t.textTertiary, size: 18),
-            ],
-          ),
-        ),
-      ),
+    // The nudge is delivered as Acorn's quest: the same single most-useful
+    // action, framed as an NPC handing the player something to do. The gold
+    // ACCEPT runs exactly the tap target the strip always had.
+    return AcornDialogue(
+      speaker: '${l.acornName.toUpperCase()} · ${title.toUpperCase()}',
+      text: body,
+      actionLabel: l.pulseAccept.toUpperCase(),
+      onAction: _open,
+      onTap: _open,
+      margin: const EdgeInsets.fromLTRB(14, 10, 14, 0),
     );
   }
 }
