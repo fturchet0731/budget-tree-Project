@@ -97,17 +97,18 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
   }
 
   void _openTrees() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const StatusTreesScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const StatusTreesScreen()));
   }
 
   Future<void> _answer(CheckIn checkIn) async {
     final saved = await showCheckInSheet(context, checkIn);
     if (saved && mounted) {
       final l = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l.checkInSaved)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.checkInSaved)));
     }
     await _load();
   }
@@ -278,7 +279,9 @@ class _HealthCard extends StatelessWidget {
           ],
           const SizedBox(height: 9),
           Text(
-            health.isEmpty ? l.hubTreeFreshSub : l.hubScoreSub(health.score.round()),
+            health.isEmpty
+                ? l.hubTreeFreshSub
+                : l.hubScoreSub(health.score.round()),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (health.showsPrestige && health.prestigeDays >= 1) ...[
@@ -295,7 +298,9 @@ class _HealthCard extends StatelessWidget {
                   ? l.hubDeltaUp(health.delta.round())
                   : l.hubDeltaDown(health.delta.abs().round()),
               style: AppTheme.label(
-                  9, health.delta > 0 ? t.success : t.warning),
+                9,
+                health.delta > 0 ? t.success : t.warning,
+              ),
             ),
           ],
           if (stats.hasCheckIns) ...[
@@ -332,7 +337,6 @@ class _HealthCard extends StatelessWidget {
   }
 }
 
-
 class _PendingCard extends StatelessWidget {
   final List<CheckIn> pending;
   final ValueChanged<CheckIn> onAnswer;
@@ -353,10 +357,7 @@ class _PendingCard extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 4),
-          Text(
-            l.hubPendingSub,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text(l.hubPendingSub, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: AppDims.s12),
           for (final c in pending.take(3))
             Padding(
@@ -395,8 +396,9 @@ class _PendingCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        MaterialLocalizations.of(context)
-                            .formatShortDate(c.dueAt),
+                        MaterialLocalizations.of(
+                          context,
+                        ).formatShortDate(c.dueAt),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(width: 4),
@@ -456,9 +458,11 @@ class _ReflectionCard extends StatelessWidget {
                       (ready ? l.hubReflectionReady : l.hubReflectionEmpty),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTheme.display(13, t.panelDarkText,
-                          weight: FontWeight.w400)
-                      .copyWith(height: 1.3),
+                  style: AppTheme.display(
+                    13,
+                    t.panelDarkText,
+                    weight: FontWeight.w400,
+                  ).copyWith(height: 1.3),
                 ),
                 const SizedBox(height: 8),
                 if (ready)
@@ -512,11 +516,7 @@ class _ConsistencyCard extends StatelessWidget {
               label: l.hubTrendTitle,
               padding: const EdgeInsets.only(bottom: AppDims.s8),
             ),
-            TrendLine(
-              values: stats.healthTrail,
-              minValue: 0,
-              maxValue: 100,
-            ),
+            TrendLine(values: stats.healthTrail, minValue: 0, maxValue: 100),
           ],
         ],
       ),
@@ -561,4 +561,3 @@ class _OverspendCard extends StatelessWidget {
     );
   }
 }
-

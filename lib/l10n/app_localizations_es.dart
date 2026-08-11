@@ -3227,4 +3227,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileSharedSaplings => 'BROTES COMPARTIDOS';
+
+  @override
+  String get loginSaveFiles => 'PARTIDAS';
 }

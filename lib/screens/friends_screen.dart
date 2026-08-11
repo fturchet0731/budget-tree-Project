@@ -352,10 +352,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   l.howFriendsSeeStatus,
-                  style: TextStyle(
-                    color: AppColors.mossGreen,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppColors.mossGreen, fontSize: 12),
                 ),
               ],
             ),
@@ -418,10 +415,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           for (final p in _results)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(
-                Icons.person_outline,
-                color: AppColors.mossGreen,
-              ),
+              leading: Icon(Icons.person_outline, color: AppColors.mossGreen),
               title: Text(
                 p.label,
                 style: TextStyle(color: AppColors.stoneBeigeColor),
@@ -458,10 +452,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           ),
           TextButton(
             onPressed: () => _accept(p),
-            child: Text(
-              l.accept,
-              style: TextStyle(color: AppColors.lightLeaf),
-            ),
+            child: Text(l.accept, style: TextStyle(color: AppColors.lightLeaf)),
           ),
           TextButton(
             onPressed: () => _decline(p),
@@ -481,7 +472,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
     final online = f.profile.isActive;
     // A friend's avatar is their own tree — the same thing they see when they
     // open the app, derived from the health score they publish.
-    final tier = TreeHealthService.tierFor((f.profile.healthScore ?? 50).toDouble());
+    final tier = TreeHealthService.tierFor(
+      (f.profile.healthScore ?? 50).toDouble(),
+    );
 
     return PixelBox(
       margin: const EdgeInsets.only(bottom: 11),
@@ -610,10 +603,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               label: Text(AppLocalizations.of(context).retry),
             ),
           ],
-          if (action != null) ...[
-            const SizedBox(height: 20),
-            action,
-          ],
+          if (action != null) ...[const SizedBox(height: 20), action],
         ],
       ),
     ),
@@ -676,11 +666,7 @@ class _ClaimUsernameState extends State<_ClaimUsername> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.alternate_email,
-              color: AppColors.lightLeaf,
-              size: 48,
-            ),
+            Icon(Icons.alternate_email, color: AppColors.lightLeaf, size: 48),
             const SizedBox(height: 16),
             Text(
               l.claimUsernameTitle,

@@ -93,10 +93,7 @@ class PixelScene extends StatelessWidget {
               left: 0,
               right: 0,
               bottom: groundHeight * 0.32,
-              child: Align(
-                alignment: Alignment(subjectX, 0),
-                child: subject,
-              ),
+              child: Align(alignment: Alignment(subjectX, 0), child: subject),
             ),
             if (showAcorn)
               Positioned(
@@ -110,10 +107,17 @@ class PixelScene extends StatelessWidget {
                 ),
               ),
             if (bottomLeft != null)
-              Positioned(left: 14, bottom: groundHeight + 8, child: bottomLeft!),
+              Positioned(
+                left: 14,
+                bottom: groundHeight + 8,
+                child: bottomLeft!,
+              ),
             if (bottomRight != null)
               Positioned(
-                  right: 14, bottom: groundHeight + 8, child: bottomRight!),
+                right: 14,
+                bottom: groundHeight + 8,
+                child: bottomRight!,
+              ),
             if (onBack != null)
               Positioned(
                 top: 12,
@@ -148,7 +152,10 @@ class PixelSectionRule extends StatelessWidget {
     final t = AppTokens.of(context);
     return Row(
       children: [
-        Text(label.toUpperCase(), style: AppTheme.label(9, t.textSecondary, spacing: 1.5)),
+        Text(
+          label.toUpperCase(),
+          style: AppTheme.label(9, t.textSecondary, spacing: 1.5),
+        ),
         const SizedBox(width: AppDims.s8),
         Expanded(child: Container(height: 3, color: t.track)),
         if (trailing != null) ...[

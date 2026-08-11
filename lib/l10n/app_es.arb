@@ -977,5 +977,6 @@
   "profileStatTrees": "ARBOLES",
   "profileStatStreak": "RACHA",
   "profileStatSaved": "AHORRO",
-  "profileSharedSaplings": "BROTES COMPARTIDOS"
+  "profileSharedSaplings": "BROTES COMPARTIDOS",
+  "loginSaveFiles": "PARTIDAS"
 }

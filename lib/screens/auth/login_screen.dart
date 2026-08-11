@@ -4,10 +4,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_dims.dart';
+import '../../theme/app_theme.dart';
 import '../../theme/app_tokens.dart';
-import '../../widgets/acorn_mascot.dart';
+import '../../widgets/pixel/pixel.dart';
 import '../../widgets/ui/app_buttons.dart';
-import '../../widgets/ui/app_card.dart';
 import '../../widgets/ui/entrance.dart';
 import 'verify_email_screen.dart';
 
@@ -110,7 +110,8 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         setState(
-            () => _error = AppLocalizations.of(context).somethingWentWrong);
+          () => _error = AppLocalizations.of(context).somethingWentWrong,
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -148,160 +149,219 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final t = AppTokens.of(context);
-    final text = Theme.of(context).textTheme;
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: StaggeredColumn(
-                children: [
-                  Center(
-                    child: Container(
-                      width: 108,
-                      height: 108,
-                      decoration: BoxDecoration(
-                        color: t.accentTint,
+    // The login screen is the "save file" screen and is always night chrome,
+    // whichever palette the app is set to — it sits outside the world.
+    const t = AppTokens.dark;
+    return Theme(
+      data: AppTheme.dark,
+      child: Scaffold(
+        backgroundColor: Pixel.nightCanvas,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // SAVE FILES header strip.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+                child: Row(
+                  children: [
+                    if (Navigator.of(context).canPop())
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: PixelIconButton(
+                          icon: PixelIcons.back,
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          semanticLabel: MaterialLocalizations.of(
+                            context,
+                          ).backButtonTooltip,
+                        ),
                       ),
-                      child: const Center(
-                        child: AcornMascot(size: 64, sway: true),
-                      ),
+                    Text(
+                      l.loginSaveFiles,
+                      style: AppTheme.label(10, t.textTertiary, spacing: 2),
                     ),
-                  ),
-                  const SizedBox(height: AppDims.s16),
-                  Text(
-                    'Budget Tree',
-                    textAlign: TextAlign.center,
-                    style: text.headlineLarge,
-                  ),
-                  const SizedBox(height: AppDims.s4),
-                  Text(
-                    _isSignUp ? l.loginPlantForest : l.loginWelcomeBack,
-                    textAlign: TextAlign.center,
-                    style: text.bodyMedium,
-                  ),
-                  const SizedBox(height: AppDims.s24),
-                  AppCard(
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 24,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: StaggeredColumn(
                         children: [
-                          TextFormField(
-                            controller: _email,
-                            keyboardType: TextInputType.emailAddress,
-                            autocorrect: false,
-                            enabled: !_busy,
-                            decoration: InputDecoration(
-                              labelText: l.email,
-                              prefixIcon: Icon(Icons.email_outlined,
-                                  color: t.textSecondary),
-                            ),
-                            validator: (v) {
-                              final s = v?.trim() ?? '';
-                              if (s.isEmpty) return l.enterEmail;
-                              if (!s.contains('@') || !s.contains('.')) {
-                                return l.enterValidEmail;
-                              }
-                              return null;
-                            },
+                          // Acorn greets you beside the title, as the save-file host.
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const PixelSpriteSheet(
+                                asset: PixelIcons.acorn,
+                                size: 56,
+                                frames: 2,
+                                period: Duration(milliseconds: 3400),
+                              ),
+                              const SizedBox(width: AppDims.s12),
+                              Flexible(
+                                child: Text(
+                                  _isSignUp
+                                      ? l.loginPlantForest
+                                      : l.loginWelcomeBack,
+                                  style: AppTheme.display(26, t.textPrimary),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: AppDims.s16),
-                          TextFormField(
-                            controller: _password,
-                            obscureText: true,
-                            enabled: !_busy,
-                            decoration: InputDecoration(
-                              labelText: l.password,
-                              prefixIcon: Icon(Icons.lock_outline,
-                                  color: t.textSecondary),
-                            ),
-                            validator: (v) {
-                              // Mirror the server policy (min 8, letters +
-                              // digits) so users get an instant message
-                              // instead of a generic auth error. Only enforced
-                              // on sign-up; sign in accepts whatever the
-                              // account already has.
-                              if (!_isSignUp) return null;
-                              if (!isStrongPassword(v ?? '')) {
-                                return l.passwordTooShort;
-                              }
-                              return null;
-                            },
-                            onFieldSubmitted: (_) => _submit(),
-                          ),
-                          if (_notice != null) ...[
-                            const SizedBox(height: AppDims.s16),
-                            _messageBox(
-                              message: _notice!,
-                              icon: Icons.mark_email_read_outlined,
-                              color: t.accentStrong,
-                            ),
-                          ],
-                          if (_error != null) ...[
-                            const SizedBox(height: AppDims.s16),
-                            _messageBox(
-                              message: _error!,
-                              icon: Icons.error_outline,
-                              color: t.danger,
-                            ),
-                          ],
-                          const SizedBox(height: AppDims.s24),
-                          _busy
-                              ? const SizedBox(
-                                  height: 54,
-                                  child: Center(
-                                    child: SizedBox(
-                                      height: 22,
-                                      width: 22,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2),
-                                    ),
-                                  ),
-                                )
-                              : AppPrimaryButton(
-                                  label:
-                                      _isSignUp ? l.createAccount : l.signIn,
-                                  onPressed: _submit,
+                          // Double-framed console panel: light outer rule, inner keyline.
+                          PixelBox(
+                            fill: Pixel.nightPanel,
+                            border: Pixel.hairline,
+                            padding: const EdgeInsets.all(3),
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Pixel.nightBorder,
+                                  width: 2,
                                 ),
+                              ),
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextFormField(
+                                      controller: _email,
+                                      keyboardType: TextInputType.emailAddress,
+                                      autocorrect: false,
+                                      enabled: !_busy,
+                                      decoration: InputDecoration(
+                                        labelText: l.email,
+                                        prefixIcon: Icon(
+                                          Icons.email_outlined,
+                                          color: t.textSecondary,
+                                        ),
+                                      ),
+                                      validator: (v) {
+                                        final s = v?.trim() ?? '';
+                                        if (s.isEmpty) return l.enterEmail;
+                                        if (!s.contains('@') ||
+                                            !s.contains('.')) {
+                                          return l.enterValidEmail;
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(height: AppDims.s16),
+                                    TextFormField(
+                                      controller: _password,
+                                      obscureText: true,
+                                      enabled: !_busy,
+                                      decoration: InputDecoration(
+                                        labelText: l.password,
+                                        prefixIcon: Icon(
+                                          Icons.lock_outline,
+                                          color: t.textSecondary,
+                                        ),
+                                      ),
+                                      validator: (v) {
+                                        // Mirror the server policy (min 8, letters +
+                                        // digits) so users get an instant message
+                                        // instead of a generic auth error. Only enforced
+                                        // on sign-up; sign in accepts whatever the
+                                        // account already has.
+                                        if (!_isSignUp) return null;
+                                        if (!isStrongPassword(v ?? '')) {
+                                          return l.passwordTooShort;
+                                        }
+                                        return null;
+                                      },
+                                      onFieldSubmitted: (_) => _submit(),
+                                    ),
+                                    if (_notice != null) ...[
+                                      const SizedBox(height: AppDims.s16),
+                                      _messageBox(
+                                        message: _notice!,
+                                        icon: Icons.mark_email_read_outlined,
+                                        color: t.accentStrong,
+                                      ),
+                                    ],
+                                    if (_error != null) ...[
+                                      const SizedBox(height: AppDims.s16),
+                                      _messageBox(
+                                        message: _error!,
+                                        icon: Icons.error_outline,
+                                        color: t.danger,
+                                      ),
+                                    ],
+                                    const SizedBox(height: AppDims.s24),
+                                    _busy
+                                        ? const SizedBox(
+                                            height: 54,
+                                            child: Center(
+                                              child: SizedBox(
+                                                height: 22,
+                                                width: 22,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                              ),
+                                            ),
+                                          )
+                                        : AppPrimaryButton(
+                                            label: _isSignUp
+                                                ? l.createAccount
+                                                : l.signIn,
+                                            onPressed: _submit,
+                                          ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppDims.s8),
+                          Center(
+                            child: AppTextButton(
+                              label: _isSignUp
+                                  ? l.haveAccountSignIn
+                                  : l.newHereCreate,
+                              onPressed: _busy
+                                  ? null
+                                  : () => setState(() {
+                                      _isSignUp = !_isSignUp;
+                                      _error = null;
+                                      _notice = null;
+                                    }),
+                            ),
+                          ),
+                          // Only at the gate root: let a new user in without an
+                          // account so they meet the app before committing. When
+                          // this screen is pushed over the launch screen the user
+                          // is already a guest, so the shortcut would be noise.
+                          if (!Navigator.of(context).canPop())
+                            Center(
+                              child: AppTextButton(
+                                icon: Icons.park_outlined,
+                                label: l.loginExploreFirst,
+                                onPressed: _busy
+                                    ? null
+                                    : () =>
+                                          AuthService.instance.enterGuestMode(),
+                              ),
+                            ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppDims.s8),
-                  Center(
-                    child: AppTextButton(
-                      label: _isSignUp ? l.haveAccountSignIn : l.newHereCreate,
-                      onPressed: _busy
-                          ? null
-                          : () => setState(() {
-                                _isSignUp = !_isSignUp;
-                                _error = null;
-                                _notice = null;
-                              }),
-                    ),
-                  ),
-                  // Only at the gate root: let a new user in without an
-                  // account so they meet the app before committing. When
-                  // this screen is pushed over the launch screen the user
-                  // is already a guest, so the shortcut would be noise.
-                  if (!Navigator.of(context).canPop())
-                    Center(
-                      child: AppTextButton(
-                        icon: Icons.park_outlined,
-                        label: l.loginExploreFirst,
-                        onPressed: _busy
-                            ? null
-                            : () => AuthService.instance.enterGuestMode(),
-                      ),
-                    ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

@@ -5559,6 +5559,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SHARED SAPLINGS'**
   String get profileSharedSaplings;
+
+  /// No description provided for @loginSaveFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE FILES'**
+  String get loginSaveFiles;
 }
 
 class _AppLocalizationsDelegate

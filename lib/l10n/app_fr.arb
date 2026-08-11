@@ -977,5 +977,6 @@
   "profileStatTrees": "ARBRES",
   "profileStatStreak": "SERIE",
   "profileStatSaved": "EPARGNE",
-  "profileSharedSaplings": "POUSSES PARTAGEES"
+  "profileSharedSaplings": "POUSSES PARTAGEES",
+  "loginSaveFiles": "FICHIERS"
 }

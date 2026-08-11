@@ -3217,4 +3217,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSharedSaplings => 'SHARED SAPLINGS';
+
+  @override
+  String get loginSaveFiles => 'SAVE FILES';
 }

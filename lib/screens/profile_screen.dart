@@ -143,24 +143,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           autofocus: true,
           maxLines: 4,
           maxLength: 280,
-          decoration: InputDecoration(
-            hintText: l.bioHint,
-          ),
+          decoration: InputDecoration(hintText: l.bioHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              l.cancel,
-              style: TextStyle(color: AppColors.mossGreen),
-            ),
+            child: Text(l.cancel, style: TextStyle(color: AppColors.mossGreen)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.forestGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
             ),
             onPressed: () => Navigator.pop(ctx, controller.text),
             child: Text(
@@ -327,7 +320,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               sliver: SliverToBoxAdapter(
                 child: PixelSectionRule(
                   label: l.badgesTitle,
-                  trailing: '${_unlocked.length}/${AchievementCatalog.all.length}',
+                  trailing:
+                      '${_unlocked.length}/${AchievementCatalog.all.length}',
                 ),
               ),
             ),
@@ -346,18 +340,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _statBlocks(AppLocalizations l) {
     final t = AppTokens.of(context);
     Widget block(String label, String value) => Expanded(
-          child: PixelBox(
-            padding: const EdgeInsets.all(9),
-            drop: AppDims.dropButton,
-            child: Column(
-              children: [
-                Text(label, style: AppTheme.label(9, t.textSecondary)),
-                const SizedBox(height: 5),
-                Text(value, style: AppTheme.display(22, t.textPrimary)),
-              ],
-            ),
-          ),
-        );
+      child: PixelBox(
+        padding: const EdgeInsets.all(9),
+        drop: AppDims.dropButton,
+        child: Column(
+          children: [
+            Text(label, style: AppTheme.label(9, t.textSecondary)),
+            const SizedBox(height: 5),
+            Text(value, style: AppTheme.display(22, t.textPrimary)),
+          ],
+        ),
+      ),
+    );
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -370,9 +364,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  static String _shortMoney(double v) => v >= 1000
-      ? '\$${(v / 1000).toStringAsFixed(1)}k'
-      : '\$${v.round()}';
+  static String _shortMoney(double v) =>
+      v >= 1000 ? '\$${(v / 1000).toStringAsFixed(1)}k' : '\$${v.round()}';
 
   /// The trophy shelf: every badge in the catalogue, locked ones dimmed, so
   /// there is always something visibly left to earn.
@@ -409,8 +402,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final level = _health.showsPrestige && _health.earnedPrestige != null
         ? 8 + _health.earnedPrestige!.index + 1
         : _health.tier.index + 1;
-    final name = (_me!.displayName != null &&
-            _me!.displayName!.trim().isNotEmpty)
+    final name =
+        (_me!.displayName != null && _me!.displayName!.trim().isNotEmpty)
         ? _me!.displayName!
         : _me!.username;
 
@@ -503,10 +496,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: Text(AppLocalizations.of(context).retry),
             ),
           ],
-          if (action != null) ...[
-            const SizedBox(height: 20),
-            action,
-          ],
+          if (action != null) ...[const SizedBox(height: 20), action],
         ],
       ),
     ),
