@@ -1058,5 +1058,7 @@
   "profileStatStreak": "STREAK",
   "profileStatSaved": "SAVED",
   "profileSharedSaplings": "SHARED SAPLINGS",
-  "loginSaveFiles": "SAVE FILES"
+  "loginSaveFiles": "SAVE FILES",
+  "leftLabel": "LEFT",
+  "overLabel": "OVER"
 }

@@ -978,5 +978,7 @@
   "profileStatStreak": "SERIE",
   "profileStatSaved": "EPARGNE",
   "profileSharedSaplings": "POUSSES PARTAGEES",
-  "loginSaveFiles": "FICHIERS"
+  "loginSaveFiles": "FICHIERS",
+  "leftLabel": "RESTE",
+  "overLabel": "DEPASSE"
 }

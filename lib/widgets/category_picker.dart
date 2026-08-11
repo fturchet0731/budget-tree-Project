@@ -235,8 +235,8 @@ class _PickerChip extends StatelessWidget {
                     ? [
                         BoxShadow(
                           color: color.withValues(alpha: 0.7),
-                          blurRadius: 4,
-                          spreadRadius: 1,
+                          blurRadius: 0,
+                          spreadRadius: 0,
                         ),
                       ]
                     : null,
@@ -335,8 +335,8 @@ Future<TreeCategory?> showCreateCategoryDialog(BuildContext context) async {
                           ? [
                               BoxShadow(
                                 color: c.withValues(alpha: 0.7),
-                                blurRadius: 10,
-                                spreadRadius: 2,
+                                blurRadius: 0,
+                                spreadRadius: 0,
                               ),
                             ]
                           : null,

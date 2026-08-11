@@ -510,7 +510,7 @@ class _TourButton extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 10,
+              blurRadius: 0,
               offset: const Offset(0, 3),
             ),
           ],

@@ -108,8 +108,8 @@ class _CelebrationViewState extends State<_CelebrationView>
               boxShadow: [
                 BoxShadow(
                   color: widget.color.withValues(alpha: 0.25),
-                  blurRadius: 30,
-                  spreadRadius: 2,
+                  blurRadius: 0,
+                  spreadRadius: 0,
                 ),
               ],
             ),

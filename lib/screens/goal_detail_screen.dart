@@ -17,6 +17,7 @@ import '../services/goal_repository.dart';
 import '../services/notification_scheduler.dart';
 import '../services/profile_service.dart';
 import '../services/sound_service.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_theme.dart';
 import '../widgets/pixel/pixel.dart';
 import '../theme/app_tokens.dart';
@@ -254,9 +255,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     },
                     backgroundColor: AppTokens.current.canvasSoft,
                     side: BorderSide(color: AppTokens.current.cardBorder),
-                    labelStyle: TextStyle(
-                      color: AppColors.stoneBeigeColor,
-                    ),
+                    labelStyle: TextStyle(color: AppColors.stoneBeigeColor),
                   );
                 }).toList(),
               ),
@@ -283,8 +282,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                     // reminders track the user's actual rhythm.
                     final cadence = _goal.waterCadence;
                     if (_goal.waterRemindersEnabled && cadence != null) {
-                      _goal.nextWaterDate =
-                          addDays(DateTime.now(), cadence.days);
+                      _goal.nextWaterDate = addDays(
+                        DateTime.now(),
+                        cadence.days,
+                      );
                     }
                   });
                   SoundService.fundsAllocated();
@@ -609,8 +610,9 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: AppTokens.current.canvasSoft,
-                          border:
-                              Border.all(color: AppTokens.current.cardBorder),
+                          border: Border.all(
+                            color: AppTokens.current.cardBorder,
+                          ),
                         ),
                         child: Icon(
                           Icons.arrow_back,
@@ -685,23 +687,47 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                   child: Stack(
                     children: [
+                      // Diegetic hero: sky panel with the sapling standing on a
+                      // strip of ground, matching the hub and profile scenes.
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppTokens.current.accentTint,
-                            borderRadius: BorderRadius.zero,
+                            color: Conifer.c50,
+                            border: Border.all(
+                              color: AppTokens.current.cardBorder,
+                              width: AppDims.borderThick,
+                            ),
                           ),
                           clipBehavior: Clip.antiAlias,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Transform.scale(
-                              scale: _goal.isUncapped ? _goal.tierScale : 1.0,
-                              child: SaplingView(
-                                progress: _displayedProgress,
-                                size: Size.infinite,
-                                leafPalette: _leafPalette,
+                          child: Stack(
+                            children: [
+                              const Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                child: PixelGround(height: 34),
                               ),
-                            ),
+                              Positioned.fill(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    16,
+                                    16,
+                                    28,
+                                  ),
+                                  child: Transform.scale(
+                                    scale: _goal.isUncapped
+                                        ? _goal.tierScale
+                                        : 1.0,
+                                    child: SaplingView(
+                                      progress: _displayedProgress,
+                                      size: Size.infinite,
+                                      leafPalette: _leafPalette,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -797,14 +823,12 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                 padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
                 decoration: BoxDecoration(
                   color: AppTokens.current.card,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.zero,
-                  ),
+                  borderRadius: const BorderRadius.vertical(top: Radius.zero),
                   border: Border.all(color: AppTokens.current.cardBorder),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 24,
+                      blurRadius: 0,
                       offset: const Offset(0, -6),
                     ),
                   ],

@@ -272,7 +272,7 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 24,
+                    blurRadius: 0,
                     offset: const Offset(0, -6),
                   ),
                 ],

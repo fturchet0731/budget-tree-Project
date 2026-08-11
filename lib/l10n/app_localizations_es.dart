@@ -3230,4 +3230,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loginSaveFiles => 'PARTIDAS';
+
+  @override
+  String get leftLabel => 'QUEDA';
+
+  @override
+  String get overLabel => 'EXCEDIDO';
 }

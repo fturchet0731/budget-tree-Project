@@ -494,8 +494,8 @@ class _TargetHighlightRingState extends State<TargetHighlightRing>
                       boxShadow: [
                         BoxShadow(
                           color: t.accent.withValues(alpha: 0.25 + 0.2 * v),
-                          blurRadius: 14,
-                          spreadRadius: 1,
+                          blurRadius: 0,
+                          spreadRadius: 0,
                         ),
                       ],
                     ),

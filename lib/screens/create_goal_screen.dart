@@ -813,7 +813,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                                               BoxShadow(
                                                 color: AppColors.forestGreen
                                                     .withValues(alpha: 0.30),
-                                                blurRadius: 8,
+                                                blurRadius: 0,
                                               ),
                                             ]
                                           : null,

@@ -978,5 +978,7 @@
   "profileStatStreak": "RACHA",
   "profileStatSaved": "AHORRO",
   "profileSharedSaplings": "BROTES COMPARTIDOS",
-  "loginSaveFiles": "PARTIDAS"
+  "loginSaveFiles": "PARTIDAS",
+  "leftLabel": "QUEDA",
+  "overLabel": "EXCEDIDO"
 }

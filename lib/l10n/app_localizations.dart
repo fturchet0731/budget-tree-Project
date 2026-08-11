@@ -5565,6 +5565,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SAVE FILES'**
   String get loginSaveFiles;
+
+  /// No description provided for @leftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'LEFT'**
+  String get leftLabel;
+
+  /// No description provided for @overLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'OVER'**
+  String get overLabel;
 }
 
 class _AppLocalizationsDelegate

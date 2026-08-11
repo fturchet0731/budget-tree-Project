@@ -3249,4 +3249,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginSaveFiles => 'FICHIERS';
+
+  @override
+  String get leftLabel => 'RESTE';
+
+  @override
+  String get overLabel => 'DEPASSE';
 }

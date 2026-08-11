@@ -3220,4 +3220,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSaveFiles => 'SAVE FILES';
+
+  @override
+  String get leftLabel => 'LEFT';
+
+  @override
+  String get overLabel => 'OVER';
 }
