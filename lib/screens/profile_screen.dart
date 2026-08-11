@@ -197,22 +197,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: widget.onClose == null,
-        leading: widget.onClose == null
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: widget.onClose,
-              ),
-        title: Text(l.profile),
-        centerTitle: true,
-        foregroundColor: AppColors.stoneBeigeColor,
-      ),
-      body: SafeArea(child: _body(l)),
-    );
+    // No AppBar: the reference opens straight onto the scene, with the back
+    // chevron sitting *on* it. A Material title bar above the hero was what
+    // made this screen read as a form rather than a place. States that never
+    // reach the hero (loading / signed out / error) keep a plain bar so they
+    // still have a way back.
+    final ready = !_loading &&
+        ProfileService.instance.isAvailable &&
+        _errorMsg == null &&
+        _me != null;
+    if (!ready) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: widget.onClose == null,
+          leading: widget.onClose == null
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: widget.onClose,
+                ),
+          title: Text(l.profile),
+          centerTitle: true,
+        ),
+        body: SafeArea(child: _body(l)),
+      );
+    }
+    return Scaffold(body: _body(l));
   }
 
   Widget _body(AppLocalizations l) {
@@ -414,7 +425,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           groundHeight: 42,
           subjectX: -0.72,
           subject: StatusTreeView(spriteKey: _health.spriteKey, size: 132),
-          onBack: widget.onClose,
+          // Pushed from the dashboard there is no onClose, so fall back to a
+          // plain pop — otherwise removing the AppBar would strand the user.
+          onBack: widget.onClose ?? () => Navigator.of(context).maybePop(),
           backLabel: l.close,
           bottomRight: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 190),

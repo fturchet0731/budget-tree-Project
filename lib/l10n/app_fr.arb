@@ -980,5 +980,7 @@
   "profileSharedSaplings": "POUSSES PARTAGEES",
   "loginSaveFiles": "FICHIERS",
   "leftLabel": "RESTE",
-  "overLabel": "DEPASSE"
+  "overLabel": "DEPASSE",
+  "hubTileCaption": "{score}/100 · série de {streak} sem",
+  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}}
 }

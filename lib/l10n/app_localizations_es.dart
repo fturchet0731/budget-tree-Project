@@ -3236,4 +3236,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get overLabel => 'EXCEDIDO';
+
+  @override
+  String hubTileCaption(int score, int streak) {
+    return '$score/100 · racha de $streak sem';
+  }
 }

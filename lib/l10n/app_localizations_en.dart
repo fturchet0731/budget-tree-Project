@@ -3226,4 +3226,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overLabel => 'OVER';
+
+  @override
+  String hubTileCaption(int score, int streak) {
+    return '$score/100 · $streak week streak';
+  }
 }

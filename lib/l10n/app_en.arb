@@ -1060,5 +1060,7 @@
   "profileSharedSaplings": "SHARED SAPLINGS",
   "loginSaveFiles": "SAVE FILES",
   "leftLabel": "LEFT",
-  "overLabel": "OVER"
+  "overLabel": "OVER",
+  "hubTileCaption": "{score}/100 · {streak} week streak",
+  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}}
 }

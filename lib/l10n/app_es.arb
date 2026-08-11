@@ -980,5 +980,7 @@
   "profileSharedSaplings": "BROTES COMPARTIDOS",
   "loginSaveFiles": "PARTIDAS",
   "leftLabel": "QUEDA",
-  "overLabel": "EXCEDIDO"
+  "overLabel": "EXCEDIDO",
+  "hubTileCaption": "{score}/100 · racha de {streak} sem",
+  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}}
 }

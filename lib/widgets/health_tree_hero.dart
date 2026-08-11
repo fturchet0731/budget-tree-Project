@@ -86,7 +86,9 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
     // and the check-in call to action along the bottom edge.
     return PixelBox(
       onTap: widget.onOpenHub,
-      fill: t.accentTint,
+      // The reference tile sits on the palest green (#f6fce9 = Conifer.c50),
+      // one step lighter than the menu tiles' wells.
+      fill: Conifer.c50,
       padding: EdgeInsets.zero,
       height: widget.height,
       child: Column(
@@ -110,7 +112,7 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
                           _health.isEmpty
                               ? l.hubTitle.toUpperCase()
                               : '${l.hubTitle.toUpperCase()} · '
-                                  'LV.${_health.score.round()}',
+                                  '${l.hubLevel(_level)}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style:
@@ -157,13 +159,22 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
     );
   }
 
+  /// Which of the sixteen trees you are standing on: 1-8 across the score
+  /// tiers, 9-16 through prestige. Same expression as the hub and the profile
+  /// — keep the three in sync.
+  int get _level => _health.showsPrestige && _health.earnedPrestige != null
+      ? 8 + _health.earnedPrestige!.index + 1
+      : _health.tier.index + 1;
+
   String _subtitle(AppLocalizations l) {
     if (_health.isEmpty) return l.hubTreeFreshSub;
+    // The reference prints score and streak together on one line
+    // ("78/100 · 5 week streak") rather than choosing between them.
+    if (_health.currentStreak > 0) {
+      return l.hubTileCaption(_health.score.round(), _health.currentStreak);
+    }
     if (_health.showsPrestige && _health.prestigeDays >= 1) {
       return l.hubPrestigeDays(_health.prestigeDays.floor());
-    }
-    if (_health.currentStreak > 0) {
-      return l.hubStreakSub(_health.currentStreak);
     }
     if (_health.missedRecent > 0) return l.hubMissedSub(_health.missedRecent);
     return l.hubScoreSub(_health.score.round());

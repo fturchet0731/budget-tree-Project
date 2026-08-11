@@ -5577,6 +5577,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OVER'**
   String get overLabel;
+
+  /// No description provided for @hubTileCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'{score}/100 · {streak} week streak'**
+  String hubTileCaption(int score, int streak);
 }
 
 class _AppLocalizationsDelegate
