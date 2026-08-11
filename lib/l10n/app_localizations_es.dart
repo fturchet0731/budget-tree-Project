@@ -3205,4 +3205,26 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chooseBranchToContinue => 'Elige una rama para añadir este gasto.';
+
+  @override
+  String hubLevel(int n) {
+    return 'NIV.$n';
+  }
+
+  @override
+  String hubStreakWeeks(int n) {
+    return 'RACHA DE $n SEM';
+  }
+
+  @override
+  String get profileStatTrees => 'ARBOLES';
+
+  @override
+  String get profileStatStreak => 'RACHA';
+
+  @override
+  String get profileStatSaved => 'AHORRO';
+
+  @override
+  String get profileSharedSaplings => 'BROTES COMPARTIDOS';
 }

@@ -969,5 +969,13 @@
   "expenseBelongsTo": "À quelle branche appartient cette dépense ?",
   "savedExpenseBranches": "Branches enregistrées",
   "savedExpenseBranchesHint": "Touchez-en une pour la réutiliser d'un arbre précédent.",
-  "chooseBranchToContinue": "Choisissez une branche pour ajouter cette dépense."
+  "chooseBranchToContinue": "Choisissez une branche pour ajouter cette dépense.",
+  "hubLevel": "NIV.{n}",
+  "@hubLevel": {"placeholders": {"n": {"type": "int"}}},
+  "hubStreakWeeks": "SERIE DE {n} SEM",
+  "@hubStreakWeeks": {"placeholders": {"n": {"type": "int"}}},
+  "profileStatTrees": "ARBRES",
+  "profileStatStreak": "SERIE",
+  "profileStatSaved": "EPARGNE",
+  "profileSharedSaplings": "POUSSES PARTAGEES"
 }

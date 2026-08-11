@@ -1049,5 +1049,13 @@
   "expenseBelongsTo": "Which branch does it belong to?",
   "savedExpenseBranches": "Saved branches",
   "savedExpenseBranchesHint": "Tap one to reuse it from an earlier tree.",
-  "chooseBranchToContinue": "Pick a branch to add this expense."
+  "chooseBranchToContinue": "Pick a branch to add this expense.",
+  "hubLevel": "LV.{n}",
+  "@hubLevel": {"placeholders": {"n": {"type": "int"}}},
+  "hubStreakWeeks": "{n} WEEK STREAK",
+  "@hubStreakWeeks": {"placeholders": {"n": {"type": "int"}}},
+  "profileStatTrees": "TREES",
+  "profileStatStreak": "STREAK",
+  "profileStatSaved": "SAVED",
+  "profileSharedSaplings": "SHARED SAPLINGS"
 }

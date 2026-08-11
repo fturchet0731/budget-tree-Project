@@ -3195,4 +3195,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chooseBranchToContinue => 'Pick a branch to add this expense.';
+
+  @override
+  String hubLevel(int n) {
+    return 'LV.$n';
+  }
+
+  @override
+  String hubStreakWeeks(int n) {
+    return '$n WEEK STREAK';
+  }
+
+  @override
+  String get profileStatTrees => 'TREES';
+
+  @override
+  String get profileStatStreak => 'STREAK';
+
+  @override
+  String get profileStatSaved => 'SAVED';
+
+  @override
+  String get profileSharedSaplings => 'SHARED SAPLINGS';
 }

@@ -9,18 +9,18 @@ import '../services/check_in_service.dart';
 import '../services/reflection_service.dart';
 import '../services/reflection_stats.dart';
 import '../theme/app_dims.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_overlay.dart';
 import '../widgets/acorn_mascot.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/charts/hub_charts.dart';
 import '../widgets/check_in_sheet.dart';
 import '../widgets/status_tree_view.dart';
 import '../widgets/skeleton.dart';
-import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/app_card.dart';
-import '../widgets/ui/app_progress_bar.dart';
 import '../widgets/ui/entrance.dart';
 import '../widgets/ui/pressable.dart';
 import '../widgets/ui/section_header.dart';
@@ -117,26 +117,55 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
     final l = AppLocalizations.of(context);
     final stats = _stats;
 
+    if (stats == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l.hubTitle)),
+        body: const Padding(
+          padding: EdgeInsets.all(AppDims.s20),
+          child: ProfileSkeleton(),
+        ),
+      );
+    }
+
+    final health = stats.health;
+    // The sixteen trees are the progression, so the level is which one you are
+    // standing on: 1..8 across the score tiers, 9..16 through prestige.
+    final level = health.showsPrestige && health.earnedPrestige != null
+        ? 8 + health.earnedPrestige!.index + 1
+        : health.tier.index + 1;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.hubTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: l.hubHowItWorks,
-            onPressed: _showTutorial,
+      body: Column(
+        children: [
+          // Diegetic hero: you arrive at the hub and your tree is standing
+          // there, rather than reading a title bar about it.
+          PixelScene(
+            height: 212,
+            subject: StatusTreeView(spriteKey: health.spriteKey, size: 158),
+            showAcorn: true,
+            onBack: () => Navigator.of(context).maybePop(),
+            backLabel: MaterialLocalizations.of(context).backButtonTooltip,
+            topRight: Row(
+              children: [
+                PixelBadge(
+                  label: l.hubLevel(level),
+                  fill: AppTokens.of(context).panelDark,
+                  ink: AppTokens.of(context).gold,
+                ),
+                const SizedBox(width: 6),
+                PixelIconButton(
+                  icon: PixelIcons.scroll,
+                  onPressed: _showTutorial,
+                  semanticLabel: l.hubHowItWorks,
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      body: stats == null
-          ? const Padding(
-              padding: EdgeInsets.all(AppDims.s20),
-              child: ProfileSkeleton(),
-            )
-          : AppScrollbar(
+          Expanded(
+            child: AppScrollbar(
               builder: (controller) => SingleChildScrollView(
                 controller: controller,
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 520),
@@ -144,18 +173,6 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Entrance(child: _HealthCard(stats: stats)),
-                        Entrance(
-                          delay: const Duration(milliseconds: 30),
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: AppDims.s12),
-                            child: AppSecondaryButton(
-                              label: l.hubSeeAllTrees,
-                              icon: Icons.forest_outlined,
-                              onPressed: _openTrees,
-                            ),
-                          ),
-                        ),
                         if (_pending.isNotEmpty)
                           Entrance(
                             delay: const Duration(milliseconds: 60),
@@ -179,14 +196,30 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
                           delay: const Duration(milliseconds: 240),
                           child: _OverspendCard(stats: stats),
                         ),
+                        // The two ways forward, side by side as in the handoff.
                         Entrance(
                           delay: const Duration(milliseconds: 300),
-                          child: _TalkCard(
-                            onOpen: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const AcornChatScreen(),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: PixelButton(
+                                  label: l.hubSeeAllTrees,
+                                  tone: PixelTone.neutral,
+                                  onPressed: _openTrees,
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: AppDims.s8),
+                              Expanded(
+                                child: PixelButton(
+                                  label: l.hubTalkAction,
+                                  onPressed: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const AcornChatScreen(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -195,6 +228,9 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
                 ),
               ),
             ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -211,81 +247,82 @@ class _HealthCard extends StatelessWidget {
     final t = AppTokens.of(context);
     final health = stats.health;
 
-    return AppCard(
+    // The tier name is the headline — you read where you stand before you read
+    // a number — with the score sitting quietly beside it.
+    return PixelBox(
       margin: const EdgeInsets.only(bottom: AppDims.s12),
+      padding: const EdgeInsets.all(11),
+      drop: AppDims.dropButton,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              StatusTreeView(spriteKey: health.spriteKey, size: 96),
-              const SizedBox(width: AppDims.s12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      health.isEmpty
-                          ? l.hubTreeFresh
-                          : health.statusLabel(l),
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      health.isEmpty
-                          ? l.hubTreeFreshSub
-                          : l.hubScoreSub(health.score.round()),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    if (health.showsPrestige && health.prestigeDays >= 1) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        l.hubPrestigeDays(health.prestigeDays.floor()),
-                        style: GoogleFonts.nunito(
-                          color: t.accentStrong,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                    if (!health.isEmpty) ...[
-                      const SizedBox(height: AppDims.s8),
-                      AppProgressBar(value: health.fraction),
-                      if (health.delta.abs() >= 1) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          health.delta > 0
-                              ? l.hubDeltaUp(health.delta.round())
-                              : l.hubDeltaDown(health.delta.abs().round()),
-                          style: GoogleFonts.nunito(
-                            color: health.delta > 0 ? t.success : t.warning,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ],
+                child: Text(
+                  health.isEmpty ? l.hubTreeFresh : health.statusLabel(l),
+                  style: AppTheme.display(24, t.textPrimary),
                 ),
               ),
+              if (!health.isEmpty)
+                Text(
+                  '${health.score.round()}/100',
+                  style: AppTheme.label(9, t.accentStrong),
+                ),
             ],
           ),
+          if (!health.isEmpty) ...[
+            const SizedBox(height: 9),
+            PixelBar(value: health.fraction, height: 16),
+          ],
+          const SizedBox(height: 9),
+          Text(
+            health.isEmpty ? l.hubTreeFreshSub : l.hubScoreSub(health.score.round()),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          if (health.showsPrestige && health.prestigeDays >= 1) ...[
+            const SizedBox(height: 4),
+            Text(
+              l.hubPrestigeDays(health.prestigeDays.floor()),
+              style: AppTheme.label(9, t.gold),
+            ),
+          ],
+          if (health.delta.abs() >= 1) ...[
+            const SizedBox(height: 4),
+            Text(
+              health.delta > 0
+                  ? l.hubDeltaUp(health.delta.round())
+                  : l.hubDeltaDown(health.delta.abs().round()),
+              style: AppTheme.label(
+                  9, health.delta > 0 ? t.success : t.warning),
+            ),
+          ],
           if (stats.hasCheckIns) ...[
-            const SizedBox(height: AppDims.s16),
+            const SizedBox(height: 11),
+            // Streak row: flame, weeks, and a seven-pip week meter.
             Row(
               children: [
-                _Stat(
-                  value: '${health.currentStreak}',
-                  label: l.hubStatStreak,
+                const PixelSprite(asset: PixelIcons.flame, size: 18),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    l.hubStreakWeeks(health.currentStreak),
+                    style: AppTheme.label(9, t.textSecondary),
+                  ),
                 ),
-                _Stat(
-                  value: '${(stats.answerRate * 100).round()}%',
-                  label: l.hubStatAnswered,
-                ),
-                _Stat(
-                  value: '${health.bestStreak}',
-                  label: l.hubStatBest,
-                ),
+                for (var i = 0; i < 7; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 3),
+                    child: Container(
+                      width: 11,
+                      height: 11,
+                      decoration: BoxDecoration(
+                        color: i < health.currentStreak ? t.gold : t.track,
+                        border: Border.all(color: t.cardBorder, width: 2),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
@@ -295,39 +332,6 @@ class _HealthCard extends StatelessWidget {
   }
 }
 
-class _Stat extends StatelessWidget {
-  final String value;
-  final String label;
-  const _Stat({required this.value, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppTokens.of(context);
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: GoogleFonts.pixelifySans(
-              color: t.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.nunito(
-              color: t.textTertiary,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _PendingCard extends StatelessWidget {
   final List<CheckIn> pending;
@@ -424,59 +428,59 @@ class _ReflectionCard extends StatelessWidget {
     final report = ReflectionService.instance.latestReport();
     final ready = reflection != null || stats.hasCheckIns;
 
-    return AppCard(
+    // Acorn delivers the reflection from her dark NPC panel, the same box she
+    // speaks from on the dashboard.
+    return PixelBox(
       margin: const EdgeInsets.only(bottom: AppDims.s12),
-      child: Column(
+      padding: const EdgeInsets.all(10),
+      drop: AppDims.dropButton,
+      fill: t.panelDark,
+      border: t.panelDarkBorder,
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const AcornMascot(size: 54, sway: false),
-              const SizedBox(width: AppDims.s12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.hubReflectionTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      report?.headline ??
-                          reflection?.text ??
-                          (ready ? l.hubReflectionReady : l.hubReflectionEmpty),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
+          const AcornPortrait(size: 44),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.hubReflectionTitle.toUpperCase(),
+                  style: AppTheme.label(9, Conifer.c300),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  report?.headline ??
+                      reflection?.text ??
+                      (ready ? l.hubReflectionReady : l.hubReflectionEmpty),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.display(13, t.panelDarkText,
+                          weight: FontWeight.w400)
+                      .copyWith(height: 1.3),
+                ),
+                const SizedBox(height: 8),
+                if (ready)
+                  PixelButton(
+                    label: l.hubReflectionPlay,
+                    tone: PixelTone.gold,
+                    expand: false,
+                    fontSize: 10,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ReflectionStoryScreen(),
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    l.hubReflectionEmptySub,
+                    style: AppTheme.label(9, t.textTertiary),
+                  ),
+              ],
+            ),
           ),
-          if (ready) ...[
-            const SizedBox(height: AppDims.s16),
-            AppPrimaryButton(
-              label: l.hubReflectionPlay,
-              icon: Icons.play_arrow_rounded,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const ReflectionStoryScreen(),
-                ),
-              ),
-            ),
-          ] else
-            Padding(
-              padding: const EdgeInsets.only(top: AppDims.s8),
-              child: Text(
-                l.hubReflectionEmptySub,
-                style: GoogleFonts.nunito(
-                  color: t.textTertiary,
-                  fontSize: 12.5,
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -558,34 +562,3 @@ class _OverspendCard extends StatelessWidget {
   }
 }
 
-class _TalkCard extends StatelessWidget {
-  final VoidCallback onOpen;
-  const _TalkCard({required this.onOpen});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l.hubTalkTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l.hubTalkSub,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppDims.s16),
-          AppPrimaryButton(
-            label: l.hubTalkAction,
-            icon: Icons.chat_bubble_outline,
-            onPressed: onOpen,
-          ),
-        ],
-      ),
-    );
-  }
-}

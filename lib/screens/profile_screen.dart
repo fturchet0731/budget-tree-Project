@@ -5,18 +5,23 @@ import 'package:image_picker/image_picker.dart';
 import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
+import '../models/achievement.dart';
 import '../models/profile_model.dart';
+import '../services/achievement_service.dart';
 import '../services/auth_service.dart';
+import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
-import '../theme/app_shadows.dart';
+import '../services/tree_health_service.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/goal_sapling_card.dart';
+import '../widgets/pixel/pixel.dart';
+import '../widgets/status_tree_view.dart';
 import '../widgets/skeleton.dart';
-import '../widgets/profile_avatar.dart';
 import 'auth/login_screen.dart';
 import 'goal_detail_screen.dart';
 
@@ -47,6 +52,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _load();
   }
 
+  TreeHealth _health = TreeHealth.fresh;
+  int _treeCount = 0;
+  double _totalSaved = 0;
+  Map<String, DateTime> _unlocked = const {};
+
   Future<void> _load() async {
     if (!ProfileService.instance.isAvailable) {
       setState(() => _loading = false);
@@ -76,6 +86,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           await GoalRepository.update(g);
         }
       }
+      // Save-file stats for the hero and the trophy shelf.
+      final health = await TreeHealthService.current();
+      final budgets = await BudgetRepository.loadAll();
+      final allGoals = await GoalRepository.loadAll();
+      final unlocked = await AchievementService.loadUnlocked();
+      final saved = allGoals.fold<double>(0, (a, g) => a + g.currentAmount);
+      if (!mounted) return;
+      setState(() {
+        _health = health;
+        _treeCount = budgets.where((b) => b.savedAt != null).length;
+        _totalSaved = saved;
+        _unlocked = unlocked;
+      });
       if (!mounted) return;
       setState(() {
         _me = me;
@@ -249,25 +272,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
           controller: controller,
           slivers: [
             SliverToBoxAdapter(child: _header(l)),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 6),
+              sliver: SliverToBoxAdapter(child: _statBlocks(l)),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(14, 6, 14, 8),
+              sliver: SliverToBoxAdapter(
+                child: PixelSectionRule(label: l.profileSharedSaplings),
+              ),
+            ),
             if (_sharedGoals.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 30, 28, 30),
+                  padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
                   child: Text(
                     l.shareGoalsToShowOnProfile,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.mossGreen),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 16),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
                     childAspectRatio: 0.72,
                   ),
                   delegate: SliverChildBuilderDelegate(
@@ -289,122 +322,147 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(14, 6, 14, 8),
+              sliver: SliverToBoxAdapter(
+                child: PixelSectionRule(
+                  label: l.badgesTitle,
+                  trailing: '${_unlocked.length}/${AchievementCatalog.all.length}',
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 24),
+              sliver: SliverToBoxAdapter(child: _badgeGrid()),
+            ),
           ],
         ),
       ),
     );
   }
 
+  /// TREES / STREAK / SAVED, the three numbers that say how the save file is
+  /// going at a glance.
+  Widget _statBlocks(AppLocalizations l) {
+    final t = AppTokens.of(context);
+    Widget block(String label, String value) => Expanded(
+          child: PixelBox(
+            padding: const EdgeInsets.all(9),
+            drop: AppDims.dropButton,
+            child: Column(
+              children: [
+                Text(label, style: AppTheme.label(9, t.textSecondary)),
+                const SizedBox(height: 5),
+                Text(value, style: AppTheme.display(22, t.textPrimary)),
+              ],
+            ),
+          ),
+        );
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        block(l.profileStatTrees, '$_treeCount'),
+        const SizedBox(width: AppDims.s8),
+        block(l.profileStatStreak, '${_health.currentStreak}'),
+        const SizedBox(width: AppDims.s8),
+        block(l.profileStatSaved, _shortMoney(_totalSaved)),
+      ],
+    );
+  }
+
+  static String _shortMoney(double v) => v >= 1000
+      ? '\$${(v / 1000).toStringAsFixed(1)}k'
+      : '\$${v.round()}';
+
+  /// The trophy shelf: every badge in the catalogue, locked ones dimmed, so
+  /// there is always something visibly left to earn.
+  Widget _badgeGrid() {
+    final t = AppTokens.of(context);
+    return GridView.count(
+      crossAxisCount: 4,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 9,
+      crossAxisSpacing: 9,
+      children: [
+        for (final a in AchievementCatalog.all)
+          Opacity(
+            opacity: _unlocked.containsKey(a.id) ? 1 : 0.42,
+            child: PixelBox(
+              drop: AppDims.dropSmall,
+              fill: _unlocked.containsKey(a.id) ? t.accentTint : t.canvasSoft,
+              alignment: Alignment.center,
+              semanticLabel: a.title,
+              child: Icon(a.icon, size: 26, color: t.textPrimary),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// The diegetic hero: your status tree stands on the left, your name plate
+  /// on the right, exactly like the handoff's profile scene.
   Widget _header(AppLocalizations l) {
+    final t = AppTokens.of(context);
     final bio = _me!.bio?.trim();
     final hasBio = bio != null && bio.isNotEmpty;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: _pickAvatar,
-                child: Stack(
-                  children: [
-                    ProfileAvatar(profile: _me, size: 56),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          color: AppTokens.current.accent,
-                          border: Border.all(
-                              color: AppTokens.current.card, width: 1.5),
-                        ),
-                        child: Icon(Icons.photo_camera,
-                            size: 10, color: AppTokens.current.onAccent),
-                      ),
-                    ),
-                  ],
+    final level = _health.showsPrestige && _health.earnedPrestige != null
+        ? 8 + _health.earnedPrestige!.index + 1
+        : _health.tier.index + 1;
+    final name = (_me!.displayName != null &&
+            _me!.displayName!.trim().isNotEmpty)
+        ? _me!.displayName!
+        : _me!.username;
+
+    return Column(
+      children: [
+        PixelScene(
+          height: 196,
+          groundHeight: 42,
+          subjectX: -0.72,
+          subject: StatusTreeView(spriteKey: _health.spriteKey, size: 132),
+          onBack: widget.onClose,
+          backLabel: l.close,
+          bottomRight: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 190),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.display(26, t.textPrimary),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_me!.displayName != null &&
-                        _me!.displayName!.trim().isNotEmpty)
-                      Text(
-                        _me!.displayName!,
-                        style: TextStyle(
-                          color: AppColors.stoneBeigeColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    Text(
-                      '@${_me!.username}',
-                      style: TextStyle(
-                        color: AppColors.mossGreen,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 5),
+                Text(
+                  '@${_me!.username} \u00b7 ${l.hubLevel(level)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.label(9, t.accentStrong),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // Bio block — tap to edit.
-          InkWell(
-            onTap: _editBio,
-            borderRadius: BorderRadius.zero,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppTokens.current.card,
-                borderRadius: BorderRadius.zero,
-                border: Border.all(color: AppTokens.current.cardBorder),
-                boxShadow: AppShadows.card,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      hasBio ? bio : l.addABio,
-                      style: TextStyle(
-                        color: hasBio
-                            ? AppColors.stoneBeigeColor
-                            : AppColors.mossGreen,
-                        fontSize: 14,
-                        height: 1.4,
-                        fontStyle: hasBio ? FontStyle.normal : FontStyle.italic,
-                      ),
-                    ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: _editBio,
+                  child: Text(
+                    hasBio ? bio : l.addABio,
+                    textAlign: TextAlign.right,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.edit_outlined,
-                    color: AppColors.mossGreen,
-                    size: 18,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 18),
-          Text(
-            l.sharedGoals,
-            style: TextStyle(
-              color: AppColors.lightLeaf,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1,
-            ),
+          topRight: PixelIconButton(
+            icon: PixelIcons.pencil,
+            onPressed: _pickAvatar,
+            semanticLabel: l.profile,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

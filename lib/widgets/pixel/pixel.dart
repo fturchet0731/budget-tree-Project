@@ -18,4 +18,5 @@ export 'pixel_box.dart';
 export 'pixel_button.dart';
 export 'pixel_chip.dart';
 export 'pixel_header.dart';
+export 'pixel_scene.dart';
 export 'pixel_sprite.dart';

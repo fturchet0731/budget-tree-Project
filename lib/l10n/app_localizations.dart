@@ -5523,6 +5523,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a branch to add this expense.'**
   String get chooseBranchToContinue;
+
+  /// No description provided for @hubLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'LV.{n}'**
+  String hubLevel(int n);
+
+  /// No description provided for @hubStreakWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} WEEK STREAK'**
+  String hubStreakWeeks(int n);
+
+  /// No description provided for @profileStatTrees.
+  ///
+  /// In en, this message translates to:
+  /// **'TREES'**
+  String get profileStatTrees;
+
+  /// No description provided for @profileStatStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'STREAK'**
+  String get profileStatStreak;
+
+  /// No description provided for @profileStatSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVED'**
+  String get profileStatSaved;
+
+  /// No description provided for @profileSharedSaplings.
+  ///
+  /// In en, this message translates to:
+  /// **'SHARED SAPLINGS'**
+  String get profileSharedSaplings;
 }
 
 class _AppLocalizationsDelegate

@@ -3224,4 +3224,26 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get chooseBranchToContinue =>
       'Choisissez une branche pour ajouter cette dépense.';
+
+  @override
+  String hubLevel(int n) {
+    return 'NIV.$n';
+  }
+
+  @override
+  String hubStreakWeeks(int n) {
+    return 'SERIE DE $n SEM';
+  }
+
+  @override
+  String get profileStatTrees => 'ARBRES';
+
+  @override
+  String get profileStatStreak => 'SERIE';
+
+  @override
+  String get profileStatSaved => 'EPARGNE';
+
+  @override
+  String get profileSharedSaplings => 'POUSSES PARTAGEES';
 }
