@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/tree_health_labels.dart';
 import '../models/friendship_model.dart';
 import '../models/profile_model.dart';
 import '../services/auth_service.dart';
 import '../services/friends_service.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
+import '../services/tree_health_service.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_scrollbar.dart';
+import '../widgets/status_tree_view.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/skeleton.dart';
-import '../widgets/profile_avatar.dart';
 import 'auth/login_screen.dart';
 import 'friend_garden_screen.dart';
 
@@ -472,35 +476,73 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   Widget _friendTile(FriendSummary f) {
-    return _card(
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        leading: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            ProfileAvatar(profile: f.profile, size: 44),
-            Positioned(
-              right: -4,
-              bottom: -4,
-              child: Text(f.statusEmoji,
-                  style: const TextStyle(fontSize: 16)),
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final online = f.profile.isActive;
+    // A friend's avatar is their own tree — the same thing they see when they
+    // open the app, derived from the health score they publish.
+    final tier = TreeHealthService.tierFor((f.profile.healthScore ?? 50).toDouble());
+
+    return PixelBox(
+      margin: const EdgeInsets.only(bottom: 11),
+      padding: const EdgeInsets.all(9),
+      drop: AppDims.dropButton,
+      onTap: () => _openGarden(f),
+      semanticLabel: f.profile.label,
+      child: Row(
+        children: [
+          // Tree portrait in an inset well, ringed green while they're online.
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: t.accentTint,
+              border: Border.all(
+                color: online ? t.accent : t.cardBorder,
+                width: AppDims.borderThin,
+              ),
             ),
-          ],
-        ),
-        title: Text(
-          f.profile.label,
-          style: TextStyle(
-            color: AppColors.stoneBeigeColor,
-            fontWeight: FontWeight.bold,
+            child: StatusTreeView(spriteKey: tier.name, size: 52),
           ),
-        ),
-        subtitle: Text(
-          '@${f.profile.username} · '
-          '${AppLocalizations.of(context).sharedGoalsCount(f.sharedGoals.length)}',
-          style: TextStyle(color: AppColors.mossGreen),
-        ),
-        trailing: Icon(Icons.chevron_right, color: AppColors.mossGreen),
-        onTap: () => _openGarden(f),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  f.profile.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.display(17, t.textPrimary),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '${tier.label(l)} · @${f.profile.username}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.label(9, t.textSecondary),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  l.sharedGoalsCount(f.sharedGoals.length),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          if (online)
+            Container(
+              width: 11,
+              height: 11,
+              decoration: BoxDecoration(
+                color: t.accent,
+                border: Border.all(color: t.cardBorder, width: 2),
+              ),
+            ),
+        ],
       ),
     );
   }
