@@ -162,8 +162,12 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
               ],
             ),
           ),
+          // top:false — the scene already handles the status bar; this is only
+          // here so the last card clears the home indicator.
           Expanded(
-            child: AppScrollbar(
+            child: SafeArea(
+              top: false,
+              child: AppScrollbar(
               builder: (controller) => SingleChildScrollView(
                 controller: controller,
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
@@ -228,6 +232,7 @@ class _AcornHubScreenState extends State<AcornHubScreen> {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ],

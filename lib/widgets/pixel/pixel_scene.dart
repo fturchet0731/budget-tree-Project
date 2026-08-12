@@ -63,8 +63,15 @@ class PixelScene extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppTokens.of(context);
+    // The sky deliberately bleeds up behind the status bar — that's what makes
+    // the scene read as scenery rather than a header. The *controls* must not,
+    // so the band grows by the inset and everything pinned to its top is
+    // pushed below the clock, wifi, and battery. Handling it here fixes every
+    // scene screen at once; those screens must NOT wrap this in a SafeArea, or
+    // the sky would stop short of the top edge.
+    final topInset = MediaQuery.paddingOf(context).top;
     return SizedBox(
-      height: height,
+      height: height + topInset,
       child: ClipRect(
         child: Stack(
           children: [
@@ -120,7 +127,7 @@ class PixelScene extends StatelessWidget {
               ),
             if (onBack != null)
               Positioned(
-                top: 12,
+                top: 12 + topInset,
                 left: 12,
                 child: PixelIconButton(
                   icon: PixelIcons.back,
@@ -129,7 +136,7 @@ class PixelScene extends StatelessWidget {
                 ),
               ),
             if (topRight != null)
-              Positioned(top: 12, right: 12, child: topRight!),
+              Positioned(top: 12 + topInset, right: 12, child: topRight!),
           ],
         ),
       ),

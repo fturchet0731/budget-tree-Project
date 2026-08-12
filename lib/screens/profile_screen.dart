@@ -253,7 +253,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     return RefreshIndicator(
       onRefresh: _load,
-      child: AppScrollbar(
+      // top:false — PixelScene handles the status bar itself so the sky can
+      // bleed to the top edge; this only keeps the badge grid clear of the
+      // home indicator.
+      child: SafeArea(
+        top: false,
+        child: AppScrollbar(
         builder: (controller) => CustomScrollView(
           controller: controller,
           slivers: [
@@ -323,6 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               sliver: SliverToBoxAdapter(child: _badgeGrid()),
             ),
           ],
+        ),
         ),
       ),
     );
