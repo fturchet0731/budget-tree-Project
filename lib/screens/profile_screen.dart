@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
@@ -113,22 +111,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     }
-  }
-
-  /// Let the user pick a profile photo from the device gallery. The image is
-  /// resized/compressed on device (~256px JPEG) and stored inline on the
-  /// profile row, so friends see it with no extra infrastructure.
-  Future<void> _pickAvatar() async {
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 256,
-      maxHeight: 256,
-      imageQuality: 70,
-    );
-    if (picked == null) return;
-    final bytes = await picked.readAsBytes();
-    await ProfileService.instance.setAvatar(base64Encode(bytes));
-    await _load();
   }
 
   Future<void> _editBio() async {
@@ -461,11 +443,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-          ),
-          topRight: PixelIconButton(
-            icon: PixelIcons.pencil,
-            onPressed: _pickAvatar,
-            semanticLabel: l.profile,
           ),
         ),
       ],

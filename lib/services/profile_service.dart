@@ -158,16 +158,6 @@ class ProfileService {
     }).eq('id', _uid!);
   }
 
-  /// Update the user's profile picture (a small base64 JPEG resized on
-  /// device; pass null to clear it).
-  Future<void> setAvatar(String? avatarB64) async {
-    if (!isAvailable) return;
-    await SupabaseConfig.client.from(_table).update({
-      'avatar_b64': avatarB64,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', _uid!);
-  }
-
   /// Update the user's profile bio (pass null/blank to clear it).
   Future<void> setBio(String? bio) async {
     if (!isAvailable) return;

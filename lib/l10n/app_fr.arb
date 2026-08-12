@@ -982,5 +982,8 @@
   "leftLabel": "RESTE",
   "overLabel": "DEPASSE",
   "hubTileCaption": "{score}/100 · série de {streak} sem",
-  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}}
+  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}},
+  "partyTitle": "Équipe",
+  "partyCounts": "{friends} amis · {online} en ligne",
+  "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}}
 }

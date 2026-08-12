@@ -1062,5 +1062,8 @@
   "leftLabel": "LEFT",
   "overLabel": "OVER",
   "hubTileCaption": "{score}/100 · {streak} week streak",
-  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}}
+  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}},
+  "partyTitle": "Party",
+  "partyCounts": "{friends} friends · {online} online",
+  "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}}
 }

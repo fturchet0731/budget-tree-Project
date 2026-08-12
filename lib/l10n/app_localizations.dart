@@ -5583,6 +5583,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{score}/100 · {streak} week streak'**
   String hubTileCaption(int score, int streak);
+
+  /// No description provided for @partyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Party'**
+  String get partyTitle;
+
+  /// No description provided for @partyCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{friends} friends · {online} online'**
+  String partyCounts(int friends, int online);
 }
 
 class _AppLocalizationsDelegate

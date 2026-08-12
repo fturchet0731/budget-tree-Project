@@ -246,20 +246,25 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final online = _friends.where((f) => f.profile.isActive).length;
+    // "PARTY / 7 FRIENDS · 2 ONLINE" — the pixel header replaces the Material
+    // title bar so the screen opens like the rest of the world.
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: widget.onClose == null,
-        leading: widget.onClose == null
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: widget.onClose,
-              ),
-        title: Text(AppLocalizations.of(context).friends),
-        foregroundColor: AppColors.stoneBeigeColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            PixelHeader(
+              title: l.partyTitle,
+              strapline: _friends.isEmpty
+                  ? null
+                  : l.partyCounts(_friends.length, online),
+              onBack: widget.onClose ?? () => Navigator.of(context).maybePop(),
+            ),
+            Expanded(child: _body()),
+          ],
+        ),
       ),
-      body: SafeArea(child: _body()),
     );
   }
 
@@ -511,7 +516,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${tier.label(l)} · @${f.profile.username}',
+                  // Tier and score, the way the reference reads
+                  // ("RADIANT · 94"). A friend who has not published a score
+                  // yet just shows the tier.
+                  f.profile.healthScore == null
+                      ? tier.label(l).toUpperCase()
+                      : '${tier.label(l).toUpperCase()} · '
+                          '${f.profile.healthScore}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTheme.label(9, t.textSecondary),
@@ -526,15 +537,16 @@ class _FriendsScreenState extends State<FriendsScreen> {
               ],
             ),
           ),
-          if (online)
-            Container(
-              width: 11,
-              height: 11,
-              decoration: BoxDecoration(
-                color: t.accent,
-                border: Border.all(color: t.cardBorder, width: 2),
-              ),
+          // Presence dot is always drawn — green when online, muted when not —
+          // so the row's shape doesn't shift as friends come and go.
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: online ? t.accent : t.track,
+              border: Border.all(color: t.cardBorder, width: 2),
             ),
+          ),
         ],
       ),
     );

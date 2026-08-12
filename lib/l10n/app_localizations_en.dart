@@ -3231,4 +3231,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String hubTileCaption(int score, int streak) {
     return '$score/100 · $streak week streak';
   }
+
+  @override
+  String get partyTitle => 'Party';
+
+  @override
+  String partyCounts(int friends, int online) {
+    return '$friends friends · $online online';
+  }
 }

@@ -982,5 +982,8 @@
   "leftLabel": "QUEDA",
   "overLabel": "EXCEDIDO",
   "hubTileCaption": "{score}/100 · racha de {streak} sem",
-  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}}
+  "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}},
+  "partyTitle": "Grupo",
+  "partyCounts": "{friends} amigos · {online} en línea",
+  "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}}
 }
