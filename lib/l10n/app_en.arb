@@ -204,8 +204,6 @@
   "milestoneMature": "Mature",
 
   "edit": "Edit",
-  "walkThroughForest": "Walk through your forest",
-  "gridList": "Grid list",
   "removeTreeTitle": "Remove this tree?",
   "removeTreeBody": "\"{name}\" will be permanently removed from your forest.",
   "@removeTreeBody": { "placeholders": { "name": { "type": "String" } } },
@@ -1068,5 +1066,9 @@
   "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}},
   "requestsWaiting": "{count, plural, =1{1 request waiting} other{{count} requests waiting}}",
   "@requestsWaiting": {"placeholders": {"count": {"type": "int"}}},
-  "viewAction": "View"
+  "viewAction": "View",
+  "badgeEarnedOn": "Earned {date}",
+  "@badgeEarnedOn": {"placeholders": {"date": {"type": "String"}}},
+  "badgeLocked": "Not earned yet",
+  "dismiss": "Dismiss"
 }

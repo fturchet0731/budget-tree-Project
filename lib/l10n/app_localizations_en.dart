@@ -605,12 +605,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get edit => 'Edit';
 
   @override
-  String get walkThroughForest => 'Walk through your forest';
-
-  @override
-  String get gridList => 'Grid list';
-
-  @override
   String get removeTreeTitle => 'Remove this tree?';
 
   @override
@@ -3253,4 +3247,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewAction => 'View';
+
+  @override
+  String badgeEarnedOn(String date) {
+    return 'Earned $date';
+  }
+
+  @override
+  String get badgeLocked => 'Not earned yet';
+
+  @override
+  String get dismiss => 'Dismiss';
 }

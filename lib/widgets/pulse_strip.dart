@@ -33,6 +33,18 @@ class PulseStrip extends StatefulWidget {
 class PulseStripState extends State<PulseStrip> {
   PulseInfo _pulse = PulseInfo.none;
 
+  /// Nudges the user has waved away this session, keyed by what the nudge is
+  /// about. Deliberately **not** persisted: these are time-sensitive prompts
+  /// (a check-in that is due, a goal that needs watering), so dismissing one
+  /// should quiet it now, not bury it forever — it comes back next launch if
+  /// it still applies, and disappears on its own once it's actually done.
+  final Set<String> _dismissed = {};
+
+  /// Identity of the current nudge: kind plus subject, so answering one
+  /// check-in doesn't suppress the next.
+  String get _pulseId =>
+      '${_pulse.kind.name}:${_pulse.checkIn?.id ?? _pulse.goal?.id ?? ''}';
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +104,7 @@ class PulseStripState extends State<PulseStrip> {
   @override
   Widget build(BuildContext context) {
     if (_pulse.kind == PulseKind.none) return const SizedBox.shrink();
+    if (_dismissed.contains(_pulseId)) return const SizedBox.shrink();
     final l = AppLocalizations.of(context);
 
     final String title;
@@ -141,6 +154,8 @@ class PulseStripState extends State<PulseStrip> {
       actionLabel: l.pulseAccept.toUpperCase(),
       onAction: _open,
       onTap: _open,
+      onDismiss: () => setState(() => _dismissed.add(_pulseId)),
+      dismissLabel: l.dismiss,
       margin: const EdgeInsets.fromLTRB(14, 10, 14, 0),
     );
   }

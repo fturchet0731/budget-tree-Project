@@ -17,66 +17,10 @@ import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../widgets/category_picker.dart';
-import '../widgets/immersive_forest_view.dart';
 import '../widgets/info_button.dart';
 import '../widgets/pixel/pixel.dart';
 import '../tutorial/tutorial_content.dart';
 import 'budget_tree_screen.dart';
-
-enum ForestViewMode { immersive, grid }
-
-class _ViewModeToggle extends StatelessWidget {
-  final ForestViewMode mode;
-  final ValueChanged<ForestViewMode> onChange;
-  const _ViewModeToggle({required this.mode, required this.onChange});
-
-  @override
-  Widget build(BuildContext context) {
-    Widget pill(IconData icon, ForestViewMode m, String tip) {
-      final selected = mode == m;
-      return Tooltip(
-        message: tip,
-        child: GestureDetector(
-          onTap: () => onChange(m),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: selected ? AppTokens.current.card : Colors.transparent,
-              borderRadius: BorderRadius.zero,
-              boxShadow: selected ? AppShadows.pill : null,
-            ),
-            child: Icon(
-              icon,
-              size: 17,
-              color: selected
-                  ? AppTokens.current.accentStrong
-                  : AppTokens.current.textSecondary,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: AppTokens.current.canvasSoft,
-        borderRadius: BorderRadius.zero,
-        border: Border.all(color: AppTokens.current.cardBorder),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          pill(Icons.forest_outlined, ForestViewMode.immersive,
-              AppLocalizations.of(context).walkThroughForest),
-          pill(Icons.grid_view_rounded, ForestViewMode.grid,
-              AppLocalizations.of(context).gridList),
-        ],
-      ),
-    );
-  }
-}
 
 class ForestScreen extends StatefulWidget {
   const ForestScreen({super.key});
@@ -91,7 +35,6 @@ class _ForestScreenState extends State<ForestScreen> {
   String? _filterCategoryId;
   bool _loading = true;
   int? _expandedIndex;
-  ForestViewMode _mode = ForestViewMode.immersive;
 
   @override
   void initState() {
@@ -194,18 +137,8 @@ class _ForestScreenState extends State<ForestScreen> {
                   strapline: _loading
                       ? l.loadingEllipsis
                       : l.budgetTreesPlanted(_budgets.length),
-                  action: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_budgets.isNotEmpty)
-                        _ViewModeToggle(
-                          mode: _mode,
-                          onChange: (m) => setState(() => _mode = m),
-                        ),
-                      const SizedBox(width: 6),
-                      const SectionInfoButton(
-                          section: TutorialSection.forest),
-                    ],
+                  action: const SectionInfoButton(
+                    section: TutorialSection.forest,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -238,33 +171,7 @@ class _ForestScreenState extends State<ForestScreen> {
                                   onClear: () => setState(
                                       () => _filterCategoryId = null),
                                 )
-                              : AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 280),
-                              child: _mode == ForestViewMode.immersive
-                                  ? ImmersiveForestView(
-                                      key: const ValueKey('immersive'),
-                                      budgets: _filteredBudgets,
-                                      categoriesById: _categoriesById,
-                                      onTapTree: (b) {
-                                        Navigator.push(
-                                          context,
-                                          PageRouteBuilder(
-                                            transitionDuration:
-                                                const Duration(milliseconds: 500),
-                                            pageBuilder: (_, a, b2) =>
-                                                BudgetTreeScreen(budget: b),
-                                            transitionsBuilder:
-                                                (_, a, b2, child) =>
-                                                    FadeTransition(
-                                                        opacity: a,
-                                                        child: child),
-                                          ),
-                                        );
-                                      },
-                                      onEdit: _editBudget,
-                                      onDelete: _deleteBudget,
-                                    )
-                                  : ListView.builder(
+                              : ListView.builder(
                                       key: const ValueKey('grid'),
                                       padding: const EdgeInsets.fromLTRB(
                                           18, 0, 18, 32),
@@ -307,7 +214,6 @@ class _ForestScreenState extends State<ForestScreen> {
                                         );
                                       },
                                     ),
-                            ),
                 ),
               ],
             ),

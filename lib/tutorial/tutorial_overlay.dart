@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
-import '../theme/app_shadows.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
-import '../widgets/acorn_mascot.dart';
+import '../widgets/pixel/pixel.dart';
 import 'tutorial_content.dart';
 
 /// Plays the acorn's guide for a single [TutorialSection] as a dismissible
@@ -190,8 +190,6 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final acornSize = (media.size.width * 0.28).clamp(96.0, 150.0);
 
     final speakerLabel = widget.sectionTitle == null
         ? _step.speaker
@@ -268,21 +266,6 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                       ),
                     ],
                     const SizedBox(height: 10),
-                    // Acorn peeks up from the bottom-left as the guide.
-                    ScaleTransition(
-                      scale: CurvedAnimation(
-                          parent: _enter, curve: Curves.easeOutBack),
-                      alignment: Alignment.bottomLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: AcornMascot(
-                          size: acornSize,
-                          speaking: _typing,
-                          sway: !_typing,
-                          expression: _typing ? null : _step.expression,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -316,105 +299,71 @@ class _SpeechBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _BubbleTailPainter(),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: AppTokens.current.card,
-          borderRadius: BorderRadius.zero,
-          border: Border.all(color: AppTokens.current.cardBorder),
-          boxShadow: AppShadows.card,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Speaker name plate.
-            Row(
+    final t = AppTokens.of(context);
+    // Acorn's dialogue is a dark NPC panel, the same one the dashboard quest
+    // card and the hub's reflection use — the tutorial should look like the
+    // character talking to you, not like a help tooltip pasted over the game.
+    return PixelBox(
+      fill: t.panelDark,
+      border: t.panelDarkBorder,
+      drop: AppDims.dropButton,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(11),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const AcornPortrait(size: 44),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.eco, size: 15, color: AppColors.forestGreen),
-                const SizedBox(width: 6),
-                // Flexible + ellipsis so a long "Acorn • <section>" never
-                // overflows the name plate on a narrow screen.
-                Expanded(
-                  child: Text(
-                    speaker,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.pixelifySans(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: AppColors.barkBrown,
-                      letterSpacing: 0.4,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        speaker.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTheme.label(9, Conifer.c300, spacing: 1.0),
+                      ),
                     ),
+                    const SizedBox(width: 8),
+                    Text(
+                      progress,
+                      style: AppTheme.label(9, t.textTertiary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 7),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 56),
+                  child: Text(
+                    text,
+                    style: AppTheme.display(
+                      15,
+                      t.panelDarkText,
+                      weight: FontWeight.w400,
+                    ).copyWith(height: 1.35),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  progress,
-                  style: GoogleFonts.nunito(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.barkBrown.withValues(alpha: 0.5),
+                const SizedBox(height: 6),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: AnimatedOpacity(
+                    opacity: showContinue ? 1 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: TapContinueHint(hint: hint),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            // Constrain so long lines don't crowd the tail/continue row.
-            ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 56),
-              child: Text(
-                text,
-                style: GoogleFonts.nunito(
-                  fontSize: 17,
-                  height: 1.4,
-                  fontWeight: FontWeight.w600,
-                  color: AppTokens.current.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Align(
-              alignment: Alignment.centerRight,
-              child: AnimatedOpacity(
-                opacity: showContinue ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: TapContinueHint(hint: hint),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
-}
-
-/// Small downward triangle tail beneath the bubble, pointing at the acorn.
-class _BubbleTailPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final tailTop = size.height - 12;
-    final x = size.width * 0.16;
-    final path = Path()
-      ..moveTo(x - 14, tailTop)
-      ..lineTo(x + 14, tailTop)
-      ..lineTo(x - 4, tailTop + 16)
-      ..close();
-    canvas.drawPath(path, Paint()..color = AppTokens.current.cardBorder);
-    final inner = Path()
-      ..moveTo(x - 9, tailTop - 1)
-      ..lineTo(x + 9, tailTop - 1)
-      ..lineTo(x - 3, tailTop + 11)
-      ..close();
-    canvas.drawPath(inner, Paint()..color = AppTokens.current.card);
-  }
-
-  @override
-  bool shouldRepaint(_BubbleTailPainter old) => false;
 }
 
 /// The "tap to continue" affordance: hint text + blinking chevron. Shared by

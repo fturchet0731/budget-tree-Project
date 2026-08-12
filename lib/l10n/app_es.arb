@@ -184,8 +184,6 @@
   "milestoneMature": "Maduro",
 
   "edit": "Editar",
-  "walkThroughForest": "Recorre tu bosque",
-  "gridList": "Lista en cuadrícula",
   "removeTreeTitle": "¿Eliminar este árbol?",
   "removeTreeBody": "«{name}» se eliminará permanentemente de tu bosque.",
   "yourForest": "Tu bosque",
@@ -988,5 +986,9 @@
   "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}},
   "requestsWaiting": "{count, plural, =1{1 solicitud pendiente} other{{count} solicitudes pendientes}}",
   "@requestsWaiting": {"placeholders": {"count": {"type": "int"}}},
-  "viewAction": "Ver"
+  "viewAction": "Ver",
+  "badgeEarnedOn": "Conseguido el {date}",
+  "@badgeEarnedOn": {"placeholders": {"date": {"type": "String"}}},
+  "badgeLocked": "Aún no conseguido",
+  "dismiss": "Descartar"
 }

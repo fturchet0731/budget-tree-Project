@@ -135,6 +135,13 @@ class AcornDialogue extends StatelessWidget {
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? margin;
 
+  /// Shows a small dismiss cross in the panel's top-right. Acorn's nudges are
+  /// suggestions, not obligations, so the player must be able to wave one away.
+  final VoidCallback? onDismiss;
+
+  /// Tooltip / semantic label for the dismiss control.
+  final String? dismissLabel;
+
   const AcornDialogue({
     super.key,
     required this.speaker,
@@ -143,6 +150,8 @@ class AcornDialogue extends StatelessWidget {
     this.onAction,
     this.onTap,
     this.margin,
+    this.onDismiss,
+    this.dismissLabel,
   });
 
   @override
@@ -165,9 +174,34 @@ class AcornDialogue extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  speaker,
-                  style: AppTheme.label(9, Conifer.c300, spacing: 1.0),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        speaker,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTheme.label(9, Conifer.c300, spacing: 1.0),
+                      ),
+                    ),
+                    if (onDismiss != null)
+                      Semantics(
+                        button: true,
+                        label: dismissLabel,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: onDismiss,
+                          child: Padding(
+                            // Padding rather than a bigger glyph: keeps the
+                            // 44px tap target without a heavy X in the corner.
+                            padding: const EdgeInsets.only(
+                                left: 12, bottom: 12, right: 2),
+                            child: Icon(Icons.close,
+                                size: 15, color: t.panelDarkText),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 5),
                 ConstrainedBox(

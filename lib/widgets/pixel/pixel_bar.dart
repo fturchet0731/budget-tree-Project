@@ -42,6 +42,12 @@ class PixelBar extends StatelessWidget {
 
     return Container(
       height: height,
+      // width is load-bearing: the Stack below sizes to its only non-positioned
+      // child, which is the *fill*. Without this the whole bar collapses to the
+      // width of its own fill wherever the parent doesn't constrain it (a
+      // Column with crossAxisAlignment.start, say) — so an empty bar rendered
+      // as nothing at all instead of an empty track.
+      width: double.infinity,
       decoration: BoxDecoration(
         color: t.track,
         border: Border.all(color: t.cardBorder, width: 2),

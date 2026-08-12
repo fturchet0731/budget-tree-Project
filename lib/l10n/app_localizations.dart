@@ -1132,18 +1132,6 @@ abstract class AppLocalizations {
   /// **'Edit'**
   String get edit;
 
-  /// No description provided for @walkThroughForest.
-  ///
-  /// In en, this message translates to:
-  /// **'Walk through your forest'**
-  String get walkThroughForest;
-
-  /// No description provided for @gridList.
-  ///
-  /// In en, this message translates to:
-  /// **'Grid list'**
-  String get gridList;
-
   /// No description provided for @removeTreeTitle.
   ///
   /// In en, this message translates to:
@@ -5607,6 +5595,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View'**
   String get viewAction;
+
+  /// No description provided for @badgeEarnedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned {date}'**
+  String badgeEarnedOn(String date);
+
+  /// No description provided for @badgeLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not earned yet'**
+  String get badgeLocked;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
 }
 
 class _AppLocalizationsDelegate

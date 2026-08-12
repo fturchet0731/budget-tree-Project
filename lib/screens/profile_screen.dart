@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
+import '../l10n/achievement_labels.dart';
 import '../models/achievement.dart';
 import '../models/profile_model.dart';
 import '../services/achievement_service.dart';
@@ -391,10 +392,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fill: _unlocked.containsKey(a.id) ? t.accentTint : t.canvasSoft,
               alignment: Alignment.center,
               semanticLabel: a.title,
-              child: Icon(a.icon, size: 26, color: t.textPrimary),
+              // Every badge is tappable: a locked one has to be able to say
+              // what it wants from you, or the shelf is just wallpaper.
+              onTap: () => _showBadge(a),
+              child: Icon(
+                _unlocked.containsKey(a.id) ? a.icon : Icons.lock_outline,
+                size: 26,
+                color: t.textPrimary,
+              ),
             ),
           ),
       ],
+    );
+  }
+
+  /// What this badge is, whether it's earned, and when. Locked badges show the
+  /// requirement so the shelf reads as a to-do list rather than decoration.
+  Future<void> _showBadge(Achievement a) async {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final earnedAt = _unlocked[a.id];
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(14),
+        child: PixelBox(
+          padding: const EdgeInsets.all(AppDims.s16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  PixelBox(
+                    fill: earnedAt != null ? t.accentTint : t.canvasSoft,
+                    drop: AppDims.dropSmall,
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      earnedAt != null ? a.icon : Icons.lock_outline,
+                      size: 28,
+                      color: t.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: AppDims.s12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          a.localizedTitle(l),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          earnedAt != null
+                              ? l.badgeEarnedOn(
+                                  MaterialLocalizations.of(context)
+                                      .formatShortDate(earnedAt),
+                                )
+                              : l.badgeLocked,
+                          style: AppTheme.label(
+                            9,
+                            earnedAt != null ? t.accentStrong : t.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDims.s12),
+              Text(
+                a.localizedDescription(l),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppDims.s16),
+              PixelButton(
+                label: l.close,
+                tone: PixelTone.neutral,
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

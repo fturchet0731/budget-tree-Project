@@ -613,12 +613,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get edit => 'Modifier';
 
   @override
-  String get walkThroughForest => 'Parcourir votre forêt';
-
-  @override
-  String get gridList => 'Liste en grille';
-
-  @override
   String get removeTreeTitle => 'Supprimer cet arbre ?';
 
   @override
@@ -3282,4 +3276,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get viewAction => 'Voir';
+
+  @override
+  String badgeEarnedOn(String date) {
+    return 'Obtenu le $date';
+  }
+
+  @override
+  String get badgeLocked => 'Pas encore obtenu';
+
+  @override
+  String get dismiss => 'Masquer';
 }
