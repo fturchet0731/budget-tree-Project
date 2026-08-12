@@ -372,20 +372,13 @@ class _BudgetCard extends StatelessWidget {
                           ),
                         ],
                         const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.zero,
-                          child: LinearProgressIndicator(
-                            value: allocPct,
-                            minHeight: 7,
-                            backgroundColor: AppColors.soilMid,
-                            valueColor: AlwaysStoppedAnimation(
-                              isOver
-                                  ? AppColors.dangerRed
-                                  : allocPct > 0.85
-                                      ? AppColors.warningAmber
-                                      : AppColors.forestGreen,
-                            ),
-                          ),
+                        PixelBar(
+                          value: allocPct,
+                          height: 9,
+                          over: isOver,
+                          tone: allocPct > 0.85
+                              ? PixelTone.gold
+                              : PixelTone.accent,
                         ),
                         const SizedBox(height: 4),
                         Row(
@@ -483,16 +476,7 @@ class _BudgetCard extends StatelessWidget {
                                               ],
                                             ),
                                             const SizedBox(height: 4),
-                                            ClipRRect(
-                                              borderRadius: BorderRadius.zero,
-                                              child: LinearProgressIndicator(
-                                                value: pct,
-                                                minHeight: 5,
-                                                backgroundColor: AppColors.soilMid,
-                                                valueColor: AlwaysStoppedAnimation(
-                                                    AppColors.forestGreen),
-                                              ),
-                                            ),
+                                            PixelBar(value: pct, height: 7),
                                           ],
                                         ),
                                       ),

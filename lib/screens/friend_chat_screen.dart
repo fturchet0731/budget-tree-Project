@@ -209,13 +209,8 @@ class _MessageBubble extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: mine ? t.accent : t.card,
-          border: mine ? null : Border.all(color: t.cardBorder),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.zero,
-            topRight: Radius.zero,
-            bottomLeft: Radius.circular(mine ? 18 : 6),
-            bottomRight: Radius.circular(mine ? 6 : 18),
-          ),
+          border: Border.all(color: t.cardBorder, width: 2),
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           message.body,

@@ -142,28 +142,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: FilterChip(
+                      child: PixelChip(
+                        label: l.completedFilter(_completedCount),
                         selected: _completedOnly,
-                        onSelected: (v) => setState(() => _completedOnly = v),
-                        showCheckmark: false,
-                        avatar: Icon(
-                          Icons.emoji_events,
-                          size: 16,
-                          color: _completedOnly
-                              ? const Color(0xFF5C4407)
-                              : const Color(0xFFBA8514),
-                        ),
-                        label: Text(l.completedFilter(_completedCount)),
-                        labelStyle: GoogleFonts.nunito(
-                          color: _completedOnly
-                              ? const Color(0xFF5C4407)
-                              : AppColors.stoneBeigeColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.5,
-                        ),
-                        backgroundColor: AppTokens.current.canvasSoft,
-                        selectedColor: const Color(0xFFFFE082),
-                        side: BorderSide(color: AppTokens.current.cardBorder),
+                        onTap: () =>
+                            setState(() => _completedOnly = !_completedOnly),
                       ),
                     ),
                   ),
@@ -491,16 +474,10 @@ class _GoalCardState extends State<_GoalCard> {
             ],
           ),
             const SizedBox(height: 5),
-            ClipRRect(
-              borderRadius: BorderRadius.zero,
-              child: LinearProgressIndicator(
-                value: goal.progress,
-                minHeight: 6,
-                backgroundColor: t.accentSoft,
-                valueColor: AlwaysStoppedAnimation(
-                  complete ? const Color(0xFFE3B93F) : t.accent,
-                ),
-              ),
+            PixelBar(
+              value: goal.progress,
+              height: 10,
+              tone: complete ? PixelTone.gold : PixelTone.accent,
             ),
             const SizedBox(height: 4),
             Text(

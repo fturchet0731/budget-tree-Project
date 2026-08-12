@@ -27,7 +27,7 @@ import '../widgets/achievements_sheet.dart';
 import '../widgets/category_picker.dart';
 import '../widgets/celebration_overlay.dart';
 import '../widgets/sapling_view.dart';
-import '../widgets/savings_thermometer.dart';
+import '../widgets/ui/segmented_choice.dart' show PixelSwitch;
 
 class GoalDetailScreen extends StatefulWidget {
   final Goal goal;
@@ -247,15 +247,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
               Wrap(
                 spacing: 8,
                 children: [25, 50, 100, 250].map((amount) {
-                  return ActionChip(
-                    label: Text('+\$$amount'),
-                    onPressed: () {
+                  return PixelChip(
+                    label: '+\$$amount',
+                    selected: false,
+                    onTap: () {
                       final cur = double.tryParse(ctrl.text) ?? 0;
                       ctrl.text = (cur + amount).toStringAsFixed(2);
                     },
-                    backgroundColor: AppTokens.current.canvasSoft,
-                    side: BorderSide(color: AppTokens.current.cardBorder),
-                    labelStyle: TextStyle(color: AppColors.stoneBeigeColor),
                   );
                 }).toList(),
               ),
@@ -770,23 +768,15 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                             ),
                           ),
                         ),
-                      // Savings thermometer — fills as money accumulates
-                      // toward the target, mirroring the sapling's growth on a
-                      // precise gauge.
+                      // Progress badge, top-right of the hero: tier for an
+                      // uncapped goal, percent grown otherwise. The sapling
+                      // itself is the growth gauge; the striped bar below the
+                      // fold carries the precise reading.
                       Positioned(
                         right: 12,
                         top: 16,
                         child: Column(
                           children: [
-                            SavingsThermometer(
-                              fill: _displayedProgress,
-                              color: complete
-                                  ? const Color(0xFFBA8514)
-                                  : (_category != null
-                                        ? Color(_category!.colorValue)
-                                        : AppColors.forestGreen),
-                            ),
-                            const SizedBox(height: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -898,18 +888,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                       ],
                     ),
                     const SizedBox(height: 14),
-                    ClipRRect(
-                      borderRadius: BorderRadius.zero,
-                      child: LinearProgressIndicator(
-                        value: _displayedProgress,
-                        minHeight: 12,
-                        backgroundColor: AppColors.soilMid,
-                        valueColor: AlwaysStoppedAnimation(
-                          complete
-                              ? const Color(0xFFBA8514)
-                              : AppColors.forestGreen,
-                        ),
-                      ),
+                    PixelBar(
+                      value: _displayedProgress,
+                      height: 14,
+                      tone: complete ? PixelTone.gold : PixelTone.accent,
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -971,7 +953,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen>
                               ),
                             ),
                           ),
-                          Switch(
+                          PixelSwitch(
                             value: _goal.sharedWithFriends,
                             onChanged: _toggleShared,
                           ),

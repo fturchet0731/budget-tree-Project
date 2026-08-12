@@ -11,7 +11,7 @@ import '../theme/app_tokens.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import '../widgets/sapling_view.dart';
-import '../widgets/savings_thermometer.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/ui/pressable.dart';
 
 /// Read-only view of a friend's shared goal. It mirrors the layout of the
@@ -221,15 +221,6 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                       top: 16,
                       child: Column(
                         children: [
-                          SavingsThermometer(
-                            fill: progress,
-                            color: complete
-                                ? const Color(0xFFBA8514)
-                                : (goal.leafColorValue != null
-                                      ? Color(goal.leafColorValue!)
-                                      : AppColors.forestGreen),
-                          ),
-                          const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -338,18 +329,10 @@ class _FriendGoalScreenState extends State<FriendGoalScreen> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  ClipRRect(
-                    borderRadius: BorderRadius.zero,
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 12,
-                      backgroundColor: AppColors.soilMid,
-                      valueColor: AlwaysStoppedAnimation(
-                        complete
-                            ? const Color(0xFFBA8514)
-                            : AppColors.forestGreen,
-                      ),
-                    ),
+                  PixelBar(
+                    value: progress,
+                    height: 14,
+                    tone: complete ? PixelTone.gold : PixelTone.accent,
                   ),
                   const SizedBox(height: 6),
                   Row(

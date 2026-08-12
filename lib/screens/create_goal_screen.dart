@@ -29,7 +29,9 @@ import '../widgets/ui/app_card.dart' show AppCard;
 import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/step_progress.dart';
 import '../widgets/category_picker.dart';
+import '../widgets/pixel/pixel.dart';
 import '../widgets/sapling_view.dart';
+import '../widgets/ui/segmented_choice.dart' show PixelSwitch;
 
 class CreateGoalScreen extends StatefulWidget {
   const CreateGoalScreen({super.key});
@@ -1611,19 +1613,10 @@ class _WateringStep extends StatelessWidget {
                         runSpacing: 8,
                         children: [
                           for (final a in result!.alternativeDates)
-                            ActionChip(
-                              backgroundColor: AppTokens.current.canvasSoft,
-                              side: BorderSide(
-                                color: AppTokens.current.cardBorder,
-                              ),
-                              label: Text(
-                                mat.formatShortDate(a.date),
-                                style: TextStyle(
-                                  color: AppColors.stoneBeigeColor,
-                                  fontSize: 11.5,
-                                ),
-                              ),
-                              onPressed: () => onApplyDate(a.date),
+                            PixelChip(
+                              label: mat.formatShortDate(a.date),
+                              selected: false,
+                              onTap: () => onApplyDate(a.date),
                             ),
                         ],
                       ),
@@ -1674,7 +1667,7 @@ class _WateringStep extends StatelessWidget {
                   ),
                 ),
               ),
-              Switch(value: remind, onChanged: onRemindChanged),
+              PixelSwitch(value: remind, onChanged: onRemindChanged),
             ],
           ),
         ),

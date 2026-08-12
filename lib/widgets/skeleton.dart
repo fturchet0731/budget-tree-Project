@@ -51,7 +51,7 @@ class SkeletonBox extends StatelessWidget {
     super.key,
     this.width,
     required this.height,
-    this.radius = 14,
+    this.radius = 0,
   });
 
   final double? width;

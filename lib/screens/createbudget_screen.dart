@@ -20,6 +20,7 @@ import '../widgets/allocation_plan_card.dart';
 import '../widgets/rhythm_picker.dart';
 import '../widgets/app_scrollbar.dart';
 import '../widgets/info_button.dart';
+import '../widgets/pixel/pixel.dart';
 import '../theme/app_shadows.dart';
 import '../widgets/ui/app_buttons.dart';
 import '../widgets/ui/app_card.dart' show AppCard;
@@ -2018,11 +2019,9 @@ class _SurveyProgress extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.zero,
           child: SizedBox(
-            height: 5,
-            child: LinearProgressIndicator(
+            child: PixelBar(
               value: completed / total,
-              backgroundColor: AppColors.soilMid,
-              valueColor: AlwaysStoppedAnimation(AppColors.forestGreen),
+              height: 7,
             ),
           ),
         ),
@@ -2890,20 +2889,11 @@ class _BudgetBar extends StatelessWidget {
         ? (totalAllocated / totalIncome).clamp(0.0, 1.0)
         : 0.0;
     final overBudget = totalAllocated > totalIncome;
-    return ClipRRect(
-      borderRadius: BorderRadius.zero,
-      child: LinearProgressIndicator(
-        value: pct,
-        minHeight: 10,
-        backgroundColor: AppColors.soilMid,
-        valueColor: AlwaysStoppedAnimation(
-          overBudget
-              ? AppColors.dangerRed
-              : pct > 0.85
-              ? AppColors.warningAmber
-              : AppColors.forestGreen,
-        ),
-      ),
+    return PixelBar(
+      value: pct,
+      height: 12,
+      over: overBudget,
+      tone: pct > 0.85 ? PixelTone.gold : PixelTone.accent,
     );
   }
 }

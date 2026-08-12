@@ -1704,11 +1704,9 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   const SizedBox(height: 14),
                   ClipRRect(
                     borderRadius: BorderRadius.zero,
-                    child: LinearProgressIndicator(
+                    child: PixelBar(
                       value: widget.budget.percentageFor(cat),
-                      minHeight: 12,
-                      backgroundColor: AppColors.soilMid,
-                      valueColor: AlwaysStoppedAnimation(AppColors.forestGreen),
+                      height: 12,
                     ),
                   ),
                   const SizedBox(height: 6),
