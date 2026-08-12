@@ -2180,7 +2180,10 @@ class _TreeStatStrip extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 14),
       padding: EdgeInsets.zero,
       drop: AppDims.dropSmall,
-      child: Row(
+      // Same rule as the profile's stat blocks: stretch needs a bounded
+      // height, and a PixelBox sizes to its child, so wrap it.
+      child: IntrinsicHeight(
+        child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           cell(
@@ -2200,6 +2203,7 @@ class _TreeStatStrip extends StatelessWidget {
             last: true,
           ),
         ],
+        ),
       ),
     );
   }

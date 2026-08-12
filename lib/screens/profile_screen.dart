@@ -351,15 +351,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        block(l.profileStatTrees, '$_treeCount'),
-        const SizedBox(width: AppDims.s8),
-        block(l.profileStatStreak, '${_health.currentStreak}'),
-        const SizedBox(width: AppDims.s8),
-        block(l.profileStatSaved, _shortMoney(_totalSaved)),
-      ],
+    // IntrinsicHeight is load-bearing, not decoration: CrossAxisAlignment
+    // .stretch needs a bounded height, and this Row sits in a
+    // SliverToBoxAdapter, which offers unbounded height. Without it the row
+    // throws on every frame and the whole profile renders blank.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          block(l.profileStatTrees, '$_treeCount'),
+          const SizedBox(width: AppDims.s8),
+          block(l.profileStatStreak, '${_health.currentStreak}'),
+          const SizedBox(width: AppDims.s8),
+          block(l.profileStatSaved, _shortMoney(_totalSaved)),
+        ],
+      ),
     );
   }
 
