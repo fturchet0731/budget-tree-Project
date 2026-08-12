@@ -12,6 +12,7 @@ import '../services/budget_repository.dart';
 import '../services/category_repository.dart';
 import '../services/goal_repository.dart';
 import '../services/profile_service.dart';
+import '../services/streak_service.dart';
 import '../services/tree_health_service.dart';
 import '../theme/app_dims.dart';
 import '../theme/app_theme.dart';
@@ -53,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   TreeHealth _health = TreeHealth.fresh;
   int _treeCount = 0;
+  int _streakWeeks = 0;
   double _totalSaved = 0;
   Map<String, DateTime> _unlocked = const {};
 
@@ -85,16 +87,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           await GoalRepository.update(g);
         }
       }
-      // Save-file stats for the hero and the trophy shelf.
+      // Save-file stats for the hero and the trophy shelf. All three describe
+      // the saving journey, computed from the same sources the rest of the app
+      // uses so the profile can never disagree with another screen:
+      //   TREES  = planted budgets (identical to the dashboard's counter),
+      //   STREAK = weeks saving in a row (the same weekly streak the dashboard
+      //            Acorn card shows — not the hub's separate check-in streak),
+      //   SAVED  = current total across every sapling.
       final health = await TreeHealthService.current();
       final budgets = await BudgetRepository.loadAll();
       final allGoals = await GoalRepository.loadAll();
       final unlocked = await AchievementService.loadUnlocked();
       final saved = allGoals.fold<double>(0, (a, g) => a + g.currentAmount);
+      final streak = StreakService.weeklyStreak(allGoals);
       if (!mounted) return;
       setState(() {
         _health = health;
         _treeCount = budgets.where((b) => b.savedAt != null).length;
+        _streakWeeks = streak.currentWeeks;
         _totalSaved = saved;
         _unlocked = unlocked;
       });
@@ -362,7 +372,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           block(l.profileStatTrees, '$_treeCount'),
           const SizedBox(width: AppDims.s8),
-          block(l.profileStatStreak, '${_health.currentStreak}'),
+          block(l.profileStatStreak, '$_streakWeeks'),
           const SizedBox(width: AppDims.s8),
           block(l.profileStatSaved, _shortMoney(_totalSaved)),
         ],

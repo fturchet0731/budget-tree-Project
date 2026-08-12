@@ -186,38 +186,42 @@ class _HomeScreenState extends State<HomeScreen>
                   alignment: Alignment.bottomCenter,
                   child: PixelGround(height: 62),
                 ),
-                // Tree + Acorn seated on the ground line.
+                // The tree, planted: its base sinks into the grass band rather
+                // than resting on top of it, so it reads as rooted in the
+                // ground rather than standing on it.
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 34,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      StatusTreeView(
-                        spriteKey: _heroSpriteKey,
-                        size: treeSize,
-                      ),
-                      AnimatedBuilder(
-                        animation: _idle,
-                        builder: (context, child) {
-                          final bob = AppSettings.instance.motionFull
-                              ? math.sin(_idle.value * math.pi * 8) * 3
-                              : 0.0;
-                          return Transform.translate(
-                            offset: Offset(0, bob),
-                            child: child,
-                          );
-                        },
-                        child: const PixelSpriteSheet(
-                          asset: PixelIcons.acorn,
-                          size: 56,
-                          frames: 2,
-                          period: Duration(milliseconds: 3400),
-                        ),
-                      ),
-                    ],
+                  bottom: 46,
+                  child: Center(
+                    child: StatusTreeView(
+                      spriteKey: _heroSpriteKey,
+                      size: treeSize,
+                    ),
+                  ),
+                ),
+                // Acorn floats in the sky beside the canopy, drifting up and
+                // down on a slow sine rather than sitting on the ground.
+                Positioned(
+                  right: size.width * 0.14,
+                  bottom: sceneH * 0.46,
+                  child: AnimatedBuilder(
+                    animation: _idle,
+                    builder: (context, child) {
+                      final float = AppSettings.instance.motionFull
+                          ? math.sin(_idle.value * math.pi * 2) * 9
+                          : 0.0;
+                      return Transform.translate(
+                        offset: Offset(0, float),
+                        child: child,
+                      );
+                    },
+                    child: const PixelSpriteSheet(
+                      asset: PixelIcons.acorn,
+                      size: 52,
+                      frames: 2,
+                      period: Duration(milliseconds: 3400),
+                    ),
                   ),
                 ),
                 // Hard ink line closing the scene off from the menu below.
