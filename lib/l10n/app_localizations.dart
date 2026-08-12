@@ -5613,6 +5613,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dismiss'**
   String get dismiss;
+
+  /// No description provided for @statusMaxLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max level'**
+  String get statusMaxLevel;
+
+  /// No description provided for @statusXpToNext.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} XP to {tier}'**
+  String statusXpToNext(int points, String tier);
+
+  /// No description provided for @statusDaysToNext.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day to {tier}} other{{days} days to {tier}}}'**
+  String statusDaysToNext(int days, String tier);
 }
 
 class _AppLocalizationsDelegate

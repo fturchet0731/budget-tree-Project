@@ -3258,4 +3258,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dismiss => 'Dismiss';
+
+  @override
+  String get statusMaxLevel => 'Max level';
+
+  @override
+  String statusXpToNext(int points, String tier) {
+    return '$points XP to $tier';
+  }
+
+  @override
+  String statusDaysToNext(int days, String tier) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days to $tier',
+      one: '1 day to $tier',
+    );
+    return '$_temp0';
+  }
 }

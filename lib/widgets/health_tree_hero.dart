@@ -129,9 +129,10 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 5),
-                        // The HP bar: consistency score out of 100.
+                        // EXP bar: progress into this tier toward the next
+                        // tree, so the meter always has somewhere to go.
                         PixelBar(
-                          value: _health.isEmpty ? 0 : _health.score / 100,
+                          value: _health.isEmpty ? 0 : _health.level.fraction,
                           height: 12,
                         ),
                         const SizedBox(height: 4),
@@ -168,16 +169,10 @@ class HealthTreeHeroState extends State<HealthTreeHero> {
 
   String _subtitle(AppLocalizations l) {
     if (_health.isEmpty) return l.hubTreeFreshSub;
-    // The reference prints score and streak together on one line
-    // ("78/100 · 5 week streak") rather than choosing between them.
-    if (_health.currentStreak > 0) {
-      return l.hubTileCaption(_health.score.round(), _health.currentStreak);
-    }
-    if (_health.showsPrestige && _health.prestigeDays >= 1) {
-      return l.hubPrestigeDays(_health.prestigeDays.floor());
-    }
-    if (_health.missedRecent > 0) return l.hubMissedSub(_health.missedRecent);
-    return l.hubScoreSub(_health.score.round());
+    // The caption names how close the next tree is, so it agrees with the EXP
+    // bar above it rather than reporting an absolute score the bar no longer
+    // shows ("12 XP to Radiant", "5 days to Blossoming", "Max level").
+    return _health.level.toNextLabel(l);
   }
 }
 

@@ -990,5 +990,10 @@
   "badgeEarnedOn": "Conseguido el {date}",
   "@badgeEarnedOn": {"placeholders": {"date": {"type": "String"}}},
   "badgeLocked": "Aún no conseguido",
-  "dismiss": "Descartar"
+  "dismiss": "Descartar",
+  "statusMaxLevel": "Nivel máximo",
+  "statusXpToNext": "{points} XP a {tier}",
+  "@statusXpToNext": {"placeholders": {"points": {"type": "int"}, "tier": {"type": "String"}}},
+  "statusDaysToNext": "{days, plural, =1{1 día a {tier}} other{{days} días a {tier}}}",
+  "@statusDaysToNext": {"placeholders": {"days": {"type": "int"}, "tier": {"type": "String"}}}
 }

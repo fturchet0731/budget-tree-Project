@@ -56,3 +56,15 @@ extension TreeHealthStatusLabel on TreeHealth {
   String statusLabel(AppLocalizations l) =>
       showsPrestige ? earnedPrestige!.label(l) : tier.label(l);
 }
+
+/// The caption beside the status EXP bar: how close the next tree is.
+/// "12 XP TO RADIANT" / "5 DAYS TO BLOSSOMING" / "MAX LEVEL".
+extension LevelProgressLabel on LevelProgress {
+  String toNextLabel(AppLocalizations l) {
+    if (atMax) return l.statusMaxLevel;
+    final name = nextPrestige?.label(l) ?? nextTier!.label(l);
+    return inDays
+        ? l.statusDaysToNext(toNext, name)
+        : l.statusXpToNext(toNext, name);
+  }
+}

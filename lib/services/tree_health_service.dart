@@ -130,6 +130,88 @@ class TreeHealth {
   /// `assets/status_trees/<key>.png`.
   String get spriteKey =>
       showsPrestige ? earnedPrestige!.name : tier.name;
+
+  /// Progress toward the next of the sixteen levels — the data behind the
+  /// status EXP bar. A per-level bar (how far into *this* tier you are) tells
+  /// you how close the next tree is far better than an absolute score meter,
+  /// which barely moves near the top.
+  ///
+  /// It threads the whole ladder: within a score band it fills by score, at
+  /// radiant it fills by days held toward the first prestige tree, within the
+  /// prestige tiers it fills by days toward the next, and it caps at ruby.
+  LevelProgress get level {
+    // Lower bound of each score tier, parallel to TreeHealthTier.values.
+    const starts = [0, 13, 26, 39, 52, 65, 78, 90];
+
+    if (showsPrestige) {
+      final cur = earnedPrestige!;
+      final values = PrestigeTier.values;
+      if (cur.index >= values.length - 1) return const LevelProgress.max();
+      final next = values[cur.index + 1];
+      final span = next.days - cur.days;
+      return LevelProgress(
+        fraction: span <= 0
+            ? 1
+            : ((prestigeDays - cur.days) / span).clamp(0.0, 1.0),
+        toNext: (next.days - prestigeDays).ceil().clamp(0, 1 << 30),
+        inDays: true,
+        nextPrestige: next,
+      );
+    }
+
+    if (tier == TreeHealthTier.radiant) {
+      // Radiant with no prestige yet: the next level is the first prestige
+      // tree, earned by cumulative days held at 90+.
+      final target = PrestigeTier.blossoming.days;
+      return LevelProgress(
+        fraction: (prestigeDays / target).clamp(0.0, 1.0),
+        toNext: (target - prestigeDays).ceil().clamp(0, 1 << 30),
+        inDays: true,
+        nextPrestige: PrestigeTier.blossoming,
+      );
+    }
+
+    final i = tier.index;
+    final start = starts[i];
+    final nextStart = starts[i + 1];
+    return LevelProgress(
+      fraction: ((score - start) / (nextStart - start)).clamp(0.0, 1.0),
+      toNext: (nextStart - score).ceil().clamp(0, 1 << 30),
+      inDays: false,
+      nextTier: TreeHealthTier.values[i + 1],
+    );
+  }
+}
+
+/// How close a [TreeHealth] is to its next of the sixteen levels.
+///
+/// [fraction] fills the EXP bar; [toNext] is how much is left — score points
+/// below radiant, or days held at 90+ within the prestige climb ([inDays]
+/// says which). Exactly one of [nextTier] / [nextPrestige] names the next tree,
+/// unless [atMax] (ruby, the top of the ladder).
+class LevelProgress {
+  final double fraction;
+  final int toNext;
+  final bool inDays;
+  final bool atMax;
+  final TreeHealthTier? nextTier;
+  final PrestigeTier? nextPrestige;
+
+  const LevelProgress({
+    required this.fraction,
+    required this.toNext,
+    required this.inDays,
+    this.nextTier,
+    this.nextPrestige,
+  }) : atMax = false;
+
+  const LevelProgress.max()
+      : fraction = 1,
+        toNext = 0,
+        inDays = false,
+        atMax = true,
+        nextTier = null,
+        nextPrestige = null;
 }
 
 /// Turns the check-in ledger into a single consistency signal.

@@ -280,14 +280,17 @@ class _HealthCard extends StatelessWidget {
           ),
           if (!health.isEmpty) ...[
             const SizedBox(height: 9),
-            PixelBar(value: health.fraction, height: 16),
+            // EXP bar: how far into this tier you are, toward the next tree.
+            PixelBar(value: health.level.fraction, height: 16),
           ],
           const SizedBox(height: 9),
           Text(
             health.isEmpty
                 ? l.hubTreeFreshSub
-                : l.hubScoreSub(health.score.round()),
-            style: Theme.of(context).textTheme.bodySmall,
+                : health.level.toNextLabel(l),
+            style: health.isEmpty
+                ? Theme.of(context).textTheme.bodySmall
+                : AppTheme.label(10, t.accentStrong),
           ),
           if (health.showsPrestige && health.prestigeDays >= 1) ...[
             const SizedBox(height: 4),
