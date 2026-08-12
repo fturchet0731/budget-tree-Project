@@ -5595,6 +5595,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{friends} friends · {online} online'**
   String partyCounts(int friends, int online);
+
+  /// No description provided for @requestsWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request waiting} other{{count} requests waiting}}'**
+  String requestsWaiting(int count);
+
+  /// No description provided for @viewAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get viewAction;
 }
 
 class _AppLocalizationsDelegate

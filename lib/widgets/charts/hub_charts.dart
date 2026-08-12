@@ -464,13 +464,25 @@ class _BarPainter extends CustomPainter {
 
     final w = (actual / scale).clamp(0.0, 1.0) * size.width;
     if (w > 0) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(0, 0, math.max(w, 4), size.height),
-          radius,
-        ),
-        Paint()..color = ChartColors.series,
-      );
+      final over = actual > planned;
+      // Red on an overspent row. This is *reinforcement only* — the row
+      // already says "Over by $X" beside an arrow icon, and the fill running
+      // past the plan tick shows it geometrically — so the hue is never the
+      // sole carrier and the deuteranopia rule in CLAUDE.md still holds.
+      final hi = over ? tokens.warning : ChartColors.series;
+      // (ChartColors.series is Conifer c600; c700 is its shadow step.)
+      final mid = over ? tokens.danger : Conifer.c700;
+      final barW = math.max(w, 4.0);
+      canvas.save();
+      canvas.clipRect(Rect.fromLTWH(0, 0, barW, size.height));
+      // Striped fill, matching PixelBar so every meter in the app reads alike.
+      canvas.drawRect(
+          Rect.fromLTWH(0, 0, barW, size.height), Paint()..color = hi);
+      final stripe = Paint()..color = mid;
+      for (var x = 5.0; x < barW; x += 7) {
+        canvas.drawRect(Rect.fromLTWH(x, 0, 2, size.height), stripe);
+      }
+      canvas.restore();
     }
 
     // The plan tick, drawn over the fill with a surface-coloured gap either

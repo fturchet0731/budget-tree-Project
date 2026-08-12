@@ -3239,4 +3239,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String partyCounts(int friends, int online) {
     return '$friends friends · $online online';
   }
+
+  @override
+  String requestsWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count requests waiting',
+      one: '1 request waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewAction => 'View';
 }

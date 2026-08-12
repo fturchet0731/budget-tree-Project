@@ -985,5 +985,8 @@
   "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}},
   "partyTitle": "Équipe",
   "partyCounts": "{friends} amis · {online} en ligne",
-  "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}}
+  "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}},
+  "requestsWaiting": "{count, plural, =1{1 demande en attente} other{{count} demandes en attente}}",
+  "@requestsWaiting": {"placeholders": {"count": {"type": "int"}}},
+  "viewAction": "Voir"
 }

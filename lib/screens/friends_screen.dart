@@ -318,7 +318,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
             _addCard(),
             if (_incoming.isNotEmpty) ...[
               const SizedBox(height: 20),
-              _sectionTitle(l.requests),
+              // Dark quest banner, as in the reference: the count plus a VIEW
+              // affordance that scrolls the requests into view. Hidden
+              // entirely at zero, so it only ever appears when it is actionable.
+              _requestBanner(l),
+              const SizedBox(height: 12),
               for (final p in _incoming) _requestTile(p),
             ],
             const SizedBox(height: 20),
@@ -437,6 +441,36 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  /// The dark "N requests waiting · VIEW" banner from the reference. Only
+  /// rendered when there is at least one incoming request.
+  Widget _requestBanner(AppLocalizations l) {
+    final t = AppTokens.of(context);
+    return PixelBox(
+      fill: t.panelDark,
+      border: t.panelDarkBorder,
+      drop: AppDims.dropButton,
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+      child: Row(
+        children: [
+          const PixelSprite(asset: PixelIcons.plus, size: 20),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              l.requestsWaiting(_incoming.length).toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTheme.label(9, t.panelDarkText),
+            ),
+          ),
+          Text(
+            '${l.viewAction.toUpperCase()} ▶',
+            style: AppTheme.label(9, Conifer.c300),
+          ),
         ],
       ),
     );

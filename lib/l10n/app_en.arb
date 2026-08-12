@@ -1065,5 +1065,8 @@
   "@hubTileCaption": {"placeholders": {"score": {"type": "int"}, "streak": {"type": "int"}}},
   "partyTitle": "Party",
   "partyCounts": "{friends} friends · {online} online",
-  "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}}
+  "@partyCounts": {"placeholders": {"friends": {"type": "int"}, "online": {"type": "int"}}},
+  "requestsWaiting": "{count, plural, =1{1 request waiting} other{{count} requests waiting}}",
+  "@requestsWaiting": {"placeholders": {"count": {"type": "int"}}},
+  "viewAction": "View"
 }
