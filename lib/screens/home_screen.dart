@@ -200,11 +200,12 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ),
-                // Acorn floats in the sky beside the canopy, drifting up and
-                // down on a slow sine rather than sitting on the ground.
+                // Acorn floats high in the open sky, clear of the canopy,
+                // drifting up and down on a slow sine rather than sitting on
+                // the ground.
                 Positioned(
-                  right: size.width * 0.14,
-                  bottom: sceneH * 0.46,
+                  right: size.width * 0.10,
+                  top: sceneH * 0.10,
                   child: AnimatedBuilder(
                     animation: _idle,
                     builder: (context, child) {
