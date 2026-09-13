@@ -1,137 +1,378 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../theme/app_shadows.dart';
+import '../l10n/app_localizations.dart';
+import '../models/profile_model.dart';
+import '../services/app_settings.dart';
+import '../services/auth_service.dart';
+import '../services/budget_repository.dart';
+import '../services/goal_repository.dart';
+import '../services/profile_service.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
+import '../tutorial/tutorial_tour.dart';
+import '../widgets/friends_strip.dart';
+import '../widgets/pixel/pixel.dart';
+import '../widgets/profile_avatar.dart';
+import '../widgets/health_tree_hero.dart';
+import '../widgets/pulse_strip.dart';
+import '../widgets/ui/app_buttons.dart';
+import '../widgets/ui/entrance.dart';
+import 'acorn_hub_screen.dart';
+import 'auth/login_screen.dart';
 import 'createbudget_screen.dart';
 import 'forest_screen.dart';
 import 'goals_screen.dart';
+import 'profile_screen.dart';
 import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  /// First launch only: play the guided tour once this menu appears, so Acorn
+  /// greets the user at the four-leaf area before handing them the Create flow,
+  /// and every section pops back here.
+  final bool runTour;
+  const DashboardScreen({super.key, this.runTour = false});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _entryController;
-  late Animation<double> _entryAnimation;
+class _DashboardScreenState extends State<DashboardScreen> {
+  final _pulseKey = GlobalKey<PulseStripState>();
+  final _friendsKey = GlobalKey<FriendsStripState>();
+  final _heroKey = GlobalKey<HealthTreeHeroState>();
+
+  /// The signed-in user's profile, for the top-right avatar button. Null while
+  /// loading, signed out, or offline (the button falls back to a glyph).
+  Profile? _me;
+
+  /// How many trees and saplings the player has, shown as "x4"/"x3" counters
+  /// on the menu tiles so the collection reads as something that grows.
+  int _trees = 0;
+  int _saplings = 0;
 
   @override
   void initState() {
     super.initState();
-    _entryController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..forward();
-    _entryAnimation = CurvedAnimation(
-      parent: _entryController,
-      curve: Curves.easeOutBack,
-    );
+    if (widget.runTour) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _runTour());
+    }
+    _loadMe();
+    _loadCounts();
+    // Best-effort presence heartbeat so friends see the active dot.
+    ProfileService.instance.touchPresence();
   }
 
-  @override
-  void dispose() {
-    _entryController.dispose();
-    super.dispose();
+  Future<void> _loadMe() async {
+    final me = await ProfileService.instance.myProfile().catchError((_) => null);
+    if (mounted) setState(() => _me = me);
   }
 
-  void _navigate(BuildContext context, Widget screen) {
-    Navigator.push(
+  Future<void> _loadCounts() async {
+    final budgets = await BudgetRepository.loadAll();
+    final goals = await GoalRepository.loadAll();
+    if (!mounted) return;
+    setState(() {
+      _trees = budgets.where((b) => b.savedAt != null).length;
+      _saplings = goals.length;
+    });
+  }
+
+  /// Opens the user's own profile from the top-right avatar button.
+  Future<void> _openProfile() async {
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => screen),
+      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+    );
+    // Avatar or shared goals may have changed in there.
+    await _loadMe();
+    _friendsKey.currentState?.refresh();
+  }
+
+  /// Plays the guided tour over the four-leaf menu on first launch, then marks
+  /// it seen so it never auto-plays again.
+  Future<void> _runTour() async {
+    if (!mounted) return;
+    await GuidedTour.start(context);
+    await AppSettings.instance.setTutorialSeen(true);
+  }
+
+  Future<void> _navigate(BuildContext context, Widget screen) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    // Anything the user did in there may change what the pulse strip says
+    // (and shared goals feed the friends strip's status emojis). Returning
+    // here also proves the user is still around, so re-stamp presence
+    // (throttled inside the service).
+    _pulseKey.currentState?.refresh();
+    _friendsKey.currentState?.refresh();
+    _heroKey.currentState?.refresh();
+    ProfileService.instance.touchPresence();
+  }
+
+  /// Opens the Create flow. When a tree is actually planted the flow pops back
+  /// here with `true`, so we land on the four-leaf menu and announce the new
+  /// tree growing in the forest.
+  Future<void> _openCreate() async {
+    final planted = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const CreateBudgetScreen()),
+    );
+    if (!mounted) return;
+    _pulseKey.currentState?.refresh();
+    if (planted == true) {
+      // Peak-motivation moment for a guest: their tree is in the ground, so
+      // offer (once) to keep it safe with an account instead of the snackbar.
+      if (await AuthService.instance.shouldOfferAccountUpgrade()) {
+        await AuthService.instance.markAccountUpgradeOffered();
+        if (mounted) await _offerAccountUpgrade();
+        return;
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.park, color: Conifer.c300, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(AppLocalizations.of(context).newTreeInForest),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  /// Bottom sheet celebrating a guest's first planted tree and inviting them
+  /// to create an account so the forest is backed up. Shown at most once.
+  Future<void> _offerAccountUpgrade() async {
+    final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(28, 24, 28, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppTokens.current.accentTint,
+                ),
+                child: const Icon(Icons.park, color: Conifer.c500, size: 36),
+              ),
+              const SizedBox(height: AppDims.s12),
+              Text(
+                l.guestUpgradeTitle,
+                textAlign: TextAlign.center,
+                style: text.headlineSmall,
+              ),
+              const SizedBox(height: AppDims.s8),
+              Text(
+                l.guestUpgradeBody,
+                textAlign: TextAlign.center,
+                style: text.bodyMedium,
+              ),
+              const SizedBox(height: AppDims.s20),
+              AppPrimaryButton(
+                label: l.createAccount,
+                icon: Icons.cloud_done_outlined,
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LoginScreen(startInSignUp: true),
+                    ),
+                  );
+                },
+              ),
+              Center(
+                child: AppTextButton(
+                  label: l.guestUpgradeLater,
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-          ),
-          CustomPaint(
-            size: Size(
-              MediaQuery.of(context).size.width,
-              MediaQuery.of(context).size.height,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+              child: Entrance(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('BUDGET TREE',
+                              style: text.displaySmall),
+                          const SizedBox(height: 5),
+                          Text(
+                            l.dashboardChooseBranch.toUpperCase(),
+                            style: AppTheme.label(
+                                9, AppTokens.of(context).textTertiary,
+                                spacing: 1.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Top-right profile button: the user's avatar with a
+                    // clear "Profile" label so there's no guessing.
+                    _ProfileButton(profile: _me, onTap: _openProfile),
+                  ],
+                ),
+              ),
             ),
-            painter: _CanopyPainter(),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Text(
-                  'Budget Tree',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontSize: 28,
-                        letterSpacing: 3,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Choose a branch',
-                  style: TextStyle(
-                    color: AppColors.mossGreen.withValues(alpha: 0.8),
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                Expanded(
-                  child: ScaleTransition(
-                    scale: _entryAnimation,
-                    child: FadeTransition(
-                      opacity: _entryAnimation,
-                      child: _LeafGrid(
-                        onTapCreate: () =>
-                            _navigate(context, const CreateBudgetScreen()),
-                        onTapModify: () =>
-                            _navigate(context, const ForestScreen()),
-                        onTapGoals: () =>
-                            _navigate(context, const GoalsScreen()),
-                        onTapSettings: () =>
-                            _navigate(context, const SettingsScreen()),
-                      ),
+            PulseStrip(key: _pulseKey, onPlantTree: _openCreate),
+            // The friends strip, the four pillars and Acorn's Hub travel as
+            // one scrolling block. The hero must live *inside* the scroll
+            // view: as a sibling of this Expanded it would take its height off
+            // the flex child, and a short screen (360x640) overflows by
+            // roughly the hero's own height.
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Swipeable Roblox-style friends row; first circle
+                        // adds friends.
+                        FriendsStrip(key: _friendsKey),
+                        const SizedBox(height: AppDims.s12),
+                        _MenuGrid(
+                          trees: _trees,
+                          saplings: _saplings,
+                          onTapCreate: _openCreate,
+                          onTapModify: () =>
+                              _navigate(context, const ForestScreen()),
+                          onTapGoals: () =>
+                              _navigate(context, const GoalsScreen()),
+                          onTapSettings: () =>
+                              _navigate(context, const SettingsScreen()),
+                        ),
+                        const SizedBox(height: AppDims.s12),
+                        // Acorn's Hub as a full-width fifth tile under the
+                        // four pillars: the living tree, how consistent the
+                        // user has been, and the door into the hub.
+                        //
+                        // A fixed height rather than a fraction of the
+                        // viewport, because sizing off the viewport only
+                        // earned its keep while the hero sat above the fold
+                        // competing for space. Down here it is scrolled to,
+                        // so a consistent size reads better than one that
+                        // shifts with the screen.
+                        HealthTreeHero(
+                          key: _heroKey,
+                          height: 156,
+                          onOpenHub: () => _navigate(
+                            context,
+                            const AcornHubScreen(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: TextButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_downward,
-                        color: AppColors.mossGreen, size: 16),
-                    label: const Text(
-                      'Back to ground',
-                      style: TextStyle(
-                          color: AppColors.mossGreen, letterSpacing: 1),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            // Pinned under the scrollable block so it's always reachable.
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2, bottom: 10),
+                child: AppTextButton(
+                  icon: Icons.arrow_downward,
+                  label: l.dashboardBackToGround,
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 // ──────────────────────────────────────────────
-// 4-Leaf grid layout
+// Top-right profile button (avatar + label)
 // ──────────────────────────────────────────────
 
-class _LeafGrid extends StatelessWidget {
+class _ProfileButton extends StatelessWidget {
+  final Profile? profile;
+  final VoidCallback onTap;
+  const _ProfileButton({required this.profile, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    // A square save-file portrait rather than a round avatar: the pixel skin
+    // has no circles.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PixelBox(
+          onTap: onTap,
+          semanticLabel: l.profile,
+          fill: t.accent,
+          drop: AppDims.dropSmall,
+          width: AppDims.tap,
+          height: AppDims.tap,
+          alignment: Alignment.center,
+          child: profile == null
+              ? const PixelSprite(asset: PixelIcons.sprout, size: 26)
+              : ClipRect(child: ProfileAvatar(profile: profile, size: 36)),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          (profile?.username ?? l.profile).toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTheme.label(9, t.textSecondary, spacing: 0.5),
+        ),
+      ],
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// 2×2 menu grid — pixel tiles with sprite art and collection counters
+// ──────────────────────────────────────────────
+
+class _MenuGrid extends StatelessWidget {
+  final int trees;
+  final int saplings;
   final VoidCallback onTapCreate;
   final VoidCallback onTapModify;
   final VoidCallback onTapGoals;
   final VoidCallback onTapSettings;
 
-  const _LeafGrid({
+  const _MenuGrid({
+    required this.trees,
+    required this.saplings,
     required this.onTapCreate,
     required this.onTapModify,
     required this.onTapGoals,
@@ -140,487 +381,153 @@ class _LeafGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Center(
-        child: AspectRatio(
-          aspectRatio: 0.78,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Branch backdrop drawn behind the leaves so the leaves
-              // appear to hang off real curving branches.
-              const Positioned.fill(
-                child: CustomPaint(painter: _BranchTrellisPainter()),
-              ),
-              // Leaves positioned around a central trunk
-              LayoutBuilder(builder: (ctx, c) {
-                final w = c.maxWidth;
-                final h = c.maxHeight;
-                const leafW = 0.42; // % of parent width
-                const leafH = 0.30;
-                return Stack(
-                  children: [
-                    _placeLeaf(
-                      left: w * 0.04,
-                      top: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: 'Create',
-                        sublabel: 'New budget',
-                        icon: Icons.park,
-                        color: AppColors.forestGreen,
-                        rotation: -0.18,
-                        onTap: onTapCreate,
-                      ),
-                    ),
-                    _placeLeaf(
-                      right: w * 0.04,
-                      top: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: 'Modify',
-                        sublabel: 'Your forest',
-                        icon: Icons.forest,
-                        color: AppColors.mossGreen,
-                        rotation: 0.18,
-                        onTap: onTapModify,
-                      ),
-                    ),
-                    _placeLeaf(
-                      left: w * 0.04,
-                      bottom: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: 'Goals',
-                        sublabel: 'Savings targets',
-                        icon: Icons.flag_outlined,
-                        color: AppColors.riverBlue,
-                        rotation: -0.18,
-                        onTap: onTapGoals,
-                      ),
-                    ),
-                    _placeLeaf(
-                      right: w * 0.04,
-                      bottom: h * 0.04,
-                      width: w * leafW,
-                      height: h * leafH,
-                      child: _LeafButton(
-                        label: 'Settings',
-                        sublabel: 'Preferences',
-                        icon: Icons.tune,
-                        color: AppColors.barkBrown,
-                        rotation: 0.18,
-                        onTap: onTapSettings,
-                      ),
-                    ),
-                  ],
-                );
-              }),
-            ],
-          ),
-        ),
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final dark = t.brightness == Brightness.dark;
+
+    final tiles = <_TileSpec>[
+      _TileSpec(
+        label: l.dashboardCreate,
+        sublabel: l.dashboardCreateSub,
+        sprite: PixelIcons.plus,
+        tint: dark ? t.accentTint : Conifer.c100,
+        onTap: onTapCreate,
       ),
-    );
-  }
+      _TileSpec(
+        label: l.dashboardModify,
+        sublabel: l.dashboardModifySub,
+        sprite: PixelIcons.forest,
+        tint: dark ? t.accentTint : Conifer.c200,
+        count: trees,
+        onTap: onTapModify,
+      ),
+      _TileSpec(
+        label: l.dashboardGoals,
+        sublabel: l.dashboardGoalsSub,
+        sprite: PixelIcons.star,
+        tint: t.skyTint,
+        count: saplings,
+        onTap: onTapGoals,
+      ),
+      _TileSpec(
+        label: l.dashboardSettings,
+        sublabel: l.dashboardSettingsSub,
+        sprite: PixelIcons.gear,
+        tint: t.soilTint,
+        onTap: onTapSettings,
+      ),
+    ];
 
-  Widget _placeLeaf({
-    double? left,
-    double? right,
-    double? top,
-    double? bottom,
-    required double width,
-    required double height,
-    required Widget child,
-  }) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: SizedBox(width: width, height: height, child: child),
-    );
-  }
-}
-
-// ──────────────────────────────────────────────
-// Branch trellis behind the 4 leaves
-// ──────────────────────────────────────────────
-
-class _BranchTrellisPainter extends CustomPainter {
-  const _BranchTrellisPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final cx = w / 2;
-    final groundY = h * 0.92;
-    final trunkTopY = h * 0.10;
-
-    // Trunk
-    final trunkPath = Path()
-      ..moveTo(cx - 14, groundY)
-      ..quadraticBezierTo(cx - 11, (groundY + trunkTopY) / 2, cx - 6, trunkTopY)
-      ..lineTo(cx + 6, trunkTopY)
-      ..quadraticBezierTo(cx + 11, (groundY + trunkTopY) / 2, cx + 14, groundY)
-      ..close();
-    canvas.drawPath(
-      trunkPath,
-      Paint()
-        ..shader = const LinearGradient(
-          colors: [
-            Color(0xFF1A0C06),
-            Color(0xFF5D4037),
-            Color(0xFF8D6E63),
-            Color(0xFF5D4037),
-            Color(0xFF1A0C06),
-          ],
-          stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ).createShader(Rect.fromLTWH(cx - 14, trunkTopY, 28, groundY - trunkTopY)),
-    );
-
-    // Horizontal bark wrinkles
-    final bark = Paint()
-      ..color = const Color(0xFF1A0C06).withValues(alpha: 0.45)
-      ..strokeWidth = 0.8
-      ..style = PaintingStyle.stroke;
-    for (int i = 1; i <= 8; i++) {
-      final t = i / 9.0;
-      final y = trunkTopY + (groundY - trunkTopY) * t;
-      final hw = 6 + (14 - 6) * t;
-      canvas.drawLine(Offset(cx - hw * 0.8, y), Offset(cx + hw * 0.8, y), bark);
-    }
-
-    // Root flare
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(cx, groundY + 3), width: 60, height: 12),
-      Paint()..color = const Color(0xFF3E2723),
-    );
-
-    // Four branches reaching to the leaf positions
-    // Each branch has a thick taper, drawn as a polygon for natural feel.
-    final branchColor = const Color(0xFF5D4037);
-    final highlight = Colors.white.withValues(alpha: 0.08);
-
-    // Approximate target points for the four leaves (inside-edge of each)
-    final tl = Offset(w * 0.26, h * 0.20);
-    final tr = Offset(w * 0.74, h * 0.20);
-    final bl = Offset(w * 0.26, h * 0.78);
-    final br = Offset(w * 0.74, h * 0.78);
-
-    // Branch attach points along the trunk
-    final upperAttach = Offset(cx, trunkTopY + (groundY - trunkTopY) * 0.18);
-    final lowerAttach = Offset(cx, trunkTopY + (groundY - trunkTopY) * 0.72);
-
-    _drawCurvedBranch(canvas, upperAttach, tl, branchColor, highlight, 13);
-    _drawCurvedBranch(canvas, upperAttach, tr, branchColor, highlight, 13);
-    _drawCurvedBranch(canvas, lowerAttach, bl, branchColor, highlight, 14);
-    _drawCurvedBranch(canvas, lowerAttach, br, branchColor, highlight, 14);
-  }
-
-  /// Draws a tapering branch from [start] to [end] using a quadratic curve.
-  /// The branch is widest at [start] (thickness [w0]) and narrows to ~3px at end.
-  void _drawCurvedBranch(
-    Canvas canvas,
-    Offset start,
-    Offset end,
-    Color color,
-    Color highlight,
-    double w0,
-  ) {
-    final w1 = 3.0;
-    // Control point biased outward and slightly downward for organic droop
-    final mid = Offset((start.dx + end.dx) / 2, (start.dy + end.dy) / 2);
-    final outward = (end.dx - start.dx).sign;
-    final ctrl = Offset(mid.dx + outward * 18, mid.dy + 12);
-
-    // Tapered ribbon: sample N points along the curve, offset normal to it.
-    final steps = 18;
-    final leftPoints = <Offset>[];
-    final rightPoints = <Offset>[];
-    Offset? prev;
-    for (int i = 0; i <= steps; i++) {
-      final t = i / steps;
-      // quadratic bezier
-      final x = (1 - t) * (1 - t) * start.dx +
-          2 * (1 - t) * t * ctrl.dx +
-          t * t * end.dx;
-      final y = (1 - t) * (1 - t) * start.dy +
-          2 * (1 - t) * t * ctrl.dy +
-          t * t * end.dy;
-      final pt = Offset(x, y);
-      final thick = w0 + (w1 - w0) * t;
-
-      // Normal direction (derivative of bezier)
-      final dx = 2 * (1 - t) * (ctrl.dx - start.dx) +
-          2 * t * (end.dx - ctrl.dx);
-      final dy = 2 * (1 - t) * (ctrl.dy - start.dy) +
-          2 * t * (end.dy - ctrl.dy);
-      final len = math.sqrt(dx * dx + dy * dy);
-      if (len == 0) continue;
-      final nx = -dy / len;
-      final ny = dx / len;
-
-      leftPoints.add(Offset(pt.dx + nx * thick / 2, pt.dy + ny * thick / 2));
-      rightPoints.add(Offset(pt.dx - nx * thick / 2, pt.dy - ny * thick / 2));
-      prev = pt;
-    }
-
-    final path = Path()..moveTo(leftPoints.first.dx, leftPoints.first.dy);
-    for (final p in leftPoints.skip(1)) {
-      path.lineTo(p.dx, p.dy);
-    }
-    for (final p in rightPoints.reversed) {
-      path.lineTo(p.dx, p.dy);
-    }
-    path.close();
-    canvas.drawPath(path, Paint()..color = color);
-
-    // Highlight strip along the top edge (one-pixel offset along the left side)
-    final hp = Path()..moveTo(leftPoints.first.dx, leftPoints.first.dy);
-    for (final p in leftPoints.skip(1)) {
-      hp.lineTo(p.dx, p.dy);
-    }
-    canvas.drawPath(
-      hp,
-      Paint()
-        ..color = highlight
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
-    );
-
-    // Small twig at the end for a natural finish
-    if (prev != null) {
-      canvas.drawCircle(end, w1 * 0.9, Paint()..color = color);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_BranchTrellisPainter old) => false;
-}
-
-// ──────────────────────────────────────────────
-// Single leaf-shaped button
-// ──────────────────────────────────────────────
-
-class _LeafButton extends StatefulWidget {
-  final String label;
-  final String sublabel;
-  final IconData icon;
-  final Color color;
-  final double rotation;
-  final VoidCallback onTap;
-
-  const _LeafButton({
-    required this.label,
-    required this.sublabel,
-    required this.icon,
-    required this.color,
-    required this.rotation,
-    required this.onTap,
-  });
-
-  @override
-  State<_LeafButton> createState() => _LeafButtonState();
-}
-
-class _LeafButtonState extends State<_LeafButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.93 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: Transform.rotate(
-          angle: widget.rotation,
-          child: DecoratedBox(
-            // Soft drop shadow follows the leaf's clipped shape.
-            decoration: ShapeDecoration(
-              shape: _LeafShapeBorder(),
-              shadows: AppShadows.card,
-            ),
-            child: ClipPath(
-            clipper: _LeafClipper(),
-            child: Container(
-              height: 145,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    widget.color.withValues(alpha: 0.9),
-                    widget.color,
-                    widget.color.withValues(alpha: 0.75),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
-              child: Stack(
-                children: [
-                  CustomPaint(
-                    size: const Size(double.infinity, 145),
-                    painter: _LeafVeinPainter(widget.color),
-                  ),
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(widget.icon,
-                            color: Colors.white.withValues(alpha: 0.92),
-                            size: 30),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.label,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          widget.sublabel,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var row = 0; row < 2; row++) ...[
+          if (row > 0) const SizedBox(height: AppDims.s12),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var col = 0; col < 2; col++) ...[
+                  if (col > 0) const SizedBox(width: AppDims.s12),
+                  Expanded(
+                    child: Entrance(
+                      delay: Duration(milliseconds: 70 * (row * 2 + col)),
+                      child: _MenuTile(spec: tiles[row * 2 + col]),
                     ),
                   ),
                 ],
-              ),
-            ),
+              ],
             ),
           ),
-        ),
-      ),
+        ],
+      ],
     );
   }
 }
 
-// ──────────────────────────────────────────────
-// Leaf clip path
-// ──────────────────────────────────────────────
+/// One menu tile's content — kept as a record-ish class so the grid reads
+/// cleanly and the tile takes a single argument.
+class _TileSpec {
+  final String label;
+  final String sublabel;
+  final String sprite;
+  final Color tint;
+  final VoidCallback onTap;
 
-class _LeafClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) => _leafPath(size);
+  /// Collection counter drawn as an "xN" badge; 0 hides it.
+  final int count;
 
-  @override
-  bool shouldReclip(_LeafClipper old) => false;
+  const _TileSpec({
+    required this.label,
+    required this.sublabel,
+    required this.sprite,
+    required this.tint,
+    required this.onTap,
+    this.count = 0,
+  });
 }
 
-Path _leafPath(Size size) {
-  final w = size.width;
-  final h = size.height;
-  return Path()
-    ..moveTo(w / 2, 0)
-    ..cubicTo(w * 1.05, h * 0.1, w * 1.05, h * 0.85, w / 2, h)
-    ..cubicTo(-w * 0.05, h * 0.85, -w * 0.05, h * 0.1, w / 2, 0)
-    ..close();
-}
-
-/// ShapeBorder version of the leaf clip — lets `ShapeDecoration.shadows`
-/// cast a drop shadow that follows the leaf outline.
-class _LeafShapeBorder extends ShapeBorder {
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+class _MenuTile extends StatelessWidget {
+  final _TileSpec spec;
+  const _MenuTile({required this.spec});
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) =>
-      _leafPath(rect.size).shift(rect.topLeft);
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
-      getOuterPath(rect, textDirection: textDirection);
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
-
-  @override
-  ShapeBorder scale(double t) => this;
-}
-
-// ──────────────────────────────────────────────
-// Leaf vein decoration
-// ──────────────────────────────────────────────
-
-class _LeafVeinPainter extends CustomPainter {
-  final Color leafColor;
-  const _LeafVeinPainter(this.leafColor);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawLine(Offset(w / 2, h * 0.05), Offset(w / 2, h * 0.92), paint);
-
-    for (int i = 1; i <= 4; i++) {
-      final t = i / 5.0;
-      final y = h * (0.15 + t * 0.65);
-      final xReach = w * (0.25 + t * 0.08);
-      canvas.drawLine(Offset(w / 2, y), Offset(w / 2 - xReach, y + 15), paint);
-      canvas.drawLine(Offset(w / 2, y), Offset(w / 2 + xReach, y + 15), paint);
-    }
+  Widget build(BuildContext context) {
+    final t = AppTokens.of(context);
+    final text = Theme.of(context).textTheme;
+    return PixelBox(
+      onTap: spec.onTap,
+      semanticLabel: spec.label,
+      padding: const EdgeInsets.all(9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Sunken art well: 2px inner border on a tinted panel.
+          SizedBox(
+            height: 74,
+            width: double.infinity,
+            child: PixelBox(
+              fill: spec.tint,
+              borderWidth: AppDims.borderThin,
+              drop: 0,
+              child: Stack(
+                children: [
+                  Center(child: PixelSprite(asset: spec.sprite, size: 40)),
+                  if (spec.count > 0)
+                    Positioned(
+                      top: 3,
+                      right: 3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 2),
+                        color: t.textPrimary,
+                        child: Text(
+                          'x${spec.count}',
+                          style: AppTheme.label(9, Conifer.c300, spacing: 0.5),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 9),
+          Text(
+            spec.label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: text.titleMedium,
+          ),
+          const SizedBox(height: 3),
+          Text(
+            spec.sublabel,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: text.bodySmall,
+          ),
+        ],
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(_LeafVeinPainter old) => false;
-}
-
-// ──────────────────────────────────────────────
-// Decorative canopy background
-// ──────────────────────────────────────────────
-
-class _CanopyPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final rng = math.Random(42);
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    for (int i = 0; i < 18; i++) {
-      final x = rng.nextDouble() * w;
-      final y = rng.nextDouble() * h * 0.6;
-      final r = 20.0 + rng.nextDouble() * 30;
-      final opacity = 0.04 + rng.nextDouble() * 0.06;
-      paint.color = AppColors.leafGreen.withValues(alpha: opacity);
-      canvas.save();
-      canvas.translate(x, y);
-      canvas.rotate(rng.nextDouble() * math.pi * 2);
-      final path = Path()
-        ..moveTo(0, -r)
-        ..cubicTo(r, -r * 0.3, r, r * 0.8, 0, r)
-        ..cubicTo(-r, r * 0.8, -r, -r * 0.3, 0, -r)
-        ..close();
-      canvas.drawPath(path, paint);
-      canvas.restore();
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CanopyPainter old) => false;
 }

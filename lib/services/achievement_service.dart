@@ -4,30 +4,57 @@ import 'budget_repository.dart';
 import 'goal_repository.dart';
 import 'sound_service.dart';
 import 'streak_service.dart';
+import 'synced_store.dart';
 
 /// Persists which badges the user has unlocked and re-evaluates the catalog
 /// after any progress event. Unlocks are sticky — once earned, a badge stays
 /// even if the underlying stat later drops (e.g. a withdrawal).
 ///
-/// Storage: key `achievements_v1`, a `List<String>` of `id|unlockedMillis`.
+/// Each unlock is one row: `id` = badge id, `data` = `{unlockedMillis}`. The
+/// store keeps a local cache (key `ach_unlocks_v1`) and syncs to the Supabase
+/// `achievements` table. Legacy `achievements_v1` records (`id|millis` strings)
+/// are migrated into the store on first read.
 class AchievementService {
   AchievementService._();
 
-  static const _key = 'achievements_v1';
+  static const _legacyKey = 'achievements_v1';
 
-  static Future<Map<String, DateTime>> loadUnlocked() async {
+  static final SyncedStore<MapEntry<String, DateTime>> store =
+      SyncedStore<MapEntry<String, DateTime>>(
+    prefsKey: 'ach_unlocks_v1',
+    table: 'achievements',
+    toJson: (e) => {
+      'id': e.key,
+      'unlockedMillis': e.value.millisecondsSinceEpoch,
+    },
+    fromJson: (j) => MapEntry(
+      j['id'] as String,
+      DateTime.fromMillisecondsSinceEpoch((j['unlockedMillis'] as num).toInt()),
+    ),
+    idOf: (e) => e.key,
+  );
+
+  /// One-time move of the old `id|millis` list into the new JSON store.
+  static Future<void> _migrateLegacy() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_key) ?? [];
-    final out = <String, DateTime>{};
-    for (final entry in raw) {
+    final legacy = prefs.getStringList(_legacyKey);
+    if (legacy == null || legacy.isEmpty) return;
+    for (final entry in legacy) {
       final i = entry.indexOf('|');
       if (i <= 0) continue;
       final id = entry.substring(0, i);
       final ms = int.tryParse(entry.substring(i + 1));
       if (ms == null) continue;
-      out[id] = DateTime.fromMillisecondsSinceEpoch(ms);
+      await store.saveNew(
+          MapEntry(id, DateTime.fromMillisecondsSinceEpoch(ms)));
     }
-    return out;
+    await prefs.remove(_legacyKey);
+  }
+
+  static Future<Map<String, DateTime>> loadUnlocked() async {
+    await _migrateLegacy();
+    final entries = await store.loadAll();
+    return {for (final e in entries) e.key: e.value};
   }
 
   /// Build the aggregate stats used by every badge test from current data.
@@ -41,7 +68,10 @@ class AchievementService {
     int maxTier = 0;
     for (final g in goals) {
       saved += g.currentAmount;
-      if (g.isComplete) completed++;
+      // The durable check, not the live one: completion is a permanent trophy,
+      // so a later withdrawal must not drop the goal back out of the tally and
+      // un-earn a badge the user was part-way to.
+      if (g.isCompleted) completed++;
       if (g.isUncapped && g.tier > maxTier) maxTier = g.tier;
       for (final c in g.contributions) {
         if (c.isDeposit) deposits++;
@@ -71,17 +101,12 @@ class AchievementService {
     for (final a in AchievementCatalog.all) {
       if (unlocked.containsKey(a.id)) continue;
       if (a.test(stats)) {
-        unlocked[a.id] = now;
+        await store.saveNew(MapEntry(a.id, now));
         newly.add(a);
       }
     }
 
     if (newly.isNotEmpty) {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = unlocked.entries
-          .map((e) => '${e.key}|${e.value.millisecondsSinceEpoch}')
-          .toList();
-      await prefs.setStringList(_key, raw);
       SoundService.celebrate();
     }
     return newly;

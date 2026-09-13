@@ -1,11 +1,11 @@
 {
-    "name": "budget_app_project",
-    "short_name": "budget_app_project",
+    "name": "Budget Tree",
+    "short_name": "Budget Tree",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F6FCE9",
+    "theme_color": "#7EBD25",
+    "description": "Grow your budget as a tree. Budgets are trees, expenses are branches, and savings goals are saplings you water each pay cycle.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

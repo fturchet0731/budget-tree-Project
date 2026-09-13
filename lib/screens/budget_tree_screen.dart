@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/rhythm_labels.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/goal_model.dart';
@@ -14,13 +16,17 @@ import '../services/notification_scheduler.dart';
 import '../services/pay_scheduler.dart';
 import '../services/sound_service.dart';
 import '../services/suggestion_service.dart';
+import '../theme/app_dims.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
+import '../widgets/pixel/pixel.dart';
 import '../theme/category_icons.dart';
 import '../theme/leaf_palette.dart';
 import '../widgets/achievements_sheet.dart';
 import '../widgets/acorn_coach.dart';
 import '../widgets/category_picker.dart';
-import '../widgets/tree_drawing.dart';
+import '../widgets/pixel_tree_engine.dart';
+import '../widgets/scenery.dart';
 import '../tutorial/tutorial_content.dart';
 
 class BudgetTreeScreen extends StatefulWidget {
@@ -28,8 +34,11 @@ class BudgetTreeScreen extends StatefulWidget {
 
   /// When true, Acorn nudges the user to save the freshly grown tree.
   final bool tutorial;
-  const BudgetTreeScreen(
-      {super.key, required this.budget, this.tutorial = false});
+  const BudgetTreeScreen({
+    super.key,
+    required this.budget,
+    this.tutorial = false,
+  });
 
   @override
   State<BudgetTreeScreen> createState() => _BudgetTreeScreenState();
@@ -49,9 +58,11 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   @override
   void initState() {
     super.initState();
+    // One-shot "plant" animation: seed to full tree, ~1.8s ease-in-out per the
+    // design handoff's budgetGrow.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3600),
+      duration: const Duration(milliseconds: 1900),
     );
     _growAnimation = CurvedAnimation(
       parent: _controller,
@@ -67,9 +78,9 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
     if (widget.budget.categoryId == null) return;
     final all = await CategoryRepository.loadAll();
     final cat = all.cast<TreeCategory?>().firstWhere(
-          (c) => c?.id == widget.budget.categoryId,
-          orElse: () => null,
-        );
+      (c) => c?.id == widget.budget.categoryId,
+      orElse: () => null,
+    );
     if (mounted && cat != null) {
       setState(() {
         _category = cat;
@@ -112,32 +123,37 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   Future<void> _runPayCycle() async {
     final result = await PayScheduler.runUpdate(widget.budget);
     if (!mounted) return;
+    final l = AppLocalizations.of(context);
     final nextWhen = _formatNextPay(result.nextPayDate);
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF122B0F),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         content: Row(
           children: [
             Icon(
               result.hadActivity
                   ? Icons.water_drop_outlined
                   : Icons.schedule_outlined,
-              color: AppColors.lightLeaf,
+              color: AppColors.forestGreen,
               size: 18,
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 result.hadActivity
-                    ? 'Processed ${result.periodsProcessed} pay period(s) · '
-                        '\$${result.totalDeposited.toStringAsFixed(2)} → '
-                        '${result.updatedGoals.length} goal(s). Next pay $nextWhen.'
-                    : 'No pay periods elapsed yet. Next pay $nextWhen.',
+                    ? l.payProcessed(
+                        result.periodsProcessed,
+                        '\$${result.totalDeposited.toStringAsFixed(2)}',
+                        result.updatedGoals.length,
+                        nextWhen,
+                      )
+                    : l.noPayPeriods(nextWhen),
                 style: GoogleFonts.nunito(
-                    color: AppColors.stoneBeigeColor, fontSize: 12.5),
+                  color: AppColors.stoneBeigeColor,
+                  fontSize: 12.5,
+                ),
               ),
             ),
           ],
@@ -156,35 +172,36 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   }
 
   String _formatNextPay(DateTime dt) {
+    final l = AppLocalizations.of(context);
     final now = DateTime.now();
     final diff = dt.difference(now);
-    if (diff.isNegative) return 'today';
-    if (diff.inDays == 0) return 'today';
-    if (diff.inDays == 1) return 'tomorrow';
-    if (diff.inDays < 7) return 'in ${diff.inDays} days';
-    return 'on ${dt.month}/${dt.day}';
+    if (diff.isNegative) return l.todayShort;
+    if (diff.inDays == 0) return l.todayShort;
+    if (diff.inDays == 1) return l.timeTomorrow;
+    if (diff.inDays < 7) return l.timeInDays(diff.inDays);
+    return l.onDate('${dt.month}/${dt.day}');
   }
 
   // ── Save budget dialog ────────────────────────
   void _showSaveDialog() {
+    final l = AppLocalizations.of(context);
     String? chosenCategoryId = widget.budget.categoryId;
     bool autoLink = true;
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (sbCtx, setSBState) => AlertDialog(
-          backgroundColor: const Color(0xFF122B0F),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: [
-              const Icon(Icons.park, color: AppColors.lightLeaf, size: 22),
+              Icon(Icons.park, color: AppColors.forestGreen, size: 22),
               const SizedBox(width: 10),
               Text(
-                'Save Budget Tree?',
-                style: GoogleFonts.fredoka(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.stoneBeigeColor,
-                    fontSize: 20),
+                l.saveBudgetTreeQuestion,
+                style: GoogleFonts.pixelifySans(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.stoneBeigeColor,
+                  fontSize: 20,
+                ),
               ),
             ],
           ),
@@ -194,15 +211,16 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Save "${widget.budget.budgetName}" to your forest. You can view and edit it anytime from the Modify leaf.',
+                  l.saveBudgetTreeBody(widget.budget.budgetName),
                   style: GoogleFonts.nunito(
-                      color: AppColors.mossGreen,
-                      fontSize: 14,
-                      height: 1.5),
+                    color: AppColors.mossGreen,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'GROUP (OPTIONAL)',
+                  l.groupOptionalUpper,
                   style: GoogleFonts.nunito(
                     color: AppColors.mossGreen.withValues(alpha: 0.75),
                     fontSize: 10.5,
@@ -213,22 +231,23 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 const SizedBox(height: 8),
                 CategoryPicker(
                   selectedCategoryId: chosenCategoryId,
-                  onChanged: (id) =>
-                      setSBState(() => chosenCategoryId = id),
+                  onChanged: (id) => setSBState(() => chosenCategoryId = id),
                 ),
                 const SizedBox(height: 16),
                 InkWell(
                   onTap: () => setSBState(() => autoLink = !autoLink),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.zero,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.soilMid,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.zero,
                       border: Border.all(
-                          color: AppColors.mossGreen
-                              .withValues(alpha: 0.35)),
+                        color: AppColors.mossGreen.withValues(alpha: 0.35),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -237,31 +256,31 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
                             color: autoLink
-                                ? AppColors.lightLeaf
+                                ? AppColors.forestGreen
                                 : Colors.transparent,
                             border: Border.all(
                               color: autoLink
-                                  ? AppColors.lightLeaf
-                                  : AppColors.mossGreen
-                                      .withValues(alpha: 0.6),
+                                  ? AppColors.forestGreen
+                                  : AppColors.mossGreen.withValues(alpha: 0.6),
                               width: 1.6,
                             ),
                           ),
                           child: autoLink
-                              ? const Icon(Icons.check,
-                                  color: Colors.white, size: 14)
+                              ? const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 14,
+                                )
                               : null,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Auto-link branches to goals',
+                                l.autoLinkBranches,
                                 style: GoogleFonts.nunito(
                                   color: AppColors.stoneBeigeColor,
                                   fontSize: 13,
@@ -270,11 +289,12 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Matches expense names to existing goal names. Linked branches feed those goals during pay cycles.',
+                                l.autoLinkBranchesDesc,
                                 style: GoogleFonts.nunito(
-                                    color: AppColors.mossGreen,
-                                    fontSize: 11,
-                                    height: 1.45),
+                                  color: AppColors.mossGreen,
+                                  fontSize: 11,
+                                  height: 1.45,
+                                ),
                               ),
                             ],
                           ),
@@ -289,61 +309,77 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel',
-                  style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+              child: Text(
+                l.cancel,
+                style: GoogleFonts.nunito(color: AppColors.mossGreen),
+              ),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.forestGreen,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
               onPressed: () async {
                 Navigator.pop(ctx);
+                // Capture before stamping savedAt: a never-saved budget is a
+                // brand-new tree being planted (vs. updating one from the forest).
+                final wasNew = widget.budget.savedAt == null;
                 widget.budget.categoryId = chosenCategoryId;
                 widget.budget.savedAt = DateTime.now();
                 int autoLinkedCount = 0;
                 if (autoLink) {
-                  autoLinkedCount =
-                      await PayScheduler.autoLinkByName(widget.budget);
+                  autoLinkedCount = await PayScheduler.autoLinkByName(
+                    widget.budget,
+                  );
                 }
                 await BudgetRepository.saveNew(widget.budget);
                 SoundService.treePlanted();
                 await AchievementService.evaluateAndUnlock();
                 await NotificationScheduler.checkBudget(widget.budget);
-                if (autoLinkedCount > 0 && mounted) {
+                if (!mounted) return;
+                if (wasNew) {
+                  // A freshly planted tree: hand a "planted" signal back up the
+                  // create flow so it lands on the four-leaf menu and announces
+                  // the new tree there, instead of dropping a snackbar on a
+                  // screen we're about to leave.
+                  Future.delayed(const Duration(milliseconds: 600), () {
+                    if (mounted) Navigator.of(context).pop(true);
+                  });
+                  return;
+                }
+                if (autoLinkedCount > 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      backgroundColor: const Color(0xFF122B0F),
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.zero,
+                      ),
                       content: Text(
-                        'Auto-linked $autoLinkedCount branch(es) to matching goals.',
+                        l.autoLinkedSnack(autoLinkedCount),
                         style: GoogleFonts.nunito(
-                            color: AppColors.stoneBeigeColor,
-                            fontSize: 13),
+                          color: AppColors.stoneBeigeColor,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   );
                 }
-                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: const Color(0xFF122B0F),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.zero,
+                    ),
                     behavior: SnackBarBehavior.floating,
                     content: Row(
                       children: [
-                        const Icon(Icons.park,
-                            color: AppColors.lightLeaf, size: 20),
+                        Icon(
+                          Icons.park,
+                          color: AppColors.forestGreen,
+                          size: 20,
+                        ),
                         const SizedBox(width: 10),
                         Text(
-                          'Tree planted in your forest!',
+                          l.treePlantedSnack,
                           style: GoogleFonts.nunito(
-                              color: AppColors.stoneBeigeColor,
-                              fontSize: 14),
+                            color: AppColors.stoneBeigeColor,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
@@ -354,9 +390,13 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                   if (mounted) Navigator.popUntil(context, (r) => r.isFirst);
                 });
               },
-              child: Text('Save',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text(
+                l.save,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -366,16 +406,23 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
 
   /// Opens the allocation-advice sheet: explained suggestions for adding,
   /// pruning, or trimming branches based on the current budget.
-  void _showSuggestions() {
-    final suggestions = SuggestionService.forBudget(widget.budget);
+  Future<void> _showSuggestions() async {
+    final l = AppLocalizations.of(context);
+    final goals = await GoalRepository.loadAll();
+    if (!mounted) return;
+    final suggestions = SuggestionService.forBudget(
+      widget.budget,
+      l,
+      goals: goals,
+    );
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF0D2010),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        decoration: BoxDecoration(
+          color: AppTokens.current.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.zero),
         ),
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
         child: Column(
@@ -388,27 +435,33 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.mossGreen.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.lightbulb,
-                    color: Color(0xFFFFD54F), size: 20),
+                const Icon(Icons.lightbulb, color: Color(0xFFFFD54F), size: 20),
                 const SizedBox(width: 8),
-                Text('Gardener\'s Tips',
-                    style: GoogleFonts.fredoka(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.stoneBeigeColor,
-                        fontSize: 20)),
+                Text(
+                  l.gardenersTips,
+                  style: GoogleFonts.pixelifySans(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.stoneBeigeColor,
+                    fontSize: 20,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 4),
-            Text('How to allocate your money better',
-                style: GoogleFonts.nunito(
-                    color: AppColors.mossGreen, fontSize: 12.5)),
+            Text(
+              l.gardenersTipsSub,
+              style: GoogleFonts.nunito(
+                color: AppColors.mossGreen,
+                fontSize: 12.5,
+              ),
+            ),
             const SizedBox(height: 16),
             Flexible(
               child: SingleChildScrollView(
@@ -428,12 +481,14 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final l = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: AnimatedBuilder(
         animation: _growAnimation,
         builder: (ctx, child) {
           final show = _growAnimation.value > 0.85;
-          final hasSchedule = widget.budget.payFrequency != null &&
+          final hasSchedule =
+              widget.budget.payFrequency != null &&
               widget.budget.firstPayDate != null;
           return AnimatedOpacity(
             opacity: show ? 1.0 : 0.0,
@@ -451,13 +506,16 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                             onPressed: _runPayCycle,
                             backgroundColor: AppColors.riverBlue,
                             elevation: 5,
-                            icon: const Icon(Icons.event_available,
-                                color: Colors.white),
+                            icon: const Icon(
+                              Icons.event_available,
+                              color: Colors.white,
+                            ),
                             label: Text(
-                              'Process Pay',
+                              l.processPay,
                               style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -471,11 +529,12 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                         icon: const Icon(Icons.save_alt, color: Colors.white),
                         label: Text(
                           widget.budget.savedAt == null
-                              ? 'Save My Tree'
-                              : 'Update Tree',
+                              ? l.saveMyTree
+                              : l.updateTree,
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -488,7 +547,13 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
         children: [
           // ── Palette-aware sky gradient ────────
           Container(
-            decoration: BoxDecoration(gradient: AppPalettes.sky()),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppTokens.current.skyTint, AppTokens.current.canvas],
+              ),
+            ),
           ),
           // ── Static background scene ───────────
           CustomPaint(
@@ -499,28 +564,51 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
           // NOTE: _leafHits.clear() is inside _GrowingTreePainter.paint()
           // so leafHits always reflects what was last painted, even after
           // the animation completes and the builder doesn't clear them.
-          AnimatedBuilder(
-            animation: _growAnimation,
-            builder: (ctx, child) {
-              return GestureDetector(
-                onTapUp: _onTapTree,
-                child: CustomPaint(
-                  size: Size(size.width, size.height),
-                  painter: _GrowingTreePainter(
-                    budget: widget.budget,
-                    progress: _growAnimation.value,
-                    leafHits: _leafHits,
-                    leafPalette: _leafPalette,
+          // The grow animation repaints a full-screen scene every frame, so it
+          // gets its own layer and leaves the static background alone.
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _growAnimation,
+              builder: (ctx, child) {
+                return GestureDetector(
+                  onTapUp: _onTapTree,
+                  child: CustomPaint(
+                    size: Size(size.width, size.height),
+                    painter: _GrowingTreePainter(
+                      budget: widget.budget,
+                      progress: _growAnimation.value,
+                      leafHits: _leafHits,
+                      leafPalette: _leafPalette,
+                      totalIncomeLabel: l.totalIncome,
+                      rootLabel: widget.budget.remaining < 0
+                          ? l.overBudgetAmount(
+                              '\$${(-widget.budget.remaining).toStringAsFixed(2)}',
+                            )
+                          : l.unallocatedAmount(
+                              '\$${widget.budget.remaining.toStringAsFixed(2)}',
+                            ),
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
+          ),
+          // ── Stat strip: INCOME / ALLOCATED / LEFT ────
+          // Pinned under the header so what is left to allocate is readable
+          // without tapping a single leaf.
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 66),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: _TreeStatStrip(budget: widget.budget),
+              ),
+            ),
           ),
           // ── Header bar ───────────────────────
           SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
                   GestureDetector(
@@ -528,18 +616,14 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.22),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        color: AppTokens.current.card,
+                        border: Border.all(color: AppTokens.current.cardBorder),
                       ),
-                      child: const Icon(Icons.arrow_back,
-                          color: Colors.white, size: 20),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: AppTokens.current.textPrimary,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -555,17 +639,10 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                                 widget.budget.budgetName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.fredoka(
+                                style: GoogleFonts.pixelifySans(
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: AppTokens.current.textPrimary,
                                   fontSize: 20,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withValues(alpha: 0.4),
-                                      offset: const Offset(1, 2),
-                                      blurRadius: 5,
-                                    ),
-                                  ],
                                 ),
                               ),
                             ),
@@ -573,20 +650,19 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 7, vertical: 2),
+                                  horizontal: 7,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: Color(_category!.colorValue)
-                                      .withValues(alpha: 0.35),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: Colors.white
-                                          .withValues(alpha: 0.5),
-                                      width: 1),
+                                  color: Color(
+                                    _category!.colorValue,
+                                  ).withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.zero,
                                 ),
                                 child: Text(
                                   _category!.name.toUpperCase(),
                                   style: GoogleFonts.nunito(
-                                    color: Colors.white,
+                                    color: AppTokens.current.textPrimary,
                                     fontSize: 9,
                                     letterSpacing: 1.0,
                                     fontWeight: FontWeight.w700,
@@ -599,7 +675,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                         Text(
                           'Income: \$${widget.budget.totalIncome.toStringAsFixed(2)}',
                           style: GoogleFonts.nunito(
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: AppTokens.current.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -612,18 +688,13 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD54F).withValues(alpha: 0.22),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        color: const Color(0xFFFFD54F).withValues(alpha: 0.30),
                       ),
-                      child: const Icon(Icons.lightbulb_outline,
-                          color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.lightbulb_outline,
+                        color: Color(0xFFBA8514),
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -643,20 +714,29 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                   alignment: const Alignment(0, 0.3),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 8),
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.38),
-                      borderRadius: BorderRadius.circular(20),
+                      color: AppTokens.current.card,
+                      borderRadius: BorderRadius.zero,
+                      border: Border.all(color: AppTokens.current.cardBorder),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.eco, color: Colors.white, size: 14),
+                        Icon(
+                          Icons.eco,
+                          color: AppTokens.current.accentStrong,
+                          size: 14,
+                        ),
                         const SizedBox(width: 6),
                         Text(
-                          'Tap a leaf to see its budget',
+                          l.tapALeaf,
                           style: GoogleFonts.nunito(
-                              color: Colors.white, fontSize: 13),
+                            color: AppTokens.current.textPrimary,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -675,7 +755,7 @@ class _BudgetTreeScreenState extends State<BudgetTreeScreen>
                   builder: (ctx, _) => _growAnimation.value > 0.85
                       ? AcornCoach(
                           lessonKey: 'save',
-                          lines: saveTreeSteps(),
+                          lines: saveTreeSteps(l),
                           initialAlignment: const Alignment(0, -0.8),
                         )
                       : const SizedBox.shrink(),
@@ -710,157 +790,63 @@ class _TreeSceneBackground extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    _drawSun(canvas, Offset(w * 0.84, h * 0.075), 30);
-    _drawClouds(canvas, w, h);
-    _drawBirds(canvas, w, h);
+    _drawSun(canvas, Offset(w * 0.84, h * 0.075), 26);
+    _drawTreeLine(canvas, w, h);
     _drawGround(canvas, w, h);
   }
 
-  void _drawSun(Canvas canvas, Offset c, double r) {
-    final isMidnight =
-        AppSettings.instance.palette == AppPalette.midnight;
-    final glow = AppPalettes.celestialGlow();
-    final core = AppPalettes.celestial();
+  /// Faint distant trees along the horizon, in a flat conifer tint so the
+  /// growing budget tree owns the stage.
+  void _drawTreeLine(Canvas canvas, double w, double h) {
+    final groundY = h * 0.74;
+    final c = AppSettings.instance.isDark
+        ? const Color(0xFF243014)
+        : Conifer.c200;
+    for (int i = 0; i < 7; i++) {
+      final x = (i + 0.5) / 7 * w;
+      // Keep the center clear so the budget tree owns the stage.
+      if ((x - w / 2).abs() < w * 0.16) continue;
+      Scenery.paintTreeSilhouette(
+        canvas,
+        Offset(x, groundY + 4),
+        40 + ((i * 9) % 4) * 7,
+        c,
+        seed: i + 5,
+      );
+    }
+  }
 
-    // Glow
+  void _drawSun(Canvas canvas, Offset c, double r) {
+    final dark = AppSettings.instance.isDark;
+    // One flat disc with a flat halo ring; a flat crescent makes the moon.
     canvas.drawCircle(
       c,
-      r * 4.5,
+      r * 1.6,
       Paint()
-        ..shader = RadialGradient(colors: [
-          glow.withValues(alpha: 0.32),
-          Colors.transparent,
-        ]).createShader(Rect.fromCircle(center: c, radius: r * 4.5)),
+        ..color = (dark ? const Color(0xFFB3C9E0) : const Color(0xFFFFE082))
+            .withValues(alpha: 0.35),
     );
-    // Rays (skipped for moon — moons don't have rays)
-    if (!isMidnight) {
-      final rayPaint = Paint()
-        ..color = glow.withValues(alpha: 0.30)
-        ..strokeWidth = 1.5
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
-      for (int i = 0; i < 8; i++) {
-        final angle = i * math.pi / 4;
-        canvas.drawLine(
-          Offset(c.dx + math.cos(angle) * r * 1.5,
-              c.dy + math.sin(angle) * r * 1.5),
-          Offset(c.dx + math.cos(angle) * r * 3.2,
-              c.dy + math.sin(angle) * r * 3.2),
-          rayPaint,
-        );
-      }
-    }
-    // Core disc
-    canvas.drawCircle(c, r, Paint()..color = core);
     canvas.drawCircle(
-        c, r, Paint()
-          ..color = glow
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5);
-    // Shine spot
-    canvas.drawCircle(
-      Offset(c.dx - r * 0.30, c.dy - r * 0.30),
-      r * 0.32,
-      Paint()..color = Colors.white.withValues(alpha: 0.40),
+      c,
+      r,
+      Paint()..color = dark ? const Color(0xFFE3EEF7) : const Color(0xFFFFD54F),
     );
-    // Moon crescent shading
-    if (isMidnight) {
+    if (dark) {
       canvas.drawCircle(
         Offset(c.dx + r * 0.30, c.dy - r * 0.05),
         r * 0.95,
-        Paint()..color = const Color(0xFF030814).withValues(alpha: 0.55),
-      );
-    }
-  }
-
-  void _drawClouds(Canvas canvas, double w, double h) {
-    _cloud(canvas, Offset(w * 0.13, h * 0.085), 1.0);
-    _cloud(canvas, Offset(w * 0.57, h * 0.055), 0.72);
-    _cloud(canvas, Offset(w * 0.35, h * 0.135), 0.52);
-  }
-
-  void _cloud(Canvas canvas, Offset c, double s) {
-    final r = 22.0 * s;
-
-    // Shadow underside
-    final shadowPaint = Paint()
-      ..color = const Color(0xFFB0C4DE).withValues(alpha: 0.30);
-    for (final (dx, dy, dr) in [
-      (0.0, r * 0.30, 1.0),
-      (r * 1.05, r * 0.45, 0.80),
-      (-r * 0.95, r * 0.50, 0.68),
-    ]) {
-      canvas.drawCircle(
-          Offset(c.dx + dx, c.dy + dy), r * dr * 0.5, shadowPaint);
-    }
-    canvas.drawRect(
-        Rect.fromLTWH(
-            c.dx - r * 1.35, c.dy + r * 0.25, r * 2.7, r * 0.4),
-        shadowPaint);
-
-    // Main cloud body
-    final p = Paint()
-      ..color = Colors.white.withValues(alpha: 0.92);
-    for (final (dx, dy, dr) in [
-      (0.0, 0.0, 1.0),
-      (r * 1.05, r * 0.20, 0.80),
-      (-r * 0.95, r * 0.28, 0.68),
-      (r * 0.35, -r * 0.46, 0.88),
-      (-r * 0.35, -r * 0.36, 0.65),
-    ]) {
-      canvas.drawCircle(Offset(c.dx + dx, c.dy + dy), r * dr, p);
-    }
-    canvas.drawRect(
-        Rect.fromLTWH(c.dx - r * 1.35, c.dy, r * 2.7, r * 0.5), p);
-
-    // Highlight on top
-    canvas.drawCircle(
-      Offset(c.dx - r * 0.2, c.dy - r * 0.3),
-      r * 0.25,
-      Paint()..color = Colors.white.withValues(alpha: 0.55),
-    );
-  }
-
-  void _drawBirds(Canvas canvas, double w, double h) {
-    final isMidnight = palette == AppPalette.midnight;
-    final p = Paint()
-      ..color = (isMidnight ? Colors.white : const Color(0xFF1A237E))
-          .withValues(alpha: 0.45)
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    for (final (bx, by, bs) in [
-      (w * 0.20, h * 0.17, 7.0),
-      (w * 0.26, h * 0.145, 5.5),
-      (w * 0.50, h * 0.10, 8.0),
-      (w * 0.56, h * 0.085, 6.2),
-      (w * 0.63, h * 0.125, 5.0),
-    ]) {
-      canvas.drawArc(
-        Rect.fromCenter(
-            center: Offset(bx - bs, by), width: bs * 2, height: bs),
-        math.pi, math.pi, false, p,
-      );
-      canvas.drawArc(
-        Rect.fromCenter(
-            center: Offset(bx + bs, by), width: bs * 2, height: bs),
-        math.pi, math.pi, false, p,
+        Paint()..color = const Color(0xFF1C2430).withValues(alpha: 0.75),
       );
     }
   }
 
   void _drawGround(Canvas canvas, double w, double h) {
     final groundY = h * 0.74;
+    final dark = AppSettings.instance.isDark;
+    final closeC = dark ? const Color(0xFF2A3618) : Conifer.c400;
+    final midC = dark ? const Color(0xFF243014) : Conifer.c300;
 
-    // Soil base (darkest, right at trunk bottom)
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(w / 2, groundY + 4), width: 100, height: 14),
-      Paint()..color = const Color(0xFF1A0C06).withValues(alpha: 0.55),
-    );
-
-    // Rolling ground layers — palette aware
+    // Rolling flat ground bands.
     canvas.drawPath(
       Path()
         ..moveTo(0, groundY)
@@ -869,9 +855,8 @@ class _TreeSceneBackground extends CustomPainter {
         ..lineTo(w, h)
         ..lineTo(0, h)
         ..close(),
-      Paint()..color = AppPalettes.groundClose(),
+      Paint()..color = closeC,
     );
-
     canvas.drawPath(
       Path()
         ..moveTo(0, groundY + 8)
@@ -880,56 +865,46 @@ class _TreeSceneBackground extends CustomPainter {
         ..lineTo(w, h)
         ..lineTo(0, h)
         ..close(),
-      Paint()..color = AppPalettes.groundMid(),
+      Paint()..color = midC,
     );
 
-    // Horizon edge lighter strip
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, groundY - 1)
-        ..quadraticBezierTo(w * 0.30, groundY - 11, w * 0.60, groundY - 1)
-        ..quadraticBezierTo(w * 0.82, groundY + 5, w, groundY - 3)
-        ..lineTo(w, groundY + 4)
-        ..lineTo(0, groundY + 4)
-        ..close(),
-      Paint()..color = AppPalettes.hillMid().withValues(alpha: 0.55),
-    );
-
-    // Grass blades
+    // A few flat grass blades in the conifer greens.
     final bladePaint = Paint()
       ..strokeWidth = 1.7
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     final rng = math.Random(21);
-    for (int i = 0; i < 48; i++) {
+    for (int i = 0; i < 26; i++) {
       final x = rng.nextDouble() * w;
       final baseY = groundY + (x / w) * 6;
-      final blH = 9 + rng.nextDouble() * 19;
+      final blH = 9 + rng.nextDouble() * 16;
       final lean = (rng.nextDouble() - 0.5) * 13;
-      bladePaint.color = Color.fromRGBO(
-        (18 + (rng.nextDouble() * 28)).round(),
-        (96 + (rng.nextDouble() * 62)).round(),
-        (18 + (rng.nextDouble() * 28)).round(),
-        1,
-      );
+      bladePaint.color = i.isEven ? Conifer.c600 : Conifer.c500;
       canvas.drawLine(
-          Offset(x, baseY), Offset(x + lean, baseY - blH), bladePaint);
+        Offset(x, baseY),
+        Offset(x + lean, baseY - blH),
+        bladePaint,
+      );
     }
 
-    // Wildflowers
+    // Wildflowers: petaled blooms, not plain dots.
     final fColors = [
       const Color(0xFFFFEE58),
       Colors.white,
       const Color(0xFFFF8A65),
       const Color(0xFFCE93D8),
-      const Color(0xFFFFB74D),
     ];
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 12; i++) {
       final x = 15.0 + rng.nextDouble() * (w - 30);
       if ((x - w / 2).abs() < 44) continue;
       final y = groundY + 2 + rng.nextDouble() * h * 0.07;
-      canvas.drawCircle(Offset(x, y), 2.8 + rng.nextDouble() * 1.5,
-          Paint()..color = fColors[i % fColors.length]);
+      Scenery.paintFlower(
+        canvas,
+        Offset(x, y),
+        3.0 + rng.nextDouble() * 1.6,
+        fColors[i % fColors.length],
+        center: i % 2 == 0 ? const Color(0xFFFFEE58) : const Color(0xFFF9A825),
+      );
     }
   }
 
@@ -946,13 +921,23 @@ class _GrowingTreePainter extends CustomPainter {
   final double progress;
   final List<_LeafHit> leafHits;
   final LeafPalette leafPalette;
+  final String totalIncomeLabel;
+  final String rootLabel;
 
-  const _GrowingTreePainter({
+  _GrowingTreePainter({
     required this.budget,
     required this.progress,
     required this.leafHits,
     required this.leafPalette,
+    required this.totalIncomeLabel,
+    required this.rootLabel,
   });
+
+  // Pixel drawing surface, set up once per paint() and shared by the helpers.
+  late PutPixel _put;
+  late double Function(double) _gx;
+  late PixelRamp _bark;
+  late PixelRamp _leaf;
 
   double get trunkProg => (progress / 0.30).clamp(0.0, 1.0);
   double get branchProg => ((progress - 0.30) / 0.30).clamp(0.0, 1.0);
@@ -962,7 +947,8 @@ class _GrowingTreePainter extends CustomPainter {
   double get fallProg => ((progress - 0.90) / 0.10).clamp(0.0, 1.0);
 
   static const double _groundY = 0.74;
-  static const double _trunkTopFrac = 0.22;
+  // A shorter trunk than before so the tree reads compact rather than tall.
+  static const double _trunkTopFrac = 0.38;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -976,6 +962,24 @@ class _GrowingTreePainter extends CustomPainter {
     final trunkTopY = h * _trunkTopFrac;
     final cx = w / 2;
 
+    // Pixel surface: a chunky-but-legible grid at this scene's size.
+    final cell = math.max(2.0, h / 84);
+    final surface = PixelSurface(canvas, cell);
+    _put = surface.put;
+    _gx = (d) => d / cell;
+    _bark = PixelTree.ramp(PixelTree.barkBase);
+    _leaf = PixelTree.ramp(leafPalette.mid);
+
+    if (trunkProg > 0.05) {
+      PixelTree.mound(
+        _put,
+        _gx(cx),
+        _gx(groundY),
+        _gx(w * 0.11),
+        _gx(h * 0.014),
+        PixelTree.ramp(PixelTree.soilBase),
+      );
+    }
     if (trunkProg > 0) _drawTrunk(canvas, cx, groundY, trunkTopY);
     if (crownProg > 0) _drawCrown(canvas, cx, trunkTopY, w);
     if (branchProg > 0 && budget.expenses.isNotEmpty) {
@@ -990,15 +994,14 @@ class _GrowingTreePainter extends CustomPainter {
   // ── Trunk ─────────────────────────────────────
   void _drawTrunk(Canvas canvas, double cx, double groundY, double trunkTopY) {
     final currentTop = groundY - (groundY - trunkTopY) * trunkProg;
-    TreeDrawing.paintTrunk(
-      canvas,
-      base: Offset(cx, groundY),
-      height: groundY - currentTop,
-      baseHalfWidth: 22,
-      topHalfWidth: 9,
-      seed: budget.id.hashCode,
-      drawKnot: trunkProg > 0.6,
-      drawRoots: trunkProg > 0.8,
+    PixelTree.trunk(
+      _put,
+      _gx(cx),
+      _gx(currentTop),
+      _gx(groundY),
+      _gx(18),
+      _gx(44),
+      _bark,
     );
   }
 
@@ -1011,18 +1014,18 @@ class _GrowingTreePainter extends CustomPainter {
     // Shadow ellipse under crown
     canvas.drawOval(
       Rect.fromCenter(
-          center: Offset(cx + 8, trunkTopY + 8),
-          width: 150 * crownProg,
-          height: 22 * crownProg),
+        center: Offset(cx + 8, trunkTopY + 8),
+        width: 150 * crownProg,
+        height: 22 * crownProg,
+      ),
       Paint()
         ..color = Colors.black.withValues(alpha: 0.13 * crownProg)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
     );
 
-    // Organic foliage clusters — back to front, animated outward from
-    // the trunk top during the grow phase.
-    final lp = leafPalette;
-    final seedBase = budget.id.hashCode;
+    // Organic foliage clusters, drawn as one metaball canopy so the crown
+    // reads as a single shaded mass. Radii grow outward during the grow phase.
+    final seedBase = budget.id.hashCode & 0x7fffffff;
     final clusters = [
       (cx - 50, cy + 28, 50.0),
       (cx + 46, cy + 22, 48.0),
@@ -1037,34 +1040,13 @@ class _GrowingTreePainter extends CustomPainter {
       (cx + 10, cy - 62, 28.0),
     ];
 
-    for (int i = 0; i < clusters.length; i++) {
-      final (lx, ly, lr) = clusters[i];
+    final blobs = <CanopyBlob>[];
+    for (final (lx, ly, lr) in clusters) {
       final animX = cx + (lx - cx) * crownProg;
       final animY = cy + (ly - cy) * crownProg;
-      TreeDrawing.paintCluster(
-        canvas,
-        Offset(animX, animY),
-        lr * crownProg,
-        lp,
-        seed: seedBase + i * 19,
-      );
+      blobs.add(CanopyBlob(_gx(animX), _gx(animY), _gx(lr * crownProg * 0.42)));
     }
-
-    // Leaf-fringe accents at the front-facing clusters
-    if (crownProg > 0.7) {
-      for (int i = 0; i < 3; i++) {
-        final (lx, ly, lr) = clusters[4 + i * 2];
-        TreeDrawing.paintLeafFringe(
-          canvas,
-          Offset(lx, ly),
-          lr * crownProg,
-          lp,
-          seed: seedBase + 800 + i,
-          leafCount: 6,
-          leafSize: 8,
-        );
-      }
-    }
+    PixelTree.canopy(_put, blobs, _leaf, seedBase);
 
     // Income text in crown center
     if (incomeProg > 0) {
@@ -1072,7 +1054,7 @@ class _GrowingTreePainter extends CustomPainter {
 
       final labelTp = TextPainter(
         text: TextSpan(
-          text: 'Total Income',
+          text: totalIncomeLabel,
           style: TextStyle(
             color: Colors.white.withValues(alpha: textAlpha * 0.78),
             fontSize: 10,
@@ -1083,7 +1065,9 @@ class _GrowingTreePainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       )..layout();
       labelTp.paint(
-          canvas, Offset(cx - labelTp.width / 2, cy - labelTp.height - 6));
+        canvas,
+        Offset(cx - labelTp.width / 2, cy - labelTp.height - 6),
+      );
 
       final amountTp = TextPainter(
         text: TextSpan(
@@ -1108,16 +1092,24 @@ class _GrowingTreePainter extends CustomPainter {
   }
 
   // ── Branches with named leaf buttons ──────────
-  void _drawBranches(Canvas canvas, double w, double h, double cx,
-      double groundY, double trunkTopY) {
+  void _drawBranches(
+    Canvas canvas,
+    double w,
+    double h,
+    double cx,
+    double groundY,
+    double trunkTopY,
+  ) {
     final cats = budget.expenses;
     final count = cats.length;
 
     for (int i = 0; i < count; i++) {
       final bStart = i / count;
       final bEnd = (i + 1) / count;
-      final localProg =
-          ((branchProg - bStart) / (bEnd - bStart)).clamp(0.0, 1.0);
+      final localProg = ((branchProg - bStart) / (bEnd - bStart)).clamp(
+        0.0,
+        1.0,
+      );
       if (localProg <= 0) continue;
 
       final cat = cats[i];
@@ -1135,17 +1127,20 @@ class _GrowingTreePainter extends CustomPainter {
       final endX = cx + math.cos(angle) * branchLen;
       final endY = attachY - math.sin(angle) * branchLen;
 
-      final startW = (7.0 + pct * 14).clamp(7.0, 21.0);
-      final endW = (startW * 0.28).clamp(2.0, 6.0);
+      // Thicker, less tapered limbs so branches read as real branches.
+      final startW = (16.0 + pct * 22).clamp(14.0, 40.0);
+      final endW = (startW * 0.5).clamp(7.0, 18.0);
 
-      // Curved tapered branch with bark highlight (organic, not a straight stick)
-      TreeDrawing.paintBranch(
-        canvas,
-        Offset(cx, attachY),
-        Offset(endX, endY),
-        startW: startW,
-        endW: endW,
-        bowFactor: 0.08,
+      // Pixel branch limb.
+      PixelTree.limb(
+        _put,
+        _gx(cx),
+        _gx(attachY),
+        _gx(endX),
+        _gx(endY),
+        _gx(startW),
+        _gx(endW),
+        _bark,
       );
 
       // Named leaf at branch tip
@@ -1158,14 +1153,16 @@ class _GrowingTreePainter extends CustomPainter {
           cat: cat,
           prog: leafProg,
         );
-        leafHits.add(_LeafHit(
-          rect: Rect.fromCenter(
-            center: Offset(endX, endY),
-            width: 88,
-            height: 88,
+        leafHits.add(
+          _LeafHit(
+            rect: Rect.fromCenter(
+              center: Offset(endX, endY),
+              width: 88,
+              height: 88,
+            ),
+            category: cat,
           ),
-          category: cat,
-        ));
+        );
       }
     }
   }
@@ -1179,94 +1176,26 @@ class _GrowingTreePainter extends CustomPainter {
     required ExpenseCategory cat,
     required double prog,
   }) {
-    const leafW = 30.0;
-    const leafH = 50.0;
-
-    final leafAngle = goLeft ? -math.pi / 4 : math.pi / 4;
-
-    canvas.save();
-    canvas.translate(tipX, tipY);
-    canvas.rotate(leafAngle);
-    canvas.scale(prog);
-
-    // Drop shadow
-    canvas.drawPath(
-      Path()
-        ..moveTo(1.5, -leafH + 2)
-        ..cubicTo(leafW * 0.95 + 1.5, -leafH * 0.25 + 2, leafW * 0.95 + 1.5,
-            leafH * 0.55 + 2, 1.5, leafH * 0.22 + 2)
-        ..cubicTo(-leafW * 0.95 + 1.5, leafH * 0.55 + 2, -leafW * 0.95 + 1.5,
-            -leafH * 0.25 + 2, 1.5, -leafH + 2)
-        ..close(),
-      Paint()..color = Colors.black.withValues(alpha: 0.20),
-    );
-
-    // Leaf body — rich gradient
-    final leafPath = Path()
-      ..moveTo(0, -leafH)
-      ..cubicTo(leafW * 0.95, -leafH * 0.25, leafW * 0.95, leafH * 0.55, 0,
-          leafH * 0.22)
-      ..cubicTo(-leafW * 0.95, leafH * 0.55, -leafW * 0.95, -leafH * 0.25, 0,
-          -leafH)
-      ..close();
-
-    final lp = leafPalette;
-    canvas.drawPath(
-      leafPath,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [lp.light, lp.mid, lp.dark],
-          stops: const [0.0, 0.45, 1.0],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ).createShader(
-            Rect.fromLTWH(-leafW, -leafH, leafW * 2, leafH * 1.3)),
-    );
-
-    // Outline
-    canvas.drawPath(
-      leafPath,
-      Paint()
-        ..color = lp.outline
-        ..strokeWidth = 1.4
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Central vein
-    canvas.drawLine(
-      Offset(0, -leafH * 0.85),
-      Offset(0, leafH * 0.18),
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.28)
-        ..strokeWidth = 1.0
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Side veins
-    for (int i = 1; i <= 3; i++) {
-      final t = i / 4.0;
-      final vy = -leafH * 0.75 + leafH * 1.2 * t;
-      final vx = leafW * 0.55 * (1 - t * 0.3);
-      final sidePaint = Paint()
-        ..color = Colors.white.withValues(alpha: 0.14)
-        ..strokeWidth = 0.7
-        ..style = PaintingStyle.stroke;
-      canvas.drawLine(Offset(0, vy), Offset(vx, vy + 6), sidePaint);
-      canvas.drawLine(Offset(0, vy), Offset(-vx, vy + 6), sidePaint);
+    // Pixel leaf blob at the branch tip, growing in with prog.
+    final pct = budget.percentageFor(cat);
+    final r = (20 + pct * 14) * prog;
+    if (r > 0.5) {
+      PixelTree.canopy(
+        _put,
+        [
+          CanopyBlob(_gx(tipX), _gx(tipY), _gx(r), k: 0.95),
+          CanopyBlob(
+            _gx(tipX - (goLeft ? r * 0.5 : -r * 0.5)),
+            _gx(tipY + r * 0.35),
+            _gx(r * 0.6),
+          ),
+        ],
+        _leaf,
+        (cat.name.hashCode) & 0x7fffffff,
+      );
     }
 
-    // Sunlit highlight oval (upper portion)
-    canvas.drawOval(
-      Rect.fromCenter(
-          center: Offset(-leafW * 0.22, -leafH * 0.42),
-          width: leafW * 0.45,
-          height: leafH * 0.30),
-      Paint()..color = Colors.white.withValues(alpha: 0.14),
-    );
-
-    canvas.restore();
-
-    // Label (drawn in screen space, unrotated): icon glyph + category name
+    // Label (drawn in screen space): icon glyph + category name
     if (prog > 0.55) {
       final textAlpha = ((prog - 0.55) / 0.45).clamp(0.0, 1.0);
       final iconData = CategoryIcons.forKey(cat.emoji);
@@ -1307,7 +1236,10 @@ class _GrowingTreePainter extends CustomPainter {
       final totalH = iconTp.height + 2 + nameTp.height;
       final topY = tipY - totalH / 2 - 2;
       iconTp.paint(canvas, Offset(tipX - iconTp.width / 2, topY));
-      nameTp.paint(canvas, Offset(tipX - nameTp.width / 2, topY + iconTp.height + 2));
+      nameTp.paint(
+        canvas,
+        Offset(tipX - nameTp.width / 2, topY + iconTp.height + 2),
+      );
     }
   }
 
@@ -1337,7 +1269,10 @@ class _GrowingTreePainter extends CustomPainter {
       // Leaf shadow
       canvas.drawOval(
         Rect.fromCenter(
-            center: const Offset(1, 1), width: sz * 1.6, height: sz * 0.6),
+          center: const Offset(1, 1),
+          width: sz * 1.6,
+          height: sz * 0.6,
+        ),
         Paint()..color = Colors.black.withValues(alpha: 0.15),
       );
 
@@ -1347,10 +1282,11 @@ class _GrowingTreePainter extends CustomPainter {
         ..cubicTo(-sz, sz * 0.7, -sz, -sz * 0.3, 0, -sz)
         ..close();
       canvas.drawPath(
-          path,
-          Paint()
-            ..color = colors[i % colors.length].withValues(alpha: 0.90)
-            ..style = PaintingStyle.fill);
+        path,
+        Paint()
+          ..color = colors[i % colors.length].withValues(alpha: 0.90)
+          ..style = PaintingStyle.fill,
+      );
 
       // Leaf vein
       canvas.drawLine(
@@ -1372,12 +1308,10 @@ class _GrowingTreePainter extends CustomPainter {
     if (alpha <= 0) return;
 
     final isOver = budget.remaining < 0;
-    final text = isOver
-        ? 'Over budget: \$${(-budget.remaining).toStringAsFixed(2)}'
-        : 'Unallocated: \$${budget.remaining.toStringAsFixed(2)}';
+    final text = rootLabel;
     final labelIcon = isOver ? Icons.warning : Icons.eco;
-    final labelColor =
-        (isOver ? AppColors.dangerRed : AppColors.leafYellow).withValues(alpha: alpha);
+    final labelColor = (isOver ? AppColors.dangerRed : AppColors.leafYellow)
+        .withValues(alpha: alpha);
     final shadow = Shadow(
       color: Colors.black.withValues(alpha: alpha * 0.6),
       offset: const Offset(0, 1),
@@ -1417,18 +1351,24 @@ class _GrowingTreePainter extends CustomPainter {
       height: tp.height + 12,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(pillRect, const Radius.circular(14)),
+      RRect.fromRectAndRadius(pillRect, Radius.zero),
       Paint()..color = Colors.black.withValues(alpha: alpha * 0.32),
     );
 
     final startX = cx - totalW / 2;
     final baseY = groundY + 16;
-    iconTp.paint(canvas, Offset(startX, baseY + (tp.height - iconTp.height) / 2));
+    iconTp.paint(
+      canvas,
+      Offset(startX, baseY + (tp.height - iconTp.height) / 2),
+    );
     tp.paint(canvas, Offset(startX + iconTp.width + 5, baseY));
   }
 
   @override
-  bool shouldRepaint(_GrowingTreePainter old) => old.progress != progress;
+  bool shouldRepaint(_GrowingTreePainter old) =>
+      old.progress != progress ||
+      old.totalIncomeLabel != totalIncomeLabel ||
+      old.rootLabel != rootLabel;
 }
 
 // ──────────────────────────────────────────────
@@ -1461,7 +1401,12 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
 
   Future<void> _loadGoals() async {
     final g = await GoalRepository.loadAll();
-    if (mounted) setState(() { _allGoals = g; _loaded = true; });
+    if (mounted) {
+      setState(() {
+        _allGoals = g;
+        _loaded = true;
+      });
+    }
   }
 
   Future<void> _toggleLink(Goal goal) async {
@@ -1481,6 +1426,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
   }
 
   void _openLinkPicker() {
+    final l = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1489,7 +1435,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
         return Container(
           decoration: const BoxDecoration(
             color: Color(0xFF0E2110),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+            borderRadius: BorderRadius.vertical(top: Radius.zero),
           ),
           padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
           child: StatefulBuilder(
@@ -1504,23 +1450,27 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       height: 4,
                       decoration: BoxDecoration(
                         color: AppColors.mossGreen.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.zero,
                       ),
                     ),
                   ),
                   const SizedBox(height: 18),
-                  Text('Link this branch to goals',
-                      style: GoogleFonts.fredoka(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.stoneBeigeColor,
-                          fontSize: 20)),
+                  Text(
+                    l.linkBranchToGoals,
+                    style: GoogleFonts.pixelifySans(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.stoneBeigeColor,
+                      fontSize: 20,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                    'Select goals that this "${widget.category.name}" branch supports.',
+                    l.selectGoalsBranch(widget.category.name),
                     style: GoogleFonts.nunito(
-                        color: AppColors.mossGreen,
-                        fontSize: 12.5,
-                        height: 1.4),
+                      color: AppColors.mossGreen,
+                      fontSize: 12.5,
+                      height: 1.4,
+                    ),
                   ),
                   const SizedBox(height: 18),
                   if (_allGoals.isEmpty)
@@ -1529,27 +1479,35 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: AppColors.soilMid,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.zero,
                         border: Border.all(
-                            color: AppColors.mossGreen.withValues(alpha: 0.3)),
+                          color: AppColors.mossGreen.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Column(
                         children: [
-                          const Icon(Icons.spa_outlined,
-                              color: AppColors.lightLeaf, size: 36),
+                          Icon(
+                            Icons.spa_outlined,
+                            color: AppColors.forestGreen,
+                            size: 36,
+                          ),
                           const SizedBox(height: 10),
-                          Text('No goals planted yet',
-                              style: GoogleFonts.nunito(
-                                  color: AppColors.stoneBeigeColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold)),
+                          Text(
+                            l.noGoalsPlanted,
+                            style: GoogleFonts.nunito(
+                              color: AppColors.stoneBeigeColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Text(
-                            'Create a goal sapling in the Grove and come back to link it.',
+                            l.createGoalComeBack,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen,
-                                fontSize: 12),
+                              color: AppColors.mossGreen,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
@@ -1561,8 +1519,8 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                         itemCount: _allGoals.length,
                         itemBuilder: (lc, i) {
                           final g = _allGoals[i];
-                          final isLinked =
-                              widget.category.linkedGoalIds.contains(g.id);
+                          final isLinked = widget.category.linkedGoalIds
+                              .contains(g.id);
                           return _GoalLinkTile(
                             goal: g,
                             linked: isLinked,
@@ -1579,17 +1537,17 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.forestGreen,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Navigator.pop(ctx),
-                      child: Text('Done',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15)),
+                      child: Text(
+                        l.done,
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -1603,6 +1561,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cat = widget.category;
     final pct = (widget.budget.percentageFor(cat) * 100).toStringAsFixed(1);
     final linkedGoals = _allGoals
@@ -1611,18 +1570,15 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppPalettes.deepForest().colors.last,
-            const Color(0xFF050805),
-          ],
-        ),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+        color: AppTokens.current.card,
+        borderRadius: const BorderRadius.vertical(top: Radius.zero),
       ),
       padding: EdgeInsets.fromLTRB(
-          24, 18, 24, MediaQuery.of(context).viewInsets.bottom + 28),
+        24,
+        18,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1635,7 +1591,7 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 margin: const EdgeInsets.only(bottom: 22),
                 decoration: BoxDecoration(
                   color: AppColors.mossGreen.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
             ),
@@ -1646,12 +1602,15 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                   padding: const EdgeInsets.all(13),
                   decoration: BoxDecoration(
                     color: AppColors.forestGreen.withValues(alpha: 0.25),
-                    shape: BoxShape.circle,
                     border: Border.all(
-                        color: AppColors.forestGreen.withValues(alpha: 0.4)),
+                      color: AppColors.forestGreen.withValues(alpha: 0.4),
+                    ),
                   ),
-                  child: Icon(CategoryIcons.forKey(cat.emoji),
-                      size: 30, color: AppColors.lightLeaf),
+                  child: Icon(
+                    CategoryIcons.forKey(cat.emoji),
+                    size: 30,
+                    color: AppColors.forestGreen,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -1660,14 +1619,14 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                     children: [
                       Text(
                         cat.name,
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.pixelifySans(
                           fontWeight: FontWeight.w600,
                           color: AppColors.stoneBeigeColor,
                           fontSize: 24,
                         ),
                       ),
                       Text(
-                        '$pct% of your income',
+                        l.percentOfIncome(pct),
                         style: GoogleFonts.nunito(
                           color: AppColors.mossGreen,
                           fontSize: 13,
@@ -1684,49 +1643,91 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.darkBark.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
-                    color: AppColors.forestGreen.withValues(alpha: 0.25)),
+                  color: AppColors.forestGreen.withValues(alpha: 0.25),
+                ),
               ),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Allocated',
-                          style: GoogleFonts.nunito(
-                              color: AppColors.mossGreen, fontSize: 14)),
                       Text(
-                        '\$${cat.allocated.toStringAsFixed(2)}',
-                        style: GoogleFonts.fredoka(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.lightLeaf,
-                          fontSize: 28,
+                        l.allocated,
+                        style: GoogleFonts.nunito(
+                          color: AppColors.mossGreen,
+                          fontSize: 14,
                         ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '\$${cat.allocated.toStringAsFixed(2)}',
+                            style: GoogleFonts.pixelifySans(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.forestGreen,
+                              fontSize: 28,
+                            ),
+                          ),
+                          if (cat.frequency != null)
+                            Text(
+                              cat.frequency!.localizedLabel(l),
+                              style: GoogleFonts.nunito(
+                                color: AppColors.mossGreen,
+                                fontSize: 12,
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
+                  // The saving advice this feature exists for: when the bill's
+                  // rhythm differs from the budget cycle, spell out how much
+                  // to put away each cycle so the money is ready when it lands.
+                  if (cat.frequency != null &&
+                      widget.budget.payFrequency != null &&
+                      cat.frequency != widget.budget.payFrequency) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l.setAsideEachCycle(
+                        '\$${cat.allocatedPerCycle(widget.budget.payFrequency).toStringAsFixed(0)}',
+                      ),
+                      style: GoogleFonts.nunito(
+                        color: AppColors.mossGreen,
+                        fontSize: 11.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
+                    borderRadius: BorderRadius.zero,
+                    child: PixelBar(
                       value: widget.budget.percentageFor(cat),
-                      minHeight: 12,
-                      backgroundColor: AppColors.soilMid,
-                      valueColor: const AlwaysStoppedAnimation(AppColors.lightLeaf),
+                      height: 12,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('\$0',
-                          style: GoogleFonts.nunito(
-                              color: AppColors.mossGreen, fontSize: 11)),
                       Text(
-                        'of \$${widget.budget.totalIncome.toStringAsFixed(2)} income',
+                        '\$0',
                         style: GoogleFonts.nunito(
-                            color: AppColors.mossGreen, fontSize: 11),
+                          color: AppColors.mossGreen,
+                          fontSize: 11,
+                        ),
+                      ),
+                      Text(
+                        l.ofIncome(
+                          '\$${widget.budget.totalIncome.toStringAsFixed(2)}',
+                        ),
+                        style: GoogleFonts.nunito(
+                          color: AppColors.mossGreen,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -1740,12 +1741,14 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.link,
-                        size: 16,
-                        color: AppColors.mossGreen.withValues(alpha: 0.85)),
+                    Icon(
+                      Icons.link,
+                      size: 16,
+                      color: AppColors.mossGreen.withValues(alpha: 0.85),
+                    ),
                     const SizedBox(width: 6),
                     Text(
-                      'LINKED GOALS',
+                      l.linkedGoalsUpper,
                       style: GoogleFonts.nunito(
                         color: AppColors.mossGreen.withValues(alpha: 0.85),
                         fontSize: 11,
@@ -1757,22 +1760,27 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 ),
                 TextButton.icon(
                   onPressed: _loaded ? _openLinkPicker : null,
-                  icon: const Icon(Icons.add,
-                      color: AppColors.lightLeaf, size: 16),
-                  label: Text('Link…',
-                      style: GoogleFonts.nunito(
-                          color: AppColors.lightLeaf,
-                          fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.add, color: AppColors.forestGreen, size: 16),
+                  label: Text(
+                    l.linkEllipsis,
+                    style: GoogleFonts.nunito(
+                      color: AppColors.forestGreen,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
             if (!_loaded)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(
-                    child: CircularProgressIndicator(
-                        color: AppColors.lightLeaf, strokeWidth: 2)),
+                  child: CircularProgressIndicator(
+                    color: AppColors.forestGreen,
+                    strokeWidth: 2,
+                  ),
+                ),
               )
             else if (linkedGoals.isEmpty)
               Container(
@@ -1780,16 +1788,18 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: AppColors.soilMid.withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(
-                      color: AppColors.mossGreen.withValues(alpha: 0.2)),
+                    color: AppColors.mossGreen.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Text(
-                  'This branch isn\'t funding any goals yet. Tap "Link…" to connect it to saplings in the Grove.',
+                  l.notFundingGoals,
                   style: GoogleFonts.nunito(
-                      color: AppColors.mossGreen,
-                      fontSize: 12,
-                      height: 1.5),
+                    color: AppColors.mossGreen,
+                    fontSize: 12,
+                    height: 1.5,
+                  ),
                 ),
               )
             else
@@ -1797,10 +1807,12 @@ class _LeafDetailSheetState extends State<_LeafDetailSheet> {
                 spacing: 8,
                 runSpacing: 8,
                 children: linkedGoals
-                    .map((g) => _LinkedGoalChip(
-                          goal: g,
-                          onRemove: () => _toggleLink(g),
-                        ))
+                    .map(
+                      (g) => _LinkedGoalChip(
+                        goal: g,
+                        onRemove: () => _toggleLink(g),
+                      ),
+                    )
                     .toList(),
               ),
           ],
@@ -1821,15 +1833,19 @@ class _LinkedGoalChip extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
       decoration: BoxDecoration(
         color: AppColors.forestGreen.withValues(alpha: 0.30),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.zero,
         border: Border.all(
-            color: AppColors.lightLeaf.withValues(alpha: 0.55)),
+          color: AppColors.forestGreen.withValues(alpha: 0.55),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(GoalIcons.forKey(goal.iconKey),
-              color: AppColors.lightLeaf, size: 14),
+          Icon(
+            GoalIcons.forKey(goal.iconKey),
+            color: AppColors.forestGreen,
+            size: 14,
+          ),
           const SizedBox(width: 6),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 130),
@@ -1848,20 +1864,26 @@ class _LinkedGoalChip extends StatelessWidget {
           Text(
             '${(goal.progress * 100).toStringAsFixed(0)}%',
             style: GoogleFonts.nunito(
-                color: AppColors.lightLeaf,
-                fontSize: 11,
-                fontWeight: FontWeight.bold),
+              color: AppColors.forestGreen,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           IconButton(
             iconSize: 13,
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(
-                minWidth: 20, minHeight: 20, maxHeight: 20),
+              minWidth: 20,
+              minHeight: 20,
+              maxHeight: 20,
+            ),
             onPressed: onRemove,
-            icon: Icon(Icons.close,
-                color: AppColors.mossGreen.withValues(alpha: 0.65),
-                size: 13),
+            icon: Icon(
+              Icons.close,
+              color: AppColors.mossGreen.withValues(alpha: 0.65),
+              size: 13,
+            ),
           ),
         ],
       ),
@@ -1873,14 +1895,17 @@ class _GoalLinkTile extends StatelessWidget {
   final Goal goal;
   final bool linked;
   final VoidCallback onTap;
-  const _GoalLinkTile(
-      {required this.goal, required this.linked, required this.onTap});
+  const _GoalLinkTile({
+    required this.goal,
+    required this.linked,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
@@ -1889,28 +1914,35 @@ class _GoalLinkTile extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppColors.forestGreen.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
               ),
-              child: Icon(GoalIcons.forKey(goal.iconKey),
-                  color: AppColors.lightLeaf, size: 18),
+              child: Icon(
+                GoalIcons.forKey(goal.iconKey),
+                color: AppColors.forestGreen,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(goal.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.nunito(
-                          color: AppColors.stoneBeigeColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold)),
+                  Text(
+                    goal.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.nunito(
+                      color: AppColors.stoneBeigeColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     '\$${goal.currentAmount.toStringAsFixed(0)} of \$${goal.targetAmount.toStringAsFixed(0)} · ${(goal.progress * 100).toStringAsFixed(0)}%',
                     style: GoogleFonts.nunito(
-                        color: AppColors.mossGreen, fontSize: 11),
+                      color: AppColors.mossGreen,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -1920,13 +1952,13 @@ class _GoalLinkTile extends StatelessWidget {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: linked ? AppColors.lightLeaf : Colors.transparent,
+                color: linked ? AppColors.forestGreen : Colors.transparent,
                 border: Border.all(
-                    color: linked
-                        ? AppColors.lightLeaf
-                        : AppColors.mossGreen.withValues(alpha: 0.55),
-                    width: 1.6),
+                  color: linked
+                      ? AppColors.forestGreen
+                      : AppColors.mossGreen.withValues(alpha: 0.55),
+                  width: 1.6,
+                ),
               ),
               child: linked
                   ? const Icon(Icons.check, color: Colors.white, size: 14)
@@ -1985,52 +2017,49 @@ class _ClockAndNextPayState extends State<_ClockAndNextPay> {
     return '${_two(h)}:${_two(m)} · $zone';
   }
 
-  String? get _nextPayLabel {
+  String? _nextPayLabel(AppLocalizations l) {
     final next = PayScheduler.nextPayDate(widget.budget, _now);
     if (next == null) return null;
     final diff = next.difference(_now);
-    String when;
-    if (diff.isNegative) {
-      when = 'now';
-    } else if (diff.inDays == 0) {
-      when = 'today ${_two(next.hour)}:${_two(next.minute)}';
-    } else if (diff.inDays == 1) {
-      when = 'tomorrow';
-    } else if (diff.inDays < 7) {
-      when = 'in ${diff.inDays} days';
-    } else {
-      when = '${next.month}/${next.day}/${next.year}';
+    if (diff.isNegative) return l.timeNow;
+    if (diff.inDays == 0) {
+      return l.timeToday('${_two(next.hour)}:${_two(next.minute)}');
     }
-    return when;
+    if (diff.inDays == 1) return l.timeTomorrow;
+    if (diff.inDays < 7) return l.timeInDays(diff.inDays);
+    return '${next.month}/${next.day}/${next.year}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final nextPay = _nextPayLabel;
+    final l = AppLocalizations.of(context);
+    final nextPay = _nextPayLabel(l);
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Row(
         children: [
-          const Icon(Icons.schedule,
-              size: 11, color: Colors.white70),
+          Icon(
+            Icons.schedule,
+            size: 11,
+            color: AppTokens.current.textSecondary,
+          ),
           const SizedBox(width: 4),
           Text(
             _localTime,
             style: GoogleFonts.nunito(
-              color: Colors.white.withValues(alpha: 0.78),
+              color: AppTokens.current.textSecondary,
               fontSize: 11,
             ),
           ),
           if (nextPay != null) ...[
             const SizedBox(width: 10),
-            const Icon(Icons.event,
-                size: 11, color: Colors.white70),
+            Icon(Icons.event, size: 11, color: AppTokens.current.textSecondary),
             const SizedBox(width: 4),
             Flexible(
               child: Text(
-                'next pay $nextPay',
+                l.nextPayLine(nextPay),
                 style: GoogleFonts.nunito(
-                  color: Colors.white.withValues(alpha: 0.78),
+                  color: AppTokens.current.textSecondary,
                   fontSize: 11,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -2059,7 +2088,7 @@ class _SuggestionTile extends StatelessWidget {
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
@@ -2067,10 +2096,7 @@ class _SuggestionTile extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.18),
-            ),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.18)),
             child: Icon(suggestion.icon, color: color, size: 18),
           ),
           const SizedBox(width: 12),
@@ -2099,6 +2125,83 @@ class _SuggestionTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// INCOME / ALLOCATED / LEFT — the three numbers the handoff pins under the
+/// tree's hero, so the state of the budget is legible without opening a branch.
+/// LEFT turns gold when there is money spare and red once over-allocated.
+class _TreeStatStrip extends StatelessWidget {
+  final BudgetModel budget;
+  const _TreeStatStrip({required this.budget});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.of(context);
+    final left = budget.remaining;
+    final over = left < 0;
+
+    Widget cell(String label, String value, Color ink, {bool last = false}) =>
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+            decoration: BoxDecoration(
+              border: last
+                  ? null
+                  : Border(right: BorderSide(color: t.track, width: 2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.label(9, t.textSecondary),
+                ),
+                const SizedBox(height: 3),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(value, style: AppTheme.display(18, ink)),
+                ),
+              ],
+            ),
+          ),
+        );
+
+    return PixelBox(
+      margin: const EdgeInsets.symmetric(horizontal: 14),
+      padding: EdgeInsets.zero,
+      drop: AppDims.dropSmall,
+      // Same rule as the profile's stat blocks: stretch needs a bounded
+      // height, and a PixelBox sizes to its child, so wrap it.
+      child: IntrinsicHeight(
+        child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          cell(
+            l.totalIncome,
+            '\$${budget.totalIncome.toStringAsFixed(0)}',
+            t.textPrimary,
+          ),
+          cell(
+            l.allocated,
+            '\$${budget.totalAllocated.toStringAsFixed(0)}',
+            t.accentStrong,
+          ),
+          cell(
+            over ? l.overLabel : l.leftLabel,
+            '\$${left.abs().toStringAsFixed(0)}',
+            over ? t.danger : t.gold,
+            last: true,
+          ),
+        ],
+        ),
       ),
     );
   }

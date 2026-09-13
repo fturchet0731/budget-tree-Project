@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../services/app_settings.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_content.dart';
+import '../tutorial/tutorial_overlay.dart' show TapContinueHint;
 import 'acorn_mascot.dart';
 
 /// An in-screen Acorn coach that lives *on* a real screen and explains the
@@ -11,7 +15,9 @@ import 'acorn_mascot.dart';
 /// It's compact, collapsible, and **draggable** — the user can grab Acorn and
 /// move his tip anywhere on the screen so it never sits over the field they're
 /// filling in. Read the tip, tap "Got it" to shrink him into a corner pill, do
-/// the task, then tap him again to re-read. When the host changes [lessonKey]
+/// the task, then tap him again to re-read. Dragging the tip off the left or
+/// right edge tucks Acorn away entirely, leaving a little edge handle; tap or
+/// swipe that handle inward to bring him back. When the host changes [lessonKey]
 /// (e.g. the user advances to the next form step), the coach automatically
 /// re-opens with the new [lines].
 ///
@@ -27,11 +33,18 @@ class AcornCoach extends StatefulWidget {
   /// Where the panel first appears before the user drags it.
   final Alignment initialAlignment;
 
+  /// The widgets Acorn can point at, keyed by [TutorialStep.highlightId].
+  /// While a line with a highlight id is on screen, the coach draws a pulsing
+  /// ring around the matching widget so the user knows what he's talking
+  /// about. Ids without a live widget (e.g. scrolled away) are just skipped.
+  final Map<String, GlobalKey>? targets;
+
   const AcornCoach({
     super.key,
     required this.lessonKey,
     required this.lines,
     this.initialAlignment = const Alignment(-0.85, 0.62),
+    this.targets,
   });
 
   @override
@@ -45,6 +58,11 @@ class _AcornCoachState extends State<AcornCoach>
   late Animation<int> _chars;
   bool _expanded = true;
   int _index = 0;
+
+  /// When true, Acorn has been swiped off-screen and only a small edge handle
+  /// remains; [_hiddenOnRight] records which edge he tucked behind.
+  bool _hidden = false;
+  bool _hiddenOnRight = false;
 
   /// Top-left of the floating panel within the host box. Null until the first
   /// layout, when we seed it from [initialAlignment].
@@ -68,6 +86,12 @@ class _AcornCoachState extends State<AcornCoach>
       // New step — re-open and start fresh (keep wherever it was dragged to).
       _index = 0;
       _expanded = true;
+      // If Acorn was swiped away, bring him back so the new tip is seen. His
+      // stored position is off-screen, so re-seed it to the default corner.
+      if (_hidden) {
+        _hidden = false;
+        _pos = null;
+      }
       _startLine();
     }
   }
@@ -114,11 +138,56 @@ class _AcornCoachState extends State<AcornCoach>
     final panel = _panelKey.currentContext?.size ?? const Size(300, 150);
     final next = (_pos ?? Offset.zero) + d.delta;
     const m = 4.0;
-    // Keep the panel from being dragged off-screen.
-    final maxX = (area.width - panel.width - m).clamp(m, double.infinity);
+    // Allow the panel to be pushed well past the left/right edges so the user
+    // can swipe Acorn off-screen; only a sliver needs to stay grabbable. The
+    // vertical axis stays inside the host box.
+    final minX = -panel.width + 40;
+    final maxX = area.width - 40;
     final maxY = (area.height - panel.height - m).clamp(m, double.infinity);
     setState(() {
-      _pos = Offset(next.dx.clamp(m, maxX), next.dy.clamp(m, maxY));
+      _pos = Offset(next.dx.clamp(minX, maxX), next.dy.clamp(m, maxY));
+    });
+  }
+
+  /// On release, decide whether Acorn was flung far enough past an edge to be
+  /// tucked away into a handle, or should snap back fully on-screen.
+  void _onDragEnd(Size area) {
+    final panel = _panelKey.currentContext?.size ?? const Size(300, 150);
+    final pos = _pos ?? Offset.zero;
+    final offLeft = -pos.dx; // how far the left edge is past the screen edge
+    final offRight = (pos.dx + panel.width) - area.width;
+    final threshold = panel.width * 0.4;
+    if (offLeft > threshold) {
+      setState(() {
+        _hidden = true;
+        _hiddenOnRight = false;
+      });
+    } else if (offRight > threshold) {
+      setState(() {
+        _hidden = true;
+        _hiddenOnRight = true;
+      });
+    } else {
+      // Snap back so no part is left hanging off an edge.
+      const m = 4.0;
+      final maxX = (area.width - panel.width - m).clamp(m, double.infinity);
+      setState(() {
+        _pos = Offset(pos.dx.clamp(m, maxX), pos.dy);
+      });
+    }
+  }
+
+  /// Bring Acorn back from his hidden edge, parked just inside that edge at the
+  /// height the handle was resting at.
+  void _restoreFromHidden(Size area) {
+    final panel = _panelKey.currentContext?.size ?? const Size(300, 150);
+    const m = 8.0;
+    final maxX = (area.width - panel.width - m).clamp(m, double.infinity);
+    final maxY = (area.height - panel.height - m).clamp(m, double.infinity);
+    final y = (_pos?.dy ?? area.height * 0.5).clamp(m, maxY);
+    setState(() {
+      _hidden = false;
+      _pos = Offset(_hiddenOnRight ? maxX : m, y.toDouble());
     });
   }
 
@@ -136,8 +205,17 @@ class _AcornCoachState extends State<AcornCoach>
         final estimate =
             Size(area.width.clamp(0, 340).toDouble() - 24, 150);
         final pos = _pos ??= _seedPos(area, estimate);
+        if (_hidden) return _buildHiddenHandle(area);
+        final highlightKey = _line.highlightId == null
+            ? null
+            : widget.targets?[_line.highlightId];
         return Stack(
           children: [
+            // Ring around whatever the current line is talking about.
+            if (_expanded && highlightKey != null)
+              Positioned.fill(
+                child: TargetHighlightRing(targetKey: highlightKey),
+              ),
             Positioned(
               left: pos.dx,
               top: pos.dy,
@@ -145,6 +223,7 @@ class _AcornCoachState extends State<AcornCoach>
                 behavior: HitTestBehavior.opaque,
                 onTap: _onTap,
                 onPanUpdate: (d) => _onDrag(d, area),
+                onPanEnd: (_) => _onDragEnd(area),
                 child: KeyedSubtree(
                   key: _panelKey,
                   child: AnimatedSize(
@@ -163,20 +242,64 @@ class _AcornCoachState extends State<AcornCoach>
     );
   }
 
+  /// The little tab that peeks from an edge once Acorn has been swiped away.
+  /// Tapping it, or swiping it back inward, restores the coach.
+  Widget _buildHiddenHandle(Size area) {
+    const handleH = 88.0;
+    final maxTop = (area.height - handleH - 8).clamp(8.0, double.infinity);
+    final top = (_pos?.dy ?? area.height * 0.5).clamp(8.0, maxTop);
+    return Stack(
+      children: [
+        Positioned(
+          top: top.toDouble(),
+          left: _hiddenOnRight ? null : 0,
+          right: _hiddenOnRight ? 0 : null,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _restoreFromHidden(area),
+            onHorizontalDragUpdate: (d) {
+              // A nudge inward (away from the edge) brings Acorn back.
+              final inward = _hiddenOnRight ? -d.delta.dx : d.delta.dx;
+              if (inward > 6) _restoreFromHidden(area);
+            },
+            child: Container(
+              width: 34,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: AppTokens.current.card,
+                borderRadius: _hiddenOnRight
+                    ? const BorderRadius.horizontal(left: Radius.zero)
+                    : const BorderRadius.horizontal(right: Radius.zero),
+                border: Border.all(color: AppTokens.current.cardBorder),
+                boxShadow: AppShadows.card,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AcornMascot(size: 26, sway: true),
+                  const SizedBox(height: 4),
+                  Icon(
+                    _hiddenOnRight ? Icons.chevron_left : Icons.chevron_right,
+                    size: 16,
+                    color: AppColors.barkBrown,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildCollapsed() {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFDF6E3),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.barkBrown, width: 2.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        color: AppTokens.current.card,
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: AppTokens.current.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -184,8 +307,8 @@ class _AcornCoachState extends State<AcornCoach>
           const AcornMascot(size: 34, sway: true),
           const SizedBox(width: 6),
           Text(
-            "Acorn's tip",
-            style: GoogleFonts.fredoka(
+            AppLocalizations.of(context).coachAcornTip,
+            style: GoogleFonts.pixelifySans(
               fontWeight: FontWeight.w600,
               fontSize: 13,
               color: AppColors.barkBrown,
@@ -203,20 +326,10 @@ class _AcornCoachState extends State<AcornCoach>
       constraints: const BoxConstraints(maxWidth: 360),
       padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFDF6E3), Color(0xFFF3E6C8)],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.barkBrown, width: 3),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 7),
-          ),
-        ],
+        color: AppTokens.current.card,
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: AppTokens.current.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -241,8 +354,8 @@ class _AcornCoachState extends State<AcornCoach>
                         size: 15, color: AppColors.barkBrown),
                     const SizedBox(width: 3),
                     Text(
-                      'Acorn',
-                      style: GoogleFonts.fredoka(
+                      _line.speaker,
+                      style: GoogleFonts.pixelifySans(
                         fontWeight: FontWeight.w600,
                         fontSize: 12.5,
                         color: AppColors.barkBrown,
@@ -276,23 +389,21 @@ class _AcornCoachState extends State<AcornCoach>
                       fontSize: 14.5,
                       height: 1.35,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF3A2A18),
+                      color: AppTokens.current.textPrimary,
                     ),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Text(
-                    _typing
-                        ? ''
-                        : _isLast
-                            ? 'Got it! ▸'
-                            : 'Tap ▸',
-                    style: GoogleFonts.nunito(
+                  child: AnimatedOpacity(
+                    opacity: _typing ? 0 : 1,
+                    duration: const Duration(milliseconds: 200),
+                    child: TapContinueHint(
+                      hint: _isLast
+                          ? AppLocalizations.of(context).coachGotIt
+                          : AppLocalizations.of(context).tourTapContinue,
                       fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.forestGreen,
                     ),
                   ),
                 ),
@@ -300,6 +411,100 @@ class _AcornCoachState extends State<AcornCoach>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A pulsing ring drawn around the widget a [TutorialStep.highlightId] points
+/// at, so the user can see exactly what Acorn is talking about. Hosted inside
+/// the coach's stack (which fills the screen area); it ignores pointers so
+/// the highlighted widget stays fully usable.
+class TargetHighlightRing extends StatefulWidget {
+  final GlobalKey targetKey;
+  const TargetHighlightRing({super.key, required this.targetKey});
+
+  @override
+  State<TargetHighlightRing> createState() => _TargetHighlightRingState();
+}
+
+class _TargetHighlightRingState extends State<TargetHighlightRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    // The controller both pulses the ring and keeps its position tracking the
+    // target (which can move as the list scrolls). With reduced motion the
+    // ring is drawn static; the ticker only re-syncs position.
+    _pulse = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1100))
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  /// The target's rect translated into this widget's coordinate space, or
+  /// null when the target isn't laid out right now (e.g. scrolled away).
+  Rect? _targetRect() {
+    final targetBox =
+        widget.targetKey.currentContext?.findRenderObject() as RenderBox?;
+    final myBox = context.findRenderObject() as RenderBox?;
+    if (targetBox == null || myBox == null) return null;
+    if (!targetBox.attached || !myBox.attached || !targetBox.hasSize) {
+      return null;
+    }
+    final topLeft = myBox.globalToLocal(targetBox.localToGlobal(Offset.zero));
+    return topLeft & targetBox.size;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // The ring repaints a blurred shadow every frame while it pulses, over a
+    // screen that is otherwise still — keep those repaints on their own layer.
+    return RepaintBoundary(
+      child: IgnorePointer(
+        child: AnimatedBuilder(
+          animation: _pulse,
+          builder: (context, _) {
+            final rect = _targetRect();
+            if (rect == null) return const SizedBox.shrink();
+            final motion = AppSettings.instance.motionFull;
+            final v = motion ? _pulse.value : 0.5;
+            final ring = rect.inflate(4 + 4 * v);
+            final t = AppTokens.current;
+            return Stack(
+              children: [
+                Positioned.fromRect(
+                  rect: ring,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.zero,
+                      border: Border.all(
+                        color: t.accentStrong.withValues(
+                          alpha: 0.55 + 0.45 * v,
+                        ),
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: t.accent.withValues(alpha: 0.25 + 0.2 * v),
+                          blurRadius: 0,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

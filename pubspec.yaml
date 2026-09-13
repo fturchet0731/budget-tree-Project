@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.11.5
@@ -30,6 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -39,6 +42,8 @@ dependencies:
   flutter_local_notifications: ^22.0.1
   timezone: ^0.11.0
   flutter_timezone: ^5.1.0
+  supabase_flutter: ^2.8.0
+  connectivity_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -50,12 +55,34 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.1
+
+# Launcher icon generation. Source art is assets/icon/app_icon.png, rendered
+# from lib/widgets/app_logo.dart by `flutter test tool/gen_app_icon.dart`.
+# Regenerate platform icons with `dart run flutter_launcher_icons`.
+flutter_launcher_icons:
+  image_path: "assets/icon/app_icon.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#F6FCE9"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  web:
+    generate: true
+    background_color: "#F6FCE9"
+    theme_color: "#7EBD25"
+  macos:
+    generate: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  # Generate localization (AppLocalizations) from the ARB files in lib/l10n/.
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -64,6 +91,8 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/status_trees/
+    - assets/ui/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -1,18 +1,8 @@
 enum PayFrequency { weekly, biWeekly, semiMonthly, monthly }
 
 extension PayFrequencyX on PayFrequency {
-  String get label {
-    switch (this) {
-      case PayFrequency.weekly:
-        return 'Weekly';
-      case PayFrequency.biWeekly:
-        return 'Bi-weekly';
-      case PayFrequency.semiMonthly:
-        return 'Semi-monthly';
-      case PayFrequency.monthly:
-        return 'Monthly';
-    }
-  }
+  // Shown labels live in `lib/l10n/pay_frequency_labels.dart` so this stays a
+  // pure, localization-free data enum.
 
   /// Approximate number of pay periods per month.
   double get periodsPerMonth {
@@ -25,6 +15,20 @@ extension PayFrequencyX on PayFrequency {
         return 2.0;
       case PayFrequency.monthly:
         return 1.0;
+    }
+  }
+
+  /// Stable token exchanged with the `ai-coach` edge function.
+  String get wire {
+    switch (this) {
+      case PayFrequency.weekly:
+        return 'weekly';
+      case PayFrequency.biWeekly:
+        return 'biweekly';
+      case PayFrequency.semiMonthly:
+        return 'semimonthly';
+      case PayFrequency.monthly:
+        return 'monthly';
     }
   }
 

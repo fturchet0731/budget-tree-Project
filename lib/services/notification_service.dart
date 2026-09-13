@@ -3,6 +3,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
+import 'app_settings.dart';
+
+import '../l10n/app_localizations_resolver.dart';
 
 /// Thin wrapper around `flutter_local_notifications`. Every method is wrapped
 /// so a failure (unsupported platform, denied permission, web limitations)
@@ -21,23 +24,28 @@ class NotificationService {
   static const _budgetChannel = 'budget_warnings';
   static const _streakChannel = 'streak_reminders';
   static const _weeklyChannel = 'weekly_summary';
+  static const _wateringChannel = 'goal_watering';
+  static const checkInChannel = 'check_ins';
 
   /// Stable notification ids — reusing an id replaces the prior schedule.
   static const int idStreak = 1001;
   static const int idWeekly = 1002;
+  static const int idReflection = 1003;
   static const int budgetIdBase = 2000; // + hash of budget id
+  static const int waterIdBase = 3000; // + hash of goal id (due today)
+  static const int waterSoonIdBase = 4000; // + hash of goal id (due in 2 days)
+
+  /// Per-entity ids are `base + (id.hashCode & 0xfff)`, i.e. 4096 wide, so the
+  /// three bases above (spaced only 1000 apart) already overlap each other.
+  /// Renumbering them would orphan reminders the OS is already holding, so this
+  /// new family is parked well clear of all of them instead.
+  static const int checkInIdBase = 20000; // + hash of budget id
 
   static Future<void> init() async {
     if (_ready) return;
     try {
       tzdata.initializeTimeZones();
-      try {
-        final info = await FlutterTimezone.getLocalTimezone();
-        tz.setLocalLocation(tz.getLocation(info.identifier));
-      } catch (_) {
-        // Fall back to UTC if the device timezone can't be resolved.
-        tz.setLocalLocation(tz.getLocation('UTC'));
-      }
+      await applyTimeZone();
 
       const android = AndroidInitializationSettings('@mipmap/ic_launcher');
       const darwin = DarwinInitializationSettings(
@@ -45,8 +53,7 @@ class NotificationService {
         requestBadgePermission: false,
         requestSoundPermission: false,
       );
-      const linux =
-          LinuxInitializationSettings(defaultActionName: 'Open');
+      const linux = LinuxInitializationSettings(defaultActionName: 'Open');
       const settings = InitializationSettings(
         android: android,
         iOS: darwin,
@@ -61,6 +68,40 @@ class NotificationService {
     }
   }
 
+  /// Point the scheduler at the right zone: the user's override from Settings
+  /// if they set one, otherwise whatever the device reports.
+  ///
+  /// Reminders are wall-clock times ("water at 9am"), so the zone decides when
+  /// they actually fire. UTC is the last resort rather than the fallback it
+  /// used to be, since silently scheduling in UTC moves every reminder by the
+  /// user's whole offset. Call again after changing the setting, then reschedule.
+  static Future<void> applyTimeZone() async {
+    final chosen = AppSettings.instance.timeZone;
+    if (chosen != null) {
+      try {
+        tz.setLocalLocation(tz.getLocation(chosen));
+        return;
+      } catch (e) {
+        // A stored name the database doesn't know: fall through to the device.
+        debugPrint('NotificationService: unknown time zone "$chosen": $e');
+      }
+    }
+    try {
+      final info = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(info.identifier));
+    } catch (e) {
+      debugPrint('NotificationService: device time zone unavailable: $e');
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
+  }
+
+  /// Every zone the bundled database knows about, sorted. Backs the Settings
+  /// picker, so the user can correct a device that reports the wrong one.
+  static List<String> availableTimeZones() {
+    final names = tz.timeZoneDatabase.locations.keys.toList()..sort();
+    return names;
+  }
+
   /// Ask the user for OS permission (Android 13+, iOS, macOS). Safe to call
   /// repeatedly; the OS only prompts once.
   static Future<void> requestPermissions() async {
@@ -68,23 +109,47 @@ class NotificationService {
     try {
       await _plugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
       await _plugin
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
       await _plugin
           .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>()
+            MacOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
     } catch (e) {
       debugPrint('NotificationService.requestPermissions failed: $e');
     }
   }
 
-  static NotificationDetails _details(
-      String channelId, String channelName, String channelDesc) {
+  /// Localized name + description for a channel. Android shows these in the
+  /// system notification settings, so they follow the app language like every
+  /// other piece of copy. Resolved through [appLocalizations] because this runs
+  /// with no BuildContext.
+  static (String, String) _channelCopy(String channelId) {
+    final l = appLocalizations();
+    switch (channelId) {
+      case _streakChannel:
+        return (l.notifChannelStreakName, l.notifChannelStreakDesc);
+      case _weeklyChannel:
+        return (l.notifChannelWeeklyName, l.notifChannelWeeklyDesc);
+      case _wateringChannel:
+        return (l.notifChannelWateringName, l.notifChannelWateringDesc);
+      case checkInChannel:
+        return (l.notifChannelCheckInName, l.notifChannelCheckInDesc);
+      case _budgetChannel:
+      default:
+        return (l.notifChannelBudgetName, l.notifChannelBudgetDesc);
+    }
+  }
+
+  static NotificationDetails _details(String channelId) {
+    final (channelName, channelDesc) = _channelCopy(channelId);
     final android = AndroidNotificationDetails(
       channelId,
       channelName,
@@ -93,8 +158,7 @@ class NotificationService {
       priority: Priority.high,
     );
     const darwin = DarwinNotificationDetails();
-    return NotificationDetails(
-        android: android, iOS: darwin, macOS: darwin);
+    return NotificationDetails(android: android, iOS: darwin, macOS: darwin);
   }
 
   /// Fire an immediate notification (used for event-driven budget warnings).
@@ -109,11 +173,61 @@ class NotificationService {
         id: id,
         title: title,
         body: body,
-        notificationDetails: _details(_budgetChannel, 'Budget warnings',
-            'Alerts when a budget nears or exceeds your income'),
+        notificationDetails: _details(_budgetChannel),
       );
     } catch (e) {
       debugPrint('NotificationService.showNow failed: $e');
+    }
+  }
+
+  /// Fire an immediate notification on the weekly-summary channel (used for the
+  /// freshly generated AI reflection).
+  static Future<void> showReflectionNow({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: _details(_weeklyChannel),
+      );
+    } catch (e) {
+      debugPrint('NotificationService.showReflectionNow failed: $e');
+    }
+  }
+
+  /// Schedule a one-shot reminder at the exact moment [when]. No
+  /// `matchDateTimeComponents`, so it fires once; the [NotificationScheduler]
+  /// re-seeds the next occurrence on boot/resume/after deposits. A [when] in the
+  /// past is ignored.
+  ///
+  /// Used by both the goal watering reminders and the pay-day check-in nudge,
+  /// which differ only in their channel.
+  static Future<void> scheduleOnce({
+    required int id,
+    required DateTime when,
+    required String title,
+    required String body,
+    String channel = _wateringChannel,
+  }) async {
+    if (!_ready) return;
+    final scheduled = tz.TZDateTime.from(when, tz.local);
+    if (!scheduled.isAfter(tz.TZDateTime.now(tz.local))) return;
+    try {
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduled,
+        notificationDetails: _details(channel),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (e) {
+      debugPrint('NotificationService.scheduleOnce($id) failed: $e');
     }
   }
 
@@ -132,8 +246,6 @@ class NotificationService {
       title: title,
       body: body,
       channelId: _streakChannel,
-      channelName: 'Streak reminders',
-      channelDesc: 'Daily nudge to keep your saving streak alive',
     );
   }
 
@@ -153,8 +265,6 @@ class NotificationService {
       title: title,
       body: body,
       channelId: _weeklyChannel,
-      channelName: 'Weekly summary',
-      channelDesc: 'A once-a-week recap of your saving progress',
     );
   }
 
@@ -165,8 +275,6 @@ class NotificationService {
     required String title,
     required String body,
     required String channelId,
-    required String channelName,
-    required String channelDesc,
   }) async {
     if (!_ready) return;
     try {
@@ -175,7 +283,7 @@ class NotificationService {
         title: title,
         body: body,
         scheduledDate: scheduledDate,
-        notificationDetails: _details(channelId, channelName, channelDesc),
+        notificationDetails: _details(channelId),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: match,
       );
@@ -196,7 +304,13 @@ class NotificationService {
   static tz.TZDateTime _nextDailyInstance(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
     var next = tz.TZDateTime(
-        tz.local, now.year, now.month, now.day, hour, minute);
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     if (!next.isAfter(now)) next = next.add(const Duration(days: 1));
     return next;
   }

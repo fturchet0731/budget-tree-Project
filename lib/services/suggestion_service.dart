@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/budget_model.dart';
+import '../models/goal_model.dart';
 
 enum SuggestionTone { good, info, warn }
 
@@ -38,17 +40,17 @@ class SuggestionService {
 
   /// At most [limit] suggestions, most important first, so the card never
   /// overwhelms the user (respecting the app's "keep it simple" surface area).
-  static List<BudgetSuggestion> forBudget(BudgetModel budget, {int limit = 4}) {
+  static List<BudgetSuggestion> forBudget(
+      BudgetModel budget, AppLocalizations l,
+      {int limit = 4, List<Goal> goals = const []}) {
     final income = budget.totalIncome;
     if (income <= 0) {
-      return const [
+      return [
         BudgetSuggestion(
           tone: SuggestionTone.info,
           icon: Icons.wb_sunny_outlined,
-          title: 'Add your income first',
-          reason:
-              'A tree needs roots. Add an income source so we can suggest how '
-              'to split it between branches and goals.',
+          title: l.sugAddIncomeTitle,
+          reason: l.sugAddIncomeReason,
         ),
       ];
     }
@@ -64,22 +66,18 @@ class SuggestionService {
       warns.add(BudgetSuggestion(
         tone: SuggestionTone.warn,
         icon: Icons.warning_amber_rounded,
-        title: 'Branches outgrow the trunk',
+        title: l.sugOverAllocTitle,
         reason:
-            'You\'ve assigned \$${(-remaining).toStringAsFixed(0)} more than you '
-            'earn. Trim a branch or two so the tree can actually support them.',
+            l.sugOverAllocReason('\$${(-remaining).toStringAsFixed(0)}'),
       ));
-    } else if (remaining > income * 0.25) {
-      // A lot of income left unassigned — money that could be growing.
+    } else if (remaining > income * 0.25 || remaining > 200) {
+      // A lot of income left unassigned: money that could be growing.
       final pct = (remaining / income * 100).round();
       infos.add(BudgetSuggestion(
         tone: SuggestionTone.info,
         icon: Icons.eco_outlined,
-        title: 'Put idle money to work',
-        reason:
-            '\$${remaining.toStringAsFixed(0)} ($pct%) of your income isn\'t '
-            'assigned yet. Add a savings branch and link it to a goal so it '
-            'grows instead of drifting away.',
+        title: l.sugIdleTitle,
+        reason: l.sugIdleReason('\$${remaining.toStringAsFixed(0)}', pct),
       ));
     }
 
@@ -89,24 +87,35 @@ class SuggestionService {
         infos.add(BudgetSuggestion(
           tone: SuggestionTone.info,
           icon: Icons.cut,
-          title: 'Prune "${cat.name}"',
-          reason:
-              'This branch has no money flowing to it. Fund it or prune it to '
-              'keep your tree focused.',
+          title: l.sugPruneTitle(cat.name),
+          reason: l.sugPruneReason,
         ));
       } else {
-        final share = cat.allocated / income;
+        final share = cat.allocatedPerCycle(budget.payFrequency) / income;
         if (share > 0.35) {
           warns.add(BudgetSuggestion(
             tone: SuggestionTone.warn,
             icon: Icons.content_cut,
-            title: '"${cat.name}" is a heavy branch',
-            reason:
-                'It takes ${(share * 100).round()}% of your income. If you can '
-                'trim it, that money could feed a savings goal instead.',
+            title: l.sugHeavyTitle(cat.name),
+            reason: l.sugHeavyReason((share * 100).round()),
           ));
         }
       }
+    }
+
+    // Goals this budget doesn't water yet: suggest a branch per goal (the
+    // most concrete advice we can give, so it goes ahead of generic info).
+    final linkedIds = <String>{
+      for (final c in budget.expenses) ...c.linkedGoalIds,
+    };
+    for (final goal in goals) {
+      if (goal.isCompleted || linkedIds.contains(goal.id)) continue;
+      infos.add(BudgetSuggestion(
+        tone: SuggestionTone.info,
+        icon: Icons.spa_outlined,
+        title: l.sugGoalBranchTitle(goal.name),
+        reason: l.sugGoalBranchReason,
+      ));
     }
 
     // Positive reinforcement: any branch feeding a goal is a win worth noting.
@@ -116,33 +125,27 @@ class SuggestionService {
       goods.add(BudgetSuggestion(
         tone: SuggestionTone.good,
         icon: Icons.check_circle_outline,
-        title: 'Goals are being fed',
-        reason:
-            '${linked.length} branch${linked.length == 1 ? '' : 'es'} send money '
-            'to a goal every pay cycle. Keep it up — that\'s how saplings grow.',
+        title: l.sugFedTitle,
+        reason: l.sugFedReason(linked.length),
       ));
     } else if (budget.expenses.isNotEmpty) {
-      infos.add(const BudgetSuggestion(
+      infos.add(BudgetSuggestion(
         tone: SuggestionTone.info,
         icon: Icons.link,
-        title: 'Link a branch to a goal',
-        reason:
-            'None of your branches feed a savings goal yet. Linking one means '
-            'every pay cycle automatically waters a sapling for you.',
+        title: l.sugLinkTitle,
+        reason: l.sugLinkReason,
       ));
     }
 
     // Warnings first (most actionable), then info, then encouragement.
     final ordered = [...warns, ...infos, ...goods];
     if (ordered.isEmpty) {
-      return const [
+      return [
         BudgetSuggestion(
           tone: SuggestionTone.good,
           icon: Icons.spa_outlined,
-          title: 'Healthy, balanced tree',
-          reason:
-              'Your branches are well proportioned and within your income. '
-              'Nothing to change — just keep watering your goals.',
+          title: l.sugHealthyTitle,
+          reason: l.sugHealthyReason,
         ),
       ];
     }

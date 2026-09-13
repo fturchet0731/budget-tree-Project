@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/app_settings.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 
 /// Shows a full-screen celebration: a burst of falling confetti behind a
 /// card announcing the milestone. Honors reduced-motion (confetti is skipped,
@@ -102,14 +102,14 @@ class _CelebrationViewState extends State<_CelebrationView>
             margin: const EdgeInsets.symmetric(horizontal: 36),
             padding: const EdgeInsets.fromLTRB(26, 28, 26, 22),
             decoration: BoxDecoration(
-              color: const Color(0xFF122B0F),
-              borderRadius: BorderRadius.circular(24),
+              color: AppTokens.current.card,
+              borderRadius: BorderRadius.zero,
               border: Border.all(color: widget.color.withValues(alpha: 0.5)),
               boxShadow: [
                 BoxShadow(
                   color: widget.color.withValues(alpha: 0.25),
-                  blurRadius: 30,
-                  spreadRadius: 2,
+                  blurRadius: 0,
+                  spreadRadius: 0,
                 ),
               ],
             ),
@@ -119,7 +119,6 @@ class _CelebrationViewState extends State<_CelebrationView>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
                     color: widget.color.withValues(alpha: 0.18),
                     border:
                         Border.all(color: widget.color.withValues(alpha: 0.6)),
@@ -130,9 +129,9 @@ class _CelebrationViewState extends State<_CelebrationView>
                 Text(
                   widget.title,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.pixelifySans(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.stoneBeigeColor,
+                    color: AppTokens.current.textPrimary,
                     fontSize: 23,
                   ),
                 ),
@@ -141,7 +140,7 @@ class _CelebrationViewState extends State<_CelebrationView>
                   widget.message,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunito(
-                    color: AppColors.mossGreen,
+                    color: AppTokens.current.textSecondary,
                     fontSize: 14,
                     height: 1.5,
                   ),
@@ -151,10 +150,9 @@ class _CelebrationViewState extends State<_CelebrationView>
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.forestGreen,
+                      backgroundColor: AppTokens.current.accent,
                       padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                      shape: const RoundedRectangleBorder(),
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
@@ -195,10 +193,11 @@ class _Confetto {
   factory _Confetto.random(math.Random r, Color base) {
     final palette = [
       base,
-      AppColors.lightLeaf,
+      Conifer.c300,
+      Conifer.c400,
+      Conifer.c600,
       const Color(0xFFFFD54F),
-      const Color(0xFF8BC34A),
-      Colors.white,
+      const Color(0xFFFFA463),
     ];
     return _Confetto(
       x: r.nextDouble(),
@@ -234,7 +233,7 @@ class _ConfettiPainter extends CustomPainter {
         RRect.fromRectAndRadius(
           Rect.fromCenter(
               center: Offset.zero, width: c.size, height: c.size * 0.6),
-          const Radius.circular(1.5),
+          Radius.zero,
         ),
         paint,
       );

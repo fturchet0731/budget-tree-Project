@@ -1,11 +1,17 @@
+import 'dart:ui' show Locale;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum AppPalette { forestDark, midnight, twilight }
+enum AppPalette { light, dark }
+
 enum AppTextScale { compact, normal, large }
 
 class AppSettings extends ChangeNotifier {
-  static const _kPalette = 'settings_palette_v1';
+  // Light/dark theme choice. The old key 'settings_palette_v1' indexed the
+  // retired forestDark/midnight/twilight palettes and is deliberately ignored:
+  // the redesign gives everyone the new light look by default, and dark is a
+  // fresh opt-in rather than a migration of the old dark palettes.
+  static const _kThemeMode = 'settings_theme_mode_v1';
   static const _kScale = 'settings_text_scale_v1';
   static const _kMotion = 'settings_motion_v1';
   static const _kSound = 'settings_sound_v1';
@@ -17,9 +23,22 @@ class AppSettings extends ChangeNotifier {
   static const _kNotifWeekly = 'settings_notif_weekly_v1';
   static const _kWeeklyWeekday = 'settings_weekly_weekday_v1';
   static const _kWeeklyHour = 'settings_weekly_hour_v1';
+  static const _kNotifWatering = 'settings_notif_watering_v1';
+  static const _kWaterHour = 'settings_water_hour_v1';
+  static const _kNotifCheckIn = 'settings_notif_checkin_v1';
+  static const _kCheckInHour = 'settings_checkin_hour_v1';
+  static const _kLocale = 'settings_locale_v1';
+  static const _kTimeZone = 'settings_timezone_v1';
+  static const _kAiCoach = 'settings_ai_coach_v1';
+  static const _kNotifPermissionAsked = 'settings_notif_perm_asked_v1';
 
-  AppPalette _palette = AppPalette.forestDark;
+  /// Languages the app ships translations for. `null` locale = follow device.
+  static const supportedLanguageCodes = ['en', 'fr', 'es'];
+
+  AppPalette _palette = AppPalette.light;
   AppTextScale _scale = AppTextScale.normal;
+  Locale? _locale;
+  String? _timeZone; // null = follow the device time zone
   bool _motionFull = true;
   bool _soundEnabled = true;
   bool _tutorialSeen = false;
@@ -34,10 +53,36 @@ class AppSettings extends ChangeNotifier {
   bool _notifWeeklySummary = true;
   int _weeklyWeekday = DateTime.sunday; // 1=Mon … 7=Sun
   int _weeklyHour = 18; // Sunday evening recap
+  // Per-goal watering reminders ("water due in 2 days" / "water due today").
+  bool _notifGoalWatering = true;
+  int _waterHour = 9; // morning nudge to water due goals
+  bool _notifCheckIn = true;
+  int _checkInHour = 18; // evening of pay day, once the money has landed
+
+  // Master switch for the Claude-powered coach (smart budget/goal plans and
+  // weekly reflections). On by default; the features still only run when
+  // Supabase is configured and the user is signed in.
+  bool _aiCoachEnabled = true;
+
+  bool _notifPermissionAsked = false;
 
   AppPalette get palette => _palette;
+  bool get isDark => _palette == AppPalette.dark;
   AppTextScale get textScale => _scale;
   bool get motionFull => _motionFull;
+
+  /// The user's chosen app language, or null to follow the device setting.
+  Locale? get locale => _locale;
+
+  /// IANA zone name the app schedules reminders in (e.g. `Europe/Paris`), or
+  /// null to follow whatever the device reports. Overriding matters when the
+  /// device zone is wrong or unavailable: reminders are wall-clock times, so a
+  /// mis-detected zone fires them hours out.
+  String? get timeZone => _timeZone;
+
+  /// The two-letter code of the active choice, or 'system' when following the
+  /// device. Used by the Settings language picker.
+  String get languageSelection => _locale?.languageCode ?? 'system';
 
   /// Whether tactile/audible feedback (taps, chimes) plays on actions.
   bool get soundEnabled => _soundEnabled;
@@ -52,10 +97,42 @@ class AppSettings extends ChangeNotifier {
   int get weeklyWeekday => _weeklyWeekday;
   int get weeklyHour => _weeklyHour;
 
+  /// Whether per-goal watering reminders fire, and the hour of day they do.
+  bool get notifGoalWatering => _notifGoalWatering;
+  int get waterHour => _waterHour;
+
+  /// Whether the pay-day check-in nudge fires, and the hour of day it does.
+  /// Defaults to the evening rather than the morning: a check-in asks how the
+  /// cycle went, which is only answerable once the day has happened.
+  bool get notifPayCheckIn => _notifCheckIn;
+  int get checkInHour => _checkInHour;
+
+  /// Whether the AI coach (smart plans + reflections) is allowed to run.
+  bool get aiCoachEnabled => _aiCoachEnabled;
+
   /// True when at least one notification type is on (used to decide whether to
   /// bother requesting OS permission).
   bool get anyNotificationsEnabled =>
-      _notifBudgetWarnings || _notifStreakReminders || _notifWeeklySummary;
+      _notifBudgetWarnings ||
+      _notifStreakReminders ||
+      _notifWeeklySummary ||
+      _notifGoalWatering ||
+      _notifCheckIn;
+
+  /// True once the user has taken a notification-related action (touched the
+  /// notification settings, or asked to be reminded to water a goal). The OS
+  /// permission dialog is held back until then, so the very first launch never
+  /// opens with a permission request the user has no context for.
+  bool get notifPermissionAsked => _notifPermissionAsked;
+
+  /// Record that the user opted into notifications somewhere; from now on the
+  /// scheduler may surface the OS permission prompt.
+  Future<void> markNotifPermissionAsked() async {
+    if (_notifPermissionAsked) return;
+    _notifPermissionAsked = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kNotifPermissionAsked, true);
+  }
 
   /// Whether the first-run acorn walkthrough has already played.
   bool get tutorialSeen => _tutorialSeen;
@@ -77,12 +154,10 @@ class AppSettings extends ChangeNotifier {
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final pi = prefs.getInt(_kPalette) ?? 0;
-    _palette =
-        AppPalette.values[pi.clamp(0, AppPalette.values.length - 1)];
+    final pi = prefs.getInt(_kThemeMode) ?? 0;
+    _palette = AppPalette.values[pi.clamp(0, AppPalette.values.length - 1)];
     final si = prefs.getInt(_kScale) ?? 1;
-    _scale =
-        AppTextScale.values[si.clamp(0, AppTextScale.values.length - 1)];
+    _scale = AppTextScale.values[si.clamp(0, AppTextScale.values.length - 1)];
     _motionFull = prefs.getBool(_kMotion) ?? true;
     _soundEnabled = prefs.getBool(_kSound) ?? true;
     _tutorialSeen = prefs.getBool(_kTutorialSeen) ?? false;
@@ -93,6 +168,46 @@ class AppSettings extends ChangeNotifier {
     _notifWeeklySummary = prefs.getBool(_kNotifWeekly) ?? true;
     _weeklyWeekday = prefs.getInt(_kWeeklyWeekday) ?? DateTime.sunday;
     _weeklyHour = prefs.getInt(_kWeeklyHour) ?? 18;
+    _notifGoalWatering = prefs.getBool(_kNotifWatering) ?? true;
+    _waterHour = prefs.getInt(_kWaterHour) ?? 9;
+    _notifCheckIn = prefs.getBool(_kNotifCheckIn) ?? true;
+    _checkInHour = prefs.getInt(_kCheckInHour) ?? 18;
+    _aiCoachEnabled = prefs.getBool(_kAiCoach) ?? true;
+    _notifPermissionAsked = prefs.getBool(_kNotifPermissionAsked) ?? false;
+    _timeZone = prefs.getString(_kTimeZone);
+    final lc = prefs.getString(_kLocale);
+    _locale = (lc != null && supportedLanguageCodes.contains(lc))
+        ? Locale(lc)
+        : null;
+  }
+
+  /// Set the app language. Pass null to follow the device language. Persists
+  /// as the language code (or clears the key for "system").
+  Future<void> setLocale(Locale? locale) async {
+    if (_locale?.languageCode == locale?.languageCode) return;
+    _locale = locale;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    if (locale == null) {
+      await prefs.remove(_kLocale);
+    } else {
+      await prefs.setString(_kLocale, locale.languageCode);
+    }
+  }
+
+  /// Set the scheduling time zone. Pass null to follow the device. Callers
+  /// should re-run `NotificationScheduler.rescheduleAll()` afterwards so the
+  /// pending reminders move with it.
+  Future<void> setTimeZone(String? name) async {
+    if (_timeZone == name) return;
+    _timeZone = name;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    if (name == null) {
+      await prefs.remove(_kTimeZone);
+    } else {
+      await prefs.setString(_kTimeZone, name);
+    }
   }
 
   Future<void> setNotifBudgetWarnings(bool v) async {
@@ -139,6 +254,46 @@ class AppSettings extends ChangeNotifier {
     await prefs.setInt(_kWeeklyHour, hour);
   }
 
+  Future<void> setNotifGoalWatering(bool v) async {
+    if (_notifGoalWatering == v) return;
+    _notifGoalWatering = v;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kNotifWatering, v);
+  }
+
+  Future<void> setWaterHour(int hour) async {
+    if (_waterHour == hour) return;
+    _waterHour = hour;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kWaterHour, hour);
+  }
+
+  Future<void> setNotifPayCheckIn(bool v) async {
+    if (_notifCheckIn == v) return;
+    _notifCheckIn = v;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kNotifCheckIn, v);
+  }
+
+  Future<void> setCheckInHour(int hour) async {
+    if (_checkInHour == hour) return;
+    _checkInHour = hour;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kCheckInHour, hour);
+  }
+
+  Future<void> setAiCoachEnabled(bool v) async {
+    if (_aiCoachEnabled == v) return;
+    _aiCoachEnabled = v;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kAiCoach, v);
+  }
+
   Future<void> setSoundEnabled(bool v) async {
     if (_soundEnabled == v) return;
     _soundEnabled = v;
@@ -160,7 +315,7 @@ class AppSettings extends ChangeNotifier {
     _palette = p;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_kPalette, p.index);
+    await prefs.setInt(_kThemeMode, p.index);
   }
 
   Future<void> setTextScale(AppTextScale s) async {

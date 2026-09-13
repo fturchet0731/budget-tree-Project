@@ -58,29 +58,22 @@ class TreeDrawing {
     }
     path.close();
 
-    // Soft drop shadow
+    // Flat modern fill: one mid tone, then flat light and dark caps
+    // clipped to the blob so the cluster keeps depth without gradients.
+    canvas.drawPath(path, Paint()..color = palette.mid);
     canvas.save();
-    canvas.translate(2, 3);
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = Colors.black.withValues(alpha: shadowAlpha)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+    canvas.clipPath(path);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.38, center.dy + radius * 0.42),
+      radius * 0.85,
+      Paint()..color = palette.dark.withValues(alpha: 0.45),
+    );
+    canvas.drawCircle(
+      Offset(center.dx - radius * 0.32, center.dy - radius * 0.38),
+      radius * 0.62,
+      Paint()..color = palette.light.withValues(alpha: 0.65),
     );
     canvas.restore();
-
-    // Base radial gradient: lit top-left → mid → shadow bottom-right
-    canvas.drawPath(
-      path,
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(-0.35, -0.45),
-          radius: 0.95,
-          colors: [palette.light, palette.mid, palette.dark],
-          stops: const [0.0, 0.55, 1.0],
-        ).createShader(
-            Rect.fromCircle(center: center, radius: radius * 1.2)),
-    );
 
     if (drawOutline) {
       canvas.drawPath(
@@ -93,16 +86,8 @@ class TreeDrawing {
       );
     }
 
-    // Soft sunlit highlight blob — adds dimensionality
-    if (sunlitTop) {
-      canvas.drawCircle(
-        Offset(center.dx - radius * 0.30, center.dy - radius * 0.35),
-        radius * 0.32,
-        Paint()
-          ..color = palette.light.withValues(alpha: 0.50)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-      );
-    }
+    // [sunlitTop] kept for API compatibility; the flat light cap above
+    // already provides the lit side.
   }
 
   /// Scatter small individual leaf silhouettes around a cluster's edge
@@ -155,12 +140,7 @@ class TreeDrawing {
       ..close();
     canvas.drawPath(
       path,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [sunlit ? palette.light : palette.mid, palette.dark],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ).createShader(Rect.fromLTWH(-size, -size, size * 2, size * 1.5)),
+      Paint()..color = sunlit ? palette.light : palette.mid,
     );
     canvas.drawPath(
       path,
@@ -192,8 +172,8 @@ class TreeDrawing {
     Offset end, {
     required double startW,
     required double endW,
-    Color color = const Color(0xFF4E342E),
-    Color highlight = const Color(0xFF8D6E63),
+    Color color = const Color(0xFF8A6B4F),
+    Color highlight = const Color(0xFFA98A68),
     double bowFactor = 0.06,
   }) {
     final dx = end.dx - start.dx;
@@ -246,34 +226,9 @@ class TreeDrawing {
       ribbon.lineTo(p.dx, p.dy);
     }
     ribbon.close();
+    // Flat modern branch: a single warm ribbon, no texture edges.
+    // [highlight] is kept for API compatibility.
     canvas.drawPath(ribbon, Paint()..color = color);
-
-    // Subtle shadow line along the under edge
-    final shadowEdge = Path()..moveTo(rightPts.first.dx, rightPts.first.dy);
-    for (final p in rightPts.skip(1)) {
-      shadowEdge.lineTo(p.dx, p.dy);
-    }
-    canvas.drawPath(
-      shadowEdge,
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.25)
-        ..strokeWidth = 1.0
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Bright highlight along the sun-lit edge
-    final highlightEdge = Path()..moveTo(leftPts.first.dx, leftPts.first.dy);
-    for (final p in leftPts.skip(1)) {
-      highlightEdge.lineTo(p.dx, p.dy);
-    }
-    canvas.drawPath(
-      highlightEdge,
-      Paint()
-        ..color = highlight.withValues(alpha: 0.55)
-        ..strokeWidth = 1.3
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke,
-    );
   }
 
   // ──────────────────────────────────────────────
@@ -322,121 +277,26 @@ class TreeDrawing {
       )
       ..close();
 
-    // Multi-stop bark gradient
-    canvas.drawPath(
-      trunkPath,
-      Paint()
-        ..shader = const LinearGradient(
-          colors: [
-            Color(0xFF1A0C06),
-            Color(0xFF3E2723),
-            Color(0xFF6D4C41),
-            Color(0xFF9B7560),
-            Color(0xFF6D4C41),
-            Color(0xFF3E2723),
-            Color(0xFF1A0C06),
-          ],
-          stops: [0.0, 0.15, 0.32, 0.5, 0.68, 0.85, 1.0],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ).createShader(
-          Rect.fromLTWH(base.dx - baseHalfWidth, base.dy - height,
-              baseHalfWidth * 2, height),
-        ),
+    // Flat modern trunk: one warm brown with a flat shaded right side.
+    canvas.drawPath(trunkPath, Paint()..color = const Color(0xFF8A6B4F));
+    canvas.save();
+    canvas.clipPath(trunkPath);
+    canvas.drawRect(
+      Rect.fromLTWH(base.dx, base.dy - height, baseHalfWidth * 1.2, height),
+      Paint()..color = const Color(0xFF6E523C).withValues(alpha: 0.45),
     );
-
-    // Sunlit edge — soft warm overlay on the left side
-    canvas.drawPath(
-      trunkPath,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [
-            const Color(0xFFFFE0B2).withValues(alpha: 0.18),
-            Colors.transparent,
-          ],
-          begin: Alignment.centerLeft,
-          end: const Alignment(-0.2, 0),
-        ).createShader(
-          Rect.fromLTWH(base.dx - baseHalfWidth, base.dy - height,
-              baseHalfWidth * 2, height),
-        ),
-    );
-
-    // Vertical bark fissures — short irregular strokes
-    final fissure = Paint()
-      ..color = const Color(0xFF120804).withValues(alpha: 0.50)
-      ..strokeWidth = 1.1
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    final fissureCount = (height / 35).round().clamp(5, 12);
-    for (int i = 0; i < fissureCount; i++) {
-      final t = 0.08 + rng.nextDouble() * 0.84;
-      final xJitter = (rng.nextDouble() - 0.5) * baseHalfWidth * 1.5;
-      final y0 = base.dy - height * t;
-      final segH = 14 + rng.nextDouble() * 28;
-      final y1 = y0 - segH;
-      final x = base.dx + xJitter;
-      final wiggle = (rng.nextDouble() - 0.5) * 3;
-      canvas.drawLine(Offset(x, y0), Offset(x + wiggle, y1), fissure);
-    }
-
-    // Horizontal wrinkles — softer
-    final wrinkle = Paint()
-      ..color = const Color(0xFF120804).withValues(alpha: 0.20)
-      ..strokeWidth = 0.7
-      ..style = PaintingStyle.stroke;
-    final wrinkleCount = (height / 32).round().clamp(3, 9);
-    for (int i = 1; i <= wrinkleCount; i++) {
-      final t = i / (wrinkleCount + 1);
-      final y = base.dy - height * t;
-      final hw = topHalfWidth + (baseHalfWidth - topHalfWidth) * (1 - t);
-      final wiggleX = math.sin(t * math.pi * 4) * 1.8;
-      canvas.drawLine(
-        Offset(base.dx - hw * 0.8 + wiggleX, y),
-        Offset(base.dx + hw * 0.8 + wiggleX, y),
-        wrinkle,
-      );
-    }
-
-    // Knot — small dark oval with a curved highlight
-    if (drawKnot && height > 70) {
-      final knotY = base.dy - height * (0.55 + rng.nextDouble() * 0.2);
-      final knotSide = rng.nextBool() ? 1 : -1;
-      final knotX = base.dx + knotSide * baseHalfWidth * 0.5;
-      final knotW = baseHalfWidth * 0.35;
-      canvas.drawOval(
-        Rect.fromCenter(
-            center: Offset(knotX, knotY), width: knotW, height: knotW * 0.7),
-        Paint()..color = const Color(0xFF120804),
-      );
-      canvas.drawOval(
-        Rect.fromCenter(
-            center: Offset(knotX, knotY),
-            width: knotW * 0.65,
-            height: knotW * 0.45),
-        Paint()..color = const Color(0xFF3E2723),
-      );
-    }
+    canvas.restore();
+    // [drawKnot] kept for API compatibility; the flat style has no knot.
 
     // Root flare — 5 organic lobes spread along the base
     if (drawRoots) {
-      final rootDark = Paint()..color = const Color(0xFF3E2723);
-      final rootMid = Paint()..color = const Color(0xFF5D4037);
+      final rootDark = Paint()..color = const Color(0xFF6E523C);
+      final rootMid = Paint()..color = const Color(0xFF8A6B4F);
       for (int i = 0; i < 5; i++) {
         final t = (i / 4.0) - 0.5; // -0.5..0.5
         final dx = t * baseHalfWidth * 4.2;
         final width = (1.0 - t.abs() * 0.55) * baseHalfWidth * 1.8;
         final h = width * 0.45;
-        // Drop shadow
-        canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(base.dx + dx + 1, base.dy + 4),
-              width: width,
-              height: h * 0.85),
-          Paint()
-            ..color = Colors.black.withValues(alpha: 0.22)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
-        );
         canvas.drawOval(
           Rect.fromCenter(
               center: Offset(base.dx + dx, base.dy + 2),

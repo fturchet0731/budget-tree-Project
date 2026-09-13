@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_tokens.dart';
 import '../services/app_settings.dart';
-import '../services/goal_repository.dart';
+import '../services/auth_service.dart';
 import '../services/notification_scheduler.dart';
+import '../services/notification_service.dart';
+import '../services/supabase_config.dart';
+import '../services/sync_engine.dart';
 import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_tour.dart';
+import '../widgets/app_scrollbar.dart';
 import '../widgets/info_button.dart';
+import '../widgets/ui/segmented_choice.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,47 +42,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _confirmEraseAllData() async {
+  Future<void> _signOut() async {
+    final l = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A0808),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            const Icon(Icons.warning_amber_rounded,
-                color: AppColors.dangerRed, size: 24),
-            const SizedBox(width: 10),
-            Text(
-              'Erase all data?',
-              style: GoogleFonts.fredoka(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 20),
-            ),
-          ],
-        ),
-        content: Text(
-          'This will permanently remove every budget tree and goal sapling. Your app preferences will remain. This cannot be undone.',
-          style: GoogleFonts.nunito(
-              color: AppColors.mossGreen, fontSize: 14, height: 1.55),
-        ),
+        title: Text(l.signOutQuestion),
+        content: Text(l.signOutBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
-                style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(l.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.signOut),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await AuthService.instance.signOut();
+    // AuthGate listens to AuthService and will swap back to the login screen.
+  }
+
+  /// Apply a new scheduling zone, then move every pending reminder onto it.
+  /// Without the reschedule the change wouldn't take effect until the next
+  /// boot, since the reminders already sitting with the OS keep their old
+  /// absolute firing times.
+  Future<void> _setTimeZone(String? name) async {
+    await AppSettings.instance.setTimeZone(name);
+    await NotificationService.applyTimeZone();
+    await NotificationScheduler.rescheduleAll();
+  }
+
+  Future<void> _confirmEraseAllData() async {
+    final l = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: AppTokens.current.danger,
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Text(l.eraseAllTitle)),
+          ],
+        ),
+        content: Text(l.eraseAllBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.dangerRed,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+              backgroundColor: AppTokens.current.danger,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Erase Everything',
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(l.eraseEverything),
           ),
         ],
       ),
@@ -87,62 +116,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final reallyOk = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A0808),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Are you absolutely sure?',
-          style: GoogleFonts.fredoka(
-              fontWeight: FontWeight.w600,
-              color: AppColors.stoneBeigeColor,
-              fontSize: 19),
-        ),
-        content: Text(
-          'Last chance. After this, every saved tree and goal will be gone.',
-          style: GoogleFonts.nunito(
-              color: AppColors.mossGreen, fontSize: 14, height: 1.55),
-        ),
+        title: Text(l.absolutelySure),
+        content: Text(l.lastChanceBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Keep my data',
-                style: GoogleFonts.nunito(color: AppColors.mossGreen)),
+            child: Text(l.keepMyData),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.dangerRed,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+              backgroundColor: AppTokens.current.danger,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Yes, erase',
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(l.yesErase),
           ),
         ],
       ),
     );
     if (reallyOk != true) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('budget_tree_v1');
-    await GoalRepository.clear();
+    // Wipe the signed-in user's rows remotely, then drop every local data
+    // cache (budgets, goals, categories, achievements). App preferences are
+    // intentionally left intact.
+    await SyncEngine.deleteAllRemote();
+    await SyncEngine.clearLocalCaches();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF1A0808),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Row(
-          children: [
-            const Icon(Icons.delete_outline, color: Colors.white, size: 18),
-            const SizedBox(width: 10),
-            Text(
-              'All data erased.',
-              style: GoogleFonts.nunito(
-                  color: AppColors.stoneBeigeColor, fontSize: 14),
-            ),
-          ],
-        ),
+        content: Text(AppLocalizations.of(context).dataErased),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -150,167 +152,227 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppPalettes.deepForest()),
-        child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                pinned: true,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: AppColors.stoneBeigeColor),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                title: Text(
-                  'Settings',
-                  style: GoogleFonts.fredoka(
+      body: SafeArea(
+          child: AppScrollbar(
+            builder: (controller) => CustomScrollView(
+              controller: controller,
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: AppTokens.current.canvas,
+                  elevation: 0,
+                  pinned: true,
+                  leading: IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios,
+                      color: AppColors.stoneBeigeColor,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  title: Text(
+                    l.settingsTitle,
+                    style: GoogleFonts.pixelifySans(
                       fontWeight: FontWeight.w600,
                       color: AppColors.stoneBeigeColor,
-                      fontSize: 22),
-                ),
-                actions: const [
-                  Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: SectionInfoButton(section: TutorialSection.settings),
+                      fontSize: 22,
+                    ),
                   ),
-                ],
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 30),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _SectionHeader(
-                        icon: Icons.brush_outlined, label: 'APPEARANCE'),
-                    _SettingsCard(
-                      children: [
-                        _TileLabel(text: 'Text size'),
-                        const SizedBox(height: 10),
-                        _ChoiceRow<AppTextScale>(
-                          current: settings.textScale,
-                          options: const [
-                            (AppTextScale.compact, 'Compact'),
-                            (AppTextScale.normal, 'Default'),
-                            (AppTextScale.large, 'Large'),
-                          ],
-                          onChanged: settings.setTextScale,
-                        ),
-                        const SizedBox(height: 18),
-                        _TileLabel(text: 'Theme palette'),
-                        const SizedBox(height: 10),
-                        _ChoiceRow<AppPalette>(
-                          current: settings.palette,
-                          options: const [
-                            (AppPalette.forestDark, 'Forest'),
-                            (AppPalette.midnight, 'Midnight'),
-                            (AppPalette.twilight, 'Twilight'),
-                          ],
-                          onChanged: settings.setPalette,
-                        ),
-                        const SizedBox(height: 18),
-                        _TileLabel(text: 'Motion'),
-                        const SizedBox(height: 6),
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          title: Text(
-                            'Full animations',
-                            style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13),
-                          ),
-                          subtitle: Text(
-                            'Disable for snappier, less-animated screens',
-                            style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen.withValues(alpha: 0.7),
-                                fontSize: 11),
-                          ),
-                          value: settings.motionFull,
-                          activeThumbColor: AppColors.lightLeaf,
-                          onChanged: settings.setMotionFull,
-                        ),
-                        const SizedBox(height: 12),
-                        _TileLabel(text: 'Sound & haptics'),
-                        const SizedBox(height: 6),
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          title: Text(
-                            'Feedback cues',
-                            style: GoogleFonts.nunito(
-                                color: AppColors.stoneBeigeColor,
-                                fontSize: 13),
-                          ),
-                          subtitle: Text(
-                            'Taps and chimes when you plant, set goals, and save',
-                            style: GoogleFonts.nunito(
-                                color: AppColors.mossGreen.withValues(alpha: 0.7),
-                                fontSize: 11),
-                          ),
-                          value: settings.soundEnabled,
-                          activeThumbColor: AppColors.lightLeaf,
-                          onChanged: settings.setSoundEnabled,
-                        ),
-                      ],
+                  actions: const [
+                    Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: SectionInfoButton(
+                        section: TutorialSection.settings,
+                      ),
                     ),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.notifications_outlined,
-                        label: 'NOTIFICATIONS'),
-                    const _NotificationsCard(),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.menu_book_outlined, label: 'GUIDE'),
-                    _SettingsCard(
-                      children: [
-                        _ActionTile(
-                          icon: Icons.school_outlined,
-                          iconColor: AppColors.lightLeaf,
-                          title: 'Replay tutorial',
-                          subtitle:
-                              'Let Acorn walk you through the app again.',
-                          onTap: () => GuidedTour.start(context),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.storage_outlined, label: 'DATA'),
-                    _SettingsCard(
-                      children: [
-                        _ActionTile(
-                          icon: Icons.delete_forever_outlined,
-                          iconColor: AppColors.dangerRed,
-                          title: 'Erase all data',
-                          subtitle:
-                              'Removes every saved budget tree and goal sapling.',
-                          onTap: _confirmEraseAllData,
-                          danger: true,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 22),
-                    _SectionHeader(
-                        icon: Icons.info_outline, label: 'ABOUT'),
-                    _SettingsCard(
-                      children: [
-                        _InfoRow(
-                            label: 'Budget Tree',
-                            value: 'v1.0.0'),
-                        _InfoRow(
-                            label: 'Built with', value: 'Flutter / Dart'),
-                      ],
-                    ),
-                  ]),
+                  ],
                 ),
-              ),
-            ],
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 30),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _SectionHeader(
+                        icon: Icons.brush_outlined,
+                        label: l.appearanceUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _TileLabel(text: l.textSize),
+                          const SizedBox(height: 10),
+                          SegmentedChoice<AppTextScale>(
+                            current: settings.textScale,
+                            options: [
+                              (AppTextScale.compact, l.scaleCompact),
+                              (AppTextScale.normal, l.scaleDefault),
+                              (AppTextScale.large, l.scaleLarge),
+                            ],
+                            onChanged: settings.setTextScale,
+                          ),
+                          const SizedBox(height: 18),
+                          _TileLabel(text: l.themePalette),
+                          const SizedBox(height: 10),
+                          SegmentedChoice<AppPalette>(
+                            current: settings.palette,
+                            options: [
+                              (AppPalette.light, l.themeLight),
+                              (AppPalette.dark, l.themeDark),
+                            ],
+                            onChanged: settings.setPalette,
+                          ),
+                          const SizedBox(height: 18),
+                          _TileLabel(text: l.motion),
+                          const SizedBox(height: 6),
+                          PixelSwitchTile(
+                            title: l.fullAnimations,
+                            subtitle: l.fullAnimationsSub,
+                            value: settings.motionFull,
+                            onChanged: settings.setMotionFull,
+                          ),
+                          const SizedBox(height: 12),
+                          _TileLabel(text: l.soundHaptics),
+                          const SizedBox(height: 6),
+                          PixelSwitchTile(
+                            title: l.feedbackCues,
+                            subtitle: l.feedbackCuesSub,
+                            value: settings.soundEnabled,
+                            onChanged: settings.setSoundEnabled,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.language,
+                        label: l.settingsLanguageTitle.toUpperCase(),
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _TileLabel(text: l.settingsLanguageSubtitle),
+                          const SizedBox(height: 8),
+                          _LanguagePicker(
+                            current: settings.languageSelection,
+                            systemLabel: l.systemDefault,
+                            onChanged: settings.setLocale,
+                          ),
+                          const SizedBox(height: 16),
+                          _TileLabel(text: l.settingsTimeZoneSubtitle),
+                          const SizedBox(height: 8),
+                          _TimeZoneTile(
+                            current: settings.timeZone,
+                            onChanged: _setTimeZone,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.auto_awesome,
+                        label: l.aiCoachUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          PixelSwitchTile(
+                            title: l.aiCoach,
+                            subtitle: l.aiCoachSub,
+                            value: settings.aiCoachEnabled,
+                            onChanged: settings.setAiCoachEnabled,
+                          ),
+                          if (settings.aiCoachEnabled &&
+                              !(SupabaseConfig.isConfigured &&
+                                  AuthService.instance.isSignedIn))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                l.aiCoachNeedsOnline,
+                                style: GoogleFonts.nunito(
+                                  color: AppColors.warningAmber,
+                                  fontSize: 11,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.notifications_outlined,
+                        label: l.notificationsUpper,
+                      ),
+                      const _NotificationsCard(),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.menu_book_outlined,
+                        label: l.guideUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _ActionTile(
+                            icon: Icons.school_outlined,
+                            iconColor: AppTokens.current.accentStrong,
+                            title: l.replayTutorial,
+                            subtitle: l.replayTutorialSub,
+                            onTap: () => GuidedTour.start(context),
+                          ),
+                        ],
+                      ),
+                      if (AuthService.instance.isSignedIn) ...[
+                        const SizedBox(height: 22),
+                        _SectionHeader(
+                          icon: Icons.person_outline,
+                          label: l.accountUpper,
+                        ),
+                        _SettingsCard(
+                          children: [
+                            _InfoRow(
+                              label: l.signedInAs,
+                              value:
+                                  AuthService.instance.currentUser?.email ??
+                                  l.unknown,
+                            ),
+                            const SizedBox(height: 6),
+                            _ActionTile(
+                              icon: Icons.logout,
+                              iconColor: AppColors.warningAmber,
+                              title: l.signOut,
+                              subtitle: l.signOutSub,
+                              onTap: _signOut,
+                            ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.storage_outlined,
+                        label: l.dataUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _ActionTile(
+                            icon: Icons.delete_forever_outlined,
+                            iconColor: AppColors.dangerRed,
+                            title: l.eraseAllData,
+                            subtitle: l.eraseAllDataSub,
+                            onTap: _confirmEraseAllData,
+                            danger: true,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      _SectionHeader(
+                        icon: Icons.info_outline,
+                        label: l.aboutUpper,
+                      ),
+                      _SettingsCard(
+                        children: [
+                          _InfoRow(label: 'Budget Tree', value: 'v1.0.0'),
+                          _InfoRow(label: l.builtWith, value: 'Flutter / Dart'),
+                        ],
+                      ),
+                    ]),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
     );
   }
 }
@@ -330,9 +392,11 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
       child: Row(
         children: [
-          Icon(icon,
-              size: 14,
-              color: AppColors.mossGreen.withValues(alpha: 0.75)),
+          Icon(
+            icon,
+            size: 14,
+            color: AppColors.mossGreen.withValues(alpha: 0.75),
+          ),
           const SizedBox(width: 8),
           Text(
             label,
@@ -357,24 +421,10 @@ class _SettingsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF152B12).withValues(alpha: 0.95),
-            const Color(0xFF0B1A09).withValues(alpha: 0.95),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-            color: AppColors.forestGreen.withValues(alpha: 0.25)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppTokens.current.card,
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: AppTokens.current.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,59 +442,80 @@ class _TileLabel extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.nunito(
-          color: AppColors.stoneBeigeColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 13.5),
+        color: AppColors.stoneBeigeColor,
+        fontWeight: FontWeight.bold,
+        fontSize: 13.5,
+      ),
     );
   }
 }
 
-class _ChoiceRow<T> extends StatelessWidget {
-  final T current;
-  final List<(T, String)> options;
-  final void Function(T) onChanged;
-  const _ChoiceRow({
+/// Vertical language selector: System default + each shipped language shown in
+/// its own native name. Tapping a row calls [onChanged] (null = follow device).
+class _LanguagePicker extends StatelessWidget {
+  final String current; // 'system' | 'en' | 'fr' | 'es'
+  final String systemLabel;
+  final void Function(Locale?) onChanged;
+  const _LanguagePicker({
     required this.current,
-    required this.options,
+    required this.systemLabel,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final options = <(String, String, Locale?)>[
+      ('system', systemLabel, null),
+      ('en', 'English', const Locale('en')),
+      ('fr', 'Français', const Locale('fr')),
+      ('es', 'Español', const Locale('es')),
+    ];
+    return Column(
       children: options.map((opt) {
-        final (value, label) = opt;
-        final selected = value == current;
-        return Expanded(
+        final (code, label, locale) = opt;
+        final selected = code == current;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
           child: GestureDetector(
-            onTap: () => onChanged(value),
+            onTap: () => onChanged(locale),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.forestGreen.withValues(alpha: 0.45)
-                    : AppColors.soilMid,
-                borderRadius: BorderRadius.circular(10),
+                    ? AppTokens.current.accentSoft
+                    : AppTokens.current.canvasSoft,
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
                   color: selected
-                      ? AppColors.lightLeaf.withValues(alpha: 0.75)
-                      : AppColors.mossGreen.withValues(alpha: 0.25),
+                      ? AppTokens.current.accentStrong
+                      : AppTokens.current.cardBorder,
                   width: selected ? 1.5 : 1,
                 ),
               ),
-              alignment: Alignment.center,
-              child: Text(
-                label,
-                style: GoogleFonts.nunito(
-                  color: selected
-                      ? AppColors.lightLeaf
-                      : AppColors.stoneBeigeColor,
-                  fontSize: 12.5,
-                  fontWeight:
-                      selected ? FontWeight.bold : FontWeight.w500,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: GoogleFonts.nunito(
+                        color: selected
+                            ? AppTokens.current.accentStrong
+                            : AppTokens.current.textPrimary,
+                        fontSize: 14,
+                        fontWeight: selected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (selected)
+                    Icon(
+                      Icons.check_circle,
+                      color: AppTokens.current.accentStrong,
+                      size: 18,
+                    ),
+                ],
               ),
             ),
           ),
@@ -474,7 +545,7 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
@@ -483,7 +554,6 @@ class _ActionTile extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.16),
-                shape: BoxShape.circle,
               ),
               child: Icon(icon, color: iconColor, size: 20),
             ),
@@ -506,13 +576,17 @@ class _ActionTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: GoogleFonts.nunito(
-                        color: AppColors.mossGreen, fontSize: 11.5),
+                      color: AppColors.mossGreen,
+                      fontSize: 11.5,
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right,
-                color: AppColors.mossGreen.withValues(alpha: 0.6)),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.mossGreen.withValues(alpha: 0.6),
+            ),
           ],
         ),
       ),
@@ -531,14 +605,18 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: AppColors.mossGreen, fontSize: 13)),
-          Text(value,
-              style: GoogleFonts.nunito(
-                  color: AppColors.stoneBeigeColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: GoogleFonts.nunito(color: AppColors.mossGreen, fontSize: 13),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              color: AppColors.stoneBeigeColor,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -552,44 +630,58 @@ class _InfoRow extends StatelessWidget {
 class _NotificationsCard extends StatelessWidget {
   const _NotificationsCard();
 
-  static const _weekdayNames = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-    'Friday', 'Saturday', 'Sunday',
+  static List<String> _weekdayNames(AppLocalizations l) => [
+    l.weekdayMon,
+    l.weekdayTue,
+    l.weekdayWed,
+    l.weekdayThu,
+    l.weekdayFri,
+    l.weekdaySat,
+    l.weekdaySun,
   ];
 
   Future<void> _apply(Future<void> Function() change) async {
     await change();
+    // Touching any notification setting is the user opting in — from here on
+    // the scheduler may show the OS permission dialog (it prompts only once).
+    await AppSettings.instance.markNotifPermissionAsked();
     await NotificationScheduler.rescheduleAll();
   }
 
   @override
   Widget build(BuildContext context) {
     final s = AppSettings.instance;
+    final l = AppLocalizations.of(context);
+    final weekdayNames = _weekdayNames(l);
     return _SettingsCard(
       children: [
         _NotifSwitch(
-          title: 'Budget warnings',
-          subtitle: 'When a budget nears or passes your income',
+          title: l.budgetWarnings,
+          subtitle: l.budgetWarningsSub,
           value: s.notifBudgetWarnings,
           onChanged: (v) => _apply(() => s.setNotifBudgetWarnings(v)),
         ),
         const SizedBox(height: 6),
         _NotifSwitch(
-          title: 'Streak reminders',
-          subtitle: 'A daily nudge to keep your saving streak alive',
+          title: l.streakReminders,
+          subtitle: l.streakRemindersSub,
           value: s.notifStreakReminders,
           onChanged: (v) => _apply(() => s.setNotifStreakReminders(v)),
         ),
         if (s.notifStreakReminders)
           _TapRow(
-            label: 'Remind me at',
-            value: TimeOfDay(hour: s.streakHour, minute: s.streakMinute)
-                .format(context),
+            label: l.remindMeAt,
+            value: TimeOfDay(
+              hour: s.streakHour,
+              minute: s.streakMinute,
+            ).format(context),
             onTap: () async {
               final picked = await showTimePicker(
                 context: context,
-                initialTime:
-                    TimeOfDay(hour: s.streakHour, minute: s.streakMinute),
+                initialTime: TimeOfDay(
+                  hour: s.streakHour,
+                  minute: s.streakMinute,
+                ),
               );
               if (picked != null) {
                 await _apply(() => s.setStreakTime(picked.hour, picked.minute));
@@ -598,19 +690,18 @@ class _NotificationsCard extends StatelessWidget {
           ),
         const SizedBox(height: 6),
         _NotifSwitch(
-          title: 'Weekly summary',
-          subtitle: 'A once-a-week recap of your progress',
+          title: l.weeklySummary,
+          subtitle: l.weeklySummarySub,
           value: s.notifWeeklySummary,
           onChanged: (v) => _apply(() => s.setNotifWeeklySummary(v)),
         ),
         if (s.notifWeeklySummary) ...[
           _TapRow(
-            label: 'Day',
-            value: _weekdayNames[(s.weeklyWeekday - 1).clamp(0, 6)],
+            label: l.dayLabel,
+            value: weekdayNames[(s.weeklyWeekday - 1).clamp(0, 6)],
             onTap: () async {
               final picked = await showModalBottomSheet<int>(
                 context: context,
-                backgroundColor: const Color(0xFF0D2010),
                 builder: (ctx) => SafeArea(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -618,13 +709,17 @@ class _NotificationsCard extends StatelessWidget {
                       final weekday = i + 1;
                       return ListTile(
                         title: Text(
-                          _weekdayNames[i],
+                          weekdayNames[i],
                           style: GoogleFonts.nunito(
-                              color: AppColors.stoneBeigeColor),
+                            color: AppColors.stoneBeigeColor,
+                          ),
                         ),
                         trailing: s.weeklyWeekday == weekday
-                            ? const Icon(Icons.check,
-                                color: AppColors.lightLeaf, size: 18)
+                            ? Icon(
+                                Icons.check,
+                                color: AppTokens.current.accentStrong,
+                                size: 18,
+                              )
                             : null,
                         onTap: () => Navigator.pop(ctx, weekday),
                       );
@@ -638,7 +733,7 @@ class _NotificationsCard extends StatelessWidget {
             },
           ),
           _TapRow(
-            label: 'Time',
+            label: l.timeLabel,
             value: TimeOfDay(hour: s.weeklyHour, minute: 0).format(context),
             onTap: () async {
               final picked = await showTimePicker(
@@ -647,11 +742,54 @@ class _NotificationsCard extends StatelessWidget {
               );
               if (picked != null) {
                 await _apply(
-                    () => s.setWeeklySchedule(s.weeklyWeekday, picked.hour));
+                  () => s.setWeeklySchedule(s.weeklyWeekday, picked.hour),
+                );
               }
             },
           ),
         ],
+        const SizedBox(height: 6),
+        _NotifSwitch(
+          title: l.wateringReminders,
+          subtitle: l.wateringRemindersSub,
+          value: s.notifGoalWatering,
+          onChanged: (v) => _apply(() => s.setNotifGoalWatering(v)),
+        ),
+        if (s.notifGoalWatering)
+          _TapRow(
+            label: l.remindMeAt,
+            value: TimeOfDay(hour: s.waterHour, minute: 0).format(context),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay(hour: s.waterHour, minute: 0),
+              );
+              if (picked != null) {
+                await _apply(() => s.setWaterHour(picked.hour));
+              }
+            },
+          ),
+        const SizedBox(height: 6),
+        _NotifSwitch(
+          title: l.payDayReminders,
+          subtitle: l.payDayRemindersSub,
+          value: s.notifPayCheckIn,
+          onChanged: (v) => _apply(() => s.setNotifPayCheckIn(v)),
+        ),
+        if (s.notifPayCheckIn)
+          _TapRow(
+            label: l.remindMeAt,
+            value: TimeOfDay(hour: s.checkInHour, minute: 0).format(context),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay(hour: s.checkInHour, minute: 0),
+              );
+              if (picked != null) {
+                await _apply(() => s.setCheckInHour(picked.hour));
+              }
+            },
+          ),
       ],
     );
   }
@@ -671,21 +809,10 @@ class _NotifSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile(
-      contentPadding: EdgeInsets.zero,
-      dense: true,
-      title: Text(
-        title,
-        style: GoogleFonts.nunito(
-            color: AppColors.stoneBeigeColor, fontSize: 13),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: GoogleFonts.nunito(
-            color: AppColors.mossGreen.withValues(alpha: 0.7), fontSize: 11),
-      ),
+    return PixelSwitchTile(
+      title: title,
+      subtitle: subtitle,
       value: value,
-      activeThumbColor: AppColors.lightLeaf,
       onChanged: onChanged,
     );
   }
@@ -695,14 +822,17 @@ class _TapRow extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback onTap;
-  const _TapRow(
-      {required this.label, required this.value, required this.onTap});
+  const _TapRow({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         child: Row(
@@ -710,17 +840,16 @@ class _TapRow extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.nunito(
-                  color: AppColors.mossGreen, fontSize: 12.5),
+                color: AppColors.mossGreen,
+                fontSize: 12.5,
+              ),
             ),
             const Spacer(),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.forestGreen.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                    color: AppColors.lightLeaf.withValues(alpha: 0.4)),
+                color: AppTokens.current.accentSoft,
+                borderRadius: BorderRadius.zero,
               ),
               child: Text(
                 value,
@@ -732,11 +861,219 @@ class _TapRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.chevron_right,
-                color: AppColors.mossGreen, size: 18),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.mossGreen,
+              size: 18,
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Shows the active scheduling zone and opens a searchable list of every zone
+/// the timezone database knows about.
+///
+/// Reminders are wall-clock times, so a device reporting the wrong zone fires
+/// them hours out; this is the escape hatch. "System default" keeps following
+/// the device, which is right for nearly everyone.
+class _TimeZoneTile extends StatelessWidget {
+  const _TimeZoneTile({required this.current, required this.onChanged});
+
+  final String? current;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.current;
+    return InkWell(
+      borderRadius: BorderRadius.zero,
+      onTap: () async {
+        final picked = await showModalBottomSheet<String>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => _TimeZoneSheet(current: current),
+        );
+        // The sheet pops the sentinel for "follow the device".
+        if (picked == null) return;
+        onChanged(picked == _TimeZoneSheet.systemSentinel ? null : picked);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: t.canvasSoft,
+          borderRadius: BorderRadius.zero,
+          border: Border.all(color: t.cardBorder),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.public, size: 18, color: t.textSecondary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                current ?? l.systemDefault,
+                style: GoogleFonts.nunito(
+                  color: t.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right, size: 18, color: t.textTertiary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeZoneSheet extends StatefulWidget {
+  const _TimeZoneSheet({required this.current});
+
+  final String? current;
+
+  /// Popped in place of a zone name to mean "follow the device".
+  static const systemSentinel = '__system__';
+
+  @override
+  State<_TimeZoneSheet> createState() => _TimeZoneSheetState();
+}
+
+class _TimeZoneSheetState extends State<_TimeZoneSheet> {
+  final _searchCtrl = TextEditingController();
+  late final List<String> _all = NotificationService.availableTimeZones();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<String> get _filtered {
+    if (_query.isEmpty) return _all;
+    // Match on any part of the path so "paris", "europe" and "eur/par" all work.
+    final q = _query.toLowerCase().replaceAll(' ', '_');
+    return _all.where((z) => z.toLowerCase().contains(q)).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final t = AppTokens.current;
+    final zones = _filtered;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, controller) => Container(
+        decoration: BoxDecoration(
+          color: t.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.zero),
+        ),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 14,
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: t.cardBorder,
+                borderRadius: BorderRadius.zero,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              l.settingsTimeZoneTitle,
+              style: GoogleFonts.pixelifySans(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: t.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _searchCtrl,
+              onChanged: (v) => setState(() => _query = v.trim()),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: l.searchTimeZones,
+                prefixIcon: const Icon(Icons.search, size: 18),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                controller: controller,
+                // One extra leading row for the "follow the device" option.
+                itemCount: zones.length + 1,
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return _ZoneRow(
+                      label: l.systemDefault,
+                      selected: widget.current == null,
+                      onTap: () => Navigator.pop(
+                        context,
+                        _TimeZoneSheet.systemSentinel,
+                      ),
+                    );
+                  }
+                  final zone = zones[i - 1];
+                  return _ZoneRow(
+                    label: zone,
+                    selected: widget.current == zone,
+                    onTap: () => Navigator.pop(context, zone),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ZoneRow extends StatelessWidget {
+  const _ZoneRow({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppTokens.current;
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      onTap: onTap,
+      title: Text(
+        label,
+        style: GoogleFonts.nunito(
+          color: selected ? t.accentStrong : t.textPrimary,
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+        ),
+      ),
+      trailing: selected
+          ? Icon(Icons.check, size: 18, color: t.accentStrong)
+          : null,
     );
   }
 }

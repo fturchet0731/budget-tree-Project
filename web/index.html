@@ -18,19 +18,61 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Grow your budget as a tree. Budgets are trees, expenses are branches, and savings goals are saplings you water each pay cycle.">
+
+  <!--
+    Content-Security-Policy for the web build. Flutter's bootstrap and CanvasKit
+    need 'unsafe-inline'/'unsafe-eval' for scripts, so this policy keeps those
+    (otherwise the app won't load) while locking down the rest of the surface:
+    object/embed is blocked, <base> can't be hijacked, the page can't be framed
+    (clickjacking), and scripts/connections/fonts are limited to known hosts
+    (self, gstatic/CanvasKit + Google Fonts, and Supabase over https/wss).
+    Every script now comes from our own origin or gstatic — the passkeys
+    bundle used to be pulled from a mutable GitHub release URL, which meant
+    github.com and objects.githubusercontent.com had to be trusted here for
+    same-origin script execution. It is vendored into web/ instead, so both
+    hosts are gone from script-src.
+    For a hardened production web deploy, build with
+    `flutter build web --csp` and drop 'unsafe-inline'/'unsafe-eval' here.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' data: https://fonts.gstatic.com;
+    img-src 'self' data: https:;
+    connect-src 'self' https: wss:;
+    object-src 'none';
+    base-uri 'self';
+    frame-ancestors 'none';
+  ">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="budget_app_project">
+  <meta name="apple-mobile-web-app-title" content="Budget Tree">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>budget_app_project</title>
+  <title>Budget Tree</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Passkeys Web SDK, required by the passkeys_web plugin (pulled in
+       transitively via supabase_flutter) when running on the web.
+       `PasskeysWeb.registerWith` probes for `window.PasskeyAuthenticator` and
+       calls `window.close()` if it is missing, so this cannot simply be
+       deleted even though the app never uses passkeys.
+
+       Served from our own origin rather than fetched from the GitHub release
+       URL at runtime. A release asset is mutable by the repo owner and is not
+       content-addressed, so the bytes were not pinned by the version in the
+       path — and this script runs with full same-origin privileges, where the
+       Supabase session lives in localStorage. Vendored from
+       flutter-passkeys 2.4.0, sha384-lJXabVIVTplZn8Gq0rr7HchxKSYaVleDXbBqiFCwr5wJ9cQnHZGdx89nnZX9xHca.
+       Re-vendor (and re-check that hash) when bumping the plugin. -->
+  <script src="passkeys_bundle.js"></script>
 </head>
 <body>
   <!--

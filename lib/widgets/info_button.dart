@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
+import '../theme/app_tokens.dart';
 import '../tutorial/tutorial_content.dart';
 import '../tutorial/tutorial_overlay.dart';
 
@@ -19,20 +20,18 @@ class SectionInfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'How this works',
+      message: AppLocalizations.of(context).howThisWorks,
       child: GestureDetector(
         onTap: () => TutorialPlayer.playSection(context, section),
         child: Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
-            shape: BoxShape.circle,
-            border: Border.all(
-                color: AppColors.mossGreen.withValues(alpha: 0.35)),
+            color: AppTokens.current.canvasSoft,
+            border: Border.all(color: AppTokens.current.cardBorder),
           ),
-          child: const Icon(Icons.help_outline,
-              color: AppColors.stoneBeigeColor, size: 20),
+          child: Icon(Icons.help_outline,
+              color: AppTokens.current.textPrimary, size: 20),
         ),
       ),
     );

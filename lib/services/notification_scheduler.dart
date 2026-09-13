@@ -1,9 +1,17 @@
+import 'dart:math' as math;
+
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/calendar.dart';
+import '../data/rhythm.dart';
+import '../l10n/app_localizations_resolver.dart';
 import '../models/budget_model.dart';
 import 'app_settings.dart';
+import 'budget_repository.dart';
 import 'goal_repository.dart';
 import 'notification_content.dart';
 import 'notification_service.dart';
+import 'pay_scheduler.dart';
+import 'reflection_service.dart';
 import 'streak_service.dart';
 
 /// Decides *what* notifications exist and keeps them in sync with the user's
@@ -23,11 +31,16 @@ class NotificationScheduler {
   /// streak/summary copy stays current. Safe to call often.
   static Future<void> rescheduleAll() async {
     final settings = AppSettings.instance;
-    if (settings.anyNotificationsEnabled) {
+    // Only surface the OS permission dialog after the user has opted into
+    // notifications somewhere (Settings, or a goal's watering reminder) — a
+    // first launch should never open with a permission request out of thin
+    // air. Scheduling below is safe without permission; it just stays silent.
+    if (settings.anyNotificationsEnabled && settings.notifPermissionAsked) {
       await NotificationService.requestPermissions();
     }
 
     final goals = await GoalRepository.loadAll();
+    final l = appLocalizations();
 
     // ── Daily streak reminder ──
     if (settings.notifStreakReminders) {
@@ -36,8 +49,8 @@ class NotificationScheduler {
         id: NotificationService.idStreak,
         hour: settings.streakHour,
         minute: settings.streakMinute,
-        title: NotificationContent.streakTitle(streak),
-        body: NotificationContent.streakReminder(streak),
+        title: NotificationContent.streakTitle(streak, l),
+        body: NotificationContent.streakReminder(streak, l),
       );
     } else {
       await NotificationService.cancel(NotificationService.idStreak);
@@ -45,16 +58,119 @@ class NotificationScheduler {
 
     // ── Weekly summary ──
     if (settings.notifWeeklySummary) {
+      // Prefer the latest AI reflection text (richer, personalised) when one is
+      // cached; otherwise fall back to the rule-based summary.
+      final reflection = await ReflectionService.instance.latest();
+      final body = reflection != null && reflection.period == 'weekly'
+          ? reflection.text
+          : NotificationContent.weeklySummary(goals, l);
       await NotificationService.scheduleWeekly(
         id: NotificationService.idWeekly,
         weekday: settings.weeklyWeekday,
         hour: settings.weeklyHour,
-        title: NotificationContent.weeklySummaryTitle,
-        body: NotificationContent.weeklySummary(goals),
+        title: NotificationContent.weeklySummaryTitle(l),
+        body: body,
       );
     } else {
       await NotificationService.cancel(NotificationService.idWeekly);
     }
+
+    // ── Per-goal watering reminders ──
+    // For each goal with a watering schedule, seed two one-shot reminders: a
+    // heads-up 2 days before the due date and a nudge on the due date itself
+    // (both at the user's watering hour). rescheduleAll runs on boot/resume and
+    // after deposits, so the next occurrence is always re-seeded.
+    for (final goal in goals) {
+      final dueId =
+          NotificationService.waterIdBase + (goal.id.hashCode & 0xfff);
+      final soonId =
+          NotificationService.waterSoonIdBase + (goal.id.hashCode & 0xfff);
+      if (!settings.notifGoalWatering ||
+          !goal.waterRemindersEnabled ||
+          goal.nextWaterDate == null ||
+          goal.isCompleted) {
+        await NotificationService.cancel(dueId);
+        await NotificationService.cancel(soonId);
+        continue;
+      }
+      // Roll the due date forward past any missed waterings.
+      goal.advanceWatering();
+      final due = goal.nextWaterDate!;
+      final dueAt = DateTime(
+        due.year,
+        due.month,
+        due.day,
+        settings.waterHour,
+      );
+      final soonAt = addDays(dueAt, -2);
+      await NotificationService.scheduleOnce(
+        id: dueId,
+        when: dueAt,
+        title: NotificationContent.wateringDueTitle(goal, l),
+        body: NotificationContent.wateringDueBody(goal, l),
+      );
+      await NotificationService.scheduleOnce(
+        id: soonId,
+        when: soonAt,
+        title: NotificationContent.wateringSoonTitle(goal, l),
+        body: NotificationContent.wateringSoonBody(goal, l),
+      );
+    }
+
+    // Pay-day check-ins. One one-shot per scheduled budget, seeded at its next
+    // pay date, using the calendar-correct enumerator rather than the engine's
+    // period counter so the reminder lands on the day the user actually gets
+    // paid. Re-seeded on every boot, resume and answered check-in.
+    final budgets = await BudgetRepository.loadAll();
+    final now = DateTime.now();
+    for (final budget in budgets) {
+      final id =
+          NotificationService.checkInIdBase + (budget.id.hashCode & 0xfff);
+      final rhythm = budget.payFrequency;
+      final first = budget.firstPayDate;
+      if (!settings.notifPayCheckIn ||
+          budget.savedAt == null ||
+          rhythm == null ||
+          first == null ||
+          !rhythm.isValid) {
+        await NotificationService.cancel(id);
+        continue;
+      }
+      final next = _nextPayDateOnCalendar(budget, rhythm, first, now);
+      if (next == null) {
+        await NotificationService.cancel(id);
+        continue;
+      }
+      await NotificationService.scheduleOnce(
+        id: id,
+        when: DateTime(
+          next.year,
+          next.month,
+          next.day,
+          settings.checkInHour,
+        ),
+        title: l.notifCheckInTitle,
+        body: l.notifCheckInBody(budget.budgetName),
+        channel: NotificationService.checkInChannel,
+      );
+    }
+  }
+
+  /// The first pay date strictly after [now], walked on the calendar.
+  static DateTime? _nextPayDateOnCalendar(
+    BudgetModel budget,
+    Rhythm rhythm,
+    DateTime first,
+    DateTime now,
+  ) {
+    if (first.isAfter(now)) return first;
+    final approx = math.max(1, rhythm.periodLength.inDays);
+    var n = math.max(0, (daysBetween(first, now) / approx).floor() - 2);
+    for (var i = 0; i < 512; i++, n++) {
+      final date = PayScheduler.payDateAt(rhythm, first, n);
+      if (date.isAfter(now)) return date;
+    }
+    return null;
   }
 
   /// Event-driven budget warning. Fires only when a budget *crosses up* into a
@@ -62,7 +178,10 @@ class NotificationScheduler {
   /// gets each alert once rather than on every save.
   static Future<void> checkBudget(BudgetModel budget) async {
     if (!AppSettings.instance.notifBudgetWarnings) return;
-    final warning = NotificationContent.budgetWarning(budget);
+    final warning = NotificationContent.budgetWarning(
+      budget,
+      appLocalizations(),
+    );
 
     final prefs = await SharedPreferences.getInstance();
     final levels = _readLevels(prefs);
@@ -97,7 +216,9 @@ class NotificationScheduler {
   }
 
   static Future<void> _writeLevels(
-      SharedPreferences prefs, Map<String, int> levels) async {
+    SharedPreferences prefs,
+    Map<String, int> levels,
+  ) async {
     final raw = levels.entries.map((e) => '${e.key}:${e.value}').toList();
     await prefs.setStringList(_kBudgetLevels, raw);
   }
