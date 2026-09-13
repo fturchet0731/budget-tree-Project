@@ -1,6 +1,6 @@
 # 🌳 Budget Tree
 
-A Flutter app that turns personal budgeting into a tree-growing game. Your **budget is a tree**, expense categories are its **branches**, and your savings goals are **saplings** that grow as money is allocated to them over each pay cycle. The whole app wears a cozy **16-bit pixel-game skin** (Stardew/GBA era): parchment canvas, hard-outlined cards, solid offset shadows, and animated pixel-art trees.
+A Flutter app that turns personal budgeting into a tree-growing game. Your **budget is a tree**, expense categories are its **branches**, and your savings goals are **saplings** that grow as money is allocated to them over each pay cycle. The whole app wears a cozy **16-bit pixel-game skin** (Stardew/GBA era): parchment canvas, hard-outlined cards, solid offset shadows, and animated pixel-art trees. The goal of this project was to get comfortable with working with AI agents to deleiver a product and learn about backend security. This project went through many iterations, applying fundamental software design principle. The App incorporates an AI assistant using Claude API.
 
 ## Features
 
